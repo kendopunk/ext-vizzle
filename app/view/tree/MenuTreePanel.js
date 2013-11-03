@@ -1,0 +1,23 @@
+Ext.define('App.view.tree.MenuTreePanel', {
+	extend: 'Ext.tree.Panel',
+	
+	requires: [
+		'App.store.tree.MenuStore'
+	],
+	
+	width: 200,
+	title: 'Menu Tree Panel',
+	bodyStyle: {
+		padding: '5px'
+	},
+	store: Ext.create('App.store.tree.MenuStore'),
+	rootVisible: false,
+	region: 'west',
+	
+	
+	initComponent: function() {
+		var me = this;
+		
+		me.callParent(arguments);
+	}
+});
