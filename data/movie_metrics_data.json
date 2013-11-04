@@ -1,0 +1,16 @@
+{
+	"success": true,
+	"data": [{
+		"display": "Gross Box Office",
+		"value": "gross"
+	}, {
+		"display": "# Theaters",
+		"value": "theaters"
+	}, {
+		"display": "Opening Weekend Box Office",
+		"value": "opening"
+	}, {
+		"display": "IMDB Rating",
+		"value": "imdbRating"
+	}]
+}

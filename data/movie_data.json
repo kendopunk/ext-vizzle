@@ -1,0 +1,60 @@
+{
+	"success": true,
+	"data": [{
+		"title": "Aliens",
+		"gross": 85160248,
+		"theaters": 1454,
+		"opening": 10052042,
+		"release": 1986,
+		"imdbRating": 8.4
+	}, {
+		"title": "Iron Man",
+		"gross":  318412101,
+		"theaters":  4154,
+		"opening":  98618668,
+		"release":  2008,
+		"imdbRating": 7.9
+	}, {
+		"title": "The Hangover",
+		"gross":  277322503,
+		"theaters":  3545,
+		"opening":  44979319,
+		"release":  2009,
+		"imdbRating": 7.8
+	}, {
+		"title": "Tombstone",
+		"gross": 56505065,
+		"theaters": 1955,
+		"opening": 6454752,
+		"release": 1993,
+		"imdbRating": 7.7
+	}, {
+		"title": "Pulp Fiction",
+		"gross": 107928762,
+		"theaters": 1494,
+		"opening": 9311882,
+		"release": 1994,
+		"imdbRating": 9.0
+	}, {
+		"title": "Goodfellas",
+		"gross": 46836214,
+		"theaters": 1523,
+		"opening": 6368901,
+		"release": 1990,
+		"imdbRating": 8.7
+	}, {
+		"title": "True Lies",
+		"gross": 146282411,
+		"theaters": 2561,
+		"opening": 25869770,
+		"release": 1994,
+		"imdbRating": 7.2
+	}, {
+		"title": "Ishtar",
+		"gross": 14375181,
+		"theaters": 1139,
+		"opening": 4331817,
+		"release": 1987,
+		"imdbRating": 3.9
+	}]
+}
