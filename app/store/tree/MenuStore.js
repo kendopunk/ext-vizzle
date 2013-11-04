@@ -9,7 +9,8 @@ Ext.define('App.store.tree.MenuStore', {
 			children: [{
 				text: 'Bar Chart',
 				leaf: true,
-				iconCls: 'icon-arrow-right'
+				iconCls: 'icon-arrow-right',
+				id: 'app_view_viz_bar_mainpanel'
 			}, {
 				text: 'Bar Chart w/Legend',
 				leaf: true,

@@ -3,6 +3,10 @@ Ext.application({
 	
 	appFolder: 'app',
 	
+	controllers: [
+		'Application'
+	],
+	
 	requires: [
 		'Ext.container.Viewport',
 		'App.util.Global',
@@ -24,13 +28,13 @@ Ext.application({
 				region: 'north'
 			}, 
 				Ext.create('App.view.tree.MenuTreePanel', {
-					width: 200,
+					width: App.util.Global.treePanelWidth,
 					title: 'Menu',
 					region: 'west'
 				}),
 			{
 				xtype: 'tabpanel',
-				width: Ext.getBody().getViewSize().width - 200,
+				width: Ext.getBody().getViewSize().width - App.util.Global.treePanelWidth,
 				plain: true,
 				region: 'center',
 				items: [{
