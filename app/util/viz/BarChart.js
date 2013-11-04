@@ -143,7 +143,7 @@ Ext.define('App.util.viz.BarChart', {
 		
 		/*// event handling
 		if(this.handleEvents) {
-			this.eventRelay = Ext.create('KPI.util.MessageBus');
+			this.eventRelay = Ext.create('App.util.MessageBus');
 		}*/
 		
 		// make room on top for labels

@@ -1,10 +1,10 @@
 /**
  * @class
- * @memberOf App.view.viz.bar
+ * @memberOf App.view.d3.bar
  * @description SVG panel
  * @extend Ext.panel.Panel
  */
-Ext.define('App.view.viz.bar.VizPanel', {
+Ext.define('App.view.d3.bar.VizPanel', {
 	extend: 'Ext.panel.Panel',
 	plain: true,
 	autoScroll: true,
@@ -45,7 +45,7 @@ Ext.define('App.view.viz.bar.VizPanel', {
  			
  		/**
  		 * @property
- 		 * @memberOf App.view.viz.bar.VizPanel
+ 		 * @memberOf App.view.d3.bar.VizPanel
  		 * @type Ext.form.field.ComboBox
  		 * @description Metric selection list
  		 */
@@ -86,7 +86,7 @@ Ext.define('App.view.viz.bar.VizPanel', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.view.viz.bar.VizPanel
+ 	 * @memberOf App.view.d3.bar.VizPanel
  	 * @description Initialize the drawing canvas
  	 */
  	initCanvas: function() {
@@ -147,7 +147,7 @@ Ext.define('App.view.viz.bar.VizPanel', {
 	
 	/**
 	 * @function
-	 * @memberOf App.view.viz.bar.VizPanel
+	 * @memberOf App.view.d3.bar.VizPanel
 	 * @param metric String
 	 * @description Transition the bar chart to a new metric
 	 */

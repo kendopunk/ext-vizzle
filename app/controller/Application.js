@@ -6,7 +6,8 @@ Ext.define('App.controller.Application', {
 	extend: 'Ext.app.Controller',
 	
 	requires: [
-		'App.view.viz.bar.MainPanel'
+		'App.view.d3.bar.MainPanel',
+		'App.view.d3.barlegend.MainPanel'
 	],
 	
 	init: function() {

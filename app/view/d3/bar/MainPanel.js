@@ -1,17 +1,17 @@
 /**
  * @class
- * @memberOf App.view.viz.bar
+ * @memberOf App.view.d3.bar
  * @description Standard bar chart
  */
-Ext.define('App.view.viz.bar.MainPanel', {
+Ext.define('App.view.d3.bar.MainPanel', {
 	extend: 'Ext.Panel',
 	alias: 'widget.barMainPanel',
 	title: 'Bar Chart',
 	closable: true,
 	
 	requires: [
-		'App.view.viz.bar.VizPanel',
-		'App.view.viz.bar.GridPanel',
+		'App.view.d3.bar.VizPanel',
+		'App.view.d3.bar.GridPanel',
 		'App.store.movie.MovieStore'
 	],
 	
@@ -46,13 +46,13 @@ Ext.define('App.view.viz.bar.MainPanel', {
 				padding: '5px'
 			}
 		},
-			Ext.create('App.view.viz.bar.VizPanel', {
+			Ext.create('App.view.d3.bar.VizPanel', {
 				region: 'center',
 				width: vizPanelWidth,
 				height: vizPanelHeight,
 				dataStore: movieStore
 			}),
-			Ext.create('App.view.viz.bar.GridPanel', {
+			Ext.create('App.view.d3.bar.GridPanel', {
 				region: 'south',
 				title: 'Movie Data',
 				height: gridPanelHeight,

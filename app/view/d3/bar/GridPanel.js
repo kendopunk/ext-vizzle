@@ -1,10 +1,10 @@
 /**
  * @class
- * @memberOf App.view.viz.bar
+ * @memberOf App.view.d3.bar
  * @description SVG panel
  * @extend Ext.panel.Panel
  */
-Ext.define('App.view.viz.bar.GridPanel', {
+Ext.define('App.view.d3.bar.GridPanel', {
 	extend: 'Ext.grid.Panel',
 	plain: true,
 	autoScroll: true,
