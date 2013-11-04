@@ -3,9 +3,15 @@ Ext.application({
 	
 	appFolder: 'app',
 	
+	controllers: [
+		'Application'
+	],
+	
 	requires: [
 		'Ext.container.Viewport',
 		'App.util.Global',
+		'App.util.GridRenderers',
+		'App.util.ColumnDefinitions',
 		'App.view.tree.MenuTreePanel'
 	],
 	
@@ -14,29 +20,28 @@ Ext.application({
 			layout: 'border',
 			items: [{
 				xtype: 'panel',
-				height: 40,
+				height: App.util.Global.titlePanelHeight,
 				bodyStyle: {
 					padding: '5px',
-					'background-color': '#FFFFCC'
+					'background-color': 'NavajoWhite'
 				},
-				//html: '<b>D3 Visualizations in ExtJS</b>',
-				html: '<b>This space for rent</b>',
+				html: '<b>ExtJS Visualization Examples (D3, et. al.)</b>',
 				region: 'north'
 			}, 
 				Ext.create('App.view.tree.MenuTreePanel', {
-					width: 200,
+					width: App.util.Global.treePanelWidth,
 					title: 'Menu',
 					region: 'west'
 				}),
 			{
 				xtype: 'tabpanel',
-				width: Ext.getBody().getViewSize().width - 200,
+				width: Ext.getBody().getViewSize().width - App.util.Global.treePanelWidth,
 				plain: true,
 				region: 'center',
 				items: [{
-						xtype: 'panel',
-						title: 'Info',
-						closable: false
+					xtype: 'panel',
+					title: 'Info',
+					closable: false
 				}]
 			}]
 		})
