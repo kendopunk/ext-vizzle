@@ -354,16 +354,6 @@ Ext.define('App.util.viz.BarChart', {
 		}
 			
 		// re-call they y axis function
-		me.svg.selectAll('g.axis').call(me.yAxis);
-	},
-	
-	/**
- 	 * @function
- 	 * @memberOf App.util.viz.BarChart
- 	 * @description "No data" drawing"
- 	 */
-	drawNoData: function() {
-		//var me = this;
-		//KPI.util.Global.noDataSvgImage(me.svg, me.canvasWidth, me.canvasHeight, 'No data');
+		me.svg.selectAll('g.axis').transition().duration(500).call(me.yAxis);
 	}
 });
