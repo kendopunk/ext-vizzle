@@ -14,7 +14,7 @@ Ext.define('App.view.d3.bar.VizPanel', {
 	
 	requires: [
 		'App.util.JsonBuilder',
-		'App.util.viz.BarChart',
+		'App.util.d3.BarChart',
 		'App.store.movie.MovieMetricStore'
 	],
 	
@@ -111,7 +111,7 @@ Ext.define('App.view.d3.bar.VizPanel', {
 	 		
 		 		me.graphData = App.util.JsonBuilder.buildMovieDataJson(records);
 
-		 		me.barChart = Ext.create('App.util.viz.BarChart', {
+		 		me.barChart = Ext.create('App.util.d3.BarChart', {
 					svg: me.svg,
 					canvasWidth: me.canvasWidth,
 					canvasHeight: me.canvasHeight,

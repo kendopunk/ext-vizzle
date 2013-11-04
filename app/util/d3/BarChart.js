@@ -1,9 +1,9 @@
 /**
  * @class
- * @memberOf App.util.viz
+ * @memberOf App.util.d3
  * @description Generic bar chart
  */
-Ext.define('App.util.viz.BarChart', {
+Ext.define('App.util.d3.BarChart', {
 	/**
  	 * The primary SVG element.  Must be set outside the class
  	 * and passed as a configuration item
@@ -159,7 +159,7 @@ Ext.define('App.util.viz.BarChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.viz.BarChart
+ 	 * @memberOf App.util.d3.BarChart
  	 * @description Set the horizontal scale
  	 */
 	setXScale: function() {
@@ -170,7 +170,7 @@ Ext.define('App.util.viz.BarChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.viz.BarChart
+ 	 * @memberOf App.util.d3.BarChart
  	 * @description Set the vertical (y) scale
  	 */
 	setYScale: function(metric) {
@@ -181,7 +181,7 @@ Ext.define('App.util.viz.BarChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.viz.BarChart
+ 	 * @memberOf App.util.d3.BarChart
  	 * @description Set the scale for the yAxis
  	 */
 	setYAxisScale: function(metric) {
@@ -209,7 +209,7 @@ Ext.define('App.util.viz.BarChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.viz.BarChart
+ 	 * @memberOf App.util.d3.BarChart
  	 * @description Draw the initial bar chart
  	 */
 	draw: function() {
@@ -314,7 +314,7 @@ Ext.define('App.util.viz.BarChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.viz.BarChart
+ 	 * @memberOf App.util.d3.BarChart
  	 * @param metric
  	 * @description Transition the bar chart based on a new metric (data record property)
  	 */

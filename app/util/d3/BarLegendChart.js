@@ -1,4 +1,4 @@
-Ext.define('App.util.viz.BarLegendChart', {
+Ext.define('App.util.d3.BarLegendChart', {
 
 	/**
  	 * The primary SVG element.  Must be set (after render) outside this class
@@ -192,7 +192,7 @@ Ext.define('App.util.viz.BarLegendChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.viz.BarChart
+ 	 * @memberOf App.util.d3.BarChart
  	 * @description Set the horizontal scale
  	 */
 	setXScale: function() {
@@ -206,7 +206,7 @@ Ext.define('App.util.viz.BarLegendChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.viz.BarChart
+ 	 * @memberOf App.util.d3.BarChart
  	 * @description Set the vertical (y) scale
  	 */
 	setYScale: function(metric) {
@@ -217,7 +217,7 @@ Ext.define('App.util.viz.BarLegendChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.viz.BarChart
+ 	 * @memberOf App.util.d3.BarChart
  	 * @description Set the scale for the yAxis
  	 */
 	setYAxisScale: function(metric) {
@@ -245,7 +245,7 @@ Ext.define('App.util.viz.BarLegendChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.viz.BarChart
+ 	 * @memberOf App.util.d3.BarChart
  	 * @description Draw the initial bar chart
  	 */
 	draw: function() {
@@ -479,7 +479,7 @@ Ext.define('App.util.viz.BarLegendChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.viz.BarChart
+ 	 * @memberOf App.util.d3.BarChart
  	 * @param metric
  	 * @description Takes a numeric index from the data record as the y scale
  	 */
@@ -529,7 +529,7 @@ Ext.define('App.util.viz.BarLegendChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.viz.BarChart
+ 	 * @memberOf App.util.d3.BarChart
  	 * @description Return the width of a flex "unit"
  	 */
 	getFlexUnit: function() {
