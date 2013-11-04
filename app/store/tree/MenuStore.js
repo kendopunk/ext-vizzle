@@ -17,7 +17,13 @@ Ext.define('App.store.tree.MenuStore', {
 				}, {
 					text: 'Bar Chart w/Legend',
 					leaf: true,
-					iconCls: 'icon-arrow-right'
+					iconCls: 'icon-arrow-right',
+					id: 'barlegendMainPanel'
+				}, {
+					text: 'Stacked Bar Chart',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: null
 				}]
 			}, {
 				text: '<b>Pie Charts</b>',
