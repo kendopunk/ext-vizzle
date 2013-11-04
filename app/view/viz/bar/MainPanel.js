@@ -27,10 +27,10 @@ Ext.define('App.view.viz.bar.MainPanel', {
 				Ext.getBody().getViewSize().width - App.util.Global.treePanelWidth
 			),
 			vizPanelHeight = parseInt(
-				Ext.getBody().getViewSize().height 
+				(Ext.getBody().getViewSize().height 
 					- App.util.Global.titlePanelHeight 
 					- northPanelHeight
-					- gridPanelHeight
+					- gridPanelHeight)
 			);
 			
 		// shared store
@@ -40,7 +40,7 @@ Ext.define('App.view.viz.bar.MainPanel', {
 		me.items = [{
 			xtype: 'panel',
 			region: 'north',
-			html: 'Demonstration of a generic D3 bar chart.  Use the toolbar controls to invoke transitions',
+			html: 'Demonstration of a generic D3 bar chart.  Movie data courtesy of <a href="http://www.imdb.com">IMDB</a> and <a href="http://www.boxofficemojo.com">Box Office Mojo</a>. Tooltips from <a href="http://bl.ocks.org/milroc/2975255">milroc</a>.  Select different metrics from the combo to view dynamic transitions.',
 			height: northPanelHeight,
 			bodyStyle: {
 				padding: '5px'
