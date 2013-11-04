@@ -95,7 +95,7 @@ Ext.define('App.view.viz.bar.VizPanel', {
 	 	// initialize SVG, width, height
  		me.svgInitialized = true,
  			me.canvasWidth = parseInt(me.getWidth() * .95),
- 			me.canvasHeight = parseInt(me.getHeight() * .98) - 35,
+ 			me.canvasHeight = parseInt(me.getHeight() * .95) - 35,
  			me.panelId = '#' + me.body.id;
 	 	
 	 	// init svg
@@ -124,9 +124,16 @@ Ext.define('App.view.viz.bar.VizPanel', {
 					margins: {
 						top: 20,
 						right: 10,
-						bottom: 15,
+						bottom: 10,
 						left: 100,
 						leftAxis: 85
+					},
+					tooltipFunction: function(data, index) {
+						return '<b>' + data.title + '</b> (' + data.release+ ')<br>'
+							+ 'Gross: ' + Ext.util.Format.currency(data.gross, false, '0', false) + '<br>'
+							+ 'Theaters: ' + data.theaters + '<br>'
+							+ 'Opening: ' + Ext.util.Format.currency(data.opening, false, '0', false) + '<br>'
+							+ 'IMDB Rating: ' + data.imdbRating;
 					}
 				}, me);
 				
