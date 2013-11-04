@@ -1,7 +1,6 @@
 /*
  * 16 x 16 icons
  */
- 
 .icon-arrow-right {
 	background-image: url(../img/icons/16x16/arrow-right.png) !important;
 	background-repeat: no-repeat;
@@ -20,4 +19,25 @@
 .icon-stacked-bar-chart {
 	background-image: url(../img/icons/16x16/stacked-bar-chart.png) !important;
 	background-repeat: no-repeat;
+}
+
+/**
+ * SVG
+ */
+.arc path {
+	stroke: #FFFFFF;
+}
+
+.axis path, .axis line {
+	fill: none;
+	stroke: black;
+	shape-rendering: crispEdges;
+}
+
+.axis text {
+	font: 9px/1.1 sans-serif;
+}
+
+.tinyText {
+	font: 9px/1.1 sans-serif;
 }

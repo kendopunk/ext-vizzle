@@ -1,9 +1,11 @@
+/**
+ * @class
+ * @memberOf App.util
+ * @description Global static and utility functions
+ */
 Ext.define('App.util.Global', {
-    
-    statics: {
-    	treePanelWidth: 250
-    }
-    
-   
-
+	statics: {
+		titlePanelHeight: 40,
+		westPanelWidth: 225
+	}
 });
