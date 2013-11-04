@@ -5,7 +5,7 @@
  */
 Ext.define('App.view.d3.barlegend.MainPanel', {
 	extend: 'Ext.Panel',
-	alias: 'widget.barMainPanel',
+	alias: 'widget.barlegendMainPanel',
 	title: 'Bar Chart',
 	closable: true,
 	
