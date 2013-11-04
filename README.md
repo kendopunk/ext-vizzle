@@ -1,4 +1,4 @@
 ext-vizzle
 ==========
 
-Visualizations in ExtJS
+Visualizations in ExtJS 
