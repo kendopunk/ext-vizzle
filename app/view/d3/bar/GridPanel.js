@@ -44,8 +44,6 @@ Ext.define('App.view.d3.bar.GridPanel', {
 	gridRowHighlight: function(obj) {
 		var me = this;
 		
-		console.debug(obj);
-		
 		var record = me.getStore().findRecord('title', obj.value);
 		if(record) {
 			var rowIndex = me.getStore().indexOf(record);

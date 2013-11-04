@@ -10,8 +10,6 @@ Ext.define('App.view.d3.bar.VizPanel', {
 	autoScroll: true,
 	collapsible: true,
 	
-	layout: 'fit',
-	
 	requires: [
 		'App.util.JsonBuilder',
 		'App.util.d3.BarChart',

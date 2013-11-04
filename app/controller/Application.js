@@ -6,15 +6,14 @@ Ext.define('App.controller.Application', {
 	extend: 'Ext.app.Controller',
 	
 	requires: [
-		'App.view.d3.bar.MainPanel',
-		'App.view.d3.barlegend.MainPanel'
+		'App.view.d3.bar.MainPanel'
 	],
 	
 	init: function() {
 		var me = this;
 		
 		me.control({
-			'viewport > treepanel': {
+			'viewport > panel > treepanel': {
 				itemclick: me.treePanelItemClick
 			},
 			scope: me

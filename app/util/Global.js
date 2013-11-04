@@ -7,6 +7,6 @@ Ext.define('App.util.Global', {
 
 	statics: {
 		titlePanelHeight: 40,
-		treePanelWidth: 225
+		westPanelWidth: 225
 	}
 });

@@ -12,7 +12,8 @@ Ext.application({
 		'App.util.Global',
 		'App.util.GridRenderers',
 		'App.util.ColumnDefinitions',
-		'App.view.tree.MenuTreePanel'
+		'App.view.tree.MenuTreePanel',
+		'App.view.tree.MenuInfoPanel'
 	],
 	
 	launch: function() {
@@ -27,22 +28,39 @@ Ext.application({
 				},
 				html: '<b>ExtJS Visualization Examples (D3, et. al.)</b>',
 				region: 'north'
+			}, {
+				xtype: 'panel',
+				layout: 'vbox',
+				width: App.util.Global.westPanelWidth,
+				items: [ 
+					Ext.create('App.view.tree.MenuTreePanel', {
+						height: App.util.Global.treePanelHeight,
+						title: 'Viz Menu',
+						height: 350,
+						width: '100%',
+						flex: 1,
+						autoScroll: true,
+						frame: false
+					}),
+					Ext.create('App.view.tree.MenuInfoPanel', {
+						title: 'Info',
+						bodyStyle: {
+							padding: '5px'
+						},
+						html: 'FOO...',
+						layout: 'fit',
+						width: '100%',
+						flex: 1,
+						autoScroll: true
+					})
+				],
+				region: 'west'
 			}, 
-				Ext.create('App.view.tree.MenuTreePanel', {
-					width: App.util.Global.treePanelWidth,
-					title: 'Menu',
-					region: 'west'
-				}),
 			{
 				xtype: 'tabpanel',
 				width: Ext.getBody().getViewSize().width - App.util.Global.treePanelWidth,
 				plain: true,
-				region: 'center',
-				items: [{
-					xtype: 'panel',
-					title: 'Info',
-					closable: false
-				}]
+				region: 'center'
 			}]
 		})
 	}

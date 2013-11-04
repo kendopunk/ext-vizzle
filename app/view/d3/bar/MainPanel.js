@@ -16,50 +16,61 @@ Ext.define('App.view.d3.bar.MainPanel', {
 		'App.store.movie.MovieStore'
 	],
 	
-	//layout: 'border',
+	layout: 'border',
 	
 	initComponent: function() {
 		var me = this;
 		
-		// layout variables
-		var northPanelHeight = 50,
-			gridPanelHeight = 250,
-			vizPanelWidth = parseInt(
-				Ext.getBody().getViewSize().width - App.util.Global.treePanelWidth
+		// chart description for info panel
+		me.chartDescription = '<b>Bar Chart</b><br><br>'
+			+ 'Demonstration of a generic D3 bar chart<br><br>'
+			+ 'Movie data taken from <a href="http://www.imdb.com">IMDB</a> and <a href="http://www.boxofficemojo.com">Box Office Mojo</a><br><br>'
+			+ 'Tooltips from <a href="http://bl.ocks.org/milroc/2975255">milroc</a><br><br>'
+			+ 'Select different metrics from the combo to view dynamic transitions.<br><br>'
+			+ 'Employs the use of Ext.util.Observable subclass to handle messaging from the SVG visualization to the ExtJS framework (mouse over bar = grid row highlight)';
+		
+		// layout vars
+		me.gridPanelHeight = 250,
+			me.vizPanelWidth = parseInt(
+				Ext.getBody().getViewSize().width - 225
 			),
-			vizPanelHeight = parseInt(
+			me.vizPanelHeight = parseInt(
 				(Ext.getBody().getViewSize().height 
 					- App.util.Global.titlePanelHeight 
-					- northPanelHeight
-					- gridPanelHeight)
-			);
+					- me.gridPanelHeight)
+			),
+			me.eventRelay = Ext.create('App.util.MessageBus');
 			
 		// shared store
 		movieStore = Ext.create('App.store.movie.MovieStore');
 		
-		// add items
-		me.items = [{
-			xtype: 'panel',
+		// visualization panel (north)
+		me.vizPanel = Ext.create('App.view.d3.bar.VizPanel', {
 			region: 'north',
-			html: 'Demonstration of a generic D3 bar chart.  Movie data courtesy of <a href="http://www.imdb.com">IMDB</a> and <a href="http://www.boxofficemojo.com">Box Office Mojo</a>. Tooltips from <a href="http://bl.ocks.org/milroc/2975255">milroc</a>.  Select different metrics from the combo to view dynamic transitions.  Employs the use of Ext.util.Observable subclass to handle messaging from the SVG visualization to the ExtJS framework (mouse over bar = grid row highlight)',
-			height: northPanelHeight,
-			bodyStyle: {
-				padding: '5px'
-			}
-		},
-			Ext.create('App.view.d3.bar.VizPanel', {
-				region: 'center',
-				width: vizPanelWidth,
-				height: vizPanelHeight,
-				dataStore: movieStore
-			}),
-			Ext.create('App.view.d3.bar.GridPanel', {
-				region: 'south',
-				title: 'Movie Datalkjlkj',
-				height: gridPanelHeight,
-				store: movieStore
-			}, me)
+			width: me.vizPanelWidth,
+			height: me.vizPanelHeight,
+			dataStore: movieStore,
+			layout: 'fit'
+		});
+		
+		// grid panel (south)
+		me.gridPanel = Ext.create('App.view.d3.bar.GridPanel', {
+			region: 'center',
+			title: 'Movie Data Grid',
+			height: me.gridPanelHeight,
+			store: movieStore
+		});
+		
+		// configure items
+		me.items = [
+			me.vizPanel,
+			me.gridPanel
 		];
+		
+		// after render, publish update to the "Info" panel
+		me.on('afterrender', function(panel) {
+			me.eventRelay.publish('infoPanelUpdate', me.chartDescription);
+		}, me);
 		
 		me.callParent(arguments);
 	}
