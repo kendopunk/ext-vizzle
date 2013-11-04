@@ -141,10 +141,10 @@ Ext.define('App.util.viz.BarChart', {
 	constructor: function(config) {
 		Ext.apply(this, config);
 		
-		/*// event handling
+		// event handling
 		if(this.handleEvents) {
 			this.eventRelay = Ext.create('App.util.MessageBus');
-		}*/
+		}
 		
 		// make room on top for labels
 		// this must come before the heightOffset assignment

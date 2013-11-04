@@ -10,11 +10,14 @@ Ext.define('App.view.d3.bar.GridPanel', {
 	autoScroll: true,
 	title: 'Grid',
 	
-	listeners: {
-	},
-	
 	initComponent: function() {
 		var me = this;
+		
+		/**
+ 		 * event relay
+ 		 */
+ 		me.eventRelay = Ext.create('App.util.MessageBus');
+ 		me.eventRelay.subscribe('barGridPanelRowHighlight', me.gridRowHighlight, me);
 		
 		/**
  		 * @property
@@ -30,5 +33,23 @@ Ext.define('App.view.d3.bar.GridPanel', {
 		];
 		
 		me.callParent(arguments);
-	}		
+	},
+	
+	/**
+ 	 * @function
+ 	 * @memberOf App.view.d3.bar.GridPanel
+ 	 * @param obj Generic obj {title: ''}
+ 	 * @description Attempt to highlight a grid row based on a movie title value
+ 	 */
+	gridRowHighlight: function(obj) {
+		var me = this;
+		
+		console.debug(obj);
+		
+		var record = me.getStore().findRecord('title', obj.value);
+		if(record) {
+			var rowIndex = me.getStore().indexOf(record);
+			me.getSelectionModel().select(rowIndex);
+		}
+	}
 });

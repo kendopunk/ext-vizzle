@@ -10,6 +10,7 @@ Ext.define('App.view.d3.bar.MainPanel', {
 	closable: true,
 	
 	requires: [
+		'App.util.MessageBus',
 		'App.view.d3.bar.VizPanel',
 		'App.view.d3.bar.GridPanel',
 		'App.store.movie.MovieStore'
@@ -40,7 +41,7 @@ Ext.define('App.view.d3.bar.MainPanel', {
 		me.items = [{
 			xtype: 'panel',
 			region: 'north',
-			html: 'Demonstration of a generic D3 bar chart.  Movie data courtesy of <a href="http://www.imdb.com">IMDB</a> and <a href="http://www.boxofficemojo.com">Box Office Mojo</a>. Tooltips from <a href="http://bl.ocks.org/milroc/2975255">milroc</a>.  Select different metrics from the combo to view dynamic transitions.',
+			html: 'Demonstration of a generic D3 bar chart.  Movie data courtesy of <a href="http://www.imdb.com">IMDB</a> and <a href="http://www.boxofficemojo.com">Box Office Mojo</a>. Tooltips from <a href="http://bl.ocks.org/milroc/2975255">milroc</a>.  Select different metrics from the combo to view dynamic transitions.  Employs the use of Ext.util.Observable subclass to handle messaging from the SVG visualization to the ExtJS framework (mouse over bar = grid row highlight)',
 			height: northPanelHeight,
 			bodyStyle: {
 				padding: '5px'
@@ -54,7 +55,7 @@ Ext.define('App.view.d3.bar.MainPanel', {
 			}),
 			Ext.create('App.view.d3.bar.GridPanel', {
 				region: 'south',
-				title: 'Movie Data',
+				title: 'Movie Datalkjlkj',
 				height: gridPanelHeight,
 				store: movieStore
 			}, me)
