@@ -41,7 +41,8 @@ Ext.define('App.view.d3.bar.VizPanel', {
  			me.panelId,
  			me.barChart = null,
  			me.defaultMetric = 'gross',
- 			me.currentMetric = 'gross';
+ 			me.currentMetric = 'gross',
+ 			me.eventRelay = Ext.create('App.util.MessageBus');
  			
  		/**
  		 * @property
@@ -134,6 +135,12 @@ Ext.define('App.view.d3.bar.VizPanel', {
 							+ 'Theaters: ' + data.theaters + '<br>'
 							+ 'Opening: ' + Ext.util.Format.currency(data.opening, false, '0', false) + '<br>'
 							+ 'IMDB Rating: ' + data.imdbRating;
+					},
+					handleEvents: true,
+					mouseOverEvents: {
+						enabled: true,
+						eventName: 'barGridPanelRowHighlight',
+						eventDataMetric: 'title'
 					}
 				}, me);
 				
