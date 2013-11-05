@@ -43,7 +43,15 @@ Ext.define('App.util.ColumnDefinitions', {
 		
 		releaseDate: {
 			header: 'Release Date',
-			dataIndex: 'release'
+			dataIndex: 'release',
+			renderer: function(value, meta) {
+				meta.style = 'background-color:#FFC';
+				return value;
+			},
+			editor: {
+				xtype: 'textfield',
+				allowBlank: false
+			}
 		}
 	}
 });

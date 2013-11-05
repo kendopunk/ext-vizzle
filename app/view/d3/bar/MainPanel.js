@@ -30,7 +30,7 @@ Ext.define('App.view.d3.bar.MainPanel', {
 			+ 'Employs the use of Ext.util.Observable subclass to handle messaging from the SVG visualization to the ExtJS framework (mouse over bar = grid row highlight)';
 		
 		// layout vars
-		me.gridPanelHeight = 250,
+		me.gridPanelHeight = 300,
 			me.vizPanelWidth = parseInt(
 				Ext.getBody().getViewSize().width - 225
 			),
