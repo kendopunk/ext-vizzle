@@ -301,9 +301,10 @@ Ext.define('App.util.d3.BarLegendChart', {
 			.attr('transform', 'translate(' + margins.left + ', 0)');
 			
 		// the "legend" g
+		// TODO: Set the y translation value as a configuration item
 		var legendTranslateX = margins.left + (me.getFlexUnit() * chartFlex) + spaceBetweenChartAndLegend;
 		me.gLegend = me.svg.append('svg:g')
-			.attr('transform', 'translate(' + legendTranslateX + ', 10)');
+			.attr('transform', 'translate(' + legendTranslateX + ', 20)');
 			
 		// the "label" g
 		me.gLabel = me.svg.append('svg:g')
