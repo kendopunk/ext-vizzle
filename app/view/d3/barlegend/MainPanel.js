@@ -100,12 +100,6 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 			scope: me
 		}];
 		
-		// after render, publish update to the "Info" panel
-		me.on('activate', function() {
-			me.eventRelay.publish('infoPanelUpdate', me.chartDescription);
-		}, me);
-		
-		
 		// on activate, publish update to the "Info" panel
 		me.on('activate', function() {
 			me.eventRelay.publish('infoPanelUpdate', me.chartDescription);
