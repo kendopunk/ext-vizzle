@@ -1,16 +1,14 @@
 /**
  * @class
- * @memberOf App.view.d3.barlegend
+ * @memberOf App.view.d3.bar
  * @description SVG panel
  * @extend Ext.panel.Panel
  */
-Ext.define('App.view.d3.barlegend.VizPanel', {
+Ext.define('App.view.d3.bar.VizPanel', {
 	extend: 'Ext.panel.Panel',
 	plain: true,
 	autoScroll: true,
 	collapsible: true,
-	
-	layout: 'fit',
 	
 	requires: [
 		'App.util.JsonBuilder',
@@ -41,14 +39,15 @@ Ext.define('App.view.d3.barlegend.VizPanel', {
  			me.panelId,
  			me.barChart = null,
  			me.defaultMetric = 'gross',
- 			me.currentMetric = 'gross';
+ 			me.defaultMetricText = 'Gross Box Office',
+ 			me.currentMetric = 'gross',
+ 			me.eventRelay = Ext.create('App.util.MessageBus');
  			
  		/**
  		 * @property
- 		 * @memberOf App.view.d3.barlegend.VizPanel
+ 		 * @memberOf App.view.d3.bar.VizPanel
  		 * @type Ext.form.field.ComboBox
- 		 * @description Metric selection list
- 		 */
+ 		 * @description Metric selection list.  Use this dropdown instead of the toolbar button options
  		me.metricCombo = Ext.create('Ext.form.field.ComboBox', {
  			store: Ext.create('App.store.movie.MovieMetricStore', {
  				autoLoad: true
@@ -69,6 +68,15 @@ Ext.define('App.view.d3.barlegend.VizPanel', {
 				scope: me
 			}
 		});
+		*/
+		
+		/**
+ 		 * @property
+ 		 * @type Ext.toolbar.TextItem
+ 		 */
+ 		me.currentMetricTextItem = Ext.create('Ext.toolbar.TextItem', {
+ 			text: '<b>' + me.defaultMetricText + '</b>'
+ 		}, me);
  			
  		/**
   		 * @property
@@ -77,16 +85,58 @@ Ext.define('App.view.d3.barlegend.VizPanel', {
   		me.tbar = [{
 	  		xtype: 'tbtext',
 	  		text: 'Metric:'
-	  	}, 
-	  		me.metricCombo
-	  	];
+	  	},
+	  		me.currentMetricTextItem,
+	  		'->',
+	  	{
+		  	xtype: 'button',
+		  	iconCls: 'icon-dollar',
+		  	metric: 'gross',
+		  	text: me.defaultMetricText,
+			handler: me.metricHandler,
+			scope: me
+		}, {
+			xtype: 'button',
+			iconCls: 'icon-film',
+			metric: 'theaters',
+			text: '# Theaters',
+			handler: me.metricHandler,
+			scope: me
+		}, {
+			xtype: 'button',
+			iconCls: 'icon-dollar',
+			metric: 'opening',
+			text: 'Opening Weekend',
+			handler: me.metricHandler,
+			scope: me
+		}, {
+			xtype: 'button',
+			iconCls: 'icon-star',
+			metric: 'imdbRating',
+			text: 'IMDB Rating',
+			handler: me.metricHandler,
+			scope: me
+		}]
 		
 		me.callParent(arguments);
 	},
 	
 	/**
+	 * @function
+	 * @memberOf App.view.d3.bar.VizPanel
+	 * @description Toolbar button handler
+	 */
+	metricHandler: function(btn, evt) {
+		var me = this;
+		
+		me.currentMetric = btn.metric;
+		me.transition(btn.metric);
+		me.currentMetricTextItem.setText('<b>' + btn.text + '</b>');
+	},
+	
+	/**
  	 * @function
- 	 * @memberOf App.view.d3.barlegend.VizPanel
+ 	 * @memberOf App.view.d3.bar.VizPanel
  	 * @description Initialize the drawing canvas
  	 */
  	initCanvas: function() {
@@ -134,6 +184,12 @@ Ext.define('App.view.d3.barlegend.VizPanel', {
 							+ 'Theaters: ' + data.theaters + '<br>'
 							+ 'Opening: ' + Ext.util.Format.currency(data.opening, false, '0', false) + '<br>'
 							+ 'IMDB Rating: ' + data.imdbRating;
+					},
+					handleEvents: true,
+					mouseOverEvents: {
+						enabled: true,
+						eventName: 'barGridPanelRowHighlight',
+						eventDataMetric: 'title'
 					}
 				}, me);
 				
@@ -147,7 +203,7 @@ Ext.define('App.view.d3.barlegend.VizPanel', {
 	
 	/**
 	 * @function
-	 * @memberOf App.view.d3.barlegend.VizPanel
+	 * @memberOf App.view.d3.bar.VizPanel
 	 * @param metric String
 	 * @description Transition the bar chart to a new metric
 	 */

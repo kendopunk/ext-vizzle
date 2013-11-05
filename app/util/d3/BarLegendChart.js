@@ -1,5 +1,9 @@
+/**
+ * @class
+ * @memberOf App.util.d3
+ * @description Simple bar chart with legend and flex configuration
+ */
 Ext.define('App.util.d3.BarLegendChart', {
-
 	/**
  	 * The primary SVG element.  Must be set (after render) outside this class
  	 * and passed as a configuration item
@@ -175,9 +179,9 @@ Ext.define('App.util.d3.BarLegendChart', {
 		Ext.apply(this, config);
 		
 		// event handling
-		/*if(this.handleEvents) {
+		if(this.handleEvents) {
 			this.eventRelay = Ext.create('App.util.MessageBus');
-		}*/
+		}
 		
 		// make room on top for labels
 		// this must come before the heightOffset assignment
@@ -192,7 +196,7 @@ Ext.define('App.util.d3.BarLegendChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.BarChart
+ 	 * @memberOf App.util.d3.BarLegendChart
  	 * @description Set the horizontal scale
  	 */
 	setXScale: function() {
@@ -206,7 +210,7 @@ Ext.define('App.util.d3.BarLegendChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.BarChart
+ 	 * @memberOf App.util.d3.BarLegendChart
  	 * @description Set the vertical (y) scale
  	 */
 	setYScale: function(metric) {
@@ -217,7 +221,7 @@ Ext.define('App.util.d3.BarLegendChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.BarChart
+ 	 * @memberOf App.util.d3.BarLegendChart
  	 * @description Set the scale for the yAxis
  	 */
 	setYAxisScale: function(metric) {
@@ -245,7 +249,7 @@ Ext.define('App.util.d3.BarLegendChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.BarChart
+ 	 * @memberOf App.util.d3.BarLegendChart
  	 * @description Draw the initial bar chart
  	 */
 	draw: function() {
@@ -334,7 +338,7 @@ Ext.define('App.util.d3.BarLegendChart', {
 			.style('opacity', .6)
 			.style('stroke', '#333333')
 			.style('stroke-width', 1)
-			//.call(d3.helper.tooltip().text(me.tooltipFunction))
+			.call(d3.helper.tooltip().text(me.tooltipFunction))
 			.on('mouseover', function(d) {
 				if(handleEvents && eventRelay && mouseOverEvents.enabled) {
 					eventRelay.publish(
@@ -479,7 +483,7 @@ Ext.define('App.util.d3.BarLegendChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.BarChart
+ 	 * @memberOf App.util.d3.BarLegendChart
  	 * @param metric
  	 * @description Takes a numeric index from the data record as the y scale
  	 */
@@ -529,7 +533,7 @@ Ext.define('App.util.d3.BarLegendChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.BarChart
+ 	 * @memberOf App.util.d3.BarLegendChart
  	 * @description Return the width of a flex "unit"
  	 */
 	getFlexUnit: function() {

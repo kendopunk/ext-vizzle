@@ -116,7 +116,7 @@ Ext.define('App.view.d3.bar.VizPanel', {
 			text: 'IMDB Rating',
 			handler: me.metricHandler,
 			scope: me
-		}]
+		}];
 		
 		me.callParent(arguments);
 	},
