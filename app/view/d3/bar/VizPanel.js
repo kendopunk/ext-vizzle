@@ -39,6 +39,7 @@ Ext.define('App.view.d3.bar.VizPanel', {
  			me.panelId,
  			me.barChart = null,
  			me.defaultMetric = 'gross',
+ 			me.defaultMetricText = 'Gross Box Office',
  			me.currentMetric = 'gross',
  			me.eventRelay = Ext.create('App.util.MessageBus');
  			
@@ -46,8 +47,7 @@ Ext.define('App.view.d3.bar.VizPanel', {
  		 * @property
  		 * @memberOf App.view.d3.bar.VizPanel
  		 * @type Ext.form.field.ComboBox
- 		 * @description Metric selection list
- 		 */
+ 		 * @description Metric selection list.  Use this dropdown instead of the toolbar button options
  		me.metricCombo = Ext.create('Ext.form.field.ComboBox', {
  			store: Ext.create('App.store.movie.MovieMetricStore', {
  				autoLoad: true
@@ -68,6 +68,15 @@ Ext.define('App.view.d3.bar.VizPanel', {
 				scope: me
 			}
 		});
+		*/
+		
+		/**
+ 		 * @property
+ 		 * @type Ext.toolbar.TextItem
+ 		 */
+ 		me.currentMetricTextItem = Ext.create('Ext.toolbar.TextItem', {
+ 			text: '<b>' + me.defaultMetricText + '</b>'
+ 		}, me);
  			
  		/**
   		 * @property
@@ -76,11 +85,53 @@ Ext.define('App.view.d3.bar.VizPanel', {
   		me.tbar = [{
 	  		xtype: 'tbtext',
 	  		text: 'Metric:'
-	  	}, 
-	  		me.metricCombo
-	  	];
+	  	},
+	  		me.currentMetricTextItem,
+	  		'->',
+	  	{
+		  	xtype: 'button',
+		  	iconCls: 'icon-dollar',
+		  	metric: 'gross',
+		  	text: me.defaultMetricText,
+			handler: me.metricHandler,
+			scope: me
+		}, {
+			xtype: 'button',
+			iconCls: 'icon-film',
+			metric: 'theaters',
+			text: '# Theaters',
+			handler: me.metricHandler,
+			scope: me
+		}, {
+			xtype: 'button',
+			iconCls: 'icon-dollar',
+			metric: 'opening',
+			text: 'Opening Weekend',
+			handler: me.metricHandler,
+			scope: me
+		}, {
+			xtype: 'button',
+			iconCls: 'icon-star',
+			metric: 'imdbRating',
+			text: 'IMDB Rating',
+			handler: me.metricHandler,
+			scope: me
+		}]
 		
 		me.callParent(arguments);
+	},
+	
+	/**
+	 * @function
+	 * @memberOf App.view.d3.bar.VizPanel
+	 * @description Toolbar button handler
+	 */
+	metricHandler: function(btn, evt) {
+		var me = this;
+		
+		me.currentMetric = btn.metric;
+		me.transition(btn.metric);
+		me.currentMetricTextItem.setText('<b>' + btn.text + '</b>');
 	},
 	
 	/**
