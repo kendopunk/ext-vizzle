@@ -11,6 +11,16 @@
 	background-repeat: no-repeat;
 }
 
+.icon-dollar {
+	background-image: url(../img/icons/16x16/dollar-sign.png) !important;
+	background-repeat: no-repeat;
+}
+
+.icon-film {
+	background-image: url(../img/icons/16x16/film.png) !important;
+	background-repeat: no-repeat;
+}
+
 .icon-pie-chart {
 	background-image: url(../img/icons/16x16/pie-chart.png) !important;
 	background-repeat: no-repeat;
@@ -18,6 +28,11 @@
 
 .icon-stacked-bar-chart {
 	background-image: url(../img/icons/16x16/stacked-bar-chart.png) !important;
+	background-repeat: no-repeat;
+}
+
+.icon-star {
+	background-image: url(../img/icons/16x16/star.png) !important;
 	background-repeat: no-repeat;
 }
 
