@@ -10,6 +10,7 @@ Ext.application({
 	requires: [
 		'Ext.container.Viewport',
 		'App.util.Global',
+		'App.util.MessageBus',
 		'App.util.GridRenderers',
 		'App.util.ColumnDefinitions',
 		'App.view.tree.MenuTreePanel',
@@ -47,7 +48,7 @@ Ext.application({
 						bodyStyle: {
 							padding: '5px'
 						},
-						html: 'FOO...',
+						html: App.util.Global.defaultInfoMessage,
 						layout: 'fit',
 						width: '100%',
 						flex: 1,
@@ -60,7 +61,22 @@ Ext.application({
 				xtype: 'tabpanel',
 				width: Ext.getBody().getViewSize().width - App.util.Global.treePanelWidth,
 				plain: true,
-				region: 'center'
+				region: 'center',
+				listeners: {
+					/**
+					 * If there are no more tabs, then set the "Info" panel
+					 * message back to the globally-defined message
+					 */
+ 					remove: function(tabPanel) {
+						if(tabPanel.items.items.length == 0) {
+							var eventRelay = Ext.create('App.util.MessageBus');
+							eventRelay.publish(
+								'infoPanelUpdate',
+								App.util.Global.defaultInfoMessage
+							);
+						}
+					}
+				}
 			}]
 		})
 	}

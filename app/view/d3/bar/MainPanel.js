@@ -67,8 +67,8 @@ Ext.define('App.view.d3.bar.MainPanel', {
 			me.gridPanel
 		];
 		
-		// after render, publish update to the "Info" panel
-		me.on('afterrender', function(panel) {
+		// on activate, publish update to the "Info" panel
+		me.on('activate', function() {
 			me.eventRelay.publish('infoPanelUpdate', me.chartDescription);
 		}, me);
 		
