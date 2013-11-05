@@ -1,0 +1,25 @@
+{
+	"success": true,
+	"data" [{
+		key: 'Domestic',
+		values: [
+			{id: 'Van Halen', y: 1000},
+			{id: 'ACDC', y: 2000},
+			{id: 'Rush', y: 800}
+		]
+	}, {
+		key: 'Worldwide',
+		values: [
+			{id: 'Van Halen', y: 2000},
+			{id: 'ACDC', y: 3500},
+			{id: 'Rush', y: 4000}
+		]
+	}, {
+		key: 'Universal',
+		values: [
+			{id: 'Van Halen', y: 8000},
+			{id: 'ACDC', y: 3500},
+			{id: 'Rush', y: 4000}
+		]
+	}]
+}

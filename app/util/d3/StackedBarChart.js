@@ -1,217 +1,255 @@
-/*
-Ext.define('test', {
-	svg: null,
-	canvasHeight: 500,
-	canvasWidth: 500,
-	workingHeight: null,
-	workingWidth: null,
-	graphData: [],
-	panelId: null,
-	colorScale: d3.scale.category20(),
-	margins: {
-		top: 20,
-		right: 20,
-		bottom: 20,
-		left: 20
+/**
+ * @class
+ * @memberOf App.util.d3
+ * @description Stacked bar chart class
+ */
+Ext.define('App.util.d3.StackedBarChart', {
+	
+	/**
+ 	 * The primary SVG element.  Must be set (after render) outside this class
+ 	 * and passed as a configuration item
+ 	 */
+ 	svg: null,
+ 	
+ 	/**
+  	 * default canvas width, height
+  	 */
+  	canvasWidth: 500,
+  	canvasHeight: 500,
+  	
+  	/**
+  	 * default color scale
+  	 */
+  	colorScale: d3.scale.category20(),
+  	
+  	/**
+   	 * "g" elements to hold bars, X-axis, and Y-axis
+   	 */
+   	gCanvas: null,
+   	gLayer: null,
+   	gXAxis: null,
+   	gYAxis: null,
+   	
+   	/**
+     * x and y scales and axes
+     */
+    xScale: null,
+    xAxis: null,
+    yScale: null,
+    yAxis: null,
+    
+    /**
+     * misc
+     */
+    graphData: [],
+    panelId: null,
+    margins: {
+    	top: 20,
+    	right: 20,
+    	bottom: 20,
+    	left: 20
+    },
+    uniqueCategories: [],
+    uniqueIds: [],
+    stackLayout: null,
+    layers: null,
+    yMax: null,
+   	
+   	constructor: function(config) {
+	   	var me = this;
+	   	
+	   	Ext.apply(me, config);
 	},
 	
-	*
- 	 * "g" elements to hold bars, x-Axis and y-Axis
- 	 *
- 	gBar: null,
- 	gXAxis: null,
- 	gYAxis: null,
- 	
- 	*
-  	 * scales
-  	 *
-  	xScale: null,
-  	yScale: null,
-  	
-  	*
-   	 * other SVG object
-   	 *
-  	keys: null,
-  	stackLayout: null,
-  	layers: null,
-  	yMax: null,
- 	
- 	constructor: function(config) {
-	 	var me  = this;
-	 	
-	 	Ext.apply(me, config);
-	 	
-	 	me.workingHeight = me.canvasHeight - me.margins.top - me.margins.bottom;
-	 	me.workingWidth = me.canvasWidth - me.margins.left - me.margins.right;
-	},
- 	
- 	*
+	/**
  	 * @function
- 	 * @description Draw the initial stacked bar chart
- 	 *
-	draw: function() {
-		var me = this,
-			data = me.graphData;
+ 	 * @memberOf App.util.d3.StackedBarChart
+ 	 * @description Initial drawing
+ 	 */
+ 	draw: function() {
+ 		var me = this;
+ 		
+ 		//
+ 		// Bring configuration vars into local scope
+ 		// for use in D3 functions
+ 		//
+ 		var svg = me.svg,
+ 			canvasWidth = me.canvasWidth,
+ 			canvasHeight = me.canvasHeight,
+ 			panelId = me.panelId,
+ 			margins = me.margins;
+ 			
+		// adjust the color scale
+		var colorScale = me.colorScale = d3.scale.linear()
+		 	.domain([0, me.graphData.length - 1])
+		 	.range(['#f00', '#00f']);
+		 	
+		var _uniqueCategories = me.uniqueCategories = me.graphData.map(function(item) {
+			return item.key;
+		});
 		
-		// bring ExtJS variables
-		// into local scope for use in D3
-		var width = me.workingWidth,
-			height = me.workingHeight,
-			keys = me.keys,
-			colorScale = me.colorScale,
-			stackLayout = me.stackLayout;
-			
+		// get the array of unique "id" properties
+	 	me.uniqueIds = me.graphData[0].values.map(function(item) {
+		 	return item.id;
+		});
+ 			
+ 		// set the stack layout
+ 		me.stackLayout = d3.layout.stack().values(function(d) {
+			return d.values;
+		});
+		
 		// apply the stack function to layers variable
-		var layers = stackLayout(data);
+		me.layers = me.stackLayout(me.graphData);
 		
-		// max Y value (y0) is the position on the y scale
-		// where a particular rect ends
-		var yMax = d3.max(layers, function(layer) {
+		// max Y value (y0) is the position on the Y scale
+		// where a particular rectangle ends
+		me.yMax = d3.max(me.layers, function(layer) {
 			return d3.max(layer.values, function(d) {
 				return d.y0 + d.y;
 			})
 		});
 		
-		
-		
-// set up the xScale
-		var xScale = d3.scale.ordinal()
-			.domain(keys)
-			.rangeRoundBands([0, width], .08);
-		
-		// set up the yScale			
-		var yScale = d3.scale.linear()
-			.domain([0, yMax])
-			.range([height, 0]);
-	
-		
-		
-		
-		
 		// calculate the totals for each "id" value in the domain
 		var totals = {};
-		data.forEach(function(series) {
-			series.values.forEach(function(item) {
-				totals[item.id] = (totals[item.id] || 0) + item.y;
+		me.graphData.forEach(function(category) {
+			category.values.forEach(function(item) {
+				totals[item.id] = (totals[item.id] || 0) + item.y; // not set yet !!
 			})
 		});
 		
-		
+		// set up the X scale
+		var _xScale = me.xScale = d3.scale.ordinal()
+			.domain(me.uniqueIds)
+			.rangeRoundBands([0, canvasWidth - margins.left - margins.right], .08);
 			
+		// set up the X axis function
+		me.xAxis = d3.svg.axis()
+			.scale(me.xScale)
+			.tickSize(0)
+			.tickPadding(6)
+			.orient('bottom');
+			
+		// set up the Y scale
+		var _yScale = me.yScale = d3.scale.linear()
+			.domain([0, me.yMax])
+			.range([canvasHeight - margins.top - margins.bottom, 0]);
+			
+		// set up the Y axis function
+		me.yAxis = d3.svg.axis()
+			.scale(me.yScale)
+			.tickSize(0)
+			.tickPadding(6)
+			.orient('left');
+			
+		// "gCanvas" element
+		me.gCanvas = me.svg.append('svg:g')
+			.attr('transform', 'translate(' + me.margins.left + ', ' + me.margins.top + ')');
+			
+		// "gLayer" element
+		me.gLayer = me.gCanvas.selectAll('.layer')
+			.data(me.layers)
+			.enter()
+			.append('g')
+			.attr('class', 'layer')
+			.style('fill', function(d, i) {
+				return colorScale(i);
+			});
 		
-							
-		var yAxis = d3.svg.axis()
-							.scale(yScale)
-							.tickSize(0)
-							.tickPadding(6)
-							.orient('left');
-							
-		var xAxis = d3.svg.axis()
-							.scale(xScale)
-							.tickSize(0)
-							.tickPadding(6)
-							.orient('bottom');
-							
-		var svg = me.svg.append('g')
-			.attr('transform', 'translate(' + me.margins.left + ',' + me.margins.top + ')');
-						
-						var layer = svg.selectAll('.layer')
-							.data(layers)
-							.enter()
-							.append('g')
-							.attr('class', 'layer')
-							.style('fill', function(d, i) {
-								return colorScale(i);
-							});
-							
-						layer.selectAll('rect')
-							.data(function(d) {
-								return d.values;
-							})
-							.enter()
-							.append('rect')
-							.attr('fill-opacity', .5)
-							.attr('stroke', 'black')
-							.style('stroke-width', 0.5)
-							.attr('width', xScale.rangeBand())
-							.attr('x', function(d) {
-								return xScale(d.id);
-							})
-							.attr('y', function(d) {
-								return yScale(d.y0 + d.y);
-							})
-							.attr('height', function(d) {
-								return yScale(d.y0) - yScale(d.y0 + d.y);
-							});
-/*							.on('mouseover', function(d) {
-								console.debug(d);
-							});*
-							
-						/*layer.selectAll('text')
-							.data(keys)
-							.enter()
-							.append('text')
-							.text(function(d) {
-								return d + ': ' + totals[d];
-							})
-							.attr('fill', '#000')
-							.style('font-size', 9)
-							.attr('x', function(d) {
-								return xScale(d) + 25;
-							})
-							.attr('y', function(d) {
-								//return yScale(d) + 40;
-								return 100;
-							});*
-							
-						svg.append('svg:g')
-							.attr('class', 'axis')
-							.attr('transform', 'translate(0,' + height + ')')
-							.call(xAxis);
-							
-						svg.append('svg:g')
-							.attr('class', 'axis')
-							.call(yAxis);
+		// adding rectangles to each layer "g" in "gLayer"
+		me.gLayer.selectAll('rect')
+			.data(function(d) {
+				return d.values;
+			})
+			.enter()
+			.append('rect')
+			.attr('fill-opacity', .5)
+			.attr('stroke', 'black')
+			.style('stroke-width', 0.5)
+			.attr('width', me.xScale.rangeBand())
+			.attr('x', function(d) {
+				return _xScale(d.id);
+			})
+			.attr('y', function(d) {
+				return _yScale(d.y0 + d.y);
+			})
+			.attr('height', function(d) {
+				return _yScale(d.y0) - _yScale(d.y0 + d.y);
+			})
+			.on('mouseover', function(d, i) {
+				console.debug(d);
+				//console.debug(d);
+				//console.debug(i);
+				//console.debug(_uniqueCategories[i]);
+			});
+			
+		// adding the text to "gLayer"
+		/*me.gLayer.selectAll('text')
+			.data(me.uniqueIds)
+			.enter()
+			.append('text')
+			.text(function(d) {
+				return d;
+				// return d + ': ' + totals[d];
+			})
+			.attr('fill', '#000')
+			.style('font-size', 10)
+			.attr('x', function(d) {
+				return _xScale(d) + 25;
+			})
+			.attr('y', function(d) {
+				return _yScale(d) + 40;
+			});
+		*/
 		
+		// X axis
+		var g_ax_translate = canvasHeight - margins.top - margins.bottom;
+		me.gXAxis = me.gLayer.append('svg:g')
+			.attr('class', 'axis')
+			.attr('transform', 'translate(0, ' + g_ax_translate + ')');
+			
+		me.gXAxis.call(me.xAxis);
 		
+		// Y axis
+		me.gYAxis = me.gLayer.append('svg:g')
+			.attr('class', 'axis');
+			
+		me.gYAxis.call(me.yAxis);
 	},
 	
+	/**
+ 	 * @function
+ 	 * @memberOf App.util.d3.StackedBarChart
+ 	 * @description Transition stacked bar chart layout with new data
+ 	 */
 	transition: function() {
 		var me = this;
 		
-		var layers = me.svg.selectAll('.layer');
+		
+		
+		me.svg.selectAll('g').transition().duration(500).attr('transform', 'scale(0, 0)').remove();
+		
+		me.draw();
+		
+		/*var layers = me.svg.selectAll('.layer');
 		
 		layers.selectAll('rect')
 			.transition()
 			.duration(500)
-			.attr('transform', 'scale(0,0)')
+			.attr('transform', 'scale(0,2)')
 			.remove();
 			
-		me.draw();
+		me.draw();*/
 	},
 	
-	*
+	/**
  	 * @function
- 	 * @description Set the graph data object and associated params
- 	 *
- 	setGraphData: function(data) {
-	 	var me = this;
-	 	
-	 	me.graphData = data;
-	 	
-	 	// update the color scale
-	 	me.colorScale = d3.scale.linear()
-		 	.domain([0, data.length - 1])
-		 	.range(['#f00', '#00f']);
-
-	 	// get array
-	 	me.keys = me.graphData[0].values.map(function(item) {
-		 	return item.id;
-		});
+ 	 * @memberOf App.util.d3.StackedBarChart
+ 	 * @description Set the new graphData object
+ 	 * @param data Object
+ 	 */
+	setGraphData: function(data) {
+		var me = this;
 		
-		me.stackLayout = d3.layout.stack().values(function(d) {
-			return d.values;
-		});
-	}	
+		me.graphData = data;
+	}
 });
-*/
