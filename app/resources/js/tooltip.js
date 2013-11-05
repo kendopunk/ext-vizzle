@@ -32,7 +32,7 @@ d3.helper.tooltip = function(){
                 'border-radius': '8px'
             });
             // Add text using the accessor function, Crop text arbitrarily
-            tooltipDiv.style('width', function(d, i){ return (text(pD, pI).length > 80) ? '300px' : null; })
+            tooltipDiv.style('width', function(d, i){ return (text(pD, pI).length > 80) ? '200px' : null; })
                 .html(function(d, i){return text(pD, pI);});
         })
         .on('mousemove.tooltip', function(pD, pI){
