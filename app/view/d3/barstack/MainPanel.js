@@ -10,8 +10,8 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 	closable: true,
 	
 	requires: [
-		'App.util.MessageBus'//,
-		//'App.util.d3.StackedBarChart'
+		'App.util.MessageBus',
+		'App.util.d3.StackedBarChart'
 	],
 	
 	layout: 'fit',
@@ -25,6 +25,7 @@ Ext.define('App.view.d3.barstack.MainPanel', {
  		 */
  		me.svgInitialized = false,
  			me.graphData = [],
+ 			me.originalGraphData = [],
  			me.canvasWidth,
  			me.canvasHeight,
  			me.svg,
@@ -37,7 +38,8 @@ Ext.define('App.view.d3.barstack.MainPanel', {
  		 * @property
  		 */
 		me.chartDescription = '<b>Stacked Bar Chart</b><br><br>'
-			+ 'Demonstration of a D3 stacked bar chart using stack layout.';
+		 	+ '<i>Van Halen album sales in US and Canada.  Data from Wikipedia (for the most part)</i><br><br>'
+			+ 'Demonstration of a D3 stacked bar chart using stack layout. Use the toolbar buttons view transitions and rescaling.';
 			
 		/**
 		 * @property
@@ -60,6 +62,42 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 			me.eventRelay.publish('infoPanelUpdate', me.chartDescription);
 		}, me);
 		
+		//////////////////////////////////////////////////
+		// button configurations
+		//////////////////////////////////////////////////
+		me.albumRemoveButton = Ext.create('Ext.button.Button', {
+			text: 'Remove From Right',
+			tooltip: 'Transition demonstration',
+			handler: function() {
+				var newData = me.albumRemove();
+				me.stackedBarChart.setGraphData(newData);
+				me.stackedBarChart.transition();
+			},
+			scope: me
+		}, me);
+		
+		me.albumRevertButton = Ext.create('Ext.button.Button', {
+			text: 'Revert Data',
+			tooltip: 'Revert back to original data',
+			handler: function() {
+				me.albumRevert();
+			},
+			scope: me,
+			disabled: true
+		}, me);
+		
+		/**
+		 * @property
+		 * @type Ext.toolbar.Toolbar
+		 */
+		me.tbar =[
+			{xtype: 'tbtext', text: '<b>Van Halen Album Sales (US/Canada)</b>'},
+			{xtype: 'tbspacer', width: 20},
+			me.albumRemoveButton,
+			'-',
+			me.albumRevertButton
+		];
+		
 		/**
  		 * @listener
  		 * @description After render, initialize the canvas
@@ -67,15 +105,6 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 		me.on('afterrender', function(panel) {
 			me.initCanvas();
 		}, me);
-		
-		me.tbar =[{
-			xtype: 'button',
-			text: 'transition',
-			handler: function() {
-				me.transition();
-			},
-			scope: me
-		}];
 		
 		me.callParent(arguments);
 	},
@@ -114,61 +143,76 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 			}
 		});
 		
-		// graph data
- 		var test = [{
-			category: 'Domestic',
-			values: [
-				{id: 'Van Halen', category: 'Domestic', y: 10},
-				{id: 'ACDC', category: 'Domestic',  y: 10},
-				{id: 'Rush', category: 'Domestic',  y: 10},
-				{id: 'Steel Dragon', category: 'Domestic',  y: 10}
-			]
-		}, {
-			category: 'Worldwide',
-			values: [
-				{id: 'Van Halen', category: 'Worldwide',  y: 10},
-				{id: 'ACDC', category: 'Worldwide',  y: 10},
-				{id: 'Rush', category: 'Worldwide',  y: 10},
-				{id: 'Steel Dragon', category: 'Worldwide',  y: 10}
-			]
-		}, {
-			category: 'Universal',
-			values: [
-				{id: 'Van Halen', category: 'Universal',  y: 10},
-				{id: 'ACDC', category: 'Universal',  y: 10},
-				{id: 'Rush', category: 'Universal',  y: 10},
-				{id: 'Steel Dragon', category: 'Universal',  y: 10}
-			]
-		}];
-		
-		me.stackedBarChart.setGraphData(test);
-		me.stackedBarChart.draw();
+		// retrieve the graph data via AJAX and load the visualization
+		Ext.Ajax.request({
+			url: 'data/album_sales.json',
+	 		method: 'GET',
+	 		success: function(response) {
+	 			var resp = Ext.JSON.decode(response.responseText);
+	 			
+	 			Ext.each(resp.data, function(rec) {
+		 			me.graphData.push(rec);
+		 			me.originalGraphData.push(rec);
+		 		}, me);
+		 		
+		 		me.stackedBarChart.setGraphData(me.graphData);
+		 		me.stackedBarChart.draw();
+		 	},
+		 	scope: me
+		 });
  	},
  	
+ 	/**
+  	 * @function
+  	 * @memberOf App.view.d3.barstack.MainPanel
+  	 * @description Transition to new data set
+  	 */
  	transition: function() {
 	 	var me = this;
 	 	
-	 	// the damn axis is three-peated
-
- 		var temp = [{
-			category: 'Domestic',
-			values: [
-				{id: 'Van Halen', category: 'Domestic', y: 10},
-				{id: 'ACDC', category: 'Domestic',  y: 10},
-				{id: 'Rush', category: 'Domestic',  y: 10}
-			]
-		}, {
-			category: 'Worldwide',
-			values: [
-				{id: 'Van Halen', category: 'Worldwide',  y: 10},
-				{id: 'ACDC', category: 'Worldwide',  y: 10},
-				{id: 'Rush', category: 'Worldwide',  y: 10}
-			]
-		}];
-		
-		me.stackedBarChart.setGraphData(temp);
+		me.stackedBarChart.setGraphData(newData);
 		me.stackedBarChart.transition();
+ 	},
  	
- 	
- 	}
+ 	/**
+  	 * @function
+  	 * @memberOf App.view.d3.barstack.MainPanel
+  	 * @description Remove the last album from the layers in the data object
+  	 */
+  	albumRemove: function() {
+	  	var me = this,
+	  		slicedData = [];
+		
+		Ext.each(me.graphData, function(item) {
+			slicedData.push({
+				category: item.category,
+				values: item.values.slice(0, item.values.length-1)
+			});
+		}, me);
+		
+		me.albumRevertButton.enable();
+		
+		if(slicedData[0].values.length == 1) {
+			me.albumRemoveButton.disable();
+		}
+		
+		me.graphData = slicedData;
+		
+		return slicedData;
+  	},
+  	
+  	/**
+   	 * @function
+   	 * @description Revert back to original graphData values
+   	 */
+  	albumRevert: function() {
+  		var me = this;
+  		
+  		me.graphData = me.originalGraphData;
+  	
+  		me.stackedBarChart.setGraphData(me.graphData);
+		me.stackedBarChart.transition();
+		
+		me.albumRemoveButton.enable();
+  	}
 });
