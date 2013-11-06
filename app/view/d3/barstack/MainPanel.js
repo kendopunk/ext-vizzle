@@ -130,6 +130,11 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 	 		.attr('width', me.canvasWidth)
 	 		.attr('height', me.canvasHeight);
 	 		
+	 
+	 
+  	
+ 
+	 		
 	 	me.stackedBarChart = Ext.create('App.util.d3.StackedBarChart', {
 			svg: me.svg,
 			canvasWidth: me.canvasWidth,
@@ -165,6 +170,82 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 		 	},
 		 	scope: me
 		 });
+		 
+		 /*	normalizeChartData: function(dataObject) {
+  	
+  		var me = this;
+  		
+  		// me.selectedFiscalYear
+  		// me.selectedQualifier (team|office)
+  		// me.selectedMetric (hours|dollars)
+  		// me.selectedValue (absolute | percent)
+  		// me.selectedSplit (off|on)
+  		
+  		var ret = me.normalizeAbsolute(dataObject);
+  		if(me.selectedValue == 'percent') {
+	  		ret = me.normalizePercent(ret);
+	  	}
+	  	
+	  	return ret;
+  	},normalizeAbsolute: function(dataObject) {
+  		var me = this,
+  			ret = [];
+  		
+  		Ext.each(dataObject, function(item) {
+	  	
+	  		// match 'hours' or 'dollars'
+	  		if(item.unit == me.selectedMetric) {
+		  		var ind = 0;
+		  		
+	  			Ext.each(item.seriesLabels, function(label) {
+		  			var values = me.getSeriesData(item.data, ind, label);
+		  			
+	  				ret.push({
+			  			category: label,
+			  			values: values
+			  		});
+			  		
+			  		ind++;
+			  		
+		  		}, me);
+	  		}
+	  	}, me);
+	  	
+	  	return ret;
+	  	normalizePercent() : func
+	  	var idTotals = [],
+			uniqueIds = [];
+		
+		// retrieve unique ID values from the first array
+	  	Ext.each(normalizedData[0].values, function(obj) {
+	  		uniqueIds.push(obj.id);
+	  		idTotals.push(0);
+	  	});
+	  	
+	  	// run through the data and sum up totals per ID
+	  	for(var i=0; i<normalizedData.length; i++) {
+		  	var plucked = Ext.pluck(normalizedData[i].values, 'y'),
+		  		j = 0;
+			
+			plucked.map(function(el) {
+				idTotals[j] += el;
+				j++;
+			});
+		}
+		
+		// now, run through the normalized data again and calculate
+		// percentage
+		Ext.each(normalizedData, function(obj) {
+			var ind = 0;
+			
+			Ext.each(obj.values, function(item) {
+				item.y = (item.y/idTotals[ind] * 100);
+				ind++;
+			});
+		});
+		
+		return normalizedData;
+		*/
  	},
  	
  	/**

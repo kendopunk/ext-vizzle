@@ -198,6 +198,11 @@ Ext.define('App.util.d3.StackedBarChart', {
 		var me = this;
 		
 		me.graphData = data;
+		
+		// changing the graph data changes the color scale
+		me.colorScale = d3.scale.linear()
+		 	.domain([0, data.length - 1])
+		 	.range(['#f00', '#00f']);
 	},
 	
 	setUniqueIds: function() {
@@ -264,6 +269,8 @@ Ext.define('App.util.d3.StackedBarChart', {
 	transition: function() {
 		var me = this;
 		
+		var colorScale = me.colorScale;
+		
 		// set new layers
 		me.layers = me.stackLayout(me.graphData);
 		
@@ -277,11 +284,29 @@ Ext.define('App.util.d3.StackedBarChart', {
 		var _xScale = me.xScale,
 			 _yScale = me.yScale;
 			 
-		// transition added and missing layers
+		// join new layers
 		me.gLayer = me.gCanvas.selectAll('.layer')
 			.data(me.layers);
-		me.gLayer.exit().remove();
-		
+			
+		// transition out old layers
+		//me.gLayer.exit().remove();
+		me.gLayer.exit()
+			.transition()
+			.attr('width', 0)
+			.duration(500)
+			.remove();
+
+		// add new layers
+		var addedLayers = me.gLayer.enter()
+			.append('g')
+			.attr('class', 'layer');
+			
+		// transition the color of all layers
+		me.gLayer.transition()
+			.style('fill', function(d, i) {
+				return colorScale(i);
+			});
+
 		// join new rectangles
 		var rectSelection = me.gLayer.selectAll('rect')
 			.data(function(d) {
@@ -296,7 +321,7 @@ Ext.define('App.util.d3.StackedBarChart', {
 			.remove();
 		
 		// new layer elements
-		var newLayers = rectSelection.enter()
+		var newRects = rectSelection.enter()
 			.append('rect')
 			.attr('fill-opacity', .5)
 			.attr('stroke', 'black')
