@@ -223,7 +223,6 @@ Ext.define('App.util.d3.StackedBarChart', {
 			canvasHeight = me.canvasHeight;
 		
 		
-		
 		var layers = me.stackLayout(me.graphData);
 		
 		me.uniqueIds = me.graphData[0].values.map(function(item) {
@@ -249,6 +248,8 @@ Ext.define('App.util.d3.StackedBarChart', {
 		
 		me.gLayer = me.gCanvas.selectAll('.layer')
 			.data(layers);
+			
+		me.gLayer.exit().remove();
 		
 		console.debug(me.gLayer);
 		

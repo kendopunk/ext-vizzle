@@ -153,17 +153,16 @@ Ext.define('App.view.d3.barstack.MainPanel', {
  		var temp = [{
 			category: 'Domestic',
 			values: [
-				{id: 'Van Halen', category: 'Domestic', y: 15}
+				{id: 'Van Halen', category: 'Domestic', y: 10},
+				{id: 'ACDC', category: 'Domestic',  y: 10},
+				{id: 'Rush', category: 'Domestic',  y: 10}
 			]
 		}, {
 			category: 'Worldwide',
 			values: [
-				{id: 'Van Halen', category: 'Worldwide',  y: 22}
-			]
-		}, {
-			category: 'Universal',
-			values: [
-				{id: 'Van Halen', category: 'Universal',  y: 10}
+				{id: 'Van Halen', category: 'Worldwide',  y: 10},
+				{id: 'ACDC', category: 'Worldwide',  y: 10},
+				{id: 'Rush', category: 'Worldwide',  y: 10}
 			]
 		}];
 		
