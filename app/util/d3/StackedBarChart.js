@@ -174,12 +174,6 @@ Ext.define('App.util.d3.StackedBarChart', {
 			})
 			.attr('height', function(d) {
 				return _yScale(d.y0) - _yScale(d.y0 + d.y);
-			})
-			.on('mouseover', function(d, i) {
-				console.debug(d);
-				//console.debug(d);
-				//console.debug(i);
-				//console.debug(_uniqueCategories[i]);
 			});
 			
 		// adding the text to "gLayer"
@@ -203,14 +197,14 @@ Ext.define('App.util.d3.StackedBarChart', {
 		
 		// X axis
 		var g_ax_translate = canvasHeight - margins.top - margins.bottom;
-		me.gXAxis = me.gLayer.append('svg:g')
+		me.gXAxis = me.gCanvas.append('svg:g')
 			.attr('class', 'axis')
 			.attr('transform', 'translate(0, ' + g_ax_translate + ')');
 			
 		me.gXAxis.call(me.xAxis);
 		
 		// Y axis
-		me.gYAxis = me.gLayer.append('svg:g')
+		me.gYAxis = me.gCanvas.append('svg:g')
 			.attr('class', 'axis');
 			
 		me.gYAxis.call(me.yAxis);
@@ -224,21 +218,105 @@ Ext.define('App.util.d3.StackedBarChart', {
 	transition: function() {
 		var me = this;
 		
+		var margins = me.margins,
+			canvasWidth = me.canvasWidth,
+			canvasHeight = me.canvasHeight;
 		
 		
-		me.svg.selectAll('g').transition().duration(500).attr('transform', 'scale(0, 0)').remove();
 		
-		me.draw();
+		var layers = me.stackLayout(me.graphData);
 		
-		/*var layers = me.svg.selectAll('.layer');
+		me.uniqueIds = me.graphData[0].values.map(function(item) {
+		 	return item.id;
+		});
 		
-		layers.selectAll('rect')
-			.transition()
-			.duration(500)
-			.attr('transform', 'scale(0,2)')
-			.remove();
+		me.yMax = d3.max(layers, function(layer) {
+			return d3.max(layer.values, function(d) {
+				return d.y0 + d.y;
+			})
+		});
+		
+		console.log(me.yMax);
+		
+		var xs = d3.scale.ordinal()
+			.domain(me.uniqueIds)
+			.rangeRoundBands([0, canvasWidth - margins.left - margins.right], .08);
 			
-		me.draw();*/
+		var ys = d3.scale.linear()
+			.domain([0, me.yMax])
+			.range([canvasHeight - margins.top - margins.bottom, 0]);
+
+		
+		me.gLayer = me.gCanvas.selectAll('.layer')
+			.data(layers);
+		
+		console.debug(me.gLayer);
+		
+		// OK...I'm joining now
+		var temp = me.gLayer.selectAll('rect')
+			.data(function(d) {
+				return d.values;
+			});
+			
+		temp.exit().transition().attr('width', 0).duration(500).remove();
+		
+		var added = temp
+			.enter()
+			.append('rect')
+			.attr('fill-opacity', .5)
+			.attr('stroke', 'black')
+			.style('stroke-width', 0.5)
+			.attr('width', xs.rangeBand())
+			.attr('x', function(d) {
+				return xs(d.id);
+			})
+			.attr('y', function(d) {
+				return ys(d.y0 + d.y);
+			})
+			.attr('height', function(d) {
+				return ys(d.y0) - ys(d.y0 + d.y);
+			});
+			
+			
+		temp.transition().duration(500).attr('width', xs.rangeBand())
+			.attr('x', function(d) {
+				return xs(d.id);
+			})
+			.attr('y', function(d) {
+				return ys(d.y0 + d.y);
+			})
+			.attr('height', function(d) {
+				return ys(d.y0) - ys(d.y0 + d.y);
+			});
+			
+		//temp.exit().transition().attr('width', 0).duration(500).remove();
+		
+		// transition them all
+		
+		//temp.transition().duration(100).attr('x', 100);
+		
+		//temp.transition().duration(100).attr('height', 20);
+		
+		/*temp
+			.enter()
+			.append('rect')
+			.attr('fill-opacity', .5)
+			.attr('stroke', 'black')
+			.style('stroke-width', 0.5)
+			.attr('width', xs.rangeBand())
+			.attr('x', function(d) {
+				return xs(d.id);
+			})
+			.attr('y', function(d) {
+				return ys(d.y0 + d.y);
+			})
+			.attr('height', function(d) {
+				//return ys(d.y0) - ys(d.y0 + d.y);
+				return 20;
+			});
+			*/
+	
+	
 	},
 	
 	/**

@@ -147,30 +147,23 @@ Ext.define('App.view.d3.barstack.MainPanel', {
  	
  	transition: function() {
 	 	var me = this;
+	 	
+	 	// the damn axis is three-peated
 
  		var temp = [{
 			category: 'Domestic',
 			values: [
-				{id: 'Van Halen', category: 'Domestic', y: 102},
-				{id: 'ACDC', category: 'Domestic',  y: 110},
-				{id: 'Rush', category: 'Domestic',  y: 103},
-				{id: 'Steel Dragon', category: 'Domestic',  y: 410}
+				{id: 'Van Halen', category: 'Domestic', y: 15}
 			]
 		}, {
 			category: 'Worldwide',
 			values: [
-				{id: 'Van Halen', category: 'Worldwide',  y: 510},
-				{id: 'ACDC', category: 'Worldwide',  y: 170},
-				{id: 'Rush', category: 'Worldwide',  y: 150},
-				{id: 'Steel Dragon', category: 'Worldwide',  y: 710}
+				{id: 'Van Halen', category: 'Worldwide',  y: 22}
 			]
 		}, {
 			category: 'Universal',
 			values: [
-				{id: 'Van Halen', category: 'Universal',  y: 910},
-				{id: 'ACDC', category: 'Universal',  y: 102},
-				{id: 'Rush', category: 'Universal',  y: 44},
-				{id: 'Steel Dragon', category: 'Universal',  y: 234}
+				{id: 'Van Halen', category: 'Universal',  y: 10}
 			]
 		}];
 		
