@@ -51,6 +51,7 @@
 
 .axis text {
 	font: 9px/1.1 sans-serif;
+	fill: #333333;
 }
 
 .tinyText {

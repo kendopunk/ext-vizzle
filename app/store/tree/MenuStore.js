@@ -1,3 +1,9 @@
+/**
+ * @class
+ * @memberOf App.store.tree
+ * @extend Ext.data.TreeStore
+ * @description Static store used in construction of Viz Menu
+ */
 Ext.define('App.store.tree.MenuStore', {
 	extend: 'Ext.data.TreeStore',
 	root: {
@@ -23,7 +29,7 @@ Ext.define('App.store.tree.MenuStore', {
 					text: 'Stacked Bar Chart',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
-					id: null
+					id: 'barstackMainPanel'
 				}]
 			}, {
 				text: '<b>Pie Charts</b>',

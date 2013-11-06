@@ -10,8 +10,25 @@ Ext.define('App.view.d3.bar.GridPanel', {
 	autoScroll: true,
 	title: 'Grid',
 	
+	requires: [
+		'Ext.window.MessageBox'
+	],
+	
 	initComponent: function() {
 		var me = this;
+		
+		/**
+ 		 * Sample for S GRAY
+ 		 */
+		me.plugins = [
+			Ext.create('Ext.grid.plugin.CellEditing', {
+				clicksToEdit: 1,
+				listeners: {
+					edit: me.testEdit,
+					scope: me
+				}
+			}, me)
+		];
 		
 		/**
  		 * event relay
@@ -49,5 +66,15 @@ Ext.define('App.view.d3.bar.GridPanel', {
 			var rowIndex = me.getStore().indexOf(record);
 			me.getSelectionModel().select(rowIndex);
 		}
+	},
+	
+	testEdit: function(editor, e, eOpts) {
+		var re = /^\s*\d+\s*$/;
+		if(!re.test(e.value)) {
+			Ext.Msg.alert('Error', 'Numbers only');
+			e.record.reject();
+			return;
+		}
+		e.record.commit();
 	}
 });
