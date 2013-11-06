@@ -53,6 +53,13 @@ Ext.define('App.util.d3.StackedBarChart', {
     stackLayout: null,
     layers: null,
     yMax: null,
+    
+    /**
+	 * Default function for the tooltip
+	 */
+	tooltipFunction: function(data, index) {
+		return 'tooltip';
+	},
    	
    	constructor: function(config) {
 	   	var me = this;
@@ -144,7 +151,8 @@ Ext.define('App.util.d3.StackedBarChart', {
 			})
 			.attr('height', function(d) {
 				return _yScale(d.y0) - _yScale(d.y0 + d.y);
-			});
+			})
+			.call(d3.helper.tooltip().text(me.tooltipFunction));
 			
 		// adding the text to "gLayer"
 		/*me.gLayer.selectAll('text')
@@ -302,7 +310,8 @@ Ext.define('App.util.d3.StackedBarChart', {
 			})
 			.attr('height', function(d) {
 				return _yScale(d.y0) - _yScale(d.y0 + d.y);
-			});
+			})
+			.call(d3.helper.tooltip().text(me.tooltipFunction));
 			
 		// transition existing rectangles
 		rectSelection.transition()

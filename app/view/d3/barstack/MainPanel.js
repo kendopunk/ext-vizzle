@@ -140,6 +140,11 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 				right: 5,
 				bottom: 20,
 				left: 80
+			},
+			tooltipFunction: function(data, index) {
+				return '<b>' + data.id + '</b><br>'
+				+ data.category + ' Sales: '
+				+ Ext.util.Format.currency(data.y, false, 0, false);
 			}
 		});
 		
