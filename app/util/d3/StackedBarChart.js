@@ -22,7 +22,7 @@ Ext.define('App.util.d3.StackedBarChart', {
   	 */
   	colorScale: d3.scale.category20(),
   	
-  	/**
+  	/**5
    	 * "g" elements to hold bars, X-axis, and Y-axis
    	 */
    	gCanvas: null,
@@ -59,6 +59,13 @@ Ext.define('App.util.d3.StackedBarChart', {
 	 */
 	tooltipFunction: function(data, index) {
 		return 'tooltip';
+	},
+	
+	/**
+ 	 * yTickFormat
+ 	 */
+ 	tickFormat: function(d) {
+	 	return d3.format(',0f');
 	},
    	
    	constructor: function(config) {
@@ -269,7 +276,8 @@ Ext.define('App.util.d3.StackedBarChart', {
 	transition: function() {
 		var me = this;
 		
-		var colorScale = me.colorScale;
+		var colorScale = me.colorScale,
+			tooltipFn = me.tooltipFunction;
 		
 		// set new layers
 		me.layers = me.stackLayout(me.graphData);
@@ -311,7 +319,8 @@ Ext.define('App.util.d3.StackedBarChart', {
 		var rectSelection = me.gLayer.selectAll('rect')
 			.data(function(d) {
 				return d.values;
-			});
+			})
+			.call(d3.helper.tooltip().text(tooltipFn));
 			
 		// transition out the old rectangles
 		rectSelection.exit()
@@ -320,7 +329,7 @@ Ext.define('App.util.d3.StackedBarChart', {
 			.duration(500)
 			.remove();
 		
-		// new layer elements
+		// new rect elements
 		var newRects = rectSelection.enter()
 			.append('rect')
 			.attr('fill-opacity', .5)
@@ -335,8 +344,7 @@ Ext.define('App.util.d3.StackedBarChart', {
 			})
 			.attr('height', function(d) {
 				return _yScale(d.y0) - _yScale(d.y0 + d.y);
-			})
-			.call(d3.helper.tooltip().text(me.tooltipFunction));
+			});
 			
 		// transition existing rectangles
 		rectSelection.transition()
@@ -355,5 +363,14 @@ Ext.define('App.util.d3.StackedBarChart', {
 		// transition the axes
 		me.gXAxis.transition().duration(500).call(me.xAxis);
 		me.gYAxis.transition().duration(500).call(me.yAxis);
+	},
+	
+	/**
+ 	 * @private
+ 	 */
+	setTooltipFunction: function(fn) {
+		var me = this;
+
+		me.tooltipFunction = fn;
 	}
 });

@@ -39,7 +39,7 @@ Ext.define('App.view.d3.barstack.MainPanel', {
  		 */
 		me.chartDescription = '<b>Stacked Bar Chart</b><br><br>'
 		 	+ '<i>Van Halen album sales in US and Canada.  Data from Wikipedia (for the most part)</i><br><br>'
-			+ 'Demonstration of a D3 stacked bar chart using stack layout. Use the toolbar buttons view transitions and rescaling.';
+			+ 'Demonstration of a D3 stacked bar chart using stack layout. Use the toolbar buttons to view transitions / rescaling.';
 			
 		/**
 		 * @property
@@ -49,10 +49,20 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 			
 		/**
  		 * @properties
- 		 * @description layout vars
+ 		 * @description layout vars and tooltip functions
  		 */
 		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
+		me.dollarTooltipFn = function(data, index) {
+			return '<b>' + data.id + '</b><br>'
+				+ data.category + ' Sales: '
+				+ Ext.util.Format.currency(data.y, false, 0, false);
+		};
+		me.percentTooltipFn = function(data, index) {
+			return '<b>' + data.id + '</b><br>'
+				+ data.category + ' Sales: '
+				+ Ext.util.Format.number(data.y, '0.00') + '%';
+		};
 		
 		/**
  		 * @listener
@@ -68,6 +78,7 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 		me.albumRemoveButton = Ext.create('Ext.button.Button', {
 			text: 'Remove From Right',
 			tooltip: 'Transition demonstration',
+			iconCls: 'icon-delete',
 			handler: function() {
 				var newData = me.albumRemove();
 				me.stackedBarChart.setGraphData(newData);
@@ -79,6 +90,7 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 		me.albumRevertButton = Ext.create('Ext.button.Button', {
 			text: 'Revert Data',
 			tooltip: 'Revert back to original data',
+			iconCls: 'icon-refresh',
 			handler: function() {
 				me.albumRevert();
 			},
@@ -91,8 +103,26 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 		 * @type Ext.toolbar.Toolbar
 		 */
 		me.tbar =[
-			{xtype: 'tbtext', text: '<b>Van Halen Album Sales (US/Canada)</b>'},
+			{xtype: 'tbtext', text: '<b>Van Halen Album Sales (US & Canada)</b>'},
 			{xtype: 'tbspacer', width: 20},
+			{
+				xtype: 'button',
+				text: 'By Total Sales',
+				iconCls: 'icon-dollar',
+				handler: function() {
+					me.graphTransition('dollar');
+				},
+				scope: me
+			}, {
+				xtype: 'button',
+				text: 'By Percentage',
+				iconCls: 'icon-percent',
+				handler: function() {
+					me.graphTransition('percent');
+				},
+				scope: me
+			},
+			'->',
 			me.albumRemoveButton,
 			'-',
 			me.albumRevertButton
@@ -130,11 +160,6 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 	 		.attr('width', me.canvasWidth)
 	 		.attr('height', me.canvasHeight);
 	 		
-	 
-	 
-  	
- 
-	 		
 	 	me.stackedBarChart = Ext.create('App.util.d3.StackedBarChart', {
 			svg: me.svg,
 			canvasWidth: me.canvasWidth,
@@ -146,11 +171,7 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 				bottom: 20,
 				left: 80
 			},
-			tooltipFunction: function(data, index) {
-				return '<b>' + data.id + '</b><br>'
-				+ data.category + ' Sales: '
-				+ Ext.util.Format.currency(data.y, false, 0, false);
-			}
+			tooltipFunction: me.dollarTooltipFn
 		});
 		
 		// retrieve the graph data via AJAX and load the visualization
@@ -170,94 +191,6 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 		 	},
 		 	scope: me
 		 });
-		 
-		 /*	normalizeChartData: function(dataObject) {
-  	
-  		var me = this;
-  		
-  		// me.selectedFiscalYear
-  		// me.selectedQualifier (team|office)
-  		// me.selectedMetric (hours|dollars)
-  		// me.selectedValue (absolute | percent)
-  		// me.selectedSplit (off|on)
-  		
-  		var ret = me.normalizeAbsolute(dataObject);
-  		if(me.selectedValue == 'percent') {
-	  		ret = me.normalizePercent(ret);
-	  	}
-	  	
-	  	return ret;
-  	},normalizeAbsolute: function(dataObject) {
-  		var me = this,
-  			ret = [];
-  		
-  		Ext.each(dataObject, function(item) {
-	  	
-	  		// match 'hours' or 'dollars'
-	  		if(item.unit == me.selectedMetric) {
-		  		var ind = 0;
-		  		
-	  			Ext.each(item.seriesLabels, function(label) {
-		  			var values = me.getSeriesData(item.data, ind, label);
-		  			
-	  				ret.push({
-			  			category: label,
-			  			values: values
-			  		});
-			  		
-			  		ind++;
-			  		
-		  		}, me);
-	  		}
-	  	}, me);
-	  	
-	  	return ret;
-	  	normalizePercent() : func
-	  	var idTotals = [],
-			uniqueIds = [];
-		
-		// retrieve unique ID values from the first array
-	  	Ext.each(normalizedData[0].values, function(obj) {
-	  		uniqueIds.push(obj.id);
-	  		idTotals.push(0);
-	  	});
-	  	
-	  	// run through the data and sum up totals per ID
-	  	for(var i=0; i<normalizedData.length; i++) {
-		  	var plucked = Ext.pluck(normalizedData[i].values, 'y'),
-		  		j = 0;
-			
-			plucked.map(function(el) {
-				idTotals[j] += el;
-				j++;
-			});
-		}
-		
-		// now, run through the normalized data again and calculate
-		// percentage
-		Ext.each(normalizedData, function(obj) {
-			var ind = 0;
-			
-			Ext.each(obj.values, function(item) {
-				item.y = (item.y/idTotals[ind] * 100);
-				ind++;
-			});
-		});
-		
-		return normalizedData;
-		*/
- 	},
- 	
- 	/**
-  	 * @function
-  	 * @memberOf App.view.d3.barstack.MainPanel
-  	 * @description Transition to new data set
-  	 */
- 	transition: function() {
-	 	var me = this;
-	 	
-		me.stackedBarChart.setGraphData(newData);
-		me.stackedBarChart.transition();
  	},
  	
  	/**
@@ -300,5 +233,70 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 		me.stackedBarChart.transition();
 		
 		me.albumRemoveButton.enable();
-  	}
+		me.albumRevertButton.disable();
+  	},
+  	
+  	/**
+   	 * @function
+   	 * @description Transition graph to dollars sales or percent sales
+   	 */
+   	graphTransition: function(metric) {
+   		
+   		var me = this;
+   		
+   		var dataSet = Ext.clone(me.graphData);
+   		
+   		if(metric == 'percent') {
+   			me.stackedBarChart.setTooltipFunction(me.percentTooltipFn);
+   			me.stackedBarChart.setGraphData(me.normalizePercent(dataSet));
+   			var newData = me.normalizePercent(dataSet);
+   		} else {
+	   		me.stackedBarChart.setTooltipFunction(me.dollarTooltipFn);
+	   		me.stackedBarChart.setGraphData(dataSet);
+	   	}
+
+	   	me.stackedBarChart.transition();
+   	},
+   	
+   	/**
+     * @function
+     * @description Convert graph data to percent layout
+     */
+    normalizePercent: function(normalizedData) {
+    	
+    	var me = this;
+    	
+    	var idTotals = [],
+			uniqueIds = [];
+		
+		// retrieve unique ID values from the first array
+	  	Ext.each(normalizedData[0].values, function(obj) {
+	  		uniqueIds.push(obj.id);
+	  		idTotals.push(0);
+	  	});
+	  	
+	  	// run through the data and sum up totals per ID
+	  	for(var i=0; i<normalizedData.length; i++) {
+		  	var plucked = Ext.pluck(normalizedData[i].values, 'y'),
+		  		j = 0;
+			
+			plucked.map(function(el) {
+				idTotals[j] += el;
+				j++;
+			});
+		}
+		
+		// now, run through the normalized data again and calculate
+		// percentage
+		Ext.each(normalizedData, function(obj) {
+			var ind = 0;
+			
+			Ext.each(obj.values, function(item) {
+				item.y = (item.y/idTotals[ind] * 100);
+				ind++;
+			});
+		});
+		
+		return normalizedData;
+   	}
 });
