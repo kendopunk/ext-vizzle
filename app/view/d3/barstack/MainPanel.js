@@ -201,6 +201,8 @@ Ext.define('App.view.d3.barstack.MainPanel', {
   	albumRemove: function() {
 	  	var me = this,
 	  		slicedData = [];
+	  		
+	  	me.stackedBarChart.setTooltipFunction(me.dollarTooltipFn);
 		
 		Ext.each(me.graphData, function(item) {
 			slicedData.push({
@@ -230,6 +232,7 @@ Ext.define('App.view.d3.barstack.MainPanel', {
   		me.graphData = me.originalGraphData;
   	
   		me.stackedBarChart.setGraphData(me.graphData);
+  		me.stackedBarChart.setTooltipFunction(me.dollarTooltipFn);
 		me.stackedBarChart.transition();
 		
 		me.albumRemoveButton.enable();

@@ -319,8 +319,7 @@ Ext.define('App.util.d3.StackedBarChart', {
 		var rectSelection = me.gLayer.selectAll('rect')
 			.data(function(d) {
 				return d.values;
-			})
-			.call(d3.helper.tooltip().text(tooltipFn));
+			});
 			
 		// transition out the old rectangles
 		rectSelection.exit()
@@ -344,7 +343,8 @@ Ext.define('App.util.d3.StackedBarChart', {
 			})
 			.attr('height', function(d) {
 				return _yScale(d.y0) - _yScale(d.y0 + d.y);
-			});
+			})
+			.call(d3.helper.tooltip().text(tooltipFn));
 			
 		// transition existing rectangles
 		rectSelection.transition()
@@ -359,6 +359,9 @@ Ext.define('App.util.d3.StackedBarChart', {
 			.attr('height', function(d) {
 				return _yScale(d.y0) - _yScale(d.y0 + d.y);
 			});
+		
+		// apply tooltip function
+		rectSelection.call(d3.helper.tooltip().text(tooltipFn));
 			
 		// transition the axes
 		me.gXAxis.transition().duration(500).call(me.xAxis);
