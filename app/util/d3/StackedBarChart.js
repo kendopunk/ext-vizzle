@@ -64,8 +64,8 @@ Ext.define('App.util.d3.StackedBarChart', {
 	/**
  	 * yTickFormat
  	 */
- 	tickFormat: function(d) {
-	 	return d3.format(',0f');
+ 	yTickFormat: function(d) {
+ 		return Ext.util.Format.number(d, '0,000');
 	},
    	
    	constructor: function(config) {
@@ -265,6 +265,7 @@ Ext.define('App.util.d3.StackedBarChart', {
 			.scale(me.yScale)
 			.tickSize(0)
 			.tickPadding(6)
+			.tickFormat(me.yTickFormat)
 			.orient('left');	
 	},
 	
@@ -375,5 +376,14 @@ Ext.define('App.util.d3.StackedBarChart', {
 		var me = this;
 
 		me.tooltipFunction = fn;
+	},
+	
+	/**
+ 	 * @private
+ 	 */
+ 	setYTickFormat: function(fn) {
+	 	var me = this;
+	 	
+	 	me.yTickFormat = fn;
 	}
 });

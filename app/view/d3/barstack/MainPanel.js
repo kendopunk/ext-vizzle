@@ -58,10 +58,16 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 				+ data.category + ' Sales: '
 				+ Ext.util.Format.currency(data.y, false, 0, false);
 		};
+		me.dollarTickFormat = function(d) {
+			return Ext.util.Format.currency(d, false, '0', false);
+		};
 		me.percentTooltipFn = function(data, index) {
 			return '<b>' + data.id + '</b><br>'
 				+ data.category + ' Sales: '
 				+ Ext.util.Format.number(data.y, '0.00') + '%';
+		};
+		me.percentTickFormat = function(d) {
+			return Ext.util.Format.number(d, '0') + '%';
 		};
 		
 		/**
@@ -171,7 +177,8 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 				bottom: 20,
 				left: 80
 			},
-			tooltipFunction: me.dollarTooltipFn
+			tooltipFunction: me.dollarTooltipFn,
+			yTickFormat: me.dollarTickFormat
 		});
 		
 		// retrieve the graph data via AJAX and load the visualization
@@ -203,6 +210,7 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 	  		slicedData = [];
 	  		
 	  	me.stackedBarChart.setTooltipFunction(me.dollarTooltipFn);
+	  	me.stackedBarChart.setYTickFormat(me.dollarTickFormat);
 		
 		Ext.each(me.graphData, function(item) {
 			slicedData.push({
@@ -233,6 +241,7 @@ Ext.define('App.view.d3.barstack.MainPanel', {
   	
   		me.stackedBarChart.setGraphData(me.graphData);
   		me.stackedBarChart.setTooltipFunction(me.dollarTooltipFn);
+  		me.stackedBarChart.setYTickFormat(me.dollarTickFormat);
 		me.stackedBarChart.transition();
 		
 		me.albumRemoveButton.enable();
@@ -251,10 +260,12 @@ Ext.define('App.view.d3.barstack.MainPanel', {
    		
    		if(metric == 'percent') {
    			me.stackedBarChart.setTooltipFunction(me.percentTooltipFn);
+   			me.stackedBarChart.setYTickFormat(me.percentTickFormat);
    			me.stackedBarChart.setGraphData(me.normalizePercent(dataSet));
    			var newData = me.normalizePercent(dataSet);
    		} else {
 	   		me.stackedBarChart.setTooltipFunction(me.dollarTooltipFn);
+	   		me.stackedBarChart.setYTickFormat(me.dollarTickFormat);
 	   		me.stackedBarChart.setGraphData(dataSet);
 	   	}
 
