@@ -1,25 +1,22 @@
 {
 	"success": true,
-	"data" [{
-		key: 'Domestic',
-		values: [
-			{id: 'Van Halen', y: 1000},
-			{id: 'ACDC', y: 2000},
-			{id: 'Rush', y: 800}
+	"data": [{
+		"category": "US",
+		"values": [
+			{"id": "5150", "category": "US", "y": 6000000},
+			{"id": "1984", "category": "US", "y": 10000000},
+			{"id": "Diver Down", "category": "US", "y": 4000000},
+			{"id": "Van Halen II", "category": "US", "y": 5000000},
+			{"id": "Van Halen", "category": "US", "y": 10000000}
 		]
 	}, {
-		key: 'Worldwide',
-		values: [
-			{id: 'Van Halen', y: 2000},
-			{id: 'ACDC', y: 3500},
-			{id: 'Rush', y: 4000}
-		]
-	}, {
-		key: 'Universal',
-		values: [
-			{id: 'Van Halen', y: 8000},
-			{id: 'ACDC', y: 3500},
-			{id: 'Rush', y: 4000}
+		"category": "Canada",
+		"values": [
+			{"id": "5150", "category": "Canada", "y": 300000},
+			{"id": "1984", "category": "Canada", "y": 500000},
+			{"id": "Diver Down", "category": "Canada", "y": 1000000},
+			{"id": "Van Halen II", "category": "Canada", "y": 200000},
+			{"id": "Van Halen", "category": "Canada", "y": 3850000}
 		]
 	}]
 }

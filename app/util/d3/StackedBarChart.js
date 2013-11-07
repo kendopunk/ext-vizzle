@@ -22,7 +22,7 @@ Ext.define('App.util.d3.StackedBarChart', {
   	 */
   	colorScale: d3.scale.category20(),
   	
-  	/**
+  	/**5
    	 * "g" elements to hold bars, X-axis, and Y-axis
    	 */
    	gCanvas: null,
@@ -49,11 +49,24 @@ Ext.define('App.util.d3.StackedBarChart', {
     	bottom: 20,
     	left: 20
     },
-    uniqueCategories: [],
     uniqueIds: [],
     stackLayout: null,
     layers: null,
     yMax: null,
+    
+    /**
+	 * Default function for the tooltip
+	 */
+	tooltipFunction: function(data, index) {
+		return 'tooltip';
+	},
+	
+	/**
+ 	 * yTickFormat
+ 	 */
+ 	yTickFormat: function(d) {
+ 		return Ext.util.Format.number(d, '0,000');
+	},
    	
    	constructor: function(config) {
 	   	var me = this;
@@ -79,67 +92,38 @@ Ext.define('App.util.d3.StackedBarChart', {
  			panelId = me.panelId,
  			margins = me.margins;
  			
-		// adjust the color scale
+		// initial adjustment of the color scale
 		var colorScale = me.colorScale = d3.scale.linear()
 		 	.domain([0, me.graphData.length - 1])
 		 	.range(['#f00', '#00f']);
 		 	
-		var _uniqueCategories = me.uniqueCategories = me.graphData.map(function(item) {
-			return item.key;
-		});
-		
 		// get the array of unique "id" properties
-	 	me.uniqueIds = me.graphData[0].values.map(function(item) {
-		 	return item.id;
-		});
- 			
- 		// set the stack layout
- 		me.stackLayout = d3.layout.stack().values(function(d) {
+		me.setUniqueIds();
+		
+		// set the stack layout
+		me.stackLayout = d3.layout.stack().values(function(d) {
 			return d.values;
 		});
 		
 		// apply the stack function to layers variable
 		me.layers = me.stackLayout(me.graphData);
 		
-		// max Y value (y0) is the position on the Y scale
-		// where a particular rectangle ends
-		me.yMax = d3.max(me.layers, function(layer) {
-			return d3.max(layer.values, function(d) {
-				return d.y0 + d.y;
-			})
-		});
+		// set the max "Y" value
+		me.setYMax();
+		
+		// set X and Y scales, bring into local scope
+		me.setXScale();
+		me.setYScale();
+		var _xScale = me.xScale,
+			 _yScale = me.yScale;
 		
 		// calculate the totals for each "id" value in the domain
-		var totals = {};
+		/*var totals = {};
 		me.graphData.forEach(function(category) {
 			category.values.forEach(function(item) {
 				totals[item.id] = (totals[item.id] || 0) + item.y; // not set yet !!
 			})
-		});
-		
-		// set up the X scale
-		var _xScale = me.xScale = d3.scale.ordinal()
-			.domain(me.uniqueIds)
-			.rangeRoundBands([0, canvasWidth - margins.left - margins.right], .08);
-			
-		// set up the X axis function
-		me.xAxis = d3.svg.axis()
-			.scale(me.xScale)
-			.tickSize(0)
-			.tickPadding(6)
-			.orient('bottom');
-			
-		// set up the Y scale
-		var _yScale = me.yScale = d3.scale.linear()
-			.domain([0, me.yMax])
-			.range([canvasHeight - margins.top - margins.bottom, 0]);
-			
-		// set up the Y axis function
-		me.yAxis = d3.svg.axis()
-			.scale(me.yScale)
-			.tickSize(0)
-			.tickPadding(6)
-			.orient('left');
+		});*/
 			
 		// "gCanvas" element
 		me.gCanvas = me.svg.append('svg:g')
@@ -174,7 +158,8 @@ Ext.define('App.util.d3.StackedBarChart', {
 			})
 			.attr('height', function(d) {
 				return _yScale(d.y0) - _yScale(d.y0 + d.y);
-			});
+			})
+			.call(d3.helper.tooltip().text(me.tooltipFunction));
 			
 		// adding the text to "gLayer"
 		/*me.gLayer.selectAll('text')
@@ -209,117 +194,7 @@ Ext.define('App.util.d3.StackedBarChart', {
 			
 		me.gYAxis.call(me.yAxis);
 	},
-	
-	/**
- 	 * @function
- 	 * @memberOf App.util.d3.StackedBarChart
- 	 * @description Transition stacked bar chart layout with new data
- 	 */
-	transition: function() {
-		var me = this;
-		
-		var margins = me.margins,
-			canvasWidth = me.canvasWidth,
-			canvasHeight = me.canvasHeight;
-		
-		
-		var layers = me.stackLayout(me.graphData);
-		
-		me.uniqueIds = me.graphData[0].values.map(function(item) {
-		 	return item.id;
-		});
-		
-		me.yMax = d3.max(layers, function(layer) {
-			return d3.max(layer.values, function(d) {
-				return d.y0 + d.y;
-			})
-		});
-		
-		console.log(me.yMax);
-		
-		var xs = d3.scale.ordinal()
-			.domain(me.uniqueIds)
-			.rangeRoundBands([0, canvasWidth - margins.left - margins.right], .08);
-			
-		var ys = d3.scale.linear()
-			.domain([0, me.yMax])
-			.range([canvasHeight - margins.top - margins.bottom, 0]);
 
-		
-		me.gLayer = me.gCanvas.selectAll('.layer')
-			.data(layers);
-			
-		me.gLayer.exit().remove();
-		
-		console.debug(me.gLayer);
-		
-		// OK...I'm joining now
-		var temp = me.gLayer.selectAll('rect')
-			.data(function(d) {
-				return d.values;
-			});
-			
-		temp.exit().transition().attr('width', 0).duration(500).remove();
-		
-		var added = temp
-			.enter()
-			.append('rect')
-			.attr('fill-opacity', .5)
-			.attr('stroke', 'black')
-			.style('stroke-width', 0.5)
-			.attr('width', xs.rangeBand())
-			.attr('x', function(d) {
-				return xs(d.id);
-			})
-			.attr('y', function(d) {
-				return ys(d.y0 + d.y);
-			})
-			.attr('height', function(d) {
-				return ys(d.y0) - ys(d.y0 + d.y);
-			});
-			
-			
-		temp.transition().duration(500).attr('width', xs.rangeBand())
-			.attr('x', function(d) {
-				return xs(d.id);
-			})
-			.attr('y', function(d) {
-				return ys(d.y0 + d.y);
-			})
-			.attr('height', function(d) {
-				return ys(d.y0) - ys(d.y0 + d.y);
-			});
-			
-		//temp.exit().transition().attr('width', 0).duration(500).remove();
-		
-		// transition them all
-		
-		//temp.transition().duration(100).attr('x', 100);
-		
-		//temp.transition().duration(100).attr('height', 20);
-		
-		/*temp
-			.enter()
-			.append('rect')
-			.attr('fill-opacity', .5)
-			.attr('stroke', 'black')
-			.style('stroke-width', 0.5)
-			.attr('width', xs.rangeBand())
-			.attr('x', function(d) {
-				return xs(d.id);
-			})
-			.attr('y', function(d) {
-				return ys(d.y0 + d.y);
-			})
-			.attr('height', function(d) {
-				//return ys(d.y0) - ys(d.y0 + d.y);
-				return 20;
-			});
-			*/
-	
-	
-	},
-	
 	/**
  	 * @function
  	 * @memberOf App.util.d3.StackedBarChart
@@ -330,5 +205,185 @@ Ext.define('App.util.d3.StackedBarChart', {
 		var me = this;
 		
 		me.graphData = data;
+		
+		// changing the graph data changes the color scale
+		me.colorScale = d3.scale.linear()
+		 	.domain([0, data.length - 1])
+		 	.range(['#f00', '#00f']);
+	},
+	
+	setUniqueIds: function() {
+		var me = this;
+		
+		me.uniqueIds = me.graphData[0].values.map(function(item) {
+		 	return item.id;
+		});
+	},
+	
+	setYMax: function() {
+		var me = this;
+		
+		// max Y value (y0) is the position on the Y scale
+		// where a particular rectangle ends
+		me.yMax = d3.max(me.layers, function(layer) {
+			return d3.max(layer.values, function(d) {
+				return d.y0 + d.y;
+			})
+		}, me);
+	},
+	
+	/**
+	 * @function
+	 * @description Set X scale and new X axis definition
+	 */
+	setXScale: function() {
+		var me = this;
+		
+		me.xScale = d3.scale.ordinal()
+			.domain(me.uniqueIds)
+			.rangeRoundBands([0, me.canvasWidth - me.margins.left - me.margins.right], .08);
+			
+		me.xAxis = d3.svg.axis()
+			.scale(me.xScale)
+			.tickSize(0)
+			.tickPadding(6)
+			.orient('bottom');
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Set Y scale and new Y axis definition
+ 	 */
+	setYScale: function() {
+		var me = this;
+		
+		me.yScale = d3.scale.linear()
+			.domain([0, me.yMax])
+			.range([me.canvasHeight - me.margins.top - me.margins.bottom, 0]);
+			
+		me.yAxis = d3.svg.axis()
+			.scale(me.yScale)
+			.tickSize(0)
+			.tickPadding(6)
+			.tickFormat(me.yTickFormat)
+			.orient('left');	
+	},
+	
+	/**
+ 	 * @function
+ 	 * @memberOf App.util.d3.StackedBarChart
+ 	 * @description Transition stacked bar chart layout with new data
+ 	 */
+	transition: function() {
+		var me = this;
+		
+		var colorScale = me.colorScale,
+			tooltipFn = me.tooltipFunction;
+		
+		// set new layers
+		me.layers = me.stackLayout(me.graphData);
+		
+		// set the new unique IDs
+		me.setUniqueIds();
+		me.setYMax();
+		me.setXScale();
+		me.setYScale();
+		
+		// scales into local scope
+		var _xScale = me.xScale,
+			 _yScale = me.yScale;
+			 
+		// join new layers
+		me.gLayer = me.gCanvas.selectAll('.layer')
+			.data(me.layers);
+			
+		// transition out old layers
+		//me.gLayer.exit().remove();
+		me.gLayer.exit()
+			.transition()
+			.attr('width', 0)
+			.duration(500)
+			.remove();
+
+		// add new layers
+		var addedLayers = me.gLayer.enter()
+			.append('g')
+			.attr('class', 'layer');
+			
+		// transition the color of all layers
+		me.gLayer.transition()
+			.style('fill', function(d, i) {
+				return colorScale(i);
+			});
+
+		// join new rectangles
+		var rectSelection = me.gLayer.selectAll('rect')
+			.data(function(d) {
+				return d.values;
+			});
+			
+		// transition out the old rectangles
+		rectSelection.exit()
+			.transition()
+			.attr('width', 0)
+			.duration(500)
+			.remove();
+		
+		// new rect elements
+		var newRects = rectSelection.enter()
+			.append('rect')
+			.attr('fill-opacity', .5)
+			.attr('stroke', 'black')
+			.style('stroke-width', 0.5)
+			.attr('width', _xScale.rangeBand())
+			.attr('x', function(d) {
+				return _xScale(d.id);
+			})
+			.attr('y', function(d) {
+				return _yScale(d.y0 + d.y);
+			})
+			.attr('height', function(d) {
+				return _yScale(d.y0) - _yScale(d.y0 + d.y);
+			})
+			.call(d3.helper.tooltip().text(tooltipFn));
+			
+		// transition existing rectangles
+		rectSelection.transition()
+			.duration(500)
+			.attr('width', _xScale.rangeBand())
+			.attr('x', function(d) {
+				return _xScale(d.id);
+			})
+			.attr('y', function(d) {
+				return _yScale(d.y0 + d.y);
+			})
+			.attr('height', function(d) {
+				return _yScale(d.y0) - _yScale(d.y0 + d.y);
+			});
+		
+		// apply tooltip function
+		rectSelection.call(d3.helper.tooltip().text(tooltipFn));
+			
+		// transition the axes
+		me.gXAxis.transition().duration(500).call(me.xAxis);
+		me.gYAxis.transition().duration(500).call(me.yAxis);
+	},
+	
+	/**
+ 	 * @private
+ 	 */
+	setTooltipFunction: function(fn) {
+		var me = this;
+
+		me.tooltipFunction = fn;
+	},
+	
+	/**
+ 	 * @private
+ 	 */
+ 	setYTickFormat: function(fn) {
+	 	var me = this;
+	 	
+	 	me.yTickFormat = fn;
 	}
 });

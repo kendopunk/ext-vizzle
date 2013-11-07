@@ -525,7 +525,7 @@ Ext.define('App.util.d3.BarLegendChart', {
 		}
 			
 		// re-call they y axis function
-		me.svg.selectAll('g.axis').call(me.yAxis);
+		me.svg.selectAll('g.axis').transition().duration(500).call(me.yAxis);
 		
 		// set the new legend text
 		gLegend.selectAll('text')
