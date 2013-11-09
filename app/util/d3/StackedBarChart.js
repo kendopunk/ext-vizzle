@@ -94,6 +94,10 @@ Ext.define('App.util.d3.StackedBarChart', {
 		click: {
 			enabled: false,
 			eventName: null
+		},
+		dblclick: {
+			enabled: false,
+			eventName: null
 		}
 	},
 	
@@ -200,7 +204,7 @@ Ext.define('App.util.d3.StackedBarChart', {
 			})
 			.enter()
 			.append('rect')
-			.attr('fill-opacity', .7)
+			.attr('fill-opacity', .6)
 			.attr('stroke', 'black')
 			.style('stroke-width', 0.5)
 			.attr('width', me.xScale.rangeBand())
@@ -270,19 +274,27 @@ Ext.define('App.util.d3.StackedBarChart', {
 	transition: function() {
 		var me = this;
 		
+		//////////////////////////////////////////////////
 		// set new layers
+		//////////////////////////////////////////////////
 		me.layers = me.stackLayout(me.graphData);
 		
+		//////////////////////////////////////////////////
 		// set the new unique IDs
+		//////////////////////////////////////////////////
 		me.setUniqueIds();
 		me.setYMax();
 		me.setXScale();
 		me.setYScale();
 		
+		
 		// scales and vars into local scope
 		var _xScale = me.xScale,
 			 _yScale = me.yScale,
-			colorScale = me.colorScale;
+			colorScale = me.colorScale,
+			handleEvents = me.handleEvents,
+			eventRelay = me.eventRelay,
+			mouseEvents = me.mouseEvents;
 			 
 		// join new layers
 		me.gLayer = me.gCanvas.selectAll('.layer')
@@ -326,7 +338,7 @@ Ext.define('App.util.d3.StackedBarChart', {
 		// transition all 
 		rectSelection.transition()
 			.duration(500)
-			.attr('fill-opacity', .7)
+			.attr('fill-opacity', .6)
 			.attr('stroke', 'black')
 			.style('stroke-width', 0.5)
 			.attr('width', _xScale.rangeBand())
@@ -339,6 +351,20 @@ Ext.define('App.util.d3.StackedBarChart', {
 			.attr('height', function(d) {
 				return _yScale(d.y0) - _yScale(d.y0 + d.y);
 			});
+			
+		// mouse events
+		rectSelection.on('mouseover', function(d, i) {
+			if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
+				eventRelay.publish(
+					mouseEvents.mouseover.eventName,
+					{
+						payload: d,
+						index: i
+					}
+				);
+			}
+		});
+			
 		
 		// call tooltip function
 		rectSelection.call(d3.helper.tooltip().text(me.tooltipFunction));	

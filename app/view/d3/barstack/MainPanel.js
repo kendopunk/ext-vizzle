@@ -94,6 +94,9 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 			disabled: true,
 			handler: function(btn, e) {
 				me.removeAlbum(btn.targetIndex);
+				btn.disable().hide();
+				me.albumRevertButton.enable().show();
+				me.albumRevertButton.enable().show();
 			},
 			scope: me
 		}, me);
@@ -102,7 +105,7 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 			text: 'Revert Data',
 			tooltip: 'Revert back to original data',
 			iconCls: 'icon-refresh',
-			handler: function() {
+			handler: function(btn) {
 				me.albumRevert();
 			},
 			scope: me,
@@ -212,7 +215,6 @@ Ext.define('App.view.d3.barstack.MainPanel', {
   	 * @function
   	 * obj.payload, obj.index
   	 */
- 	
  	handleRemoveButton: function(obj) {
  		var me = this;
  		
@@ -231,59 +233,14 @@ Ext.define('App.view.d3.barstack.MainPanel', {
   	removeAlbum: function(index) {
   		var me = this;
   		
-  		var newData = [];
-  		var loopObj;
-  		
-  		Ext.each(me.graphData, function(item) {
-  			
-  			loopObj = {
-  				category: item.category,
-  				values: []
-  			};
-  			
-  			var ind = 0;
-  			
-  			Ext.each(item.values, function(obj) {
-  				
-  				if(ind != index) {
-  					loopObj.values.push(obj);
-  				}
-  				
-  				ind++;
-  			});
-  			
-  			newData.push(loopObj);
-  			
-  			
-  		});
+  		var newData = Ext.clone(me.graphData);
+  		for(i=0; i<newData.length; i++) {
+  			newData[i].values.splice(index, 1);
+  		}
   		
   		me.graphData = newData;
   		me.stackedBarChart.setGraphData(newData);
   		me.stackedBarChart.transition();
-  		
-  		
-  		
-  		
-  		
-	  	/*var me = this,
-	  		slicedData = [];
-	  		
-	  	me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
-	  	me.stackedBarChart.setYTickFormat(me.salesTickFormat);
-		
-		Ext.each(me.graphData, function(item) {
-			slicedData.push({
-				category: item.category,
-				values: item.values.slice(0, item.values.length-1)
-			});
-		}, me);
-		
-		me.albumRevertButton.enable();
-		
-		me.graphData = slicedData;
-		
-		return slicedData;
-		*/
   	},
   	
   	/**
