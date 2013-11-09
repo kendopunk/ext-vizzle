@@ -32,20 +32,25 @@ Ext.define('App.view.d3.barstack.MainPanel', {
  			me.g,
  			me.panelId,
  			me.stackedBarChart = null,
+ 			me.currentMetric = 'sales',
+ 			me.defaultMetricText = 'By Total Sales',
+ 			me.baseTitle = 'Top Albums',
  			me.eventRelay = Ext.create('App.util.MessageBus');
 		
 		/**
  		 * @property
  		 */
 		me.chartDescription = '<b>Stacked Bar Chart</b><br><br>'
-		 	+ '<i>Van Halen album sales in US and Canada.  Data from Wikipedia (for the most part)</i><br><br>'
-			+ 'Demonstration of a D3 stacked bar chart using stack layout. Use the toolbar buttons to view transitions / rescaling.';
+			+ '<i>Sales of some of the top-selling albums of all time in the US, UK, and Canada. '
+		 	+ 'Data from Wikipedia (for the most part)</i><br><br>'
+			+ 'Demonstration of a D3 stacked bar chart using stack layout.';
 			
 		/**
 		 * @property
 		 * @description Message event relay
 		 */
 		me.eventRelay = Ext.create('App.util.MessageBus');
+		me.eventRelay.subscribe('albumRemove', me.handleRemoveButton, me);
 			
 		/**
  		 * @properties
@@ -53,13 +58,13 @@ Ext.define('App.view.d3.barstack.MainPanel', {
  		 */
 		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
-		me.dollarTooltipFn = function(data, index) {
+		me.salesTooltipFn = function(data, index) {
 			return '<b>' + data.id + '</b><br>'
 				+ data.category + ' Sales: '
-				+ Ext.util.Format.currency(data.y, false, 0, false);
+				+ Ext.util.Format.number(data.y, '0,000');
 		};
-		me.dollarTickFormat = function(d) {
-			return Ext.util.Format.currency(d, false, '0', false);
+		me.salesTickFormat = function(d) {
+			return Ext.util.Format.number(d, '0,000');
 		};
 		me.percentTooltipFn = function(data, index) {
 			return '<b>' + data.id + '</b><br>'
@@ -82,13 +87,13 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 		// button configurations
 		//////////////////////////////////////////////////
 		me.albumRemoveButton = Ext.create('Ext.button.Button', {
-			text: 'Remove From Right',
-			tooltip: 'Transition demonstration',
+			text: '',
 			iconCls: 'icon-delete',
-			handler: function() {
-				var newData = me.albumRemove();
-				me.stackedBarChart.setGraphData(newData);
-				me.stackedBarChart.transition();
+			targetIndex: null,
+			hidden: true,
+			disabled: true,
+			handler: function(btn, e) {
+				me.removeAlbum(btn.targetIndex);
 			},
 			scope: me
 		}, me);
@@ -101,6 +106,7 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 				me.albumRevert();
 			},
 			scope: me,
+			hidden: true,
 			disabled: true
 		}, me);
 		
@@ -108,29 +114,23 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 		 * @property
 		 * @type Ext.toolbar.Toolbar
 		 */
-		me.tbar =[
-			{xtype: 'tbtext', text: '<b>Van Halen Album Sales (US & Canada)</b>'},
-			{xtype: 'tbspacer', width: 20},
-			{
+		me.tbar =[{
 				xtype: 'button',
 				text: 'By Total Sales',
-				iconCls: 'icon-dollar',
-				handler: function() {
-					me.graphTransition('dollar');
-				},
+				metric: 'sales',
+				iconCls: 'icon-album',
+				handler: me.metricHandler,
 				scope: me
 			}, {
 				xtype: 'button',
-				text: 'By Percentage',
+				text: 'Percentage Breakdown',
+				metric: 'percent',
 				iconCls: 'icon-percent',
-				handler: function() {
-					me.graphTransition('percent');
-				},
+				handler: me.metricHandler,
 				scope: me
 			},
 			'->',
 			me.albumRemoveButton,
-			'-',
 			me.albumRevertButton
 		];
 		
@@ -177,8 +177,16 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 				bottom: 20,
 				left: 80
 			},
-			tooltipFunction: me.dollarTooltipFn,
-			yTickFormat: me.dollarTickFormat
+			tooltipFunction: me.salesTooltipFn,
+			yTickFormat: me.salesTickFormat,
+			chartTitle: me.generateChartTitle(me.defaultMetricText),
+			handleEvents: true,
+			mouseEvents: {
+				mouseover: {
+					enabled: true,
+					eventName: 'albumRemove'
+				}
+			}
 		});
 		
 		// retrieve the graph data via AJAX and load the visualization
@@ -202,15 +210,66 @@ Ext.define('App.view.d3.barstack.MainPanel', {
  	
  	/**
   	 * @function
-  	 * @memberOf App.view.d3.barstack.MainPanel
-  	 * @description Remove the last album from the layers in the data object
+  	 * obj.payload, obj.index
   	 */
-  	albumRemove: function() {
-	  	var me = this,
+ 	
+ 	handleRemoveButton: function(obj) {
+ 		var me = this;
+ 		
+ 		me.albumRemoveButton.setText('Remove ' + obj.payload.artist);
+ 		me.albumRemoveButton.targetIndex = obj.index;
+ 		me.albumRemoveButton.enable().show();
+ 		
+ 		me.albumRevertButton.show();
+ 	},
+ 	
+ 	/**
+  	 * @function
+  	 * @memberOf App.view.d3.barstack.MainPanel
+  	 * @description Remove a selected album
+  	 */
+  	removeAlbum: function(index) {
+  		var me = this;
+  		
+  		var newData = [];
+  		var loopObj;
+  		
+  		Ext.each(me.graphData, function(item) {
+  			
+  			loopObj = {
+  				category: item.category,
+  				values: []
+  			};
+  			
+  			var ind = 0;
+  			
+  			Ext.each(item.values, function(obj) {
+  				
+  				if(ind != index) {
+  					loopObj.values.push(obj);
+  				}
+  				
+  				ind++;
+  			});
+  			
+  			newData.push(loopObj);
+  			
+  			
+  		});
+  		
+  		me.graphData = newData;
+  		me.stackedBarChart.setGraphData(newData);
+  		me.stackedBarChart.transition();
+  		
+  		
+  		
+  		
+  		
+	  	/*var me = this,
 	  		slicedData = [];
 	  		
-	  	me.stackedBarChart.setTooltipFunction(me.dollarTooltipFn);
-	  	me.stackedBarChart.setYTickFormat(me.dollarTickFormat);
+	  	me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
+	  	me.stackedBarChart.setYTickFormat(me.salesTickFormat);
 		
 		Ext.each(me.graphData, function(item) {
 			slicedData.push({
@@ -221,13 +280,10 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 		
 		me.albumRevertButton.enable();
 		
-		if(slicedData[0].values.length == 1) {
-			me.albumRemoveButton.disable();
-		}
-		
 		me.graphData = slicedData;
 		
 		return slicedData;
+		*/
   	},
   	
   	/**
@@ -240,38 +296,41 @@ Ext.define('App.view.d3.barstack.MainPanel', {
   		me.graphData = me.originalGraphData;
   	
   		me.stackedBarChart.setGraphData(me.graphData);
-  		me.stackedBarChart.setTooltipFunction(me.dollarTooltipFn);
-  		me.stackedBarChart.setYTickFormat(me.dollarTickFormat);
+  		me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
+  		me.stackedBarChart.setYTickFormat(me.salesTickFormat);
 		me.stackedBarChart.transition();
 		
-		me.albumRemoveButton.enable();
 		me.albumRevertButton.disable();
   	},
   	
   	/**
-   	 * @function
-   	 * @description Transition graph to dollars sales or percent sales
-   	 */
-   	graphTransition: function(metric) {
-   		
-   		var me = this;
-   		
-   		var dataSet = Ext.clone(me.graphData);
-   		
-   		if(metric == 'percent') {
-   			me.stackedBarChart.setTooltipFunction(me.percentTooltipFn);
-   			me.stackedBarChart.setYTickFormat(me.percentTickFormat);
-   			me.stackedBarChart.setGraphData(me.normalizePercent(dataSet));
-   			var newData = me.normalizePercent(dataSet);
-   		} else {
-	   		me.stackedBarChart.setTooltipFunction(me.dollarTooltipFn);
-	   		me.stackedBarChart.setYTickFormat(me.dollarTickFormat);
-	   		me.stackedBarChart.setGraphData(dataSet);
-	   	}
-
-	   	me.stackedBarChart.transition();
-   	},
-   	
+	 * @function
+	 * @memberOf App.view.d3.barlegend.MainPanel
+	 * @description Toolbar button handler
+	 */
+	metricHandler: function(btn, evt) {
+		var me = this;
+		
+		me.stackedBarChart.setChartTitle(me.generateChartTitle(btn.text));
+		
+		var dataSet = Ext.clone(me.graphData);
+		
+		if(btn.metric == 'percent') {
+			//me.stackedBarChart.setGraphData(me.normalizePercent(dataSet));
+			
+			var temp = me.normalizePercent(dataSet);
+			me.stackedBarChart.setGraphData(temp);
+			me.stackedBarChart.setTooltipFunction(me.percentTooltipFn);
+			me.stackedBarChart.setYTickFormat(me.percentTickFormat);
+		} else {			
+			me.stackedBarChart.setGraphData(dataSet);
+			me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
+			me.stackedBarChart.setYTickFormat(me.salesTickFormat);
+		}
+		
+		me.stackedBarChart.transition();
+	},
+  
    	/**
      * @function
      * @description Convert graph data to percent layout
@@ -312,5 +371,16 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 		});
 		
 		return normalizedData;
-   	}
+   	},
+   	
+   	/** 
+	 * @function
+	 * @private
+	 * @description Set a new chart title
+	 */
+	generateChartTitle: function(append) {
+		var me = this;
+		
+		return me.baseTitle + ' : ' + append;
+	}
 });

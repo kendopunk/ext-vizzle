@@ -1,6 +1,11 @@
 /*
  * 16 x 16 icons
  */
+.icon-album {
+	background-image: url(../img/icons/16x16/album.png) !important;
+	background-repeat: no-repeat;
+}
+
 .icon-arrow-right {
 	background-image: url(../img/icons/16x16/arrow-right.png) !important;
 	background-repeat: no-repeat;

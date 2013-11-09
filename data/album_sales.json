@@ -3,20 +3,35 @@
 	"data": [{
 		"category": "US",
 		"values": [
-			{"id": "5150", "category": "US", "y": 6000000},
-			{"id": "1984", "category": "US", "y": 10000000},
-			{"id": "Diver Down", "category": "US", "y": 4000000},
-			{"id": "Van Halen II", "category": "US", "y": 5000000},
-			{"id": "Van Halen", "category": "US", "y": 10000000}
-		]
+			{"id": "Thriller", category: "US", artist: "Michael Jackson", y: 29000000},
+			{"id": "Back in Black", category: "US", artist: "AC/DC", y: 22000000},
+			{"id": "Hotel California", category: "US", artist: "The Eagles", y: 16000000},
+			{"id": "The Wall", category: "US", artist: "Pink Floyd", y: 11500000},
+			{"id": "Brothers in Arms", category: "US", artist: "Dire Straits", y: 9000000},
+			{"id": "Metallica", category: "US", artist: "Metallica", y: 16000000},
+			{"id": "Bat Out of Hell", category: "US", artist: "Meatloaf", y: 14000000}
+		],
+	}, {
+		"category": "UK",
+		"values": [
+			{"id": "Thriller", category: "UK", artist: "Michael Jackson", y: 3300000},
+			{"id": "Back in Black", category: "UK", artist: "AC/DC", y: 100000},
+			{"id": "Hotel California", category: "UK", artist: "The Eagles", y: 1800000},
+			{"id": "The Wall", category: "UK", artist: "Pink Floyd", y: 300000},
+			{"id": "Brothers in Arms", category: "UK", artist: "Dire Straits", y: 3900000},
+			{"id": "Metallica", category: "UK", artist: "Metallica", y: 300000},
+			{"id": "Bat Out of Hell", category: "UK", artist: "Meatloaf", y: 2100000}
+		],
 	}, {
 		"category": "Canada",
 		"values": [
-			{"id": "5150", "category": "Canada", "y": 300000},
-			{"id": "1984", "category": "Canada", "y": 500000},
-			{"id": "Diver Down", "category": "Canada", "y": 1000000},
-			{"id": "Van Halen II", "category": "Canada", "y": 200000},
-			{"id": "Van Halen", "category": "Canada", "y": 3850000}
-		]
+			{"id": "Thriller", category: "Canada", artist: "Michael Jackson", y: 2000000},
+			{"id": "Back in Black", category: "Canada", artist: "AC/DC", y: 1000000},
+			{"id": "Hotel California", category: "Canada", artist: "The Eagles", y: 1000000},
+			{"id": "The Wall", category: "Canada", artist: "Pink Floyd", y: 1000000},
+			{"id": "Brothers in Arms", category: "Canada", artist: "Dire Straits", y: 1000000},
+			{"id": "Metallica", category: "Canada", artist: "Metallica", y: 1000000},
+			{"id": "Bat Out of Hell", category: "Canada", artist: "Meatloaf", y: 2000000}
+		],
 	}]
 }
