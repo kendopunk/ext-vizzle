@@ -26,6 +26,11 @@ Ext.define('App.util.d3.BarChart', {
 	gAxis: null,
 	
 	/**
+ 	 * The "g" element to hold the title
+ 	 */
+ 	gTitle: null,
+	
+	/**
 	 * Overall height of the drawing canvas.  This should be passed
 	 * as a configuration item
 	 */
@@ -62,7 +67,7 @@ Ext.define('App.util.d3.BarChart', {
 	 * Show bar graph labels.  TODO: Customize placement of labels
 	 */
 	showLabels: false,
-	labelOffsetTop: 20,	 // height (in pix) to lower graph to show top labels
+	labelOffsetTop: 15,	 // height (in pix) to lower graph to show top labels
 	labelDistanceFromBar: 10,	// needs to be less than labelOffsetTop
 	
 	/**
@@ -92,9 +97,13 @@ Ext.define('App.util.d3.BarChart', {
  	desiredYIncrements: null,
 	
 	/**
-	 * default increments, ticks
+	 * default y tick increments and default
+	 *   tick formatting function
  	 */
  	yTicks: 10,
+ 	yTickFormat: function(d) {
+	 	return d;
+	},
 	
 	/**
  	 * Scales and Axes
@@ -103,6 +112,12 @@ Ext.define('App.util.d3.BarChart', {
 	yScale: null,
 	yAxisScale: null,
 	yAxis: null,
+	
+	/**
+ 	 * chart title configs
+ 	 */
+ 	chartTitle: null,
+ 	showChartTitle: false,
 	
 	/**
 	 * Default function for the tooltip
@@ -139,22 +154,24 @@ Ext.define('App.util.d3.BarChart', {
 	},
 	
 	constructor: function(config) {
-		Ext.apply(this, config);
+		var me = this;
+		
+		Ext.apply(me, config);
 		
 		// event handling
-		if(this.handleEvents) {
-			this.eventRelay = Ext.create('App.util.MessageBus');
+		if(me.handleEvents) {
+			me.eventRelay = Ext.create('App.util.MessageBus');
 		}
 		
 		// make room on top for labels
 		// this must come before the heightOffset assignment
 		// below
 		if(config.showLabels) {
-			this.margins.top += this.labelOffsetTop;
+			me.margins.top += me.labelOffsetTop;
 		}
 		
-		// setting height offset
-		this.heightOffset = this.canvasHeight - this.margins.top;
+		// setting the height offset
+		me.heightOffset = me.canvasHeight - me.margins.top - me.labelOffsetTop;
 	},
 	
 	/**
@@ -163,9 +180,11 @@ Ext.define('App.util.d3.BarChart', {
  	 * @description Set the horizontal scale
  	 */
 	setXScale: function() {
-		this.xScale = d3.scale.linear()
-			.domain([0, this.graphData.length])
-			.range([this.margins.left, this.canvasWidth - this.margins.right]);
+		var me = this;
+		
+		me.xScale = d3.scale.linear()
+			.domain([0, me.graphData.length])
+			.range([me.margins.left, me.canvasWidth - me.margins.right]);
 	},
 	
 	/**
@@ -174,9 +193,11 @@ Ext.define('App.util.d3.BarChart', {
  	 * @description Set the vertical (y) scale
  	 */
 	setYScale: function(metric) {
-		this.yScale = d3.scale.linear()
-			.domain([0, d3.max(this.graphData, function(d) { return d[metric]; })])
-			.range([this.margins.bottom, this.heightOffset]);
+		var me = this;
+		
+		me.yScale = d3.scale.linear()
+			.domain([0, d3.max(me.graphData, function(d) { return d[metric]; })])
+			.range([me.margins.bottom, this.heightOffset]);
 	},
 	
 	/**
@@ -185,26 +206,30 @@ Ext.define('App.util.d3.BarChart', {
  	 * @description Set the scale for the yAxis
  	 */
 	setYAxisScale: function(metric) {
-		this.yAxisScale = d3.scale.linear()
-			.domain([0, d3.max(this.graphData, function(d) { return d[metric]; })])
-			.range([this.canvasHeight-this.margins.bottom, this.canvasHeight - this.heightOffset]);
+		
+		var me = this;
+		
+		me.yAxisScale = d3.scale.linear()
+			.domain([0, d3.max(me.graphData, function(d) { return d[metric]; })])
+			.range([me.canvasHeight-this.margins.bottom, me.canvasHeight - this.heightOffset]);
 			
 		
 		var _yTicks = this.yTicks;
 		
 		// "guess" on increments
-		if(this.desiredYIncrements != null) {
-			var max = d3.max(this.graphData, function(d) { return d[metric]; });
+		if(me.desiredYIncrements != null) {
+			var max = d3.max(me.graphData, function(d) { return d[metric]; });
 			
-			if(this.desiredYIncrements > 0) {
-				_yTicks = parseInt(max/this.desiredYIncrements);
+			if(me.desiredYIncrements > 0) {
+				_yTicks = parseInt(max/me.desiredYIncrements);
 			}
 		}
 			
-		this.yAxis = d3.svg.axis()
-			.scale(this.yAxisScale)
+		me.yAxis = d3.svg.axis()
+			.scale(me.yAxisScale)
 			.orient('left')
-			.ticks(_yTicks);
+			.ticks(_yTicks)
+			.tickFormat(me.yTickFormat);
 	},
 	
 	/**
@@ -215,17 +240,32 @@ Ext.define('App.util.d3.BarChart', {
 	draw: function() {
 		var me = this;
 		
+		//////////////////////////////////////////////////
+		// sanity check
+		//////////////////////////////////////////////////
+		if(me.svg == null || me.defaultMetric == null) {
+			Ext.Msg.alert('Configuration Error', 'Missing required configuration data needed<br>to render visualization.');
+			return;
+		}
+		
+		//////////////////////////////////////////////////
+		// set "g" elements
+		//////////////////////////////////////////////////
 		me.gBar = me.svg.append('svg:g');
 		me.gText = me.svg.append('svg:g');
 		me.gAxis = me.svg.append('svg:g');
 		
+		//////////////////////////////////////////////////
 		// set scales
+		//////////////////////////////////////////////////
 		me.setXScale();
 		me.setYScale(me.defaultMetric);
 		me.setYAxisScale(me.defaultMetric);
 		
+		//////////////////////////////////////////////////
 		// bring ExtJS variables
 		// into local scope for use in D3
+		//////////////////////////////////////////////////
 		var xScale = me.xScale,
 			yScale = me.yScale,
 			yAxis = me.yAxis,
@@ -241,13 +281,16 @@ Ext.define('App.util.d3.BarChart', {
 			mouseOverEvents = me.mouseOverEvents,
 			labelDistanceFromBar = me.labelDistanceFromBar;
 			
-			
+		//////////////////////////////////////////////////
+		// sanity check
+		//////////////////////////////////////////////////
 		if(me.graphData.length == 0) {
-			me.drawNoData();
 			return;
 		}
 		
-		// draw rectangles / bars
+		//////////////////////////////////////////////////
+		// draw rectangle / bars
+		//////////////////////////////////////////////////
 		me.gBar.selectAll('rect')
 			.data(graphData)
 			.enter()
@@ -289,7 +332,9 @@ Ext.define('App.util.d3.BarChart', {
 				el.style('opacity', el.attr('defaultOpacity'));
 			});
 		
+		//////////////////////////////////////////////////
 		// construct labels, if applicable
+		//////////////////////////////////////////////////
 		if(me.showLabels) {
 			me.gText.selectAll('text')
 				.data(graphData)
@@ -306,10 +351,31 @@ Ext.define('App.util.d3.BarChart', {
 				.text(me.labelFunction);
 		}
 		
-		// call the Y-axis			
+		//////////////////////////////////////////////////
+		// call the Y-axis
+		//////////////////////////////////////////////////	
 		me.gAxis.attr('class', 'axis')
 			.attr('transform', 'translate(' + margins.leftAxis + ', 0)')
 			.call(yAxis);
+			
+		//////////////////////////////////////////////////
+		// chart title
+		//////////////////////////////////////////////////
+		me.gTitle = me.svg.append('svg:g')
+			.attr('transform', 'translate(15,' + parseInt(me.margins.top/2) + ')');
+		
+		if(me.chartTitle != null) {
+			me.gTitle.selectAll('text')
+				.data([me.chartTitle])
+				.enter()
+				.append('text')
+				.style('fill', '#444444')
+				.style('font-weight', 'bold')
+				.style('font-family', 'sans-serif')
+				.text(function(d) {
+					return d;
+				});
+		}
 	},
 	
 	/**
@@ -321,18 +387,24 @@ Ext.define('App.util.d3.BarChart', {
 	transition: function(metric) {
 		var me = this;
 		
+		//////////////////////////////////////////////////
 		// set scales
+		//////////////////////////////////////////////////
 		me.setXScale();
 		me.setYScale(metric);
 		me.setYAxisScale(metric);
 		
-		// y scale local scope
+		//////////////////////////////////////////////////
+		// vars into local scope
+		//////////////////////////////////////////////////
 		var yScale = me.yScale,
 			canvasHeight = me.canvasHeight,
 			margins = me.margins,
 			labelDistanceFromBar = me.labelDistanceFromBar;
 		
+		//////////////////////////////////////////////////
 		// transition rectangles
+		//////////////////////////////////////////////////
 		me.gBar.selectAll('rect')
 			.transition()
 			.duration(500)
@@ -342,8 +414,10 @@ Ext.define('App.util.d3.BarChart', {
 			.attr('height', function(d) {
 				return yScale(d[metric]) - margins.bottom;
 			});
-			
+		
+		//////////////////////////////////////////////////
 		// transition labels
+		//////////////////////////////////////////////////
 		if(me.showLabels) {
 			me.gText.selectAll('text')
 				.transition()
@@ -352,8 +426,30 @@ Ext.define('App.util.d3.BarChart', {
 					return canvasHeight - yScale(d[metric]) - labelDistanceFromBar;
 				});
 		}
-			
+		
+		//////////////////////////////////////////////////
+		// TITLE
+		//////////////////////////////////////////////////
+		if(me.chartTitle != null) {
+			me.gTitle.selectAll('text')
+				.text(me.chartTitle);
+		}
+		
+		//////////////////////////////////////////////////
 		// re-call they y axis function
+		//////////////////////////////////////////////////
 		me.svg.selectAll('g.axis').transition().duration(500).call(me.yAxis);
+	},
+	
+	setYTickFormat: function(fn) {
+		var me = this;
+		
+		me.yTickFormat = fn;
+	},
+	
+	setChartTitle: function(title) {
+		var me = this;
+		
+		me.chartTitle = title;
 	}
 });

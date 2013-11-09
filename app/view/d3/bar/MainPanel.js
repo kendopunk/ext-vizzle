@@ -26,18 +26,19 @@ Ext.define('App.view.d3.bar.MainPanel', {
 			+ 'Demonstration of a generic D3 bar chart. '
 			+ 'Movie data taken from <a href="http://www.imdb.com">IMDB</a> and <a href="http://www.boxofficemojo.com">Box Office Mojo</a>. '
 			+ 'Tooltips from <a href="http://bl.ocks.org/milroc/2975255">milroc</a>.<br><br>'
-			+ 'Select different metrics from the combo to view dynamic transitions.<br><br>'
+			+ 'Select different metrics from the toolbar buttons to view transitions.<br><br>'
 			+ 'Employs the use of Ext.util.Observable subclass to handle messaging from the SVG visualization to the ExtJS framework (mouse over bar = grid row highlight)';
 		
 		// layout vars
-		me.gridPanelHeight = 300,
+		me.gridPanelHeight = 225,
 			me.vizPanelWidth = parseInt(
 				Ext.getBody().getViewSize().width - 225
 			),
 			me.vizPanelHeight = parseInt(
 				(Ext.getBody().getViewSize().height 
 					- App.util.Global.titlePanelHeight 
-					- me.gridPanelHeight)
+					- me.gridPanelHeight
+					- 15)
 			),
 			me.eventRelay = Ext.create('App.util.MessageBus');
 			
@@ -53,7 +54,7 @@ Ext.define('App.view.d3.bar.MainPanel', {
 			layout: 'fit'
 		});
 		
-		// grid panel (south)
+		// grid panel (center)
 		me.gridPanel = Ext.create('App.view.d3.bar.GridPanel', {
 			region: 'center',
 			title: 'Movie Data Grid',

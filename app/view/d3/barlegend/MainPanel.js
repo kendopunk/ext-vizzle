@@ -35,13 +35,14 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
  			me.defaultMetric = 'gross',
  			me.defaultMetricText = 'Gross Box Office',
  			me.currentMetric = 'gross',
+ 			me.baseTitle = 'Box Office Statistics',
  			me.eventRelay = Ext.create('App.util.MessageBus');
 		
 		/**
  		 * @property
  		 */
 		me.chartDescription = '<b>Bar Chart w/Legend</b><br><br>'
-			+ 'Demonstration of a D3 bar chart with legend.<br><br>'
+			+ 'Demonstration of a D3 bar chart with legend.  This is a subclass of the generic bar chart.<br><br>'
 			+ 'The chart and legend are each contained in separate SVG "g" elements and can be '
 			+ '"flexed" accordingly to adjust the width each "g" occupies in the canvas.';
 			
@@ -51,26 +52,12 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
  		 */
 		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
-		
-		/**
- 		 * @property
- 		 * @type Ext.toolbar.TextItem
- 		 */
- 		me.currentMetricTextItem = Ext.create('Ext.toolbar.TextItem', {
- 			text: '<b>' + me.defaultMetricText + '</b>'
- 		}, me);
  		
 		/**
 		 * @property
 		 * @type Ext.toolbar.Toolbar
 		 */
 		me.tbar = [{
-	  		xtype: 'tbtext',
-	  		text: 'Metric:'
-	  	},
-	  		me.currentMetricTextItem,
-	  		'->',
-	  	{
 		  	xtype: 'button',
 		  	iconCls: 'icon-dollar',
 		  	metric: 'gross',
@@ -122,8 +109,17 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 		var me = this;
 		
 		me.currentMetric = btn.metric;
-		me.transition(btn.metric);
-		me.currentMetricTextItem.setText('<b>' + btn.text + '</b>');
+		me.barLegendChart.setChartTitle(me.generateChartTitle(btn.text));
+		if(btn.metric == 'theaters') {
+			me.barLegendChart.setYTickFormat(App.util.Global.svg.numberTickFormat);
+		} else if(btn.metric == 'imdbRating') {
+			me.barLegendChart.setYTickFormat(function(d) {
+				return Ext.util.Format.number(d, '0.0');
+			});
+		} else {
+			me.barLegendChart.setYTickFormat(App.util.Global.svg.wholeDollarTickFormat);
+		}
+		me.barLegendChart.transition(btn.metric);
 	},
 	
 	/**
@@ -166,7 +162,7 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 					graphData: me.graphData,
 					defaultMetric: 'gross',
 					panelId: me.panelId,
-					chartFlex: 3,
+					chartFlex: 4,
 					legendFlex: 1,
 					margins: {
 						top: 20,
@@ -188,7 +184,9 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 							+ 'Theaters: ' + data.theaters + '<br>'
 							+ 'Opening: ' + Ext.util.Format.currency(data.opening, false, '0', false) + '<br>'
 							+ 'IMDB Rating: ' + data.imdbRating;
-					}
+					},
+					yTickFormat: App.util.Global.svg.wholeDollarTickFormat,
+					chartTitle: me.generateChartTitle(me.defaultMetricText)
 				}, me);
 				
 				
@@ -201,17 +199,14 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 	 	});
 	 },
 	 
-	 /**
+	 /** 
 	 * @function
-	 * @memberOf App.view.d3.barlegend.MainPanel
-	 * @param metric String
-	 * @description Transition the bar chart to a new metric
+	 * @private
+	 * @description Set a new chart title
 	 */
-	transition: function(metric) {
+	generateChartTitle: function(append) {
 		var me = this;
-
-		if(metric == null) { metric = 'gross'; }
 		
-		me.barLegendChart.transition(metric);
+		return me.baseTitle + ' : ' + append;
 	}
 });
