@@ -104,12 +104,23 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 			tooltip: 'Revert back to original data',
 			iconCls: 'icon-refresh',
 			handler: function(btn) {
+				me.addRandomButton.enable();
 				me.albumRevert();
 			},
 			scope: me,
 			hidden: true,
 			disabled: true
 		}, me);
+		
+		me.addRandomButton = Ext.create('Ext.button.Button', {
+			text: 'Add Random Record',
+			iconCls: 'icon-plus',
+			tooltip: 'Add a random album',
+			handler: function() {
+				me.addRandomAlbum();
+			},
+			scope: me
+		});
 		
 		/**
 		 * @property
@@ -140,11 +151,14 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 				iconCls: 'icon-arrow-switch',
 				tooltip: 'Make up some random data',
 				handler: function() {
+					me.albumRevertButton.enable();
 					me.randomizeData();
 				},
 				scope: me
-			}
-		];
+			},
+			'-',
+			me.addRandomButton
+		]
 		
 		/**
  		 * @listener
@@ -281,6 +295,8 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 	metricHandler: function(btn, evt) {
 		var me = this;
 		
+		me.currentMetric = btn.metric;
+		
 		me.stackedBarChart.setChartTitle(me.generateChartTitle(btn.text));
 		
 		var dataSet = Ext.clone(me.graphData);
@@ -354,35 +370,83 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 		return me.baseTitle + ' : ' + append;
 	},
 	
+	/**
+ 	 * @function
+ 	 */
 	randomizeData: function() {
 		var me = this;
 		
 		var newData = Ext.clone(me.originalGraphData);
 		
-		var countries = ['US', 'Japan', 'Germany', 'Ireland', 'Spain', 
-			'Canada', 'France', 'Australia', 'New Zealand', 'UK',
-			'Belgium', 'Peru', 'Bolivia', 'Latvia', 'Norway'
-		];
-			
-		
 		Ext.each(newData, function(rec) {
-			var newCountry = countries[Math.floor(Math.random() * countries.length)];
-			
-			rec.category = newCountry;
-
 			Ext.each(rec.values, function(v) {
 				Ext.each(v, function(obj) {
-					obj.category = newCountry;
 					obj.y = parseInt(Math.random() * 2000000);
 				});
 			})
 		});
-		
 		
 		me.graphData = newData;
 		me.stackedBarChart.setGraphData(newData);
 		me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
 		me.stackedBarChart.setYTickFormat(me.salesTickFormat);
 		me.stackedBarChart.transition();
-	}
+	},
+	
+	/**
+ 	 * @function
+ 	 */
+ 	addRandomAlbum: function() {
+ 		var me = this;
+ 		
+ 		var randomAlbums = [{
+	 		id: '1984',
+	 		artist: 'Van Halen'
+	 	}, {
+	 		id: 'Unplugged',
+	 		artist: 'Eric Clapton'
+	 	}, {
+	 		id: 'No Jacket Required',
+	 		artist: 'Phil Collins'
+	 	}, {
+	 		id: 'Private Dancer',
+	 		artist: 'Tina Turner'
+	 	}, {
+	 		id: 'Boston',
+	 		artist: 'Boston'
+	 	}, {
+	 		id: 'The Joshua Tree',
+	 		artist: 'U2'
+	 	}, {
+	 		id: 'Nevermind',
+	 		artist: 'Nirvana'
+	 	}, {
+	 		id: 'Abbey Road',
+	 		artist: 'The Beatles'
+	 	}];
+	 	
+	 	var ind = parseInt(Math.floor(Math.random() * randomAlbums.length));
+	 	
+	 	var add = randomAlbums[ind];
+	 	
+	 	var newData = Ext.clone(me.graphData);
+	 	
+	 	Ext.each(newData, function(rec) {
+	 		rec.values.push({
+	 			id: add.id,
+	 			artist: add.artist,
+	 			category: rec.category,
+	 			y: parseInt(Math.random() * 5000000)
+	 		})
+	 	});
+ 		
+ 		me.graphData = newData;
+ 		me.stackedBarChart.setGraphData(newData);
+		me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
+		me.stackedBarChart.setYTickFormat(me.salesTickFormat);
+		me.stackedBarChart.transition();
+ 	
+ 		
+ 		me.addRandomButton.disable();
+ 	}
 });

@@ -46,6 +46,11 @@
 	background-repeat: no-repeat;
 }
 
+.icon-plus {
+	background-image: url(../img/icons/16x16/plus.png) !important;
+	background-repeat: no-repeat;
+}
+
 .icon-refresh {
 	background-image: url(../img/icons/16x16/refresh) !important;
 	background-repeat: no-repeat;
