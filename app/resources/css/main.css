@@ -11,6 +11,11 @@
 	background-repeat: no-repeat;
 }
 
+.icon-arrow-switch {
+	background-image: url(../img/icons/16x16/arrow-switch.png) !important;
+	background-repeat: no-repeat;
+}
+
 .icon-bar-chart {
 	background-image: url(../img/icons/16x16/bar-chart.png) !important;
 	background-repeat: no-repeat;
