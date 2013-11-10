@@ -401,8 +401,6 @@ Ext.define('App.util.d3.StackedBarLegendChart', {
 		var me = this;
 		var chartUnits = me.getFlexUnit() * me.chartFlex;
 		
-		console.log('Chart units: ' + chartUnits);
-		
 		me.xScale = d3.scale.ordinal()
 			.domain(me.uniqueIds)
 			.rangeRoundBands([0, chartUnits], .08);

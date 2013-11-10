@@ -132,7 +132,18 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 			},
 			'-',
 			me.albumRemoveButton,
-			me.albumRevertButton
+			me.albumRevertButton,
+			'->',
+			{
+				xtype: 'button',
+				text: 'Randomize',
+				iconCls: 'icon-arrow-switch',
+				tooltip: 'Make up some random data',
+				handler: function() {
+					me.randomizeData();
+				},
+				scope: me
+			}
 		];
 		
 		/**
@@ -240,6 +251,8 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
   		
   		me.graphData = newData;
   		me.stackedBarChart.setGraphData(newData);
+  		me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
+		me.stackedBarChart.setYTickFormat(me.salesTickFormat);
   		me.stackedBarChart.transition();
   	},
   	
@@ -339,5 +352,37 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 		var me = this;
 		
 		return me.baseTitle + ' : ' + append;
+	},
+	
+	randomizeData: function() {
+		var me = this;
+		
+		var newData = Ext.clone(me.originalGraphData);
+		
+		var countries = ['US', 'Japan', 'Germany', 'Ireland', 'Spain', 
+			'Canada', 'France', 'Australia', 'New Zealand', 'UK',
+			'Belgium', 'Peru', 'Bolivia', 'Latvia', 'Norway'
+		];
+			
+		
+		Ext.each(newData, function(rec) {
+			var newCountry = countries[Math.floor(Math.random() * countries.length)];
+			
+			rec.category = newCountry;
+
+			Ext.each(rec.values, function(v) {
+				Ext.each(v, function(obj) {
+					obj.category = newCountry;
+					obj.y = parseInt(Math.random() * 2000000);
+				});
+			})
+		});
+		
+		
+		me.graphData = newData;
+		me.stackedBarChart.setGraphData(newData);
+		me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
+		me.stackedBarChart.setYTickFormat(me.salesTickFormat);
+		me.stackedBarChart.transition();
 	}
 });
