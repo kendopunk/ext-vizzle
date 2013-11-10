@@ -22,7 +22,7 @@ Ext.define('App.util.d3.StackedBarChart', {
   	 */
   	colorScale: d3.scale.category20(),
   	
-  	/**5
+  	/**
    	 * "g" elements to hold bars, title, X-axis, and Y-axis
    	 */
    	gCanvas: null,

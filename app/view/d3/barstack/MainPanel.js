@@ -43,7 +43,8 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 		me.chartDescription = '<b>Stacked Bar Chart</b><br><br>'
 			+ '<i>Sales of some of the top-selling albums of all time in the US, UK, and Canada. '
 		 	+ 'Data from Wikipedia (for the most part)</i><br><br>'
-			+ 'Demonstration of a D3 stacked bar chart using stack layout.';
+			+ 'Demonstration of a D3 stacked bar chart using stack layout.<br><br>'
+			+ 'Check out the mouseover events...'
 			
 		/**
 		 * @property
@@ -132,7 +133,7 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 				handler: me.metricHandler,
 				scope: me
 			},
-			'->',
+			'-',
 			me.albumRemoveButton,
 			me.albumRevertButton
 		];

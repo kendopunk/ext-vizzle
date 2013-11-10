@@ -8,7 +8,8 @@ Ext.define('App.controller.Application', {
 	requires: [
 		'App.view.d3.bar.MainPanel',
 		'App.view.d3.barlegend.MainPanel',
-		'App.view.d3.barstack.MainPanel'
+		'App.view.d3.barstack.MainPanel',
+		'App.view.d3.barstacklegend.MainPanel'
 	],
 	
 	init: function() {

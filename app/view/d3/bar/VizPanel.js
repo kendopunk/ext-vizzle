@@ -155,10 +155,11 @@ Ext.define('App.view.d3.bar.VizPanel', {
 							+ 'IMDB Rating: ' + data.imdbRating;
 					},
 					handleEvents: true,
-					mouseOverEvents: {
-						enabled: true,
-						eventName: 'barGridPanelRowHighlight',
-						eventDataMetric: 'title'
+					mouseEvents: {
+						mouseover: {
+							enabled: true,
+							eventName: 'barGridPanelRowHighlight'
+						}
 					},
 					chartTitle: me.generateChartTitle(me.defaultMetricText),
 					yTickFormat: App.util.Global.svg.wholeDollarTickFormat

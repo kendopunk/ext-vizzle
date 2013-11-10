@@ -8,7 +8,7 @@ Ext.define('App.util.Global', {
 	statics: {
 		titlePanelHeight: 40,
 		
-		westPanelWidth: 225,
+		westPanelWidth: 235,
 		
 		defaultInfoMessage: 'Demonstration of various visualization libraries in ExtJS',
 		

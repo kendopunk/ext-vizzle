@@ -145,12 +145,21 @@ Ext.define('App.util.d3.BarChart', {
 	eventRelay: false,
 	
 	/**
- 	 * mouse over events configuration object
+ 	 * mouse events
  	 */
-	mouseOverEvents: {
-		enabled: false,
-		eventName: '',
-		eventDataMetric: ''
+ 	mouseEvents: {
+	 	mouseover: {
+		 	enabled: false,
+		 	eventName: null
+		},
+		click: {
+			enabled: false,
+			eventName: null
+		},
+		dblclick: {
+			enabled: false,
+			eventName: null
+		}
 	},
 	
 	constructor: function(config) {
@@ -278,7 +287,7 @@ Ext.define('App.util.d3.BarChart', {
 			colorScale = me.colorScale,
 			handleEvents = me.handleEvents,
 			eventRelay = me.eventRelay,
-			mouseOverEvents = me.mouseOverEvents,
+			mouseEvents = me.mouseEvents,
 			labelDistanceFromBar = me.labelDistanceFromBar;
 			
 		//////////////////////////////////////////////////
@@ -315,14 +324,13 @@ Ext.define('App.util.d3.BarChart', {
 			.style('stroke', '#333333')
 			.style('stroke-width', 1)
 			.call(d3.helper.tooltip().text(me.tooltipFunction))
-			.on('mouseover', function(d) {
-				if(handleEvents && eventRelay && mouseOverEvents.enabled) {
-					eventRelay.publish(
-						mouseOverEvents.eventName,
-						{
-							value: d[mouseOverEvents.eventDataMetric]
-						}
-					);
+			.on('mouseover', function(d, i) {
+				
+				if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
+					eventRelay.publish(mouseEvents.mouseover.eventName, {
+						payload: d,
+						index: i
+					});
 				}
 				
 				d3.select(this).style('opacity', .9);
