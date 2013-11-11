@@ -1,8 +1,18 @@
 /*
  * 16 x 16 icons
  */
+.icon-album {
+	background-image: url(../img/icons/16x16/album.png) !important;
+	background-repeat: no-repeat;
+}
+
 .icon-arrow-right {
 	background-image: url(../img/icons/16x16/arrow-right.png) !important;
+	background-repeat: no-repeat;
+}
+
+.icon-arrow-switch {
+	background-image: url(../img/icons/16x16/arrow-switch.png) !important;
 	background-repeat: no-repeat;
 }
 
@@ -33,6 +43,11 @@
 
 .icon-pie-chart {
 	background-image: url(../img/icons/16x16/pie-chart.png) !important;
+	background-repeat: no-repeat;
+}
+
+.icon-plus {
+	background-image: url(../img/icons/16x16/plus.png) !important;
 	background-repeat: no-repeat;
 }
 

@@ -3,15 +3,15 @@
  * @memberOf App.view.d3.barstack
  * @description Stacked bar chart
  */
-Ext.define('App.view.d3.barstack.MainPanel', {
+Ext.define('App.view.d3.barstacklegend.MainPanel', {
 	extend: 'Ext.Panel',
-	alias: 'widget.barstackMainPanel',
+	alias: 'widget.barstackLegendMainPanel',
 	title: 'Bar Chart',
 	closable: true,
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.StackedBarChart'
+		'App.util.d3.StackedBarLegendChart'
 	],
 	
 	layout: 'fit',
@@ -40,18 +40,15 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 		/**
  		 * @property
  		 */
-		me.chartDescription = '<b>Stacked Bar Chart</b><br><br>'
-			+ '<i>Sales of some of the top-selling albums of all time in the US, UK, and Canada. '
-		 	+ 'Data from Wikipedia (for the most part)</i><br><br>'
-			+ 'Demonstration of a D3 stacked bar chart using stack layout.<br><br>'
-			+ 'Check out the mouseover events...'
+		me.chartDescription = '<b>Stacked Bar Chart w/Legend</b><br><br>'
+		+ 'Again, we use flex values for the chart and the legend to position them relative to one another';
 			
 		/**
 		 * @property
 		 * @description Message event relay
 		 */
 		me.eventRelay = Ext.create('App.util.MessageBus');
-		me.eventRelay.subscribe('albumRemove', me.handleRemoveButton, me);
+		me.eventRelay.subscribe('legendAlbumRemove', me.handleRemoveButton, me);
 			
 		/**
  		 * @properties
@@ -107,12 +104,23 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 			tooltip: 'Revert back to original data',
 			iconCls: 'icon-refresh',
 			handler: function(btn) {
+				me.addRandomButton.enable();
 				me.albumRevert();
 			},
 			scope: me,
 			hidden: true,
 			disabled: true
 		}, me);
+		
+		me.addRandomButton = Ext.create('Ext.button.Button', {
+			text: 'Add Random Record',
+			iconCls: 'icon-plus',
+			tooltip: 'Add a random album',
+			handler: function() {
+				me.addRandomAlbum();
+			},
+			scope: me
+		});
 		
 		/**
 		 * @property
@@ -135,8 +143,22 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 			},
 			'-',
 			me.albumRemoveButton,
-			me.albumRevertButton
-		];
+			me.albumRevertButton,
+			'->',
+			{
+				xtype: 'button',
+				text: 'Randomize',
+				iconCls: 'icon-arrow-switch',
+				tooltip: 'Make up some random data',
+				handler: function() {
+					me.albumRevertButton.enable();
+					me.randomizeData();
+				},
+				scope: me
+			},
+			'-',
+			me.addRandomButton
+		]
 		
 		/**
  		 * @listener
@@ -170,7 +192,7 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 	 		.attr('width', me.canvasWidth)
 	 		.attr('height', me.canvasHeight);
 	 		
-	 	me.stackedBarChart = Ext.create('App.util.d3.StackedBarChart', {
+	 	me.stackedBarChart = Ext.create('App.util.d3.StackedBarLegendChart', {
 			svg: me.svg,
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,
@@ -185,10 +207,12 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 			yTickFormat: me.salesTickFormat,
 			chartTitle: me.generateChartTitle(me.defaultMetricText),
 			handleEvents: true,
+			chartFlex: 6,
+			legendFlex: 1,
 			mouseEvents: {
 				mouseover: {
 					enabled: true,
-					eventName: 'albumRemove'
+					eventName: 'legendAlbumRemove'
 				}
 			}
 		});
@@ -241,6 +265,8 @@ Ext.define('App.view.d3.barstack.MainPanel', {
   		
   		me.graphData = newData;
   		me.stackedBarChart.setGraphData(newData);
+  		me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
+		me.stackedBarChart.setYTickFormat(me.salesTickFormat);
   		me.stackedBarChart.transition();
   	},
   	
@@ -268,6 +294,8 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 	 */
 	metricHandler: function(btn, evt) {
 		var me = this;
+		
+		me.currentMetric = btn.metric;
 		
 		me.stackedBarChart.setChartTitle(me.generateChartTitle(btn.text));
 		
@@ -340,5 +368,85 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 		var me = this;
 		
 		return me.baseTitle + ' : ' + append;
-	}
+	},
+	
+	/**
+ 	 * @function
+ 	 */
+	randomizeData: function() {
+		var me = this;
+		
+		var newData = Ext.clone(me.originalGraphData);
+		
+		Ext.each(newData, function(rec) {
+			Ext.each(rec.values, function(v) {
+				Ext.each(v, function(obj) {
+					obj.y = parseInt(Math.random() * 2000000);
+				});
+			})
+		});
+		
+		me.graphData = newData;
+		me.stackedBarChart.setGraphData(newData);
+		me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
+		me.stackedBarChart.setYTickFormat(me.salesTickFormat);
+		me.stackedBarChart.transition();
+	},
+	
+	/**
+ 	 * @function
+ 	 */
+ 	addRandomAlbum: function() {
+ 		var me = this;
+ 		
+ 		var randomAlbums = [{
+	 		id: '1984',
+	 		artist: 'Van Halen'
+	 	}, {
+	 		id: 'Unplugged',
+	 		artist: 'Eric Clapton'
+	 	}, {
+	 		id: 'No Jacket Required',
+	 		artist: 'Phil Collins'
+	 	}, {
+	 		id: 'Private Dancer',
+	 		artist: 'Tina Turner'
+	 	}, {
+	 		id: 'Boston',
+	 		artist: 'Boston'
+	 	}, {
+	 		id: 'The Joshua Tree',
+	 		artist: 'U2'
+	 	}, {
+	 		id: 'Nevermind',
+	 		artist: 'Nirvana'
+	 	}, {
+	 		id: 'Abbey Road',
+	 		artist: 'The Beatles'
+	 	}];
+	 	
+	 	var ind = parseInt(Math.floor(Math.random() * randomAlbums.length));
+	 	
+	 	var add = randomAlbums[ind];
+	 	
+	 	var newData = Ext.clone(me.graphData);
+	 	
+	 	Ext.each(newData, function(rec) {
+	 		rec.values.push({
+	 			id: add.id,
+	 			artist: add.artist,
+	 			category: rec.category,
+	 			y: parseInt(Math.random() * 5000000)
+	 		})
+	 	});
+ 		
+ 		me.graphData = newData;
+ 		me.stackedBarChart.setGraphData(newData);
+		me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
+		me.stackedBarChart.setYTickFormat(me.salesTickFormat);
+		me.stackedBarChart.transition();
+ 	
+ 		
+ 		me.addRandomButton.disable();
+ 	}
 });

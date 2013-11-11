@@ -41,54 +41,14 @@ Ext.define('App.view.d3.bar.VizPanel', {
  			me.defaultMetric = 'gross',
  			me.defaultMetricText = 'Gross Box Office',
  			me.currentMetric = 'gross',
+ 			me.baseTitle = 'Box Office Statistics',
  			me.eventRelay = Ext.create('App.util.MessageBus');
- 			
- 		/**
- 		 * @property
- 		 * @memberOf App.view.d3.bar.VizPanel
- 		 * @type Ext.form.field.ComboBox
- 		 * @description Metric selection list.  Use this dropdown instead of the toolbar button options
- 		me.metricCombo = Ext.create('Ext.form.field.ComboBox', {
- 			store: Ext.create('App.store.movie.MovieMetricStore', {
- 				autoLoad: true
- 			}),
-			value: 'gross',
-			displayField: 'display',
-			valueField: 'value',
-			editable: false,
-			triggerAction: 'all',
-			queryMode: 'local',
-			width: 225,
-			listWidth: 225,
-			listeners: {
-				select: function(combo) {
-					me.currentMetric = combo.getValue();
-					me.transition(combo.getValue());
-				},
-				scope: me
-			}
-		});
-		*/
-		
-		/**
- 		 * @property
- 		 * @type Ext.toolbar.TextItem
- 		 */
- 		me.currentMetricTextItem = Ext.create('Ext.toolbar.TextItem', {
- 			text: '<b>' + me.defaultMetricText + '</b>'
- 		}, me);
  			
  		/**
   		 * @property
   		 * @type Ext.toolbar.Toolbar
   		 */
   		me.tbar = [{
-	  		xtype: 'tbtext',
-	  		text: 'Metric:'
-	  	},
-	  		me.currentMetricTextItem,
-	  		'->',
-	  	{
 		  	xtype: 'button',
 		  	iconCls: 'icon-dollar',
 		  	metric: 'gross',
@@ -130,8 +90,17 @@ Ext.define('App.view.d3.bar.VizPanel', {
 		var me = this;
 		
 		me.currentMetric = btn.metric;
-		me.transition(btn.metric);
-		me.currentMetricTextItem.setText('<b>' + btn.text + '</b>');
+		if(btn.metric == 'theaters') {
+			me.barChart.setYTickFormat(App.util.Global.svg.numberTickFormat);
+		} else if(btn.metric == 'imdbRating') {
+			me.barChart.setYTickFormat(function(d) {
+				return Ext.util.Format.number(d, '0.0');
+			});
+		} else {
+			me.barChart.setYTickFormat(App.util.Global.svg.wholeDollarTickFormat);
+		}
+		me.barChart.setChartTitle(me.generateChartTitle(btn.text));
+		me.barChart.transition(btn.metric);
 	},
 	
 	/**
@@ -186,11 +155,14 @@ Ext.define('App.view.d3.bar.VizPanel', {
 							+ 'IMDB Rating: ' + data.imdbRating;
 					},
 					handleEvents: true,
-					mouseOverEvents: {
-						enabled: true,
-						eventName: 'barGridPanelRowHighlight',
-						eventDataMetric: 'title'
-					}
+					mouseEvents: {
+						mouseover: {
+							enabled: true,
+							eventName: 'barGridPanelRowHighlight'
+						}
+					},
+					chartTitle: me.generateChartTitle(me.defaultMetricText),
+					yTickFormat: App.util.Global.svg.wholeDollarTickFormat
 				}, me);
 				
 				me.getEl().unmask();
@@ -201,17 +173,14 @@ Ext.define('App.view.d3.bar.VizPanel', {
 		});
 	},
 	
-	/**
+	/** 
 	 * @function
-	 * @memberOf App.view.d3.bar.VizPanel
-	 * @param metric String
-	 * @description Transition the bar chart to a new metric
+	 * @private
+	 * @description Set a new chart title
 	 */
-	transition: function(metric) {
+	generateChartTitle: function(append) {
 		var me = this;
-
-		if(metric == null) { metric = 'gross'; }
 		
-		me.barChart.transition(metric);
+		return me.baseTitle + ' : ' + append;
 	}
 });

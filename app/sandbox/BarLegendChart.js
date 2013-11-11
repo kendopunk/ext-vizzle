@@ -1,10 +1,19 @@
-/**
- * @class
- * @memberOf App.util.d3
- * @description Extended bar chart with legend and flex values
- */
-Ext.define('App.util.d3.BarLegendChart', {
-	extend: 'App.util.d3.BarChart',
+Ext.define('Sandbox.util.viz.BarLegendChart', {
+	/**
+ 	 * The primary SVG element.  Must be set outside the class
+ 	 * and passed as a configuration item
+ 	 */
+	svg: null,
+	
+	/**
+ 	 * The "g" element to hold the bars
+ 	 */
+	gBar: null,
+	
+	/**
+ 	 * The "g" element to hold the label text
+ 	 */
+	gLabel: null,
 	
 	/**
 	 * The "g" element to hold the legend
@@ -12,9 +21,83 @@ Ext.define('App.util.d3.BarLegendChart', {
 	gLegend: null,
 	
 	/**
+ 	 * The "g" element to hold the title
+ 	 */
+ 	gTitle: null,
+	
+	/**
+ 	 * The "g" element to hold the Y axis
+ 	 */
+	gAxis: null,
+	
+	/**
+	 * Overall height of the drawing canvas.  This should be passed
+	 * as a configuration item
+	 */
+	canvasHeight: 300,
+	
+	/**
+	 * Overal width of the drawing canvas. Should be passed as a configuration
+	 * item
+	 */
+	canvasWidth: 500,
+	
+	/**
+ 	 * Height offset of bars and axis from the top
+ 	 */
+	heightOffset: 5,
+	
+	/**
+	 * An array of data objects for the graph
+	 */
+	graphData: [],
+	
+	/**
+ 	 * Default metric, i.e. data[defaultMetric] to use when initializing
+ 	 * the drawing
+ 	 */
+	defaultMetric: null,
+	
+	/**
+ 	 * The ExtJS panel ID in which the drawing is rendered
+ 	 */
+	panelId: null,
+	
+	/**
+	 * Set to true to show labels above bars
+	 */
+	showLabels: false,
+	
+	/**
+ 	 * height (in pix) to lower graph to show top labels
+ 	 */
+	labelOffsetTop: 30,
+	
+	/**
+ 	 * needs to be less than labelOffsetTop
+ 	 */
+	labelDistanceFromBar: 10,
+	
+	/**
+ 	 * Default margins for the drawing
+ 	 */
+	margins: {
+		top: 10,
+		right: 10,
+		bottom: 10,
+		left: 50,
+		leftAxis: 40
+	},
+	
+	/**
+ 	 * spacing between bar chart bars
+ 	 */
+	barPadding: 5,
+	
+	/**
  	 * chart and legend flex default values
  	 */
- 	chartFlex: 3,
+ 	chartFlex: 1,
  	legendFlex: 1,
  	
  	/**
@@ -29,22 +112,99 @@ Ext.define('App.util.d3.BarLegendChart', {
 	spaceBetweenChartAndLegend: 20,
 	
 	/**
+ 	 * color scale
+ 	 */
+	colorScale: d3.scale.category20(),
+	
+	/**
+ 	 * desired increments
+ 	 */
+ 	desiredYIncrements: null,
+	
+	/**
+	 * default increments, ticks
+ 	 */
+ 	yTicks: 10,
+ 	yTickFormat: function(d) {
+	 	return Ext.util.Format.number(d, '0,000');
+	},
+	
+	/**
+ 	 * Scales and Axes
+ 	 */
+	xScale: null,
+	yScale: null,
+	yAxisScale: null,
+	yAxis: null,
+	
+	/**
+ 	 * MISC
+ 	 */
+ 	chartTitle: null,
+	
+	/**
+	 * Default function for the tooltip
+	 */
+	tooltipFunction: function(data, index) {
+		return 'tooltip';
+	},
+	
+	/**
+ 	 * Default function for rendering a label
+ 	 */
+ 	labelFunction: function(data, index) {
+	 	return 'label';
+	},
+	
+	/**
  	 * default text function for the legend
  	 */
  	legendTextFunction: function(data, index) {
 	 	return 'legend item';
 	},
 	
+	/**
+ 	 * enable the handling of click/mouse events
+ 	 */
+	handleEvents: false,
+	
+	/**
+	 * @private
+	 * Default message bus / event relay mechanism
+	 */
+	eventRelay: false,
+	
+	/**
+ 	 * mouse over events configuration object
+ 	 */
+	mouseOverEvents: {
+		enabled: false,
+		eventName: '',
+		eventDataMetric: ''
+	},
+	
 	constructor: function(config) {
-		var me = this;
+		Ext.apply(this, config);
 		
-		me.superclass.constructor.call(me, config)
+		// event handling
+		if(this.handleEvents) {
+			this.eventRelay = Ext.create('Sandbox.util.MessageBus');
+		}
+		
+		// make room on top for labels
+		// this must come before the heightOffset assignment
+		// below
+		if(config.showLabels) {
+			this.margins.top += this.labelOffsetTop;
+		}
+		
+		// setting height offset
+		this.heightOffset = this.canvasHeight - this.margins.top;
 	},
 	
 	/**
  	 * @function
- 	 * @override
- 	 * @memberOf App.util.d3.BarLegendChart
+ 	 * @memberOf Sandbox.util.viz.BarLegendChart
  	 * @description Set the horizontal scale
  	 */
 	setXScale: function() {
@@ -58,76 +218,63 @@ Ext.define('App.util.d3.BarLegendChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.BarChart
+ 	 * @memberOf Sandbox.util.viz.BarLegendChart
  	 * @description Set the vertical (y) scale
  	 */
 	setYScale: function(metric) {
-		var me = this;
-		
-		me.yScale = d3.scale.linear()
-			.domain([0, d3.max(me.graphData, function(d) { return d[metric]; })])
-			.range([me.margins.bottom, this.heightOffset]);
+		this.yScale = d3.scale.linear()
+			.domain([0, d3.max(this.graphData, function(d) { return d[metric]; })])
+			.range([this.margins.bottom, this.heightOffset]);
 	},
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.BarChart
+ 	 * @memberOf Sandbox.util.viz.BarLegendChart
  	 * @description Set the scale for the yAxis
  	 */
 	setYAxisScale: function(metric) {
-		
-		var me = this;
-		
-		me.yAxisScale = d3.scale.linear()
-			.domain([0, d3.max(me.graphData, function(d) { return d[metric]; })])
-			.range([me.canvasHeight-this.margins.bottom, me.canvasHeight - this.heightOffset]);
+		this.yAxisScale = d3.scale.linear()
+			.domain([0, d3.max(this.graphData, function(d) { return d[metric]; })])
+			.range([this.canvasHeight-this.margins.bottom, this.canvasHeight - this.heightOffset]);
 			
 		
 		var _yTicks = this.yTicks;
 		
 		// "guess" on increments
-		if(me.desiredYIncrements != null) {
-			var max = d3.max(me.graphData, function(d) { return d[metric]; });
+		if(this.desiredYIncrements != null) {
+			var max = d3.max(this.graphData, function(d) { return d[metric]; });
 			
-			if(me.desiredYIncrements > 0) {
-				_yTicks = parseInt(max/me.desiredYIncrements);
+			if(this.desiredYIncrements > 0) {
+				_yTicks = parseInt(max/this.desiredYIncrements);
 			}
 		}
 			
-		me.yAxis = d3.svg.axis()
-			.scale(me.yAxisScale)
+		this.yAxis = d3.svg.axis()
+			.scale(this.yAxisScale)
 			.orient('left')
 			.ticks(_yTicks)
-			.tickFormat(me.yTickFormat);
+			.tickFormat(this.yTickFormat);
 	},
-
+	
 	/**
  	 * @function
- 	 * @override
- 	 * @memberOf App.util.d3.BarLegendChart
+ 	 * @memberOf Sandbox.util.viz.BarLegendChart
  	 * @description Draw the initial bar chart
  	 */
 	draw: function() {
 		var me = this;
 		
-		//////////////////////////////////////////////////
 		// sanity check
-		//////////////////////////////////////////////////
 		if(me.svg == null || me.defaultMetric == null) {
 			Ext.Msg.alert('Configuration Error', 'Missing required configuration data needed<br>to render visualization.');
 			return;
 		}
 		
-		//////////////////////////////////////////////////
 		// set scales
-		//////////////////////////////////////////////////
 		me.setXScale();
 		me.setYScale(me.defaultMetric);
 		me.setYAxisScale(me.defaultMetric);
 		
-		//////////////////////////////////////////////////
-		// bring class vars into local scope
-		//////////////////////////////////////////////////
 		var canvasWidth = me.canvasWidth,
 			canvasHeight = me.canvasHeight,
 			xScale = me.xScale,
@@ -148,40 +295,35 @@ Ext.define('App.util.d3.BarLegendChart', {
 			oneFlexUnit = me.getFlexUnit(),
 			legendSquareWidth = me.legendSquareWidth,
 			legendSquareHeight = me.legendSquareHeight;
+		
+		/**
+ 		 * empty data array ??
+ 		 * draw placeholder visualization and exit
+ 		 */	
+		if(me.graphData.length == 0) {
+			me.drawNoData();
+			return;
+		}
 
-		//////////////////////////////////////////////////
-		// configure the rectangle "g" element
-		//////////////////////////////////////////////////
+		// the "bar" g
 		me.gBar = me.svg.append('svg:g')
 			.attr('transform', 'translate(' + margins.left + ', 0)');
 			
-		//////////////////////////////////////////////////
-		// configure the label "g" for the rectangles
-		//////////////////////////////////////////////////
-		me.gText = me.svg.append('svg:g')
-			.attr('transform', 'translate(' + margins.left + ', 0)');
-
-		//////////////////////////////////////////////////
-		// the legend "g"
-		//////////////////////////////////////////////////
+		// the "legend" g
 		var legendTranslateX = margins.left + (me.getFlexUnit() * chartFlex) + spaceBetweenChartAndLegend;
 		me.gLegend = me.svg.append('svg:g')
 			.attr('transform', 'translate(' + legendTranslateX + ', ' + me.margins.top + ')');
-		
-		//////////////////////////////////////////////////
-		// the label "g" element
-		//////////////////////////////////////////////////
+			
+		// the "label" g
 		me.gLabel = me.svg.append('svg:g')
 			.attr('transform', 'translate(' + margins.left + ', 0)');
-		
-		//////////////////////////////////////////////////
-		// the axis "g" element
-		//////////////////////////////////////////////////
+			
+		// the "axis" g
 		me.gAxis = me.svg.append('svg:g');
 			
-		//////////////////////////////////////////////////
-		// draw the rectangles
-		//////////////////////////////////////////////////
+		/**
+ 		 * draw the rectangles
+ 		 */
 		me.gBar.selectAll('rect')
 			.data(graphData)
 			.enter()
@@ -223,11 +365,11 @@ Ext.define('App.util.d3.BarLegendChart', {
 				el.style('opacity', el.attr('defaultOpacity'));
 			});
 		
-		//////////////////////////////////////////////////
-		// constuct rectangle labels, if applicable
-		//////////////////////////////////////////////////
+		/**
+ 		 * construct bar labels, if true
+ 		 */
 		if(me.showLabels) {
-			me.gText.selectAll('text')
+			me.gLabel.selectAll('text')
 				.data(graphData)
 				.enter()
 				.append('text')
@@ -242,21 +384,19 @@ Ext.define('App.util.d3.BarLegendChart', {
 				.text(me.labelFunction);
 		}
 		
-		//////////////////////////////////////////////////
-		// call the Y axis function
-		//////////////////////////////////////////////////
+		/**
+ 		 * call the Y-axis function
+ 		 */
 		me.gAxis.attr('class', 'axis')
 			.attr('transform', 'translate(' + margins.leftAxis + ', 0)')
 			.call(yAxis);
-		
-		//////////////////////////////////////////////////
-		// bring the bar "g" into local scope
-		//////////////////////////////////////////////////
+			
+		// bring "bar" g into local scope
 		var bars = me.gBar;
 			
-		//////////////////////////////////////////////////
-		// legend squares
-		//////////////////////////////////////////////////
+		/**
+ 		 * legend rectangles
+ 		 */
 		me.gLegend.selectAll('rect')
 			.data(me.graphData)
 			.enter()
@@ -302,9 +442,9 @@ Ext.define('App.util.d3.BarLegendChart', {
 				.attr('transform', 'translate(0,0)');
 			});
 		
-		//////////////////////////////////////////////////
-		// legend text elements
-		//////////////////////////////////////////////////
+		/**
+ 		 * legend text elements
+ 		 */
 		me.gLegend.selectAll('text')
 			.data(me.graphData)
 			.enter()
@@ -315,11 +455,10 @@ Ext.define('App.util.d3.BarLegendChart', {
 			})
 			.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
 			.text(me.legendTextFunction)
-			.style('font-size', '10')
 			.on('mouseover', function(d, i) {
 				// highlight text
 				d3.select(this)
-					.style('fill', '#CC3300')
+					.style('fill', '#000099')
 					.style('font-weight', 'bold');
 				
 				// outline the bars
@@ -349,7 +488,7 @@ Ext.define('App.util.d3.BarLegendChart', {
 				.duration(500)
 				.attr('transform', 'translate(0,0)');
 			});
-		
+			
 		//////////////////////////////////////////////////
 		// TITLE
 		//////////////////////////////////////////////////
@@ -372,32 +511,26 @@ Ext.define('App.util.d3.BarLegendChart', {
 	
 	/**
  	 * @function
- 	 * @override
- 	 * @memberOf App.util.d3.BarLegendChart
+ 	 * @memberOf Sandbox.util.viz.BarLegendChart
  	 * @param metric
- 	 * @description Transition the chart and legend
+ 	 * @description Takes a numeric index from the data record as the y scale
  	 */
 	transition: function(metric) {
 		var me = this;
 		
-		//////////////////////////////////////////////////
 		// set scales
-		//////////////////////////////////////////////////
 		me.setXScale();
 		me.setYScale(metric);
 		me.setYAxisScale(metric);
 		
-		//////////////////////////////////////////////////
-		// vars into local scope
-		//////////////////////////////////////////////////
+		// y scale local scope
 		var yScale = me.yScale,
 			canvasHeight = me.canvasHeight,
 			margins = me.margins,
-			labelDistanceFromBar = me.labelDistanceFromBar;
+			labelDistanceFromBar = me.labelDistanceFromBar,
+			gLegend = me.gLegend;
 		
-		//////////////////////////////////////////////////
 		// transition rectangles
-		//////////////////////////////////////////////////
 		me.gBar.selectAll('rect')
 			.transition()
 			.duration(500)
@@ -407,19 +540,24 @@ Ext.define('App.util.d3.BarLegendChart', {
 			.attr('height', function(d) {
 				return yScale(d[metric]) - margins.bottom;
 			});
-		
-		//////////////////////////////////////////////////
+			
 		// transition labels
-		//////////////////////////////////////////////////
 		if(me.showLabels) {
-			me.gText.selectAll('text')
+			me.gLabel.selectAll('text')
 				.transition()
 				.duration(500)
 				.attr('y', function(d) {
 					return canvasHeight - yScale(d[metric]) - labelDistanceFromBar;
 				});
 		}
+			
+		// re-call they y axis function
+		me.svg.selectAll('g.axis').call(me.yAxis);
 		
+		// set the new legend text
+		gLegend.selectAll('text')
+		 	.text(me.legendTextFunction);
+		 	
 		//////////////////////////////////////////////////
 		// TITLE
 		//////////////////////////////////////////////////
@@ -427,16 +565,11 @@ Ext.define('App.util.d3.BarLegendChart', {
 			me.gTitle.selectAll('text')
 				.text(me.chartTitle);
 		}
-		
-		//////////////////////////////////////////////////
-		// re-call they y axis function
-		//////////////////////////////////////////////////
-		me.svg.selectAll('g.axis').transition().duration(500).call(me.yAxis);
 	},
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.BarLegendChart
+ 	 * @memberOf Sandbox.util.viz.BarLegendChart
  	 * @description Return the width of a flex "unit"
  	 */
 	getFlexUnit: function() {
@@ -450,5 +583,38 @@ Ext.define('App.util.d3.BarLegendChart', {
 		var workingWidth = canvasWidth - margins.left - margins.right - spaceBetweenChartAndLegend;
 		
 		return Math.floor(workingWidth/(chartFlex + legendFlex));
+	},
+	
+	/**
+ 	 * @function
+ 	 * @memberOf Sandbox.util.viz.BarLegendChart
+ 	 * @description Change the y tick format
+ 	 * @private
+ 	 */
+ 	setYTickFormat: function(fn) {
+	 	var me = this;
+	 	
+	 	me.yTickFormat = fn;
+	},
+	
+	/**
+ 	 * @function
+ 	 * @memberOf Sandbox.util.viz.BarLegendChart
+ 	 * @description Change the report title
+ 	 */
+ 	setChartTitle: function(title) {
+	 	var me = this;
+	 	
+	 	me.chartTitle = title;
+	},
+	
+	/**
+ 	 * @function
+ 	 * @memberOf Sandbox.util.viz.BarLegendChart
+ 	 * @description "No data" drawing"
+ 	 */
+	drawNoData: function() {
+		var me = this;
+		Sandbox.util.Global.noDataSvgImage(me.svg, me.canvasWidth, me.canvasHeight, 'No data');
 	}
 });

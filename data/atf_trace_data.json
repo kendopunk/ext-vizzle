@@ -1,0 +1,70 @@
+{
+	"success": true,
+	"data": [{
+		"state": "TX",
+		"recoveries": [{
+			"caliber": "9mm",
+			"recovery": 2522
+		}, {
+			"caliber": ".22 cal",
+			"recovery": 1574
+		}, {
+			"caliber": ".40 S&W",
+			"recovery": 1415
+		}, {
+			"caliber": "12ga",
+			"recovery": 1190
+		}, {
+			"caliber": ".45 cal",
+			"recovery": 1121
+		}, {
+			"caliber": ".380 ACP",
+			"recovery": 1048
+		}, {
+			"caliber": ".38 cal",
+			"recovery": 962
+		}, {
+			"caliber": "7.62mm",
+			"recovery": 649
+		}, {
+			"caliber": ".357 Mag",
+			"recovery": 479
+		}, {
+			"caliber": ".223",
+			"recovery": 424
+		}]
+	}, {
+		"state": "NY",
+		"recoveries": [{
+			"caliber": "9mm",
+			"recovery": 1506
+		}, {
+			"caliber": ".22 cal",
+			"recovery": 1429
+		}, {
+			"caliber": ".38 cal",
+			"recovery": 897
+		}, {
+			"caliber": ".380 ACP",
+			"recovery": 734
+		}, {
+			"caliber": "12ga",
+			"recovery": 712
+		}, {
+			"caliber": ".45 cal",
+			"recovery": 586
+		}, {
+			"caliber": ".32 cal",
+			"recovery": 527
+		}/*, {
+			"caliber": ".25 cal",
+			"recovery": 4466
+		}, {
+			"caliber": ".40 S&W",
+			"recovery": 414
+		}, {
+			"caliber": ".357 Mag",
+			"recovery": 344
+		}*/]
+	}]
+}

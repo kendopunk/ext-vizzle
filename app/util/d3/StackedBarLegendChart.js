@@ -1,191 +1,111 @@
 /**
  * @class
  * @memberOf App.util.d3
- * @description Stacked bar chart class
+ * @description Stacked bar chart class with legend
+ * @extend App.util.d3.StackedBarChart
  */
-Ext.define('App.util.d3.StackedBarChart', {
+Ext.define('App.util.d3.StackedBarLegendChart', {
+	extend: 'App.util.d3.StackedBarChart',
 	
 	/**
- 	 * The primary SVG element.  Must be set (after render) outside this class
- 	 * and passed as a configuration item
+	 * The "g" element to hold the legend
+	 */
+	gLegend: null,
+	
+	/**
+ 	 * chart and legend flex default values
  	 */
- 	svg: null,
+ 	chartFlex: 3,
+ 	legendFlex: 1,
  	
  	/**
-  	 * default canvas width, height
+  	 * height and width of legend colored rects
   	 */
-  	canvasWidth: 500,
-  	canvasHeight: 500,
+  	legendSquareWidth: 10,
+  	legendSquareHeight: 10,
   	
   	/**
-  	 * default color scale
+  	 * hard space between chart and legend
   	 */
-  	colorScale: d3.scale.category20(),
-  	
-  	/**
-   	 * "g" elements to hold bars, title, X-axis, and Y-axis
-   	 */
-   	gCanvas: null,
-   	gLayer: null,
-   	gTitle: null,
-   	gXAxis: null,
-   	gYAxis: null,
-   	
-   	/**
-     * x and y scales and axes
-     */
-    xScale: null,
-    xAxis: null,
-    yScale: null,
-    yAxis: null,
-    
-    /**
-     * misc
-     */
-    graphData: [],
-    panelId: null,
-    margins: {
-    	top: 20,
-    	right: 20,
-    	bottom: 20,
-    	left: 20
-    },
-    uniqueIds: [],
-    stackLayout: null,
-    layers: null,
-    yMax: null,
-    chartTitle: null,
-    colorRangeStart: '#000099',
-    colorRangeEnd: '#FFCC33',
-    
-    /**
-	 * Default function for the tooltip
+	spaceBetweenChartAndLegend: 20,
+	
+	/**
+ 	 * default text function for the legend
+ 	 */
+ 	legendTextFunction: function(data, index) {
+	 	return 'legend item';
+	},
+	
+	constructor: function(config) {
+		var me = this;
+		
+		me.superclass.constructor.call(me, config)
+	},
+	
+	/**
+	 * @function
+	 * @memberOf App.util.d3.StackedBarLegendChart
+	 * @override
 	 */
-	tooltipFunction: function(data, index) {
-		return 'tooltip';
-	},
-	
-	/**
- 	 * yTickFormat
- 	 */
- 	yTickFormat: function(d) {
- 		return Ext.util.Format.number(d, '0,000');
-	},
-	
-	/**
- 	 * enable the handling of click/mouse events
- 	 */
-	handleEvents: false,
-	
-	/**
-	 * @private
-	 * Default message bus / event relay mechanism
-	 */
-	eventRelay: false,
-	
-	/**
- 	 * mouse events
- 	 */
- 	mouseEvents: {
-	 	mouseover: {
-		 	enabled: false,
-		 	eventName: null
-		},
-		click: {
-			enabled: false,
-			eventName: null
-		},
-		dblclick: {
-			enabled: false,
-			eventName: null
-		}
-	},
-	
-   	constructor: function(config) {
-	   	var me = this;
-	   	
-	   	Ext.apply(me, config);
-	   	
-	   	// event handling
-		if(me.handleEvents) {
-			me.eventRelay = Ext.create('App.util.MessageBus');
-		}
-	},
-	
-	/**
- 	 * @function
- 	 * @memberOf App.util.d3.StackedBarChart
- 	 * @description Initial drawing
- 	 */
- 	draw: function() {
+	draw: function() {
  		var me = this;
  		
- 		//////////////////////////////////////////////////
+ 		//
  		// Bring configuration vars into local scope
- 		//////////////////////////////////////////////////
+ 		// for use in D3 functions
+ 		//
  		var svg = me.svg,
  			canvasWidth = me.canvasWidth,
  			canvasHeight = me.canvasHeight,
  			panelId = me.panelId,
  			margins = me.margins,
+ 			legendSquareWidth = me.legendSquareWidth,
+ 			legendSquareHeight = me.legendSquareHeight,
  			handleEvents = me.handleEvents,
  			eventRelay = me.eventRelay,
  			mouseEvents = me.mouseEvents;
  			
-		//////////////////////////////////////////////////
 		// initial adjustment of the color scale
-		//////////////////////////////////////////////////
-		var colorScale = me.colorScale = d3.scale.linear()
-		 	.domain([0, me.graphData.length - 1])
-		 	.range([me.colorRangeStart, me.colorRangeEnd]);
-		 
-		//////////////////////////////////////////////////
+		me.setColorScale(me.colorRangeStart, me.colorRangeEnd);
+		colorScale = me.colorScale;
+		 	
 		// get the array of unique "id" properties
-		//////////////////////////////////////////////////
 		me.setUniqueIds();
 		
-		//////////////////////////////////////////////////
 		// set the stack layout
-		//////////////////////////////////////////////////
 		me.stackLayout = d3.layout.stack().values(function(d) {
 			return d.values;
 		});
 		
-		//////////////////////////////////////////////////
 		// apply the stack function to layers variable
-		//////////////////////////////////////////////////
 		me.layers = me.stackLayout(me.graphData);
 		
-		//////////////////////////////////////////////////
 		// set the max "Y" value
-		//////////////////////////////////////////////////
 		me.setYMax();
 		
-		//////////////////////////////////////////////////
 		// set X and Y scales, bring into local scope
-		//////////////////////////////////////////////////
 		me.setXScale();
 		me.setYScale();
 		var _xScale = me.xScale,
 			 _yScale = me.yScale;
-		
-		// calculate the totals for each "id" value in the domain
-		/*var totals = {};
-		me.graphData.forEach(function(category) {
-			category.values.forEach(function(item) {
-				totals[item.id] = (totals[item.id] || 0) + item.y; // not set yet !!
-			})
-		});*/
-		
-		//////////////////////////////////////////////////
+			
 		// "gCanvas" element
-		//////////////////////////////////////////////////
 		me.gCanvas = me.svg.append('svg:g')
 			.attr('transform', 'translate(' + me.margins.left + ', ' + me.margins.top + ')');
+			
+		// "gLegend" element, translate based on 
+		// the space the chart occupies including the padding
+		// translate down the Y axis a bit
+		var legendTranslateX = me.margins.left + 
+			(me.getFlexUnit() * me.chartFlex)
+			+ me.spaceBetweenChartAndLegend;
+		me.gLegend = me.svg.append('svg:g')
+			.attr('transform', 'translate(' + legendTranslateX + ', ' +  margins.top + ')');
 		
 		//////////////////////////////////////////////////
+		// rectangles
+		//////////////////////////////////////////////////	
 		// "gLayer" element
-		//////////////////////////////////////////////////
 		me.gLayer = me.gCanvas.selectAll('.layer')
 			.data(me.layers)
 			.enter()
@@ -195,16 +115,14 @@ Ext.define('App.util.d3.StackedBarChart', {
 				return colorScale(i);
 			});
 		
-		//////////////////////////////////////////////////
 		// adding rectangles to each layer "g" in "gLayer"
-		//////////////////////////////////////////////////
 		me.gLayer.selectAll('rect')
 			.data(function(d) {
 				return d.values;
 			})
 			.enter()
 			.append('rect')
-			.attr('fill-opacity', .6)
+			.attr('fill-opacity', .7)
 			.attr('stroke', 'black')
 			.style('stroke-width', 0.5)
 			.attr('width', me.xScale.rangeBand())
@@ -229,7 +147,7 @@ Ext.define('App.util.d3.StackedBarChart', {
 				}
 			})
 			.call(d3.helper.tooltip().text(me.tooltipFunction));
-
+			
 		//////////////////////////////////////////////////
 		// X axis
 		//////////////////////////////////////////////////
@@ -243,27 +161,58 @@ Ext.define('App.util.d3.StackedBarChart', {
 		// Y axis
 		//////////////////////////////////////////////////
 		me.gYAxis = me.gCanvas.append('svg:g')
-			.attr('class', 'axis');	
+			.attr('class', 'axis');
 		me.gYAxis.call(me.yAxis);
 		
+		//////////////////////////////////////////////////
+		// LEGEND RECTANGLES
+		//////////////////////////////////////////////////
+		me.gLegend.selectAll('rect')
+			.data(me.graphData)
+			.enter()
+			.append('rect')
+			.attr('x', 0)
+			.attr('y', function(d, i) {
+				return i * legendSquareHeight * 1.75;
+			})
+			.attr('width', me.legendSquareWidth)
+			.attr('height', me.legendSquareHeight)
+			.attr('fill', function(d, i) {
+				return colorScale(i);
+			});
+		
+		//////////////////////////////////////////////////
+		// LEGEND TEXT
+		//////////////////////////////////////////////////
+		me.gLegend.selectAll('text')
+			.data(me.graphData)
+			.enter()
+			.append('text')
+			.attr('x', legendSquareWidth * 2)
+			.attr('y', function(d, i) {
+				return i * legendSquareHeight * 1.75;
+			})
+			.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
+			.text(function(d) {
+				return d.category.toUpperCase();
+			});
+			
 		//////////////////////////////////////////////////
 		// TITLE
 		//////////////////////////////////////////////////
 		me.gTitle = me.svg.append('svg:g')
-			.attr('transform', 'translate(15,' + parseInt(me.margins.top/2) + ')');
+			.attr('transform', 'translate(15, ' + parseInt(me.margins.top/2) + ')');
 		
-		if(me.chartTitle != null) {
-			me.gTitle.selectAll('text')
-				.data([me.chartTitle])
-				.enter()
-				.append('text')
-				.style('fill', '#333333')
-				.style('font-weight', 'bold')
-				.style('font-family', 'sans-serif')
-				.text(function(d) {
-					return d;
-				});
-		}
+		me.gTitle.selectAll('text')
+			.data([me.chartTitle])
+			.enter()
+			.append('text')
+			.style('fill', '#333333')
+			.style('font-weight', 'bold')
+			.style('font-family', 'sans-serif')
+			.text(function(d) {
+				return d;
+			});
 	},
 	
 	/**
@@ -274,24 +223,21 @@ Ext.define('App.util.d3.StackedBarChart', {
 	transition: function() {
 		var me = this;
 		
-		//////////////////////////////////////////////////
 		// set new layers
-		//////////////////////////////////////////////////
 		me.layers = me.stackLayout(me.graphData);
 		
-		//////////////////////////////////////////////////
 		// set the new unique IDs
-		//////////////////////////////////////////////////
 		me.setUniqueIds();
 		me.setYMax();
 		me.setXScale();
 		me.setYScale();
 		
-		
 		// scales and vars into local scope
 		var _xScale = me.xScale,
 			 _yScale = me.yScale,
 			colorScale = me.colorScale,
+			legendSquareWidth = me.legendSquareWidth,
+			legendSquareHeight = me.legendSquareHeight,
 			handleEvents = me.handleEvents,
 			eventRelay = me.eventRelay,
 			mouseEvents = me.mouseEvents;
@@ -338,7 +284,7 @@ Ext.define('App.util.d3.StackedBarChart', {
 		// transition all 
 		rectSelection.transition()
 			.duration(500)
-			.attr('fill-opacity', .6)
+			.attr('fill-opacity', .7)
 			.attr('stroke', 'black')
 			.style('stroke-width', 0.5)
 			.attr('width', _xScale.rangeBand())
@@ -352,7 +298,7 @@ Ext.define('App.util.d3.StackedBarChart', {
 				return _yScale(d.y0) - _yScale(d.y0 + d.y);
 			});
 			
-		// mouse events
+		// call events
 		rectSelection.on('mouseover', function(d, i) {
 			if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
 				eventRelay.publish(
@@ -364,7 +310,6 @@ Ext.define('App.util.d3.StackedBarChart', {
 				);
 			}
 		});
-			
 		
 		// call tooltip function
 		rectSelection.call(d3.helper.tooltip().text(me.tooltipFunction));	
@@ -375,7 +320,57 @@ Ext.define('App.util.d3.StackedBarChart', {
 		me.gXAxis.transition().duration(500).call(me.xAxis);
 		me.gYAxis.transition().duration(500).call(me.yAxis);
 		
-
+		//////////////////////////////////////////////////
+		// LEGEND SQUARES
+		//////////////////////////////////////////////////
+		
+		// join new squares with current squares
+		var legendSquareSelection = me.gLegend.selectAll('rect')
+			.data(me.graphData);
+			
+		// remove old text
+		legendSquareSelection.exit().remove();
+		
+		// add new squares
+		legendSquareSelection.enter().append('rect');
+		
+		// transition all
+		legendSquareSelection.transition()
+			.attr('x', 0)
+			.attr('y', function(d, i) {
+				return i * legendSquareHeight * 1.75;
+			})
+			.attr('width', me.legendSquareWidth)
+			.attr('height', me.legendSquareHeight)
+			.attr('fill', function(d, i) {
+				return colorScale(i);
+			});
+			
+		//////////////////////////////////////////////////
+		// TRANSITION LEGEND TEXT
+		//////////////////////////////////////////////////
+		
+		// join new text with current text
+		var legendTextSelection = me.gLegend.selectAll('text')
+			.data(me.graphData);
+			
+		// remove old text
+		legendTextSelection.exit().remove();
+		
+		// add new
+		legendTextSelection.enter().append('text');
+		
+		// transition all
+		legendTextSelection.transition()
+			.attr('x', legendSquareWidth * 2)
+			.attr('y', function(d, i) {
+				return i * legendSquareHeight * 1.75;
+			})
+			.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
+			.text(function(d) {
+				return d.category.toUpperCase();
+			});
+			
 		//////////////////////////////////////////////////
 		// ADJUST THE REPORT TITLE
 		//////////////////////////////////////////////////
@@ -385,51 +380,30 @@ Ext.define('App.util.d3.StackedBarChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.StackedBarChart
- 	 * @description Set the new graphData object
- 	 * @param data Object
+ 	 * @description Set the color scale start value
+ 	 * @private
  	 */
-	setGraphData: function(data) {
-		var me = this;
-		
-		me.graphData = data;
-		
-		// changing the graph data changes the color scale
-		me.colorScale = d3.scale.linear()
-		 	.domain([0, data.length - 1])
-		 	.range([me.colorRangeStart, me.colorRangeEnd]);
-	},
-	
-	setUniqueIds: function() {
-		var me = this;
-		
-		me.uniqueIds = me.graphData[0].values.map(function(item) {
-		 	return item.id;
-		});
-	},
-	
-	setYMax: function() {
-		var me = this;
-		
-		// max Y value (y0) is the position on the Y scale
-		// where a particular rectangle ends
-		me.yMax = d3.max(me.layers, function(layer) {
-			return d3.max(layer.values, function(d) {
-				return d.y0 + d.y;
-			})
-		}, me);
+ 	setColorScale: function(startColor, endColor) {
+	 	var me = this;
+	 	
+	 	me.colorScale = d3.scale.linear()
+		 	.domain([0, me.graphData.length - 1])
+		 	.range([startColor, endColor]);
 	},
 	
 	/**
 	 * @function
+	 * @override
 	 * @description Set X scale and new X axis definition
 	 */
 	setXScale: function() {
+		
 		var me = this;
+		var chartUnits = me.getFlexUnit() * me.chartFlex;
 		
 		me.xScale = d3.scale.ordinal()
 			.domain(me.uniqueIds)
-			.rangeRoundBands([0, me.canvasWidth - me.margins.left - me.margins.right], .08);
+			.rangeRoundBands([0, chartUnits], .08);
 			
 		me.xAxis = d3.svg.axis()
 			.scale(me.xScale)
@@ -440,46 +414,19 @@ Ext.define('App.util.d3.StackedBarChart', {
 	
 	/**
  	 * @function
- 	 * @description Set Y scale and new Y axis definition
+ 	 * @memberOf App.util.d3.BarLegendChart
+ 	 * @description Return the width of a flex "unit"
  	 */
-	setYScale: function() {
-		var me = this;
+	getFlexUnit: function() {
+		var me = this,
+			canvasWidth = me.canvasWidth,
+			margins = me.margins,
+			spaceBetweenChartAndLegend = me.spaceBetweenChartAndLegend,
+			chartFlex = me.chartFlex,
+			legendFlex = me.legendFlex;
 		
-		me.yScale = d3.scale.linear()
-			.domain([0, me.yMax])
-			.range([me.canvasHeight - me.margins.top - me.margins.bottom, 0]);
-			
-		me.yAxis = d3.svg.axis()
-			.scale(me.yScale)
-			.tickSize(0)
-			.tickPadding(6)
-			.tickFormat(me.yTickFormat)
-			.orient('left');	
-	},
-	
-	/**
- 	 * @private
- 	 */
-	setTooltipFunction: function(fn) {
-		var me = this;
-
-		me.tooltipFunction = fn;
-	},
-	
-	/**
- 	 * @private
- 	 */
- 	setYTickFormat: function(fn) {
-	 	var me = this;
-	 	
-	 	me.yTickFormat = fn;
-	},
-	
-	/**
- 	 * @private
- 	 */
- 	setChartTitle: function(title) {
-	 	var me = this;
-	 	me.chartTitle = title;
+		var workingWidth = canvasWidth - margins.left - margins.right - spaceBetweenChartAndLegend;
+		
+		return Math.floor(workingWidth/(chartFlex + legendFlex));
 	}
 });

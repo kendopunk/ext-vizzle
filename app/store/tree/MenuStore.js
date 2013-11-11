@@ -30,14 +30,21 @@ Ext.define('App.store.tree.MenuStore', {
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'barstackMainPanel'
+				}, {
+					text: 'Stacked Bar Chart w/Legend',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'barstackLegendMainPanel'
 				}]
 			}, {
 				text: '<b>Pie Charts</b>',
 				iconCls: 'icon-pie-chart',
+				expanded: true,
 				children: [{
 					text: 'Pie Chart',
 					leaf: true,
-					iconCls: 'icon-arrow-right'
+					iconCls: 'icon-arrow-right',
+					id: 'pieMainPanel'
 				}, {
 					text: 'Pie Chart w/Legend',
 					leaf: true,
