@@ -7,6 +7,11 @@ Ext.define('App.util.d3.PieChart', {
 	svg: null,
 	
 	/**
+ 	 * default data metric
+ 	 */
+ 	dataMetric: null,
+	
+	/**
  	 * pie components
  	 */
  	pieLayout: null,
@@ -90,10 +95,19 @@ Ext.define('App.util.d3.PieChart', {
 	/**
  	 * mouse events
  	 */
-	mouseOverEvents: {
-		enabled: false,
-		eventName: '',
-		eventDataMetric: ''
+ 	mouseEvents: {
+ 		mouseover: {
+	 		enabled: false,
+	 		eventName: null
+	 	},
+	 	click: {
+		 	enabled: false,
+		 	eventName: null
+		},
+		dblclick: {
+			enabled: false,
+			eventName: null
+		}
 	},
 	
 	/**
@@ -125,7 +139,7 @@ Ext.define('App.util.d3.PieChart', {
 	 * @param metric String
 	 * @description Draw/initialize the pie chart
 	 */
-	draw: function(metric) {
+	draw: function() {
 		var me = this;
 		
 		//////////////////////////////////////////////////
@@ -138,7 +152,8 @@ Ext.define('App.util.d3.PieChart', {
 		//////////////////////////////////////////////////
 		// bring vars into local scope
 		//////////////////////////////////////////////////
-		var canvasWidth = me.canvasWidth,
+		var dataMetric = me.dataMetric,
+			canvasWidth = me.canvasWidth,
 			canvasHeight = me.canvasHeight,
 			colorScale = me.colorScale,
 			innerRadius = me.innerRadius,
@@ -166,7 +181,7 @@ Ext.define('App.util.d3.PieChart', {
 		me.pieLayout = d3.layout.pie()
 			.sort(null)
 			.value(function(d) {
-				return d[metric];
+				return d[dataMetric];
 			});
 		
 		//////////////////////////////////////////////////
@@ -236,7 +251,6 @@ Ext.define('App.util.d3.PieChart', {
 				.attr('text-anchor', function(d) {
 					return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';
 				})
-				.style('font-size', 10)
 				.text(me.labelFunction);
 		}
 		
@@ -265,14 +279,15 @@ Ext.define('App.util.d3.PieChart', {
  	 * @memberOf App.util.d3.PieChart
  	 * @description Transition the graphic
  	 */
-	transition: function(metric) {
+	transition: function() {
 		
 		var me = this;
 		
 		//////////////////////////////////////////////////
 		// vars into local scope
 		//////////////////////////////////////////////////
-		var colorScale = me.colorScale,
+		var dataMetric = me.dataMetric,
+			colorScale = me.colorScale,
 			innerRadius = me.innerRadius,
 			outerRadius = me.outerRadius;
 			
@@ -280,7 +295,7 @@ Ext.define('App.util.d3.PieChart', {
 		// new value function for pie layout
 		//////////////////////////////////////////////////
 		me.pieLayout.value(function(d) {
-			return d[metric];
+			return d[dataMetric];
 		});
 		
 		//////////////////////////////////////////////////
@@ -350,12 +365,11 @@ Ext.define('App.util.d3.PieChart', {
 					return 'translate(' + (x/h * outerRadius) + ',' + ((y/h * outerRadius) + i) + ')';
 				})
 				.attr('dy', function(d, i) {
-					return i%2 == 0 ? '.45em' : '.95em';
+					return i%2 == 0 ? '.35em' : '.95em';
 				})
 				.attr('text-anchor', function(d) {
 					return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';
 				})
-				.style('font-size', 10)
 				.text(me.labelFunction);
 		}
 				
@@ -394,12 +408,22 @@ Ext.define('App.util.d3.PieChart', {
 	},
 	
 	/**
+ 	 * @function
+ 	 */
+ 	setDataMetric: function(metric) {
+	 	var me = this;
+	 	
+	 	me.dataMetric = metric;
+	},
+	
+	/**
      * @function
      */
 	setOuterRadius: function(r) {
 		var me = this;
 		
 		me.outerRadius = r;
+		me.setArcObject();
 	},
 	
 	/**
@@ -409,8 +433,17 @@ Ext.define('App.util.d3.PieChart', {
 		var me = this;
 		
 		me.innerRadius = r;
+		me.setArcObject();
 	},
 	
+	setArcObject: function() {
+		var me = this;
+		
+		me.arcObject = d3.svg.arc()
+			.outerRadius(me.outerRadius)
+			.innerRadius(me.innerRadius);
+	},
+
 	/**
 	 * @function
 	 */
