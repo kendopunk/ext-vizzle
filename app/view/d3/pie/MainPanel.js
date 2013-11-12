@@ -55,11 +55,22 @@ Ext.define('App.view.d3.pie.MainPanel', {
 			targetIndex: 0,
 			handler: me.handleStateSelection,
 			scope: me
-		}, {
+		},
+			'-',
+		{
 			xtype: 'button',
 			text: 'New York',
 			abbrev: 'NY',
 			targetIndex: 1,
+			handler: me.handleStateSelection,
+			scope: me
+		},
+			'-',
+		{
+			xtype: 'button',
+			text: 'Arkansas',
+			abbrev: 'AR',
+			targetIndex: 2,
 			handler: me.handleStateSelection,
 			scope: me
 		}];
@@ -79,7 +90,7 @@ Ext.define('App.view.d3.pie.MainPanel', {
 	
 	/**
 	 * @function
-	 * @memberOf App.view.d3.barlegend.MainPanel
+	 * @memberOf App.view.d3.pie.MainPanel
 	 * @description Initialize SVG drawing canvas
 	 */
 	initCanvas: function() {
@@ -113,8 +124,6 @@ Ext.define('App.view.d3.pie.MainPanel', {
 		 		
 		 		// all the data 
 		 		me.atfData = resp.data;
-		 		
-		 		console.debug(me.atfData[0]);
 	 			
 	 			// init pie chart
 	 			me.pieChart = Ext.create('App.util.d3.PieChart', {
@@ -147,18 +156,27 @@ Ext.define('App.view.d3.pie.MainPanel', {
 	 	});
 	 },
 	 
+	 /**
+	  * @function
+	  * @memberOf App.util.d3.pie
+	  * @description Handle state selection button click
+	  */
 	 handleStateSelection: function(button, event) {
-	 	
 	 	var me = this;
 	 	
+	 	// set chart title
+	 	me.pieChart.setChartTitle(me.generateChartTitle(button.abbrev));
+	 	
+	 	// set data and transition
 	 	me.pieChart.setGraphData(me.atfData[button.targetIndex]['recoveries']);
-	 	
 	 	me.pieChart.transition('recovery');
-	 	
-	 	
-	 	
 	 },
 	 
+	 /**
+	  * @function
+	  * @memberOf App.util.d3.pie
+	  * @description Build a new chart title
+	  */
 	 generateChartTitle: function(append) {
 	 	var me = this;
 	 	

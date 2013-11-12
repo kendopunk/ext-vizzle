@@ -121,7 +121,7 @@ Ext.define('App.util.d3.PieChart', {
 	
 	/**
 	 * @function
-	 * @memberOf Sandbox.util.viz.PieChart
+	 * @memberOf App.util.d3.PieChart
 	 * @param metric String
 	 * @description Draw/initialize the pie chart
 	 */
@@ -202,29 +202,18 @@ Ext.define('App.util.d3.PieChart', {
 			.attr('defaultOpacity', .6)
 			.style('opacity', .6)
 			.call(d3.helper.tooltip().text(me.tooltipFunction))
-			/*.on('mouseover', function(d) {
-				
-				if(handleEvents && eventRelay && mouseOverEvents.enabled) {
-					eventRelay.publish(
-						mouseOverEvents.eventName,
-						{
-							value: d.data[mouseOverEvents.eventDataMetric]
-						}
-					);
-				}
-				
+			.on('mouseover', function(d) {
 				d3.select(this)
 					.style('opacity', 1)
 					.style('stroke', '#000000')
 					.style('stroke-width', 1);
 			})
-			
 			.on('mouseout', function(d) {
 				var el = d3.select(this);
 				el.style('opacity', el.attr('defaultOpacity'));
 				el.style('stroke', 'white')
 				el.style('stroke-width', 1);
-			})*/;
+			});
 		
 		//////////////////////////////////////////////////
 		// SHOW labels ??
@@ -277,10 +266,15 @@ Ext.define('App.util.d3.PieChart', {
  	 * @description Transition the graphic
  	 */
 	transition: function(metric) {
-		var me = this,
-			path = me.svg.datum(me.graphData).selectAll('path');
-			
-		var colorScale = me.colorScale;
+		
+		var me = this;
+		
+		//////////////////////////////////////////////////
+		// vars into local scope
+		//////////////////////////////////////////////////
+		var colorScale = me.colorScale,
+			innerRadius = me.innerRadius,
+			outerRadius = me.outerRadius;
 			
 		//////////////////////////////////////////////////
 		// new value function for pie layout
@@ -290,39 +284,81 @@ Ext.define('App.util.d3.PieChart', {
 		});
 		
 		//////////////////////////////////////////////////
-		// transition the arcs
-		//////////////////////////////////////////////////
-		path.data(me.pieLayout)
-			.transition()
-			.duration(250)
-			.attr('d', me.arcObject);
-			
-			
+		// join new arcs with old arcs
+		//////////////////////////////////////////////////	
 		var segments = me.gPie.selectAll('.arc')
 			.data(me.pieLayout(me.graphData));
-			
+		
+		//////////////////////////////////////////////////	
+		// transition out old segments
+		//////////////////////////////////////////////////
 		segments.exit().remove();
-		
-		var arcs = segments.selectAll('.arc');
-		
-		arcs.exit.remove();
-		
-		segments
-			.enter()
+
+		//////////////////////////////////////////////////
+		// build new segments
+		//////////////////////////////////////////////////	
+		segments.enter()
 			.append('g')
-			.attr('class', 'arc');
-			
-			segments.append('path')
+			.attr('class', 'arc')
+			.append('path')
 			.attr('d', me.arcObject)
 			.style('fill', function(d, i) {
 				return colorScale(i);
 			})
 			.attr('defaultOpacity', .6)
-			.style('opacity', .6);
-	 	
-	 	segments
+			.style('opacity', .6)
 			.call(d3.helper.tooltip().text(me.tooltipFunction))
+			.on('mouseover', function(d) {
+				d3.select(this)
+					.style('opacity', 1)
+					.style('stroke', '#000000')
+					.style('stroke-width', 1);
+			})
+			.on('mouseout', function(d) {
+				var el = d3.select(this);
+				el.style('opacity', el.attr('defaultOpacity'));
+				el.style('stroke', 'white')
+				el.style('stroke-width', 1);
+			});
 			
+		//////////////////////////////////////////////////
+		// handle path changes
+		//////////////////////////////////////////////////	
+		me.svg.datum(me.graphData).selectAll('path')
+			.data(me.pieLayout)
+			.transition()
+			.duration(250)
+			.attr('d', me.arcObject);
+		
+		//////////////////////////////////////////////////
+		// transition labels
+		//////////////////////////////////////////////////
+		if(me.showLabels) {
+			var arc = me.arcObject;
+			
+			// remove current text elements
+			me.gPie.selectAll('text').remove();
+			
+			// replacements
+			segments.append('text')
+				.attr('transform', function(d, i) {
+					var c = arc.centroid(d),
+						x = c[0],
+						y = c[1],
+						h = Math.sqrt(x*x + y*y);
+						
+					return 'translate(' + (x/h * outerRadius) + ',' + ((y/h * outerRadius) + i) + ')';
+				})
+				.attr('dy', function(d, i) {
+					return i%2 == 0 ? '.45em' : '.95em';
+				})
+				.attr('text-anchor', function(d) {
+					return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';
+				})
+				.style('font-size', 10)
+				.text(me.labelFunction);
+		}
+				
 		//////////////////////////////////////////////////
 		// transition chart title
 		//////////////////////////////////////////////////
@@ -357,18 +393,36 @@ Ext.define('App.util.d3.PieChart', {
 		}
 	},
 	
+	/**
+     * @function
+     */
 	setOuterRadius: function(r) {
 		var me = this;
 		
 		me.outerRadius = r;
 	},
 	
+	/**
+ 	 * @function
+ 	 */
 	setInnerRadius: function(r) {
 		var me = this;
 		
 		me.innerRadius = r;
 	},
 	
+	/**
+	 * @function
+	 */
+	setChartTitle: function(title) {
+		var me = this;
+		
+		me.chartTitle = title;
+	},
+	
+	/**
+	 * @function
+	 */
 	setGraphData: function(data) {
 		var me = this;
 		
