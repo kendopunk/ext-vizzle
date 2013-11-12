@@ -99,5 +99,20 @@
 			"caliber": "20ga",
 			"recovery": 22
 		}]
+	}, {
+		"state": "GA",
+		"recoveries": [{
+			"caliber": "9mm",
+			"recovery": 2323
+		}, {
+			"caliber": ".32 cal",
+			"recovery": 357
+		}, {
+			"caliber": ".40 S&W",
+			"recovery": 1246
+		}, {
+			"caliber": "12ga",
+			"recovery": 796
+		}]
 	}]
 }

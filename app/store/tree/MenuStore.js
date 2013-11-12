@@ -48,7 +48,8 @@ Ext.define('App.store.tree.MenuStore', {
 				}, {
 					text: 'Pie Chart w/Legend',
 					leaf: true,
-					iconCls: 'icon-arrow-right'
+					iconCls: 'icon-arrow-right',
+					id: 'pielegendMainPanel'
 				}]
 			}]
 		}]

@@ -315,7 +315,7 @@ Ext.define('App.util.d3.StackedBarLegendChart', {
 		rectSelection.call(d3.helper.tooltip().text(me.tooltipFunction));	
 			
 		//////////////////////////////////////////////////
-		// transition the
+		// transition the axes
 		//////////////////////////////////////////////////
 		me.gXAxis.transition().duration(500).call(me.xAxis);
 		me.gYAxis.transition().duration(500).call(me.yAxis);

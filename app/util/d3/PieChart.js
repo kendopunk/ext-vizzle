@@ -1,3 +1,8 @@
+/**
+ * @class
+ * @memberOf App.util.d3
+ * @description Simple pie chart class
+ */
 Ext.define('App.util.d3.PieChart', {
 
 	/**
