@@ -63,7 +63,7 @@ Ext.define('App.util.d3.PieChart', {
 	/**
  	 * Show pie chart labels, default true
  	 */
-	showLabels: true,
+	showLabels: false,
 
 	/**
 	 * Default function for the tooltip
@@ -122,20 +122,13 @@ Ext.define('App.util.d3.PieChart', {
 	clearMode: 'scale',
 		
 	constructor: function(config) {
-		Ext.apply(this, config);
+		var me = this;
 		
-		if(config.handleEvents) {
-			this.eventRelay = Ext.create('Sandbox.util.MessageBus')
+		Ext.apply(me, config);
+		
+		if(me.handleEvents) {
+			me.eventRelay = Ext.create('App.util.MessageBus')
 		}
-	},
-	
-	/**
- 	 * @function
- 	 * @memberOf Sandbox.util.viz.PieChart
- 	 * @description Change inner radius
- 	 */
-	setInnerRadius: function(r) {
-		this.innerRadius = r;
 	},
 	
 	/**
@@ -222,7 +215,7 @@ Ext.define('App.util.d3.PieChart', {
 			.attr('defaultOpacity', .6)
 			.style('opacity', .6)
 			.call(d3.helper.tooltip().text(me.tooltipFunction))
-			.on('mouseover', function(d) {
+			.on('mouseover', function(d, i) {
 				d3.select(this)
 					.style('opacity', 1)
 					.style('stroke', '#000000')
@@ -328,7 +321,7 @@ Ext.define('App.util.d3.PieChart', {
 			.attr('defaultOpacity', .6)
 			.style('opacity', .6)
 			.call(d3.helper.tooltip().text(me.tooltipFunction))
-			.on('mouseover', function(d) {
+			.on('mouseover', function(d, i) {
 				d3.select(this)
 					.style('opacity', 1)
 					.style('stroke', '#000000')
@@ -376,6 +369,12 @@ Ext.define('App.util.d3.PieChart', {
 					return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';
 				})
 				.text(me.labelFunction);
+		} else {
+			me.gPie.selectAll('text')
+				.transition()
+				.duration(250)
+				.attr('y', 1000)
+				.remove();
 		}
 				
 		//////////////////////////////////////////////////
@@ -391,6 +390,7 @@ Ext.define('App.util.d3.PieChart', {
 	
 	/**
  	 * @function
+ 	 * @memberOf App.util.d3.PieChart
  	 */
 	getClearMode: function() {
 		var me = this;
@@ -414,6 +414,7 @@ Ext.define('App.util.d3.PieChart', {
 	
 	/**
  	 * @function
+ 	 * @memberOf App.util.d3.PieChart
  	 */
  	setDataMetric: function(metric) {
 	 	var me = this;
@@ -423,6 +424,7 @@ Ext.define('App.util.d3.PieChart', {
 	
 	/**
      * @function
+     * @memberOf App.util.d3.PieChart
      */
 	setOuterRadius: function(r) {
 		var me = this;
@@ -433,6 +435,7 @@ Ext.define('App.util.d3.PieChart', {
 	
 	/**
  	 * @function
+ 	 * @memberOf App.util.d3.PieChart
  	 */
 	setInnerRadius: function(r) {
 		var me = this;
@@ -441,6 +444,10 @@ Ext.define('App.util.d3.PieChart', {
 		me.setArcObject();
 	},
 	
+	/**
+ 	 * @function
+ 	 * @memberOf App.util.d3.PieChart
+ 	 */
 	setArcObject: function() {
 		var me = this;
 		
@@ -451,6 +458,7 @@ Ext.define('App.util.d3.PieChart', {
 
 	/**
 	 * @function
+	 * @memberOf App.util.d3.PieChart
 	 */
 	setChartTitle: function(title) {
 		var me = this;
@@ -460,10 +468,22 @@ Ext.define('App.util.d3.PieChart', {
 	
 	/**
 	 * @function
+	 * @memberOf App.util.d3.PieChart
 	 */
 	setGraphData: function(data) {
 		var me = this;
 		
 		me.graphData = data;
+	},
+	
+	/**
+ 	 * @function
+ 	 * @memberOf App.util.d3.PieChart
+ 	 * @description Show/hide labels
+ 	 */
+ 	setShowLabels: function(bool) {
+	 	var me = this;
+	 	
+	 	me.showLabels = bool;
 	}
 });

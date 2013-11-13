@@ -70,6 +70,7 @@ Ext.define('App.util.d3.PieLegendChart', {
 			legendSquareHeight = me.legendSquareHeight,
 			handleEvents = me.handleEvents,
 			eventRelay = me.eventRelay,
+			mouseEvents = me.mouseEvents,
 			clearMode = me.clearMode,
 			chartFlex = me.chartFlex,
 			legendFlex = me.legendFlex;
@@ -145,7 +146,15 @@ Ext.define('App.util.d3.PieLegendChart', {
 			.data(me.pieLayout(me.graphData))
 			.enter()
 			.append('g')
-			.attr('class', 'arc');
+			.attr('class', 'arc')
+			.on('mouseover', function(d, i) {
+				if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
+					eventRelay.publish(mouseEvents.mouseover.eventName, {
+						payload: d,
+						index: i
+					});
+				}
+			});
 		
 		//////////////////////////////////////////////////
 		// append the paths
@@ -158,7 +167,7 @@ Ext.define('App.util.d3.PieLegendChart', {
 			.attr('defaultOpacity', .6)
 			.style('opacity', .6)
 			.call(d3.helper.tooltip().text(me.tooltipFunction))
-			.on('mouseover', function(d) {
+			.on('mouseover', function(d, i) {
 				d3.select(this)
 					.style('opacity', 1)
 					.style('stroke', '#000000')
@@ -256,7 +265,6 @@ Ext.define('App.util.d3.PieLegendChart', {
 					return i == j;
 				})
 				.transition()
-				.duration(250)
 				.attr('transform', 'scale(1,1)');
 			});
 
@@ -297,7 +305,10 @@ Ext.define('App.util.d3.PieLegendChart', {
 			innerRadius = me.innerRadius,
 			outerRadius = me.outerRadius,
 			legendSquareWidth = me.legendSquareWidth,
-			legendSquareHeight = me.legendSquareHeight;
+			legendSquareHeight = me.legendSquareHeight,
+			handleEvents = me.handleEvents,
+			eventRelay = me.eventRelay,
+			mouseEvents = me.mouseEvents;
 			
 		//////////////////////////////////////////////////
 		// new value function for pie layout
@@ -320,10 +331,22 @@ Ext.define('App.util.d3.PieLegendChart', {
 		//////////////////////////////////////////////////
 		// build new segments
 		//////////////////////////////////////////////////	
-		segments.enter()
+		var newSegments = segments.enter()
 			.append('g')
 			.attr('class', 'arc')
-			.append('path')
+			.on('mouseover', function(d, i) {
+				if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
+					eventRelay.publish(mouseEvents.mouseover.eventName, {
+						payload: d,
+						index: i
+					});
+				}
+			});
+		
+		//////////////////////////////////////////////////
+		// append paths to new segments
+		//////////////////////////////////////////////////	
+		newSegments.append('path')
 			.attr('d', me.arcObject)
 			.style('fill', function(d, i) {
 				return colorScale(i);
@@ -332,6 +355,7 @@ Ext.define('App.util.d3.PieLegendChart', {
 			.style('opacity', .6)
 			.call(d3.helper.tooltip().text(me.tooltipFunction))
 			.on('mouseover', function(d) {
+				
 				d3.select(this)
 					.style('opacity', 1)
 					.style('stroke', '#000000')
@@ -379,12 +403,23 @@ Ext.define('App.util.d3.PieLegendChart', {
 					return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';
 				})
 				.text(me.labelFunction);
+		} else {
+			me.gPie.selectAll('text')
+				.transition()
+				.duration(250)
+				.attr('y', 1000)
+				.remove();
 		}
+		
+		//////////////////////////////////////////////////
+		// bring the pie "g" into local scope
+		//////////////////////////////////////////////////
+		var thePie = me.gPie;
 		
 		//////////////////////////////////////////////////
 		// LEGEND SQUARES
 		//////////////////////////////////////////////////
-		
+
 		// join new squares with current squares
 		var legendSquareSelection = me.gLegend.selectAll('rect')
 			.data(me.graphData);
@@ -393,8 +428,8 @@ Ext.define('App.util.d3.PieLegendChart', {
 		legendSquareSelection.exit().remove();
 		
 		// add new squares
-		legendSquareSelection.enter().append('rect');
-		
+		legendSquareSelection.enter().append('rect')
+
 		// transition all
 		legendSquareSelection.transition()
 			.attr('x', 0)
@@ -406,7 +441,8 @@ Ext.define('App.util.d3.PieLegendChart', {
 			.attr('fill', function(d, i) {
 				return colorScale(i);
 			});
-			
+		
+		
 		//////////////////////////////////////////////////
 		// TRANSITION LEGEND TEXT
 		//////////////////////////////////////////////////
@@ -419,16 +455,12 @@ Ext.define('App.util.d3.PieLegendChart', {
 		legendTextSelection.exit().remove();
 		
 		// add new
-		legendTextSelection.enter().append('text');
-		
-		// transition all
-		legendTextSelection.transition()
+		legendTextSelection.enter().append('text')
 			.attr('x', legendSquareWidth * 2)
 			.attr('y', function(d, i) {
 				return i * legendSquareHeight * 1.75;
 			})
 			.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
-			.text(me.legendTextFunction)
 			.on('mouseover', function(d, i) {
 				// highlight this text
 				d3.select(this)
@@ -453,10 +485,12 @@ Ext.define('App.util.d3.PieLegendChart', {
 					return i == j;
 				})
 				.transition()
-				.duration(250)
 				.attr('transform', 'scale(1,1)');
 			});
-				
+		
+		// transition all
+		legendTextSelection.transition().text(me.legendTextFunction);
+
 		//////////////////////////////////////////////////
 		// transition chart title
 		//////////////////////////////////////////////////

@@ -119,7 +119,8 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 		} else {
 			me.barLegendChart.setYTickFormat(App.util.Global.svg.wholeDollarTickFormat);
 		}
-		me.barLegendChart.transition(btn.metric);
+		me.barLegendChart.setDataMetric(btn.metric);
+		me.barLegendChart.transition();
 	},
 	
 	/**
@@ -160,7 +161,7 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 					canvasWidth: me.canvasWidth,
 					canvasHeight: me.canvasHeight,
 					graphData: me.graphData,
-					defaultMetric: 'gross',
+					dataMetric: me.defaultMetric,
 					panelId: me.panelId,
 					chartFlex: 4,
 					legendFlex: 1,
