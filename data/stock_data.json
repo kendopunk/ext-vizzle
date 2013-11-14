@@ -52,7 +52,7 @@
 		"ticker": "WFC",
 		"name": "Wells Fargo",
 		"price": 42.76,
-		"change": .48
+		"change": .48,
 		"pctChange": 1.14
 	}, {
 		"ticker": "M",

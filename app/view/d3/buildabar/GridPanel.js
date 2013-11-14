@@ -1,80 +1,65 @@
 /**
  * @class
- * @memberOf App.view.d3.bar
+ * @memberOf App.view.d3.buildabar
  * @description SVG panel
  * @extend Ext.panel.Panel
  */
-Ext.define('App.view.d3.bar.GridPanel', {
+Ext.define('App.view.d3.buildabar.GridPanel', {
 	extend: 'Ext.grid.Panel',
 	plain: true,
 	autoScroll: true,
 	title: 'Grid',
+	multiSelect: true,
 	
 	requires: [
-		'Ext.window.MessageBox'
+		'App.store.stock.StockStore'
 	],
+	
+	stripeRows: true,
+	
+	enableDragDrop: true,
+	
+	viewConfig: {
+		plugins: {
+			ptype: 'gridviewdragdrop',
+			ddGroup: 'vizPanelDDGroup',
+			enableDrop: false
+		}
+	},
 	
 	initComponent: function() {
 		var me = this;
 		
 		/**
- 		 * Sample for S GRAY
- 		 */
-		me.plugins = [
-			Ext.create('Ext.grid.plugin.CellEditing', {
-				clicksToEdit: 1,
-				listeners: {
-					edit: me.testEdit,
-					scope: me
-				}
-			}, me)
-		];
-		
-		/**
- 		 * event relay
+ 		 * @property
  		 */
  		me.eventRelay = Ext.create('App.util.MessageBus');
- 		me.eventRelay.subscribe('barGridPanelRowHighlight', me.gridRowHighlight, me);
-		
+ 		me.eventRelay.subscribe('BuildABarPanelRendered', me.loadGridStore, me);
+ 		
+		/**
+		 * @property
+		 * @description Grid store
+		 */
+		me.store = Ext.create('App.store.stock.StockStore');
+		 
 		/**
  		 * @property
  		 * @description Column definitions
  		 */
  		me.columns = [
- 			App.util.ColumnDefinitions.movieTitle,
- 			App.util.ColumnDefinitions.grossBO,
- 			App.util.ColumnDefinitions.numTheaters,
- 			App.util.ColumnDefinitions.openingBO,
- 			App.util.ColumnDefinitions.releaseDate,
- 			App.util.ColumnDefinitions.imdbRating
+ 			App.util.ColumnDefinitions.tickerSymbol,
+ 			App.util.ColumnDefinitions.tickerPrice,
+ 			App.util.ColumnDefinitions.tickerChange,
+ 			//App.util.ColumnDefinitions.tickerName,
+ 			App.util.ColumnDefinitions.tickerPctChange
 		];
 		
 		me.callParent(arguments);
 	},
 	
-	/**
- 	 * @function
- 	 * @memberOf App.view.d3.bar.GridPanel
- 	 * @param obj Generic obj {title: ''}
- 	 * @description Attempt to highlight a grid row based on a movie title value
- 	 */
-	gridRowHighlight: function(obj) {
+	loadGridStore: function() {
 		var me = this;
 		
-		var record = me.getStore().findRecord('title', obj.payload.title);
-		if(record) {
-			var rowIndex = me.getStore().indexOf(record);
-			me.getSelectionModel().select(rowIndex);
-		}
-	},
-	
-	testEdit: function(editor, e, eOpts) {
-		var re = /^\s*\d+\s*$/;
-		if(!re.test(e.value)) {
-			Ext.Msg.alert('Error', 'Numbers only');
-			e.record.reject();
-			return;
-		}
-		e.record.commit();
+		me.store.load();
 	}
 });

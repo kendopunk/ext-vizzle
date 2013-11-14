@@ -1,25 +1,36 @@
 /**
  * @class
- * @memberOf App.view.d3.bar
+ * @memberOf App.view.d3.buildabar
  * @description SVG panel
  * @extend Ext.panel.Panel
  */
-Ext.define('App.view.d3.bar.VizPanel', {
+Ext.define('App.view.d3.buildabar.VizPanel', {
 	extend: 'Ext.panel.Panel',
 	plain: true,
 	autoScroll: true,
-	collapsible: true,
 	
 	requires: [
-		'App.util.JsonBuilder',
 		'App.util.d3.BarChart',
-		'App.store.movie.MovieMetricStore'
 	],
 	
 	listeners: {
 		afterrender: function(panel) {
-			panel.getEl().mask('Drawing...');
-			panel.initCanvas();
+			panel.eventRelay.publish('BuildABarPanelRendered', true);
+			
+			panel.dropTarget = Ext.create('Ext.dd.DropTarget', panel.body.dom, {
+		 		ddGroup: 'vizPanelDDGroup',
+		 		notifyEnter: function(ddSource, e, data) {
+			 		console.log('entered panel...');
+			 	},
+			 	notifyDrop: function(ddSource, e, data) {
+			 		if(!panel.svgInitialized) {
+			 			panel.initCanvas(data.records);
+			 		} else {
+				 		panel.transitionCanvas(data.records);
+			 		}
+				 	return true;
+				}
+			});
 		}
 	},
 	
@@ -38,79 +49,58 @@ Ext.define('App.view.d3.bar.VizPanel', {
  			me.g,
  			me.panelId,
  			me.barChart = null,
- 			me.defaultMetric = 'gross',
- 			me.defaultMetricText = 'Gross Box Office',
- 			me.currentMetric = 'gross',
- 			me.baseTitle = 'Box Office Statistics',
- 			me.eventRelay = Ext.create('App.util.MessageBus');
+ 			me.defaultMetric = 'price',
+ 			me.currentMetric = 'price',
+ 			me.defaultMetricText = 'Price',
+ 			me.baseTitle = 'Random Stock Data',
+ 			me.eventRelay = Ext.create('App.util.MessageBus'),
+ 			me.dropTarget;
  			
+ 		////////////////////////////////////////
+ 		// button configs
+ 		////////////////////////////////////////
+ 		
+ 		me.priceButton = Ext.create('Ext.button.Button', {
+ 			text: 'Price',
+ 			metric: 'price',
+ 			iconCls: 'icon-tick',
+ 			handler: me.transitionHandler,
+ 			scope: me
+ 		});
+ 		
+ 		me.changeButton = Ext.create('Ext.button.Button', {
+ 			text: 'Change',
+ 			metric: 'change',
+ 			handler: me.transitionHandler,
+ 			scope: me
+ 		});
+ 		
+ 		me.pctChangeButton = Ext.create('Ext.button.Button', {
+ 			text: '% Change',
+ 			metric: 'pctChange',
+ 			handler: me.transitionHandler,
+ 			scope: me
+ 		});
+ 		
+ 		
  		/**
   		 * @property
-  		 * @type Ext.toolbar.Toolbar
   		 */
-  		me.tbar = [{
-		  	xtype: 'button',
-		  	iconCls: 'icon-dollar',
-		  	metric: 'gross',
-		  	text: me.defaultMetricText,
-			handler: me.metricHandler,
-			scope: me
-		}, {
-			xtype: 'button',
-			iconCls: 'icon-film',
-			metric: 'theaters',
-			text: '# Theaters',
-			handler: me.metricHandler,
-			scope: me
-		}, {
-			xtype: 'button',
-			iconCls: 'icon-dollar',
-			metric: 'opening',
-			text: 'Opening Weekend',
-			handler: me.metricHandler,
-			scope: me
-		}, {
-			xtype: 'button',
-			iconCls: 'icon-star',
-			metric: 'imdbRating',
-			text: 'IMDB Rating',
-			handler: me.metricHandler,
-			scope: me
-		}];
-		
+  		me.eventRelay = Ext.create('App.util.MessageBus');
+
 		me.callParent(arguments);
 	},
 	
 	/**
-	 * @function
-	 * @memberOf App.view.d3.bar.VizPanel
-	 * @description Toolbar button handler
-	 */
-	metricHandler: function(btn, evt) {
-		var me = this;
-		
-		me.currentMetric = btn.metric;
-		if(btn.metric == 'theaters') {
-			me.barChart.setYTickFormat(App.util.Global.svg.numberTickFormat);
-		} else if(btn.metric == 'imdbRating') {
-			me.barChart.setYTickFormat(function(d) {
-				return Ext.util.Format.number(d, '0.0');
-			});
-		} else {
-			me.barChart.setYTickFormat(App.util.Global.svg.wholeDollarTickFormat);
-		}
-		me.barChart.setChartTitle(me.generateChartTitle(btn.text));
-		me.barChart.setDataMetric(btn.metric);
-		me.barChart.transition();
-	},
-	
-	/**
  	 * @function
- 	 * @memberOf App.view.d3.bar.VizPanel
+ 	 * @memberOf App.view.d3.buildabar.VizPanel
  	 * @description Initialize the drawing canvas
+ 	 * @param records Array of record objects
  	 */
- 	initCanvas: function() {
+ 	initCanvas: function(records) {
 	 	var me = this;
+	 	
+	 	me.getEl().mask('Drawing...');
 	 	
 	 	// initialize SVG, width, height
  		me.svgInitialized = true,
@@ -124,54 +114,70 @@ Ext.define('App.view.d3.bar.VizPanel', {
 	 		.attr('width', me.canvasWidth)
 	 		.attr('height', me.canvasHeight);
 	 		
-	 	// load store and build chart
-	 	me.dataStore.load({
-	 		callback: function(records) {
-	 		
-		 		me.graphData = App.util.JsonBuilder.buildMovieDataJson(records);
-
-		 		me.barChart = Ext.create('App.util.d3.BarChart', {
-					svg: me.svg,
-					canvasWidth: me.canvasWidth,
-					canvasHeight: me.canvasHeight,
-					graphData: me.graphData,
-					dataMetric: me.defaultMetric,
-					panelId: me.panelId,
-					showLabels: true,
-					labelFunction: function(data, index) {
-						return data.title;
-					},
-					margins: {
-						top: 20,
-						right: 10,
-						bottom: 10,
-						left: 100,
-						leftAxis: 85
-					},
-					tooltipFunction: function(data, index) {
-						return '<b>' + data.title + '</b> (' + data.release+ ')<br>'
-							+ 'Gross: ' + Ext.util.Format.currency(data.gross, false, '0', false) + '<br>'
-							+ 'Theaters: ' + data.theaters + '<br>'
-							+ 'Opening: ' + Ext.util.Format.currency(data.opening, false, '0', false) + '<br>'
-							+ 'IMDB Rating: ' + data.imdbRating;
-					},
-					handleEvents: true,
-					mouseEvents: {
-						mouseover: {
-							enabled: true,
-							eventName: 'barGridPanelRowHighlight'
-						}
-					},
-					chartTitle: me.generateChartTitle(me.defaultMetricText),
-					yTickFormat: App.util.Global.svg.wholeDollarTickFormat
-				}, me);
-				
-				me.getEl().unmask();
-				
-				me.barChart.draw();
+	 	// init graph data
+	 	Ext.each(records, function(rec) {
+		 	me.graphData.push(rec.data);
+		}, me);
+		
+		// build the chart
+	 	me.barChart = Ext.create('App.util.d3.BarChart', {
+			svg: me.svg,
+			canvasWidth: me.canvasWidth,
+			canvasHeight: me.canvasHeight,
+			graphData: me.graphData,
+			dataMetric: me.defaultMetric,
+			panelId: me.panelId,
+			showLabels: true,
+			labelFunction: function(data, index) {
+				return data.ticker;
 			},
-			scope: me
-		});
+			margins: {
+				top: 20,
+				right: 10,
+				bottom: 10,
+				left: 100,
+				leftAxis: 85
+			},
+			tooltipFunction: function(data, index) {
+				return '<b>' + data.name + '</b> (' + data.ticker + ')<br><br>'
+					+ 'Close Price: ' + Ext.util.Format.currency(data.price);
+			},
+			handleEvents: false,
+			chartTitle: me.generateChartTitle(me.defaultMetricText),
+			yTickFormat: App.util.Global.svg.currencyTickFormat
+		}, me);
+		
+		me.barChart.draw();
+		
+		me.getEl().unmask();
+	},
+	
+	transitionCanvas: function(records) {
+		var me = this;
+		
+		Ext.each(records, function(rec) {
+			me.graphData.push(rec.data);
+		}, me);
+		
+		me.barChart.setGraphData(me.graphData);
+		me.barChart.transition();
+	},
+	
+	transitionHandler: function(btn, event) {
+		if(btn.text == 'Change') {
+		
+		} else if(btn.text == '% Change') {
+		
+		} else {
+			
+		}
+		
+		me.barChart.setDataMetric(btn.metric);
+		me.barChart.transition();
+	
+	
+	
+	
 	},
 	
 	/** 

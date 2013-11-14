@@ -11,59 +11,54 @@ Ext.define('App.view.d3.buildabar.MainPanel', {
 	
 	requires: [
 		'App.util.MessageBus',
-		//'App.view.d3.buildabar.VizPanel',
-		//'App.view.d3.buildabar.GridPanel',
-		//'App.store.movie.MovieStore'
+		'App.view.d3.buildabar.VizPanel',
+		'App.view.d3.buildabar.GridPanel'
 	],
 	
-	//layout: 'border',
+	layout: 'border',
 	
 	initComponent: function() {
 		var me = this;
 		
 		// chart description for info panel
-		me.chartDescription = '<b>Build-A-Bar (Chart)</b><br><br>';
-		
-		/*
+		me.chartDescription = '<b>Build-A-Bar (Chart)</b><br><br>'
+			+ 'Drag record(s) from the grid to the chart to dynamically build a bar chart.';
+			
 		// layout vars
-		me.gridPanelHeight = 225,
+		me.gridPanelWidth = 330,
 			me.vizPanelWidth = parseInt(
-				Ext.getBody().getViewSize().width - 225
+				Ext.getBody().getViewSize().width
+				- 330
+				- App.util.Global.westPanelWidth
 			),
 			me.vizPanelHeight = parseInt(
-				(Ext.getBody().getViewSize().height 
-					- App.util.Global.titlePanelHeight 
-					- me.gridPanelHeight
-					- 15)
+				Ext.getBody().getViewSize().height
+				- App.util.Global.titlePanelHeight
+				- 15
 			),
 			me.eventRelay = Ext.create('App.util.MessageBus');
 			
-		// shared store
-		movieStore = Ext.create('App.store.movie.MovieStore');
-		
-		// visualization panel (north)
-		me.vizPanel = Ext.create('App.view.d3.bar.VizPanel', {
-			region: 'north',
+		// viz panel (north)
+		me.vizPanel = Ext.create('App.view.d3.buildabar.VizPanel', {
+			region: 'west',
 			width: me.vizPanelWidth,
 			height: me.vizPanelHeight,
-			dataStore: movieStore,
 			layout: 'fit'
 		});
 		
-		// grid panel (center)
-		me.gridPanel = Ext.create('App.view.d3.bar.GridPanel', {
+		// grid panel (center...south)
+		me.gridPanel = Ext.create('App.view.d3.buildabar.GridPanel', {
 			region: 'center',
-			title: 'Movie Data Grid',
-			height: me.gridPanelHeight,
-			store: movieStore
+			title: 'Stock Data',
+			//width: me.gridPanelWidth,
+			width: 300,
+			height: '100%'
 		});
-		
 		// configure items
 		me.items = [
 			me.vizPanel,
 			me.gridPanel
 		];
-		*/
 		
 		// on activate, publish update to the "Info" panel
 		me.on('activate', function() {
