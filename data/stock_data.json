@@ -1,0 +1,64 @@
+{
+	"success": true,
+	"data": [{
+		"ticker": "BAC",
+		"name": "Bank of America Corp",
+		"price": 14.64,
+		"change": .32,
+		"pctChange": 2.23
+	}, {
+		"ticker": "MSFT",
+		"name": "Microsoft Corp",
+		"price": 38.16,
+		"change": .8,
+		"pctChange": 2.13
+	}, {
+		"ticker": "CSCO",
+		"name": "Cisco Systems Inc",
+		"price": 24.00,
+		"change": .26,
+		"pctChange": 1.12
+	}, {
+		"ticker": "GM",
+		"name": "General Motors",
+		"price": 38.44,
+		"change": 1.78,
+		"pctChange": 4.86
+	}, {
+		"ticker": "F",
+		"name": "Ford Motor Co",
+		"price": 17.10,
+		"change": .38,
+		"pctChange": 2.27
+	}, {
+		"ticker": "MU",
+		"name": "Micron Technology Inc",
+		"price": 18.92,
+		"change": .29,
+		"pctChange": 1.56
+	}, {
+		"ticker": "JCP",
+		"name": "JC Penney",
+		"price": 8.67,
+		"change": .30,
+		"pctChange": 3.58
+	}, {
+		"ticker": "PFE",
+		"name": "Pfizer Inc",
+		"price": 31.87,
+		"change": .49,
+		"pctChange": 1.56
+	}, {
+		"ticker": "WFC",
+		"name": "Wells Fargo",
+		"price": 42.76,
+		"change": .48
+		"pctChange": 1.14
+	}, {
+		"ticker": "M",
+		"name": "Macy's Inc",
+		"price": 50.68,
+		"change": 4.35,
+		"pctChange": 9.39
+	}]
+}

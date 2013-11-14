@@ -64,6 +64,7 @@ Ext.define('App.util.d3.PieChart', {
  	 * Show pie chart labels, default true
  	 */
 	showLabels: false,
+	labelFontSize: 10,
 
 	/**
 	 * Default function for the tooltip
@@ -249,6 +250,7 @@ Ext.define('App.util.d3.PieChart', {
 				.attr('text-anchor', function(d) {
 					return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';
 				})
+				.style('font-size', me.labelFontSize)
 				.text(me.labelFunction);
 		}
 		
@@ -368,6 +370,7 @@ Ext.define('App.util.d3.PieChart', {
 				.attr('text-anchor', function(d) {
 					return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';
 				})
+				.style('font-size', me.labelFontSize)
 				.text(me.labelFunction);
 		} else {
 			me.gPie.selectAll('text')

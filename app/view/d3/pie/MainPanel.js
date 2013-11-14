@@ -176,6 +176,7 @@ Ext.define('App.view.d3.pie.MainPanel', {
 					graphData: me.atfData[0]['recoveries'],
 					panelId: me.panelId,
 					chartTitle: me.generateChartTitle('TX'),
+					showLabels: true,
 					labelFunction: function(data, index) {
 						return data.data.caliber;
 					},
