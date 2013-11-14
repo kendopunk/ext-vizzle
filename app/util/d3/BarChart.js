@@ -53,10 +53,10 @@ Ext.define('App.util.d3.BarChart', {
 	graphData: [],
 	
 	/**
- 	 * Default metric, i.e. data[defaultMetric] to use when initializing
+ 	 * Default metric, i.e. data[dataMetric] to use when initializing
  	 * the drawing
  	 */
-	defaultMetric: null,
+	dataMetric: null,
 	
 	/**
  	 * The ExtJS panel ID in which the drawing is rendered
@@ -67,6 +67,7 @@ Ext.define('App.util.d3.BarChart', {
 	 * Show bar graph labels.  TODO: Customize placement of labels
 	 */
 	showLabels: false,
+	labelFontSize: 9,
 	labelOffsetTop: 15,	 // height (in pix) to lower graph to show top labels
 	labelDistanceFromBar: 10,	// needs to be less than labelOffsetTop
 	
@@ -92,7 +93,7 @@ Ext.define('App.util.d3.BarChart', {
 	colorScale: d3.scale.category20(),
 	
 	/**
- 	 * desired increments
+ 	 * desired increments for Y axis
  	 */
  	desiredYIncrements: null,
 	
@@ -252,7 +253,7 @@ Ext.define('App.util.d3.BarChart', {
 		//////////////////////////////////////////////////
 		// sanity check
 		//////////////////////////////////////////////////
-		if(me.svg == null || me.defaultMetric == null) {
+		if(me.svg == null || me.dataMetric == null) {
 			Ext.Msg.alert('Configuration Error', 'Missing required configuration data needed<br>to render visualization.');
 			return;
 		}
@@ -268,8 +269,8 @@ Ext.define('App.util.d3.BarChart', {
 		// set scales
 		//////////////////////////////////////////////////
 		me.setXScale();
-		me.setYScale(me.defaultMetric);
-		me.setYAxisScale(me.defaultMetric);
+		me.setYScale(me.dataMetric);
+		me.setYAxisScale(me.dataMetric);
 		
 		//////////////////////////////////////////////////
 		// bring ExtJS variables
@@ -280,7 +281,7 @@ Ext.define('App.util.d3.BarChart', {
 			yAxis = me.yAxis,
 			canvasHeight = me.canvasHeight,
 			canvasWidth = me.canvasWidth,
-			defaultMetric = me.defaultMetric,
+			dataMetric = me.dataMetric,
 			margins = me.margins,
 			graphData = me.graphData,
 			barPadding = me.barPadding,
@@ -308,13 +309,13 @@ Ext.define('App.util.d3.BarChart', {
 				return xScale(i);
 			})
 			.attr('y', function(d) {
-				return canvasHeight - yScale(d[defaultMetric]);
+				return canvasHeight - yScale(d[dataMetric]);
 			})
 			.attr('width', function(d) {
 				return (canvasWidth - (margins.left + margins.right))/graphData.length - barPadding;
 			})
 			.attr('height', function(d) {
-				return yScale(d[defaultMetric]) - margins.bottom;
+				return yScale(d[dataMetric]) - margins.bottom;
 			})
 			.attr('fill', function(d, i) {
 				return colorScale(i);
@@ -349,11 +350,12 @@ Ext.define('App.util.d3.BarChart', {
 				.enter()
 				.append('text')
 				.attr('class', 'tinyText')
+				.style('font-size', me.labelFontSize)
 				.attr('x', function(d, i) {
 					return xScale(i);
 				})
 				.attr('y', function(d) {
-					return canvasHeight - yScale(d[defaultMetric]) - labelDistanceFromBar;
+					return canvasHeight - yScale(d[dataMetric]) - labelDistanceFromBar;
 				})
 				.attr('text-anchor', 'start')
 				.text(me.labelFunction);
@@ -389,11 +391,12 @@ Ext.define('App.util.d3.BarChart', {
 	/**
  	 * @function
  	 * @memberOf App.util.d3.BarChart
- 	 * @param metric
- 	 * @description Transition the bar chart based on a new metric (data record property)
+ 	 * @description Transition the bar chart
  	 */
-	transition: function(metric) {
+	transition: function() {
 		var me = this;
+		
+		var metric = me.dataMetric;
 		
 		//////////////////////////////////////////////////
 		// set scales
@@ -406,33 +409,116 @@ Ext.define('App.util.d3.BarChart', {
 		// vars into local scope
 		//////////////////////////////////////////////////
 		var yScale = me.yScale,
+			xScale = me.xScale,
 			canvasHeight = me.canvasHeight,
+			canvasWidth = me.canvasWidth,
 			margins = me.margins,
-			labelDistanceFromBar = me.labelDistanceFromBar;
+			barPadding = me.barPadding,
+			labelDistanceFromBar = me.labelDistanceFromBar,
+			colorScale = me.colorScale,
+			graphData = me.graphData,
+			handleEvents = me.handleEvents,
+			eventRelay = me.eventRelay,
+			mouseEvents = me.mouseEvents;
+			
+		//////////////////////////////////////////////////
+		// bars: join new data with old data
+		//////////////////////////////////////////////////
+		var rectSelection = me.gBar.selectAll('rect')
+			.data(me.graphData);
+		
+		//////////////////////////////////////////////////
+		// transition out old bars
+		//////////////////////////////////////////////////
+		rectSelection.exit()
+			.transition()
+			.duration(500)
+			.attr('width', 0)
+			.remove();
+			
+		//////////////////////////////////////////////////
+		// add new bars
+		//////////////////////////////////////////////////
+		var newBars = rectSelection.enter()
+			.append('rect')
+			.attr('defaultOpacity', .6)
+			.style('opacity', .6)
+			.style('stroke', '#333333')
+			.style('stroke-width', 1);
+		
+		//////////////////////////////////////////////////
+		// apply the events
+		//////////////////////////////////////////////////
+		rectSelection.on('mouseover', function(d, i) {
+				if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
+					eventRelay.publish(mouseEvents.mouseover.eventName, {
+						payload: d,
+						index: i
+					});
+				}
+				
+				d3.select(this).style('opacity', .9);
+			})
+			.on('mouseout', function(d) {
+				var el = d3.select(this);
+				el.style('opacity', el.attr('defaultOpacity'));
+			})
+			.call(d3.helper.tooltip().text(me.tooltipFunction));
 		
 		//////////////////////////////////////////////////
 		// transition rectangles
 		//////////////////////////////////////////////////
-		me.gBar.selectAll('rect')
-			.transition()
+		rectSelection.transition()
 			.duration(500)
+			.attr('x', function(d, i) {
+				return xScale(i);
+			})
 			.attr('y', function(d) {
 				return canvasHeight - yScale(d[metric]);
 			})
+			.attr('width', function(d) {
+				return (canvasWidth - (margins.left + margins.right))/graphData.length - barPadding;
+			})
 			.attr('height', function(d) {
 				return yScale(d[metric]) - margins.bottom;
-			});
-		
+			})
+			.attr('fill', function(d, i) {
+				return colorScale(i);
+			})
+			
 		//////////////////////////////////////////////////
 		// transition labels
 		//////////////////////////////////////////////////
 		if(me.showLabels) {
-			me.gText.selectAll('text')
-				.transition()
-				.duration(500)
+			// join
+			var labelSelection = me.gText.selectAll('text')
+				.data(me.graphData);
+
+			// remove
+			labelSelection.exit().remove();
+			
+			// new labels
+			var newLabels = labelSelection.enter()
+				.append('text')
+				.style('font-size', me.labelFontSize)
+				.attr('textAnchor', 'start');
+				
+			// transition all
+			labelSelection.transition()
+				.duration(250)
+				.attr('x', function(d, i) {
+					return xScale(i);
+				})
 				.attr('y', function(d) {
 					return canvasHeight - yScale(d[metric]) - labelDistanceFromBar;
-				});
+				})
+				.text(me.labelFunction);	
+		} else {
+			me.gText.selectAll('text')
+				.transition()
+				.duration(250)
+				.attr('x', -100)
+				.remove();
 		}
 		
 		//////////////////////////////////////////////////
@@ -449,15 +535,73 @@ Ext.define('App.util.d3.BarChart', {
 		me.svg.selectAll('g.axis').transition().duration(500).call(me.yAxis);
 	},
 	
+	/**
+ 	 * @function
+ 	 * @memberOf App.util.d3.BarChart
+ 	 * @description Set the dataMetric value (target property name
+ 	 * of data set)
+ 	 */
+ 	setDataMetric: function(metric) {
+	 	var me = this;
+	 	
+	 	me.dataMetric = metric;
+	},
+	
+	/**
+ 	 * @function
+ 	 * @memberOf App.util.d3.BarChart
+ 	 * @description Set the desired Y increments
+ 	 */
+ 	setDesiredYIncrements: function(increments) {
+	 	var me = this;
+	 	
+	 	me.desiredYIncrements = increments;
+	},
+	
+	/**
+ 	 * @function
+ 	 * @memberOf App.util.d3.BarChart
+ 	 * @param fn Function object
+ 	 * @description Set the Y tick formatting function
+ 	 */
 	setYTickFormat: function(fn) {
 		var me = this;
 		
 		me.yTickFormat = fn;
 	},
 	
+	/**
+ 	 * @function
+ 	 * @memberOf App.util.d3.BarChart
+ 	 * @description Set new chart data
+ 	 * @param data Obj
+ 	 */
+ 	setGraphData: function(data) {
+	 	var me = this;
+	 	
+	 	me.graphData = data;
+	},
+	
+	/**
+ 	 * @function
+ 	 * @memberOf App.util.d3.BarChart
+ 	 * @param title String
+ 	 * @description Set the chart title
+ 	 */
 	setChartTitle: function(title) {
 		var me = this;
 		
 		me.chartTitle = title;
-	}
+	},
+	
+	/**
+ 	 * @function
+ 	 * @memberOf App.util.d3.BarChart
+ 	 * @description Show/hide labels
+ 	 */
+ 	setShowLabels: function(bool) {
+	 	var me = this;
+	 	
+	 	me.showLabels = bool;
+	} 
 });

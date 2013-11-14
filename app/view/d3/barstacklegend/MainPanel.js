@@ -209,6 +209,7 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 			handleEvents: true,
 			chartFlex: 6,
 			legendFlex: 1,
+			legendFontSize: 11,
 			mouseEvents: {
 				mouseover: {
 					enabled: true,

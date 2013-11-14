@@ -66,6 +66,11 @@
 	background-repeat: no-repeat;
 }
 
+.icon-tick {
+	background-image: url(../img/icons/16x16/tick.png) !important;
+	background-repeat: no-repeat;
+}
+
 /**
  * SVG
  */

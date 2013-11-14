@@ -23,6 +23,7 @@ Ext.define('App.util.d3.StackedBarLegendChart', {
   	 */
   	legendSquareWidth: 10,
   	legendSquareHeight: 10,
+  	legendFontSize: 10,
   	
   	/**
   	 * hard space between chart and legend
@@ -193,6 +194,7 @@ Ext.define('App.util.d3.StackedBarLegendChart', {
 				return i * legendSquareHeight * 1.75;
 			})
 			.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
+			.style('font-size', me.legendFontSize)
 			.text(function(d) {
 				return d.category.toUpperCase();
 			});
@@ -315,7 +317,7 @@ Ext.define('App.util.d3.StackedBarLegendChart', {
 		rectSelection.call(d3.helper.tooltip().text(me.tooltipFunction));	
 			
 		//////////////////////////////////////////////////
-		// transition the
+		// transition the axes
 		//////////////////////////////////////////////////
 		me.gXAxis.transition().duration(500).call(me.xAxis);
 		me.gYAxis.transition().duration(500).call(me.yAxis);
@@ -367,6 +369,7 @@ Ext.define('App.util.d3.StackedBarLegendChart', {
 				return i * legendSquareHeight * 1.75;
 			})
 			.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
+			.style('font-size', me.legendFontSize)
 			.text(function(d) {
 				return d.category.toUpperCase();
 			});

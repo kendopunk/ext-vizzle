@@ -100,7 +100,8 @@ Ext.define('App.view.d3.bar.VizPanel', {
 			me.barChart.setYTickFormat(App.util.Global.svg.wholeDollarTickFormat);
 		}
 		me.barChart.setChartTitle(me.generateChartTitle(btn.text));
-		me.barChart.transition(btn.metric);
+		me.barChart.setDataMetric(btn.metric);
+		me.barChart.transition();
 	},
 	
 	/**
@@ -134,7 +135,7 @@ Ext.define('App.view.d3.bar.VizPanel', {
 					canvasWidth: me.canvasWidth,
 					canvasHeight: me.canvasHeight,
 					graphData: me.graphData,
-					defaultMetric: 'gross',
+					dataMetric: me.defaultMetric,
 					panelId: me.panelId,
 					showLabels: true,
 					labelFunction: function(data, index) {
