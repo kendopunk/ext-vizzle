@@ -3,6 +3,7 @@ Ext.define('App.view.tree.MenuTreePanel', {
 	requires: [
 		'App.store.tree.MenuStore'
 	],
+	autoScroll: true,
 	width: 200,
 	title: 'Menu Tree Panel',
 	bodyStyle: {

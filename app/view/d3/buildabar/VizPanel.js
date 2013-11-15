@@ -220,6 +220,7 @@ Ext.define('App.view.d3.buildabar.VizPanel', {
 		var me = this;
 		
 		btn.setIconCls('icon-tick');
+		me.barChart.setChartTitle(me.generateChartTitle(btn.text));
 		
 		// adjust the buttons
 		if(btn.text == 'Change') {

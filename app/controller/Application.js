@@ -13,7 +13,8 @@ Ext.define('App.controller.Application', {
 		'App.view.d3.barstacklegend.MainPanel',
 		'App.view.d3.buildabar.MainPanel',
 		'App.view.d3.pie.MainPanel',
-		'App.view.d3.pielegend.MainPanel'
+		'App.view.d3.pielegend.MainPanel',
+		'App.view.d3.buildapie.MainPanel'
 	],
 	
 	init: function() {

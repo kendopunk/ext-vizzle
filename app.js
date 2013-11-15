@@ -45,7 +45,7 @@ Ext.application({
 					Ext.create('App.view.tree.MenuTreePanel', {
 						height: App.util.Global.treePanelHeight,
 						title: 'Viz Menu',
-						height: 350,
+						//height: 350,
 						width: '100%',
 						flex: 1,
 						autoScroll: true,
@@ -59,6 +59,7 @@ Ext.application({
 						html: App.util.Global.defaultInfoMessage,
 						layout: 'fit',
 						width: '100%',
+						height: '50%',
 						flex: 1,
 						autoScroll: true
 					})
