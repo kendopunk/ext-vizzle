@@ -1,5 +1,6 @@
 /**
  * @class
+ * @author Mark Fehrenbacher (kendopunk@hotmail.com)
  * @memberOf App.controller
  */
 Ext.define('App.controller.Application', {

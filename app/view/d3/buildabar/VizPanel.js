@@ -1,5 +1,6 @@
 /**
  * @class
+ * @author Mark Fehrenbacher (kendopunk@hotmail.com)
  * @memberOf App.view.d3.buildabar
  * @description SVG panel
  * @extend Ext.panel.Panel
@@ -181,7 +182,11 @@ Ext.define('App.view.d3.buildabar.VizPanel', {
 			},
 			tooltipFunction: function(data, index) {
 				return '<b>' + data.name + '</b> (' + data.ticker + ')<br><br>'
-					+ 'Close Price: ' + Ext.util.Format.currency(data.price);
+					+ 'Close Price: ' + Ext.util.Format.currency(data.price)
+					+ '<br>'
+					+ 'Change: ' + Ext.util.Format.currency(data.change)
+					+ '<br>'
+					+ '% Change: ' + Ext.util.Format.number(data.pctChange, '0,000.0') + '%';
 			},
 			handleEvents: false,
 			chartTitle: me.generateChartTitle(me.defaultMetricText),

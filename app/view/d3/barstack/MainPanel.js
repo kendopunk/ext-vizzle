@@ -1,5 +1,6 @@
 /**
  * @class
+ * @author Mark Fehrenbacher (kendopunk@hotmail.com)
  * @memberOf App.view.d3.barstack
  * @description Stacked bar chart
  */

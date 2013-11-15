@@ -1,5 +1,6 @@
 /**
  * @class
+ * @author Mark Fehrenbacher (kendopunk@hotmail.com)
  * @memberOf App.util.d3
  * @description Extended pie chart class to include legend
  * @extend App.util.d3.PieChart

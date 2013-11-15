@@ -1,5 +1,6 @@
 /**
  * @class
+ * @author Mark Fehrenbacher (kendopunk@hotmail.com)
  * @memberOf App.util.d3
  * @description Stacked bar chart class with legend
  * @extend App.util.d3.StackedBarChart

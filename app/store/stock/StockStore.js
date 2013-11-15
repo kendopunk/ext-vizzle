@@ -1,5 +1,6 @@
 /**
  * @class
+ * @author Mark Fehrenbacher (kendopunk@hotmail.com)
  * @memberOf App.store.stock
  * @extend Ext.data.Store
  * @description Stock data store

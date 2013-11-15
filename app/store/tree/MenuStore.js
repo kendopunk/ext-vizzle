@@ -1,5 +1,6 @@
 /**
  * @class
+ * @author Mark Fehrenbacher (kendopunk@hotmail.com)
  * @memberOf App.store.tree
  * @extend Ext.data.TreeStore
  * @description Static store used in construction of Viz Menu

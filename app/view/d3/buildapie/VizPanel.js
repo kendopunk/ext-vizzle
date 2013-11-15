@@ -1,5 +1,6 @@
 /**
  * @class
+ * @author Mark Fehrenbacher (kendopunk@hotmail.com)
  * @memberOf App.view.d3.buildapie
  * @description SVG panel
  * @extend Ext.panel.Panel
@@ -173,15 +174,15 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
 			chartTitle: me.generateChartTitle(me.defaultMetricText),
 			showLabels: true,
 			labelFunction: function(data, index) {
-				return data.data.ticker;
+				return data.ticker;
 			},
 			tooltipFunction: function(data, index) {
-				return '<b>' + data.data.name + '</b> (' + data.data.ticker + ')<br><br>'
-					+ 'Close Price: ' + Ext.util.Format.currency(data.data.price)
+				return '<b>' + data.name + '</b> (' + data.ticker + ')<br><br>'
+					+ 'Close Price: ' + Ext.util.Format.currency(data.price)
 					+ '<br>'
-					+ 'Change: ' + Ext.util.Format.currency(data.data.change)
+					+ 'Change: ' + Ext.util.Format.currency(data.change)
 					+ '<br>'
-					+ '% Change: ' + Ext.util.Format.number(data.data.pctChange, '0,000.0') + '%';
+					+ '% Change: ' + Ext.util.Format.number(data.pctChange, '0,000.0') + '%';
 			},
 			dataMetric: me.defaultMetric
 		}, me);
