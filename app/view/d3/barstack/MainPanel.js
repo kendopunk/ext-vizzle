@@ -24,7 +24,7 @@ Ext.define('App.view.d3.barstack.MainPanel', {
  		 * @description SVG properties
  		 */
  		me.svgInitialized = false,
- 			me.graphData = [],
+ 			me.workingGraphData = [],
  			me.originalGraphData = [],
  			me.canvasWidth,
  			me.canvasHeight,
@@ -133,7 +133,7 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 				handler: me.metricHandler,
 				scope: me
 			},
-			'-',
+			'->',
 			me.albumRemoveButton,
 			me.albumRevertButton
 		];
@@ -201,11 +201,11 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 	 			var resp = Ext.JSON.decode(response.responseText);
 	 			
 	 			Ext.each(resp.data, function(rec) {
-		 			me.graphData.push(rec);
+		 			me.workingGraphData.push(rec);
 		 			me.originalGraphData.push(rec);
 		 		}, me);
 		 		
-		 		me.stackedBarChart.setGraphData(me.graphData);
+		 		me.stackedBarChart.setGraphData(me.workingGraphData);
 		 		me.stackedBarChart.draw();
 		 	},
 		 	scope: me
@@ -234,13 +234,25 @@ Ext.define('App.view.d3.barstack.MainPanel', {
   	removeAlbum: function(index) {
   		var me = this;
   		
-  		var newData = Ext.clone(me.graphData);
+  		var newData = Ext.clone(me.workingGraphData);
   		for(i=0; i<newData.length; i++) {
   			newData[i].values.splice(index, 1);
   		}
+  		me.workingGraphData = newData;
   		
-  		me.graphData = newData;
-  		me.stackedBarChart.setGraphData(newData);
+  		if(me.currentMetric == 'percent') {
+	  		var temp = Ext.clone(me.workingGraphData);
+	  		var dataSet = me.normalizePercent(temp);
+  		
+  			me.stackedBarChart.setGraphData(dataSet);
+			me.stackedBarChart.setTooltipFunction(me.percentTooltipFn);
+			me.stackedBarChart.setYTickFormat(me.percentTickFormat);
+		} else {			
+			me.stackedBarChart.setGraphData(me.workingGraphData);
+			me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
+			me.stackedBarChart.setYTickFormat(me.salesTickFormat);
+		}
+
   		me.stackedBarChart.transition();
   	},
   	
@@ -251,9 +263,9 @@ Ext.define('App.view.d3.barstack.MainPanel', {
   	albumRevert: function() {
   		var me = this;
   		
-  		me.graphData = me.originalGraphData;
+  		me.workingGraphData = me.originalGraphData;
   	
-  		me.stackedBarChart.setGraphData(me.graphData);
+  		me.stackedBarChart.setGraphData(me.workingGraphData);
   		me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
   		me.stackedBarChart.setYTickFormat(me.salesTickFormat);
 		me.stackedBarChart.transition();
@@ -270,14 +282,14 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 		var me = this;
 		
 		me.stackedBarChart.setChartTitle(me.generateChartTitle(btn.text));
+		me.currentMetric = btn.metric;
 		
-		var dataSet = Ext.clone(me.graphData);
+		var dataSet = Ext.clone(me.workingGraphData);
 		
 		if(btn.metric == 'percent') {
-			//me.stackedBarChart.setGraphData(me.normalizePercent(dataSet));
+			dataSet = me.normalizePercent(dataSet);
 			
-			var temp = me.normalizePercent(dataSet);
-			me.stackedBarChart.setGraphData(temp);
+			me.stackedBarChart.setGraphData(dataSet);
 			me.stackedBarChart.setTooltipFunction(me.percentTooltipFn);
 			me.stackedBarChart.setYTickFormat(me.percentTickFormat);
 		} else {			
