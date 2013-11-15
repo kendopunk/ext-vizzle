@@ -35,6 +35,10 @@ Ext.define('App.view.d3.buildabar.GridPanel', {
  		 */
  		me.eventRelay = Ext.create('App.util.MessageBus');
  		me.eventRelay.subscribe('BuildABarPanelRendered', me.loadGridStore, me);
+ 		me.eventRelay.subscribe('BuildABarRecordAdd', me.removeAddedRecords, me);
+ 		me.eventRelay.subscribe('BuildABarRevert', function() {
+	 		me.store.load();
+	 	}, me);
  		
 		/**
 		 * @property
@@ -61,5 +65,11 @@ Ext.define('App.view.d3.buildabar.GridPanel', {
 		var me = this;
 		
 		me.store.load();
+	},
+	
+	removeAddedRecords: function(records) {
+		var me = this;
+		
+		me.store.remove(records);
 	}
 });

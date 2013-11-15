@@ -13,17 +13,21 @@ Ext.define('App.util.Global', {
 		defaultInfoMessage: 'Demonstration of various visualization libraries in ExtJS',
 		
 		svg: {
-			wholeDollarTickFormat: function(d) {
-				return Ext.util.Format.currency(d, false, '0', false);
-			},
-			
 			currencyTickFormat: function(d) {
 				return Ext.util.Format.currency(d);
 			},
 			
 			numberTickFormat: function(d) {
 				return Ext.util.Format.number(d, '0,000');
-			}
+			},
+			
+			percentTickFormat: function(d) {
+				return Ext.util.Format.number(d, '0,000.0') + '%';
+			},
+			
+			wholeDollarTickFormat: function(d) {
+				return Ext.util.Format.currency(d, false, '0', false);
+			},
 		}
 	}
 });

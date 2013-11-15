@@ -603,5 +603,5 @@ Ext.define('App.util.d3.BarChart', {
 	 	var me = this;
 	 	
 	 	me.showLabels = bool;
-	} 
+	}
 });

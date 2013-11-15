@@ -22,7 +22,8 @@ Ext.define('App.view.d3.buildabar.MainPanel', {
 		
 		// chart description for info panel
 		me.chartDescription = '<b>Build-A-Bar (Chart)</b><br><br>'
-			+ 'Drag record(s) from the grid to the chart to dynamically build a bar chart.';
+			+ 'Drag record(s) from the grid to the chart to dynamically build a bar chart.<br><br>'
+			+ 'Use ctrl + click to select multiple records.';
 			
 		// layout vars
 		me.gridPanelWidth = 330,

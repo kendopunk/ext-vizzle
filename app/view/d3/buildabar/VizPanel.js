@@ -56,12 +56,20 @@ Ext.define('App.view.d3.buildabar.VizPanel', {
  			me.eventRelay = Ext.create('App.util.MessageBus'),
  			me.dropTarget;
  			
+ 		/**
+  		 * @property
+  		 */
+  		me.eventRelay = Ext.create('App.util.MessageBus');
+ 			
  		////////////////////////////////////////
- 		// button configs
+ 		// button configs for 
+ 		// price
+ 		// change
+ 		// % change
  		////////////////////////////////////////
- 		
  		me.priceButton = Ext.create('Ext.button.Button', {
  			text: 'Price',
+ 			disabled: true,
  			metric: 'price',
  			iconCls: 'icon-tick',
  			handler: me.transitionHandler,
@@ -70,6 +78,7 @@ Ext.define('App.view.d3.buildabar.VizPanel', {
  		
  		me.changeButton = Ext.create('Ext.button.Button', {
  			text: 'Change',
+ 			disabled: true,
  			metric: 'change',
  			handler: me.transitionHandler,
  			scope: me
@@ -77,17 +86,41 @@ Ext.define('App.view.d3.buildabar.VizPanel', {
  		
  		me.pctChangeButton = Ext.create('Ext.button.Button', {
  			text: '% Change',
+ 			disabled: true,
  			metric: 'pctChange',
  			handler: me.transitionHandler,
  			scope: me
  		});
  		
+ 		me.revertButton = Ext.create('Ext.button.Button', {
+	 		text: 'Clear/Revert',
+	 		iconCls: 'icon-refresh',
+	 		disabled: true,
+	 		handler: function(btn, e) {
+		 		btn.disable();
+		 		
+		 		me.graphData = [];
+		 		me.barChart.setGraphData(me.graphData);
+		 		me.barChart.transition();
+		 		
+	 			me.eventRelay.publish('BuildABarRevert');
+	 		}
+	 	});
  		
  		/**
   		 * @property
+  		 * @description Toolbar 
   		 */
-  		me.eventRelay = Ext.create('App.util.MessageBus');
-
+  		me.tbar = [
+  			me.priceButton,
+  			{xtype: 'tbspacer', width: 10},
+  			me.changeButton,
+  			{xtype: 'tbspacer', width: 10},
+  			me.pctChangeButton,
+  			'->',
+  			me.revertButton
+  		];
+  		 
 		me.callParent(arguments);
 	},
 	
@@ -119,6 +152,14 @@ Ext.define('App.view.d3.buildabar.VizPanel', {
 		 	me.graphData.push(rec.data);
 		}, me);
 		
+		// notify grid
+		me.eventRelay.publish('BuildABarRecordAdd', records);
+		
+		// enabled buttons
+		Ext.each(me.getDockedItems()[0].query('button'), function(btn) {
+			btn.enable();
+		}, me);
+
 		// build the chart
 	 	me.barChart = Ext.create('App.util.d3.BarChart', {
 			svg: me.svg,
@@ -152,6 +193,9 @@ Ext.define('App.view.d3.buildabar.VizPanel', {
 		me.getEl().unmask();
 	},
 	
+	/**
+ 	 * @function
+ 	 */
 	transitionCanvas: function(records) {
 		var me = this;
 		
@@ -159,25 +203,41 @@ Ext.define('App.view.d3.buildabar.VizPanel', {
 			me.graphData.push(rec.data);
 		}, me);
 		
+		// enable revert button
+		me.revertButton.enable();
+		
+		// notify grid
+		me.eventRelay.publish('BuildABarRecordAdd', records);
+		
 		me.barChart.setGraphData(me.graphData);
 		me.barChart.transition();
 	},
 	
+	/**
+	 * @function
+	 */
 	transitionHandler: function(btn, event) {
+		var me = this;
+		
+		btn.setIconCls('icon-tick');
+		
+		// adjust the buttons
 		if(btn.text == 'Change') {
-		
+			me.priceButton.setIconCls('');
+			me.pctChangeButton.setIconCls('');
+			me.barChart.setYTickFormat(App.util.Global.svg.currencyTickFormat);
 		} else if(btn.text == '% Change') {
-		
+			me.priceButton.setIconCls('');
+			me.changeButton.setIconCls('');
+			me.barChart.setYTickFormat(App.util.Global.svg.percentTickFormat);
 		} else {
-			
+			me.changeButton.setIconCls('');
+			me.pctChangeButton.setIconCls('');
+			me.barChart.setYTickFormat(App.util.Global.svg.currencyTickFormat);
 		}
 		
 		me.barChart.setDataMetric(btn.metric);
 		me.barChart.transition();
-	
-	
-	
-	
 	},
 	
 	/** 
