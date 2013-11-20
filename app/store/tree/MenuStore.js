@@ -49,8 +49,8 @@ Ext.define('App.store.tree.MenuStore', {
 				}]
 			}, {
 				text: '<b>Pie Charts</b>',
+				expanded: true,
 				iconCls: 'icon-pie-chart',
-				//expanded: true,
 				children: [{
 					text: 'Pie Chart',
 					leaf: true,
@@ -66,6 +66,16 @@ Ext.define('App.store.tree.MenuStore', {
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'buildapieMainPanel'
+				}]
+			}, {
+				text: '<b>Scatterplots</b>',
+				expanded: true,
+				iconCls: 'icon-scatterplot',
+				children: [{
+					text: 'Basic Scatter',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'scatterMainPanel'
 				}]
 			}]
 		}]

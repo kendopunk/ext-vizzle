@@ -61,6 +61,11 @@
 	background-repeat: no-repeat;
 }
 
+.icon-scatterplot {
+	background-image: url(../img/icons/16x16/scatterplot.png) !important;
+	background-repeat: no-repeat;
+}
+
 .icon-star {
 	background-image: url(../img/icons/16x16/star.png) !important;
 	background-repeat: no-repeat;
