@@ -428,60 +428,52 @@ Ext.define('App.util.d3.Scatterplot', {
 		me.setXScale(me.xDataMetric);
 		me.setYScale(me.yDataMetric);
 		
-		/*var metric = me.dataMetric;
+		//////////////////////////////////////////////////
+		// local vars
+		//////////////////////////////////////////////////
+		var xScale = me.xScale,
+			yScale = me.yScale,
+			xDataMetric = me.xDataMetric,
+			yDataMetric = me.yDataMetric;
 		
 		//////////////////////////////////////////////////
-		// set scales
+		// join new circles with old
 		//////////////////////////////////////////////////
-		me.setXScale();
-		me.setYScale(metric);
-		me.setYAxisScale(metric);
-		
-		//////////////////////////////////////////////////
-		// vars into local scope
-		//////////////////////////////////////////////////
-		var yScale = me.yScale,
-			xScale = me.xScale,
-			canvasHeight = me.canvasHeight,
-			canvasWidth = me.canvasWidth,
-			margins = me.margins,
-			barPadding = me.barPadding,
-			labelDistanceFromBar = me.labelDistanceFromBar,
-			colorScale = me.colorScale,
-			graphData = me.graphData,
-			handleEvents = me.handleEvents,
-			eventRelay = me.eventRelay,
-			mouseEvents = me.mouseEvents;
+		var circSelection = me.gScatter.selectAll('circle')
+			.data(me.graphData);
 			
 		//////////////////////////////////////////////////
-		// bars: join new data with old data
+		// transition out old circles
 		//////////////////////////////////////////////////
-		var rectSelection = me.gBar.selectAll('rect')
-			.data(me.graphData);
-		
-		//////////////////////////////////////////////////
-		// transition out old bars
-		//////////////////////////////////////////////////
-		rectSelection.exit()
+		circSelection.exit()
 			.transition()
 			.duration(500)
-			.attr('width', 0)
+			.attr('r', 0)
 			.remove();
-			
+
 		//////////////////////////////////////////////////
-		// add new bars
+		// add new circles
 		//////////////////////////////////////////////////
-		var newBars = rectSelection.enter()
-			.append('rect')
+		var newCircles = circSelection.enter()
+			.append('circle')
+			.attr('cx', function(d) {
+				return xScale(d[xDataMetric]);
+			})
+			.attr('cy', function(d) {
+				return yScale(d[yDataMetric]);
+			})
+			.attr('r', me.radius)
+			.style('fill', me.colorScaleFunction)
 			.attr('defaultOpacity', .6)
 			.style('opacity', .6)
 			.style('stroke', '#333333')
-			.style('stroke-width', 1);
+			.style('stroke-width', 1)
 		
 		//////////////////////////////////////////////////
 		// apply the events
 		//////////////////////////////////////////////////
-		rectSelection.on('mouseover', function(d, i) {
+		circSelection.on('mouseover', function(d, i) {
+				
 				if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
 					eventRelay.publish(mouseEvents.mouseover.eventName, {
 						payload: d,
@@ -496,27 +488,24 @@ Ext.define('App.util.d3.Scatterplot', {
 				el.style('opacity', el.attr('defaultOpacity'));
 			})
 			.call(d3.helper.tooltip().text(me.tooltipFunction));
-		
+			
 		//////////////////////////////////////////////////
-		// transition rectangles
+		// transition all
 		//////////////////////////////////////////////////
-		rectSelection.transition()
+		circSelection.transition()
 			.duration(500)
-			.attr('x', function(d, i) {
-				return xScale(i);
+			.attr('cx', function(d) {
+				return xScale(d[xDataMetric]);
 			})
-			.attr('y', function(d) {
-				return canvasHeight - yScale(d[metric]);
+			.attr('cy', function(d) {
+				return yScale(d[yDataMetric]);
 			})
-			.attr('width', function(d) {
-				return (canvasWidth - (margins.left + margins.right))/graphData.length - barPadding;
-			})
-			.attr('height', function(d) {
-				return yScale(d[metric]) - margins.bottom;
-			})
-			.attr('fill', function(d, i) {
-				return colorScale(i);
-			})
+			.attr('r', me.radius);
+		
+			
+			
+		
+		/*
 			
 		//////////////////////////////////////////////////
 		// transition labels
@@ -560,12 +549,12 @@ Ext.define('App.util.d3.Scatterplot', {
 			me.gTitle.selectAll('text')
 				.text(me.chartTitle);
 		}
-		
-		//////////////////////////////////////////////////
-		// re-call they y axis function
-		//////////////////////////////////////////////////
-		me.svg.selectAll('g.axis').transition().duration(500).call(me.yAxis);
 		*/
+		//////////////////////////////////////////////////
+		// transition the axes
+		//////////////////////////////////////////////////
+		me.gXAxis.transition().duration(500).call(me.xAxis);
+		me.gYAxis.transition().duration(500).call(me.yAxis);
 	},
 	
 	/**

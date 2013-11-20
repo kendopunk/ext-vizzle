@@ -244,7 +244,7 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 			break;
 		}
 		
-		ret = ret + ' (Y) vs';
+		ret = ret + ' (Y) vs ';
 		
 		switch(xDataMetric) {
 			case 'muzzleVelocity':
