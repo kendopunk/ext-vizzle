@@ -1,0 +1,94 @@
+{
+	"success": true,
+	"data": [{
+		"cartridge": "9mm",
+		"bulletWeight": 115,
+		"bulletType": "FMJ",
+		"muzzleVelocity": 1300,
+		"energy": 570
+	}, {
+		"cartridge": "9mm",
+		"bulletWeight": 124,
+		"bulletType": "FMJ",
+		"muzzleVelocity": 1200,
+		"energy": 518
+	}, {
+		"cartridge": "9mm",
+		"bulletWeight": 116,
+		"bulletType": "JHP",
+		"muzzleVelocity": 1240,
+		"energy": 533
+	}, {
+		"cartridge": "9mm",
+		"bulletWeight": 115,
+		"bulletType": "JHP +P",
+		"muzzleVelocity": 1350,
+		"energy": 632
+	}, {
+		"cartridge": "9mm",
+		"bulletWeight": 115,
+		"bulletType": "JHP +P+",
+		"muzzleVelocity": 1430,
+		"energy": 704
+	}, {
+		"cartridge": ".45 ACP",
+		"bulletWeight": 185,
+		"bulletType": "Bonded Defense",
+		"muzzleVelocity": 1225,
+		"energy": 616
+	}, {
+		"cartridge": ".45 ACP",
+		"bulletWeight": 185,
+		"bulletType": "JHP",
+		"muzzleVelocity": 1050,
+		"energy": 453
+	}, {
+		"cartridge": ".45 ACP",
+		"bulletWeight": 200,
+		"bulletType": "JHP +P",
+		"muzzleVelocity": 1080,
+		"energy": 518
+	}, {
+		"cartridge": ".45 ACP",
+		"bulletWeight": 230,
+		"bulletType": "Hydra-Shok",
+		"muzzleVelocity": 900,
+		"energy": 414
+	}, {
+		"cartridge": ".45 ACP",
+		"bulletWeight": 230,
+		"bulletType": "Ball FMJ",
+		"muzzleVelocity": 830,
+		"energy": 352
+	}, {
+		"cartridge": ".40 S&W",
+		"bulletWeight": 135,
+		"bulletType": "JHP Red. Recoil",
+		"muzzleVelocity": 1190,
+		"energy": 424
+	}, {
+		"cartridge": ".40 S&W",
+		"bulletWeight": 155,
+		"bulletType": "Gold JHP",
+		"muzzleVelocity": 1205,
+		"energy": 500
+	}, {
+		"cartridge": ".40 S&W",
+		"bulletWeight": 165,
+		"bulletType": "Rem. Gold. Saber",
+		"muzzleVelocity": 1150,
+		"energy": 485
+	}, {
+		"cartridge": ".40 S&W",
+		"bulletWeight": 180,
+		"bulletType": "MagTech FMJ-FP",
+		"muzzleVelocity": 1050,
+		"energy": 441
+	}, {
+		"cartridge": ".40 S&W",
+		"bulletWeight": 200,
+		"bulletType": "Doubletap FMJ-FP",
+		"muzzleVelocity": 1050,
+		"energy": 490
+	}]
+}
