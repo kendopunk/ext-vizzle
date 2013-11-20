@@ -434,7 +434,8 @@ Ext.define('App.util.d3.Scatterplot', {
 		var xScale = me.xScale,
 			yScale = me.yScale,
 			xDataMetric = me.xDataMetric,
-			yDataMetric = me.yDataMetric;
+			yDataMetric = me.yDataMetric,
+			radius = me.radius;
 		
 		//////////////////////////////////////////////////
 		// join new circles with old
@@ -502,19 +503,14 @@ Ext.define('App.util.d3.Scatterplot', {
 			})
 			.attr('r', me.radius);
 		
-			
-			
-		
-		/*
-			
 		//////////////////////////////////////////////////
 		// transition labels
 		//////////////////////////////////////////////////
 		if(me.showLabels) {
 			// join
-			var labelSelection = me.gText.selectAll('text')
+			var labelSelection = me.gLabel.selectAll('text')
 				.data(me.graphData);
-
+				
 			// remove
 			labelSelection.exit().remove();
 			
@@ -522,24 +518,18 @@ Ext.define('App.util.d3.Scatterplot', {
 			var newLabels = labelSelection.enter()
 				.append('text')
 				.style('font-size', me.labelFontSize)
-				.attr('textAnchor', 'start');
+				.attr('text-anchor', 'start');
 				
 			// transition all
 			labelSelection.transition()
-				.duration(250)
-				.attr('x', function(d, i) {
-					return xScale(i);
+				.duration(500)
+				.attr('x', function(d) {
+					return xScale(d[xDataMetric]) + radius + 2;
 				})
 				.attr('y', function(d) {
-					return canvasHeight - yScale(d[metric]) - labelDistanceFromBar;
+					return yScale(d[yDataMetric]) - radius;
 				})
-				.text(me.labelFunction);	
-		} else {
-			me.gText.selectAll('text')
-				.transition()
-				.duration(250)
-				.attr('x', -100)
-				.remove();
+				.text(me.labelFunction);
 		}
 		
 		//////////////////////////////////////////////////
@@ -549,7 +539,7 @@ Ext.define('App.util.d3.Scatterplot', {
 			me.gTitle.selectAll('text')
 				.text(me.chartTitle);
 		}
-		*/
+		
 		//////////////////////////////////////////////////
 		// transition the axes
 		//////////////////////////////////////////////////

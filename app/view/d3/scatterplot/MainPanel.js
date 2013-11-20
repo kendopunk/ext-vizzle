@@ -32,7 +32,9 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
  			me.panelId,
  			me.baseTitle = '9/40/45 Ballistics',
  			me.defaultXDataMetric = 'bulletWeight',
+ 			me.xDataMetric = 'bulletWeight',
  			me.defaultYDataMetric = 'muzzleVelocity',
+ 			me.yDataMetric = 'muzzleVelocity',
  			me.eventRelay = Ext.create('App.util.MessageBus');
 		
 		/**
@@ -40,6 +42,7 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
  		 */
 		me.chartDescription = '<b>Simple Scatterplot</b><br><br>'
 			+ 'Muzzle velocity and energy comparisons for 9mm, .40 S&W and .45 ACP<br><br>'
+			+ 'This layout allows for independent control of X and Y axis metrics.<br><br>'
 			+ 'Data from Wikipedia.';
 			
 		/**
@@ -49,6 +52,50 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
 		
+		/**
+		 * @property
+		 * @description Tick formats
+		 */
+		me.velocityTickFormat = function(d) {
+			return Ext.util.Format.number(d, '0,000') + ' fps';
+		};
+		me.energyTickFormat = function(d) {
+			return Ext.util.Format.number(d, '0,000') + ' ft-lb';
+		};
+		me.weightTickFormat = function(d) {
+			return Ext.util.Format.number(d, '0,000') + ' gr';
+		};
+		
+		/**
+ 		 * @property
+ 		 */
+ 		me.scaleMinMaxButton = Ext.create('Ext.button.Button', {
+	 		text: 'Min/Max Range',
+	 		iconCls: 'icon-tick',
+	 		handler: function(btn) {
+		 		btn.setIconCls('icon-tick');
+		 		me.scaleZeroButton.setIconCls('');
+		 		
+		 		me.scatterPlot.setScaleToZero(false);
+		 		
+		 		me.scatterPlot.transition();
+		 	},
+		 	scope: me
+		 });
+	 		
+	 	me.scaleZeroButton = Ext.create('Ext.button.Button', {
+	 		text: 'Zero-Based',
+	 		handler: function(btn) {
+		 		btn.setIconCls('icon-tick');
+		 		me.scaleMinMaxButton.setIconCls('');
+		 		
+		 		me.scatterPlot.setScaleToZero(true);
+		 		
+		 		me.scatterPlot.transition();
+		 	},
+		 	scope: me
+		 });
+
 		/**
  		 * @property
  		 */
@@ -83,6 +130,18 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 		 	listeners: {
 			 	select: function(combo) {
 				 	me.scatterPlot.setYDataMetric(combo.getValue());
+				 	me.yDataMetric = combo.getValue();
+				 	
+				 	if(combo.getValue() == 'muzzleVelocity') {
+				 		me.scatterPlot.setYTickFormat(me.velocityTickFormat);
+				 	} else if(combo.getValue() == 'energy') {
+				 		me.scatterPlot.setYTickFormat(me.energyTickFormat);
+				 	} else {
+				 		me.scatterPlot.setYTickFormat(me.weightTickFormat);
+				 	}
+				 	
+				 	me.scatterPlot.setChartTitle(me.generateChartTitle(me.xDataMetric, me.yDataMetric));
+				 	
 				 	me.scatterPlot.transition();
 			 	},
 			 	scope: me
@@ -109,11 +168,32 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 		 	listeners: {
 			 	select: function(combo) {
 				 	me.scatterPlot.setXDataMetric(combo.getValue());
+				 	me.xDataMetric = combo.getValue();
+				 	
+				 	if(combo.getValue() == 'muzzleVelocity') {
+				 		me.scatterPlot.setXTickFormat(me.velocityTickFormat);
+				 	} else if(combo.getValue() == 'energy') {
+				 		me.scatterPlot.setXTickFormat(me.energyTickFormat);
+				 	} else {
+				 		me.scatterPlot.setXTickFormat(me.weightTickFormat);
+				 	}
+				 	
+				 	me.scatterPlot.setChartTitle(me.generateChartTitle(me.xDataMetric, me.yDataMetric));
+				 	
 				 	me.scatterPlot.transition();
 			 	},
 			 	scope: me
 			}
-		}];
+		},
+			'->',
+		{
+			xtype: 'tbtext',
+			text: '<b>Set Scaling:</b>'
+		}, 
+			me.scaleMinMaxButton,
+			me.scaleZeroButton,
+			{xtype: 'tbspacer', width: 15}
+		];
 			
 		
 		// on activate, publish update to the "Info" panel
@@ -170,13 +250,13 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 					dataMetric: 'muzzleVelocity',
 					xDataMetric: me.defaultXDataMetric,
 					yDataMetric: me.defaultYDataMetric,
-					xScalePadding: 50,
-					yScalePadding: 50,
+					xScalePadding: 70,
+					yScalePadding: 100,
 					radius: 8,
 					margins: {
 						top: 60,
 						right: 0,
-						bottom: 50,
+						bottom: 90,
 						left: 100
 					},
 					colorScaleFunction: function(data, index) {
@@ -189,12 +269,8 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 						}
 					},
 					chartTitle: me.generateChartTitle(me.defaultXDataMetric, me.defaultYDataMetric),
-					xTickFormat: function(d, i) {
-						return Ext.util.Format.number(d, '0,000') + ' gr';
-					},
-					yTickFormat: function(d, i) {
-						return Ext.util.Format.number(d, '0,000') + ' fps';
-					},
+					xTickFormat: me.weightTickFormat,
+					yTickFormat: me.velocityTickFormat,
 					tooltipFunction: function(data, index) {
 						return '<b>' + data.cartridge + ' '
 							+ data.bulletType + '</b><br><br>'
