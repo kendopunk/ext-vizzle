@@ -1,7 +1,7 @@
 /**
  * @class
  * @author Mark Fehrenbacher (kendopunk@hotmail.com)
- * @memberOf App.view.d3.pie
+ * @memberOf App.view.d3.scatterplot
  * @description Simple scatterplot panel
  */
 Ext.define('App.view.d3.scatterplot.MainPanel', {
@@ -41,7 +41,7 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
  		 * @property
  		 */
 		me.chartDescription = '<b>Simple Scatterplot</b><br><br>'
-			+ 'Muzzle velocity and energy comparisons for 9mm, .40 S&W and .45 ACP<br><br>'
+			+ 'Muzzle velocity, energy and price comparisons for 9mm, .40 S&W and .45 ACP<br><br>'
 			+ 'This layout allows for independent control of X and Y axis metrics.<br><br>'
 			+ 'Data from Wikipedia.';
 			

@@ -176,7 +176,7 @@ Ext.define('App.util.d3.Scatterplot', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.BarChart
+ 	 * @memberOf App.util.d3.Scatterplot
  	 * @description Set the horizontal scale
  	 * @param metric String
  	 */
@@ -211,7 +211,7 @@ Ext.define('App.util.d3.Scatterplot', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.BarChart
+ 	 * @memberOf App.util.d3.Scatterplot
  	 * @description Set the vertical (y) scale
  	 * @param metric String
  	 */
@@ -247,7 +247,7 @@ Ext.define('App.util.d3.Scatterplot', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.BarChart
+ 	 * @memberOf App.util.d3.Scatterplot
  	 * @description Draw the initial bar chart
  	 */
 	draw: function() {
@@ -433,7 +433,7 @@ Ext.define('App.util.d3.Scatterplot', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.BarChart
+ 	 * @memberOf App.util.d3.Scatterplot
  	 * @description Transition the bar chart
  	 */
 	transition: function() {
@@ -586,17 +586,21 @@ Ext.define('App.util.d3.Scatterplot', {
 				})
 				.attr('y2', me.canvasHeight - me.margins.bottom);
 		} else {
-			me.gHorizontalMarker.selectAll('line')
-				.transition()
-				.duration(250)
-				.attr('x1', me.margins.left)
-				.remove();
+			 me.gHorizontalMarker.selectAll('line')
+			 	.transition()
+				.duration(500)
+				.attr('x2', me.margins.left)
+				.each('end', function() {
+					d3.select(this).remove();
+				});
 			
 			me.gVerticalMarker.selectAll('line')
 				.transition()
-				.duration(250)
-				.attr('y2', me.canvasHeight - me.margins.bottom)
-				.remove();
+				.duration(500)
+				.attr('y1', me.canvasHeight - me.margins.bottom)
+				.each('end', function() {
+					d3.select(this).remove();
+				});
 		}
 		
 		//////////////////////////////////////////////////
@@ -646,7 +650,6 @@ Ext.define('App.util.d3.Scatterplot', {
 	/**
  	 * SETTERS
  	 */
- 	 
  	setColorScaleFunction: function(fn) {
 	 	var me = this;
 	 	
