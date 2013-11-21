@@ -141,6 +141,13 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
  			me.canvasWidth = parseInt(me.getWidth() * .95),
  			me.canvasHeight = parseInt(me.getHeight() * .95) - 35,
  			me.panelId = '#' + me.body.id;
+ 			
+ 		// outer radius
+ 		if(me.canvasWidth < me.canvasHeight) {
+	 		var outerRadius = Math.floor((me.canvasWidth/2) * .7);
+ 		} else {
+ 			var outerRadius = Math.floor((me.canvasHeight/2) * .7);
+ 		}
 	 	
 	 	// init svg
 	 	me.svg = d3.select(me.panelId)
@@ -166,6 +173,7 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
 			svg: me.svg,
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,
+			outerRadius: outerRadius,
 			margins: {
 				top: 40
 			},
@@ -174,15 +182,15 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
 			chartTitle: me.generateChartTitle(me.defaultMetricText),
 			showLabels: true,
 			labelFunction: function(data, index) {
-				return data.ticker;
+				return data.data.ticker;
 			},
 			tooltipFunction: function(data, index) {
-				return '<b>' + data.name + '</b> (' + data.ticker + ')<br><br>'
-					+ 'Close Price: ' + Ext.util.Format.currency(data.price)
+				return '<b>' + data.data.name + '</b> (' + data.data.ticker + ')<br><br>'
+					+ 'Close Price: ' + Ext.util.Format.currency(data.data.price)
 					+ '<br>'
-					+ 'Change: ' + Ext.util.Format.currency(data.change)
+					+ 'Change: ' + Ext.util.Format.currency(data.data.change)
 					+ '<br>'
-					+ '% Change: ' + Ext.util.Format.number(data.pctChange, '0,000.0') + '%';
+					+ '% Change: ' + Ext.util.Format.number(data.data.pctChange, '0,000.0') + '%';
 			},
 			dataMetric: me.defaultMetric
 		}, me);

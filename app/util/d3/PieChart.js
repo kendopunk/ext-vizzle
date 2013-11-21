@@ -65,7 +65,7 @@ Ext.define('App.util.d3.PieChart', {
  	 * Show pie chart labels, default true
  	 */
 	showLabels: false,
-	labelFontSize: 10,
+	labelFontSize: '10px',
 
 	/**
 	 * Default function for the tooltip
