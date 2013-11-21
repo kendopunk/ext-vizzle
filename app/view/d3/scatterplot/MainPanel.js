@@ -65,25 +65,15 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 		me.weightTickFormat = function(d) {
 			return Ext.util.Format.number(d, '0,000') + ' gr';
 		};
+		me.pprTickFormat = function(d) {
+			return Ext.util.Format.currency(d);
+		};
 		
 		/**
  		 * @property
  		 */
- 		me.scaleMinMaxButton = Ext.create('Ext.button.Button', {
-	 		text: 'Range-Relative',
-	 		handler: function(btn) {
-		 		btn.setIconCls('icon-tick');
-		 		me.scaleZeroButton.setIconCls('');
-		 		
-		 		me.scatterPlot.setScaleToZero(false);
-		 		
-		 		me.scatterPlot.transition();
-		 	},
-		 	scope: me
-		 });
-	 		
 	 	me.scaleZeroButton = Ext.create('Ext.button.Button', {
-	 		text: 'Zero-Based',
+	 		text: 'Absolute',
 	 		iconCls: 'icon-tick',
 	 		handler: function(btn) {
 		 		btn.setIconCls('icon-tick');
@@ -95,6 +85,42 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 		 	},
 		 	scope: me
 		 });
+		 
+		 me.scaleMinMaxButton = Ext.create('Ext.button.Button', {
+	 		text: 'Range-Relative',
+	 		handler: function(btn) {
+		 		btn.setIconCls('icon-tick');
+		 		me.scaleZeroButton.setIconCls('');
+		 		
+		 		me.scatterPlot.setScaleToZero(false);
+		 		
+		 		me.scatterPlot.transition();
+		 	},
+		 	scope: me
+		 });
+		 
+		 me.markerLineToggleButton = Ext.create('Ext.button.Button', {
+			 text: 'OFF',
+			 currentValue: 'off',
+			 handler: function(btn) {
+			 	if(btn.currentValue == 'on') {
+				 	btn.setIconCls('');
+				 	btn.currentValue = 'off';
+				 	btn.setText('OFF');
+				 	
+				 	me.scatterPlot.setShowMarkerLines(false);
+			 	} else {
+			 		btn.setIconCls('icon-tick');
+				 	btn.currentValue = 'on';
+				 	btn.setText('ON');
+				 	
+				 	me.scatterPlot.setShowMarkerLines(true);
+			 	}
+			 	
+			 	me.scatterPlot.transition();
+			 },
+			 scope: me
+		});
 
 		/**
  		 * @property
@@ -103,8 +129,9 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 			 fields: ['display', 'value'],
 			 data: [
 			 	['Bullet Weight', 'bulletWeight'],
-				 ['Muzzle Velocity', 'muzzleVelocity'],
-				 ['Energy', 'energy']
+			 	['Muzzle Velocity', 'muzzleVelocity'],
+			 	['Energy', 'energy'],
+			 	['Price Per Rnd', 'ppr']
 			]
 		});
 		
@@ -113,7 +140,7 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
  		 */
  		me.tbar = [{
 	 		xtype: 'tbtext',
-	 		text: 'Y Axis:'
+	 		text: '<b>Y</b>'
 	 	}, {
 		 	xtype: 'combo',
 		 	name: 'yAxis',
@@ -124,8 +151,8 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 		 	typeAhead: true,
 		 	queryMode: 'local',
 		 	triggerAction: 'all',
-		 	width: 150,
-		 	listWidth: 150,
+		 	width: 140,
+		 	listWidth: 140,
 		 	value: 'muzzleVelocity',
 		 	listeners: {
 			 	select: function(combo) {
@@ -134,10 +161,16 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 				 	
 				 	if(combo.getValue() == 'muzzleVelocity') {
 				 		me.scatterPlot.setYTickFormat(me.velocityTickFormat);
+				 		me.scatterPlot.setYScalePadding(50);
 				 	} else if(combo.getValue() == 'energy') {
 				 		me.scatterPlot.setYTickFormat(me.energyTickFormat);
+				 		me.scatterPlot.setYScalePadding(50);
+				 	} else if(combo.getValue() == 'ppr') {
+				 		me.scatterPlot.setYTickFormat(me.pprTickFormat);
+				 		me.scatterPlot.setYScalePadding(.25);
 				 	} else {
 				 		me.scatterPlot.setYTickFormat(me.weightTickFormat);
+				 		me.scatterPlot.setYScalePadding(50);
 				 	}
 				 	
 				 	me.scatterPlot.setChartTitle(me.generateChartTitle(me.xDataMetric, me.yDataMetric));
@@ -151,7 +184,7 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 			width: 10
 		}, {
 	 		xtype: 'tbtext',
-	 		text: 'X Axis:'
+	 		text: '<b>X</b>'
 	 	}, {
 		 	xtype: 'combo',
 		 	name: 'xAxis',
@@ -162,8 +195,8 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 		 	typeAhead: true,
 		 	queryMode: 'local',
 		 	triggerAction: 'all',
-		 	width: 150,
-		 	listWidth: 150,
+		 	width: 140,
+		 	listWidth: 140,
 		 	value: 'bulletWeight',
 		 	listeners: {
 			 	select: function(combo) {
@@ -172,10 +205,16 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 				 	
 				 	if(combo.getValue() == 'muzzleVelocity') {
 				 		me.scatterPlot.setXTickFormat(me.velocityTickFormat);
+				 		me.scatterPlot.setXScalePadding(50);
 				 	} else if(combo.getValue() == 'energy') {
 				 		me.scatterPlot.setXTickFormat(me.energyTickFormat);
-				 	} else {
+				 		me.scatterPlot.setXScalePadding(50);
+				 	} else if(combo.getValue() == 'ppr') {
+					 	me.scatterPlot.setXTickFormat(me.pprTickFormat);
+					 	me.scatterPlot.setXScalePadding(.25);
+					} else {
 				 		me.scatterPlot.setXTickFormat(me.weightTickFormat);
+				 		me.scatterPlot.setXScalePadding(50);
 				 	}
 				 	
 				 	me.scatterPlot.setChartTitle(me.generateChartTitle(me.xDataMetric, me.yDataMetric));
@@ -184,15 +223,22 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 			 	},
 			 	scope: me
 			}
+		}, {
+			xtype: 'tbspacer',
+			width: 30
+		}, {
+			xtype: 'tbtext',
+			text: '<b>Marker Lines:</b>'
 		},
+			me.markerLineToggleButton,
 			'->',
 		{
 			xtype: 'tbtext',
-			text: '<b>Set Scaling:</b>'
+			text: '<b>Scaling:</b>'
 		}, 
 			me.scaleZeroButton,
 			me.scaleMinMaxButton,
-			{xtype: 'tbspacer', width: 15}
+			{xtype: 'tbspacer', width: 10}
 		];
 			
 		
@@ -273,18 +319,21 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 					yTickFormat: me.velocityTickFormat,
 					tooltipFunction: function(data, index) {
 						return '<b>' + data.cartridge + ' '
-							+ data.bulletType + '</b><br><br>'
+							+ data.bulletType + '</b><br>'
 							+ 'Weight: ' + data.bulletWeight + 'gr<br>'
 							+ 'Velocity: '
 							+ Ext.util.Format.number(data.muzzleVelocity, '0,000')
 							+ ' fps<br>'
 							+ 'Energy: ' 
-							+ Ext.util.Format.number(data.energy, '0,000') + ' ft-lb.';
+							+ Ext.util.Format.number(data.energy, '0,000') + ' ft-lb<br>'
+							+ 'PPR: ' 
+							+ Ext.util.Format.currency(data.ppr);
 					},
 					showLabels: true,
 					labelFunction: function(data, index) {
 						return data.cartridge + ' ' + data.bulletType;
-					}
+					},
+					showMarkerLines: false
 				}, me);
 				
 				me.scatterPlot.draw();
@@ -315,6 +364,10 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 			ret = ret + 'Energy';
 			break;
 			
+			case 'ppr':
+			ret = ret + 'PPR';
+			break;
+			
 			default:
 			ret = ret + 'Bullet Weight';
 			break;
@@ -329,6 +382,10 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 			
 			case 'energy':
 			ret = ret + 'Energy';
+			break;
+			
+			case 'ppr':
+			ret = ret + 'PPR';
 			break;
 			
 			default:

@@ -5,90 +5,105 @@
 		"bulletWeight": 115,
 		"bulletType": "FMJ",
 		"muzzleVelocity": 1300,
-		"energy": 570
+		"energy": 570,
+		"ppr": 0.43
 	}, {
 		"cartridge": "9mm",
 		"bulletWeight": 124,
 		"bulletType": "FMJ",
 		"muzzleVelocity": 1200,
-		"energy": 518
+		"energy": 518,
+		"ppr": 0.29
 	}, {
 		"cartridge": "9mm",
-		"bulletWeight": 116,
+		"bulletWeight": 115,
 		"bulletType": "JHP",
 		"muzzleVelocity": 1240,
-		"energy": 533
+		"energy": 533,
+		"ppr": 0.64
 	}, {
 		"cartridge": "9mm",
 		"bulletWeight": 115,
 		"bulletType": "JHP +P",
 		"muzzleVelocity": 1350,
-		"energy": 632
+		"energy": 632,
+		"ppr": 0.78
 	}, {
 		"cartridge": "9mm",
 		"bulletWeight": 115,
 		"bulletType": "JHP +P+",
 		"muzzleVelocity": 1430,
-		"energy": 704
+		"energy": 704,
+		"ppr": 1.20
 	}, {
 		"cartridge": ".45 ACP",
 		"bulletWeight": 185,
 		"bulletType": "Bonded Defense",
 		"muzzleVelocity": 1225,
-		"energy": 616
+		"energy": 616,
+		"ppr": 1.03
 	}, {
 		"cartridge": ".45 ACP",
 		"bulletWeight": 185,
 		"bulletType": "JHP",
 		"muzzleVelocity": 1050,
-		"energy": 453
+		"energy": 453,
+		"ppr": 0.62
 	}, {
 		"cartridge": ".45 ACP",
 		"bulletWeight": 200,
 		"bulletType": "JHP +P",
 		"muzzleVelocity": 1080,
-		"energy": 518
+		"energy": 518,
+		"ppr": 1.08
 	}, {
 		"cartridge": ".45 ACP",
 		"bulletWeight": 230,
 		"bulletType": "Hydra-Shok",
 		"muzzleVelocity": 900,
-		"energy": 414
+		"energy": 414,
+		"ppr": 1.06
 	}, {
 		"cartridge": ".45 ACP",
 		"bulletWeight": 230,
 		"bulletType": "Ball FMJ",
 		"muzzleVelocity": 830,
-		"energy": 352
+		"energy": 352,
+		"ppr": 0.55
 	}, {
 		"cartridge": ".40 S&W",
 		"bulletWeight": 135,
 		"bulletType": "JHP Red. Recoil",
 		"muzzleVelocity": 1190,
-		"energy": 424
+		"energy": 424,
+		"ppr": 1.22
 	}, {
 		"cartridge": ".40 S&W",
 		"bulletWeight": 155,
 		"bulletType": "Gold JHP",
 		"muzzleVelocity": 1205,
-		"energy": 500
+		"energy": 500,
+		"ppr": 0.68
 	}, {
 		"cartridge": ".40 S&W",
 		"bulletWeight": 165,
 		"bulletType": "Rem. Gold. Saber",
 		"muzzleVelocity": 1150,
-		"energy": 485
+		"energy": 485,
+		"ppr": 1.29
 	}, {
 		"cartridge": ".40 S&W",
 		"bulletWeight": 180,
 		"bulletType": "MagTech FMJ-FP",
 		"muzzleVelocity": 1050,
-		"energy": 441
+		"energy": 441,
+		"ppr": 0.44
 	}, {
 		"cartridge": ".40 S&W",
 		"bulletWeight": 200,
 		"bulletType": "Doubletap FMJ-FP",
 		"muzzleVelocity": 1050,
-		"energy": 490
+		"energy": 490,
+		"ppr": 1.11
 	}]
 }

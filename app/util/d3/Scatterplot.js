@@ -14,11 +14,12 @@ Ext.define('App.util.d3.Scatterplot', {
 	
 	/**
  	 * The "g" elements to hold scatterplot points,
- 	 * text, axes and titles
+ 	 * labels, marker lines, axes and title
  	 */
 	gScatter: null,
 	gLabel: null,
-	gText: null,
+	gHorizontalMarker: null,
+	gVerticalMarker: null,
 	gXAxis: null,
  	gYAxis: null,
  	gTitle: null,
@@ -111,6 +112,7 @@ Ext.define('App.util.d3.Scatterplot', {
   	 * misc.
   	 */
   	radius: 3,
+  	showMarkerLines: false,
 	
 	/**
  	 * chart title configs
@@ -265,7 +267,8 @@ Ext.define('App.util.d3.Scatterplot', {
 		// set "g" elements
 		//////////////////////////////////////////////////
 		me.gScatter = me.svg.append('svg:g');
-		me.gText = me.svg.append('svg:g');
+		me.gHorizontalMarker = me.svg.append('svg:g');
+		me.gVerticalMarker = me.svg.append('svg:g');
 		me.gLabel = me.svg.append('svg:g');
 		me.gXAxis = me.svg.append('svg:g');
 		me.gYAxis = me.svg.append('svg:g');
@@ -324,22 +327,56 @@ Ext.define('App.util.d3.Scatterplot', {
 			.style('stroke-width', 1)
 			.call(d3.helper.tooltip().text(me.tooltipFunction))
 			.on('mouseover', function(d, i) {
-				
-				/*if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
-					eventRelay.publish(mouseEvents.mouseover.eventName, {
-						payload: d,
-						index: i
-					});
-				}
-				*/
-				
 				d3.select(this).style('opacity', .9);
 			})
 			.on('mouseout', function(d) {
 				var el = d3.select(this);
 				el.style('opacity', el.attr('defaultOpacity'));
 			});
-			
+		
+		//////////////////////////////////////////////////
+		// marker lines, if applicable
+		//////////////////////////////////////////////////
+		if(me.showMarkerLines) {
+			// horizontal
+			me.gHorizontalMarker.selectAll('line')
+				.data(me.graphData)
+				.enter()
+				.append('svg:line')
+				.attr('x1', me.margins.left)
+				.attr('x2', function(d) {
+					return xScale(d[xDataMetric]);
+				})
+				.attr('y1', function(d) {
+					return yScale(d[yDataMetric]);
+				})
+				.attr('y2', function(d) {
+					return yScale(d[yDataMetric]);
+				})
+				.style('stroke', '#BBBBBB')
+				.style('stroke-width', 1)
+				.style('stroke-dasharray', ("7,3"));
+				
+			// vertical
+			me.gVerticalMarker.selectAll('line')
+				.data(me.graphData)
+				.enter()
+				.append('svg:line')
+				.attr('x1', function(d) {
+					return xScale(d[xDataMetric]);
+				})
+				.attr('x2', function(d) {
+					return xScale(d[xDataMetric]);
+				})
+				.attr('y1', function(d) {
+					return yScale(d[yDataMetric]);
+				})
+				.attr('y2', me.canvasHeight - me.margins.bottom)
+				.style('stroke', '#BBBBBB')
+				.style('stroke-width', 1)
+				.style('stroke-dasharray', ("7,3"));
+		}
+		
 		//////////////////////////////////////////////////
 		// construct labels, if applicable
 		//////////////////////////////////////////////////
@@ -454,15 +491,6 @@ Ext.define('App.util.d3.Scatterplot', {
 		// apply the events
 		//////////////////////////////////////////////////
 		circSelection.on('mouseover', function(d, i) {
-				
-				/*if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
-					eventRelay.publish(mouseEvents.mouseover.eventName, {
-						payload: d,
-						index: i
-					});
-				}
-				*/
-				
 				d3.select(this).style('opacity', .9);
 			})
 			.on('mouseout', function(d) {
@@ -483,6 +511,93 @@ Ext.define('App.util.d3.Scatterplot', {
 				return yScale(d[yDataMetric]);
 			})
 			.attr('r', me.radius);
+			
+			
+		//////////////////////////////////////////////////
+		// transition marker lines
+		//////////////////////////////////////////////////
+		if(me.showMarkerLines) {
+		
+			//////////////////////////////////////////////////
+			// horizontal
+			// - join
+			// - remove
+			// - add
+			// - transition
+			//////////////////////////////////////////////////
+			var hLines = me.gHorizontalMarker.selectAll('line')
+				.data(me.graphData);
+				
+			hLines.exit()
+				.transition()
+				.attr('x2', me.margins.left)
+				.remove();
+				
+			var newLines = hLines.enter()
+				.append('svg:line')
+				.style('stroke', '#BBBBBB')
+				.style('stroke-width', 1)
+				.style('stroke-dasharray', ("7,3"));
+				
+			hLines.transition()
+				.duration(600)
+				.attr('x1', me.margins.left)
+				.attr('x2', function(d) {
+					return xScale(d[xDataMetric]);
+				})
+				.attr('y1', function(d) {
+					return yScale(d[yDataMetric]);
+				})
+				.attr('y2', function(d) {
+					return yScale(d[yDataMetric]);
+				});
+		
+			//////////////////////////////////////////////////
+			// horizontal
+			// - join
+			// - remove
+			// - add
+			// - transition
+			//////////////////////////////////////////////////
+			var vLines = me.gVerticalMarker.selectAll('line')
+				.data(me.graphData);
+				
+			vLines.exit()
+				.transition()
+				.attr('y2', me.canvasHeight - me.margins.bottom)
+				.remove();
+				
+			var newLines = vLines.enter()
+				.append('svg:line')
+				.style('stroke', '#BBBBBB')
+				.style('stroke-width', 1)
+				.style('stroke-dasharray', ("7,3"));
+				
+			vLines.transition()
+				.duration(600)
+				.attr('x1', function(d) {
+					return xScale(d[xDataMetric]);
+				})
+				.attr('x2', function(d) {
+					return xScale(d[xDataMetric]);
+				})
+				.attr('y1', function(d) {
+					return yScale(d[yDataMetric]);
+				})
+				.attr('y2', me.canvasHeight - me.margins.bottom);
+		} else {
+			me.gHorizontalMarker.selectAll('line')
+				.transition()
+				.duration(250)
+				.attr('x1', me.margins.left)
+				.remove();
+			
+			me.gVerticalMarker.selectAll('line')
+				.transition()
+				.duration(250)
+				.attr('y2', me.canvasHeight - me.margins.bottom)
+				.remove();
+		}
 		
 		//////////////////////////////////////////////////
 		// transition labels
@@ -584,5 +699,23 @@ Ext.define('App.util.d3.Scatterplot', {
 		var me = this;
 		
 		me.scaleToZero = bool;
+	},
+	
+	setXScalePadding: function(num) {
+		var me = this;
+		
+		me.xScalePadding = num;
+	},
+	
+	setYScalePadding: function(num) {
+		var me = this;
+		
+		me.yScalePadding = num;
+	},
+	
+	setShowMarkerLines: function(bool) {
+		var me = this;
+		
+		me.showMarkerLines = bool;
 	}
 });
