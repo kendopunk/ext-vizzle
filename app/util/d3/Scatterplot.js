@@ -56,7 +56,6 @@ Ext.define('App.util.d3.Scatterplot', {
 	 */
 	showLabels: false,
 	labelFontSize: 9,
-	labelDistanceFromBar: 10,	// needs to be less than labelOffsetTop
 	
 	/**
  	 * Default margins for the drawing
@@ -106,7 +105,7 @@ Ext.define('App.util.d3.Scatterplot', {
  	/**
   	 * X and Y scaled to 0 as the min, by default
   	 */
-  	scaleToZero: false,
+  	scaleToZero: true,
  	
  	/**
   	 * misc.
@@ -201,18 +200,8 @@ Ext.define('App.util.d3.Scatterplot', {
 				me.canvasWidth - me.margins.right
 			]);
 			
-		var workingXAxisScale = d3.scale.linear()
-			.domain([
-				domainMin,
-				d3.max(me.graphData, function(d) { return d[metric] + xScalePadding; })
-			])
-			.range([
-				me.margins.left,
-				me.canvasWidth - me.margins.right
-			]);
-			
 		me.xAxis = d3.svg.axis()
-			.scale(workingXAxisScale)
+			.scale(me.xScale)
 			.orient('bottom')
 			.ticks(10)
 			.tickFormat(me.xTickFormat);
@@ -229,9 +218,9 @@ Ext.define('App.util.d3.Scatterplot', {
 		
 		var yScalePadding = me.yScalePadding,
 			domainMin = 0;
-		
+			
 		if(!me.scaleToZero) {
-			domainMin = d3.min(me.graphData, function(d) {
+			var domainMin = d3.min(me.graphData, function(d) {
 				return d[metric] - yScalePadding;
 			});
 		}
@@ -242,22 +231,13 @@ Ext.define('App.util.d3.Scatterplot', {
 				d3.max(me.graphData, function(d) { return d[metric] + yScalePadding })
 			])
 			.range([
-				me.canvasHeight - me.margins.top,
-				me.margins.bottom
+				me.canvasHeight - me.margins.bottom,
+				me.margins.top
 			]);
 			
-		var workingYAxisScale = d3.scale.linear()
-			.domain([
-				domainMin,
-				d3.max(me.graphData, function(d) { return d[metric] + yScalePadding; })
-			])
-			.range([
-				me.canvasHeight - me.margins.bottom,
-				me.canvasHeight - (me.canvasHeight - me.margins.top)
-			])
-			
+
 		me.yAxis = d3.svg.axis()
-			.scale(workingYAxisScale)
+			.scale(me.yScale)
 			.orient('left')
 			.ticks(me.yTicks)
 			.tickFormat(me.yTickFormat);	
@@ -314,8 +294,7 @@ Ext.define('App.util.d3.Scatterplot', {
 			colorScale = me.colorScale,
 			handleEvents = me.handleEvents,
 			eventRelay = me.eventRelay,
-			mouseEvents = me.mouseEvents,
-			labelDistanceFromBar = me.labelDistanceFromBar;
+			mouseEvents = me.mouseEvents;
 			
 		//////////////////////////////////////////////////
 		// sanity check
@@ -346,12 +325,13 @@ Ext.define('App.util.d3.Scatterplot', {
 			.call(d3.helper.tooltip().text(me.tooltipFunction))
 			.on('mouseover', function(d, i) {
 				
-				if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
+				/*if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
 					eventRelay.publish(mouseEvents.mouseover.eventName, {
 						payload: d,
 						index: i
 					});
 				}
+				*/
 				
 				d3.select(this).style('opacity', .9);
 			})
@@ -475,12 +455,13 @@ Ext.define('App.util.d3.Scatterplot', {
 		//////////////////////////////////////////////////
 		circSelection.on('mouseover', function(d, i) {
 				
-				if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
+				/*if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
 					eventRelay.publish(mouseEvents.mouseover.eventName, {
 						payload: d,
 						index: i
 					});
 				}
+				*/
 				
 				d3.select(this).style('opacity', .9);
 			})

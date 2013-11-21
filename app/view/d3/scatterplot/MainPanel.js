@@ -70,8 +70,7 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
  		 * @property
  		 */
  		me.scaleMinMaxButton = Ext.create('Ext.button.Button', {
-	 		text: 'Min/Max Range',
-	 		iconCls: 'icon-tick',
+	 		text: 'Range-Relative',
 	 		handler: function(btn) {
 		 		btn.setIconCls('icon-tick');
 		 		me.scaleZeroButton.setIconCls('');
@@ -85,6 +84,7 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 	 		
 	 	me.scaleZeroButton = Ext.create('Ext.button.Button', {
 	 		text: 'Zero-Based',
+	 		iconCls: 'icon-tick',
 	 		handler: function(btn) {
 		 		btn.setIconCls('icon-tick');
 		 		me.scaleMinMaxButton.setIconCls('');
@@ -190,8 +190,8 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 			xtype: 'tbtext',
 			text: '<b>Set Scaling:</b>'
 		}, 
-			me.scaleMinMaxButton,
 			me.scaleZeroButton,
+			me.scaleMinMaxButton,
 			{xtype: 'tbspacer', width: 15}
 		];
 			
@@ -250,14 +250,14 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 					dataMetric: 'muzzleVelocity',
 					xDataMetric: me.defaultXDataMetric,
 					yDataMetric: me.defaultYDataMetric,
-					xScalePadding: 70,
-					yScalePadding: 100,
+					xScalePadding: 50,
+					yScalePadding: 50,
 					radius: 8,
 					margins: {
 						top: 60,
-						right: 0,
-						bottom: 90,
-						left: 100
+						right: 5,
+						bottom: 75,
+						left: 75
 					},
 					colorScaleFunction: function(data, index) {
 						if(data.cartridge == '.45 ACP') {
