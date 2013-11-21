@@ -87,6 +87,36 @@ Ext.define('App.view.d3.area.MainPanel', {
 	 		me.lineChartButton,
 	 		'-',
 	 		me.areaChartButton,
+	 	{xtype: 'tbspacer', width: 30},
+	 	{
+	 		xtype: 'button',
+	 		text: 'Colors',
+	 		menu: [{
+		 		text: 'Stroke',
+		 		menu: {
+			 		xtype: 'colormenu',
+			 		listeners: {
+				 		select: function(menu, color) {
+				 			me.lineChart.setStrokeColor('#' + color);
+				 			me.lineChart.transition();
+				 		},
+				 		scope: me
+				 	}
+			 	}
+			}, {
+				text: 'Fill',
+				menu: {
+					xtype: 'colormenu',
+					listeners: {
+				 		select: function(menu, color) {
+				 			me.lineChart.setFillColor('#' + color);
+				 			me.lineChart.transition();
+				 		},
+				 		scope: me
+				 	}
+				}
+			}]
+		},
 	 		'->',
 	 	{
 	 		xtype: 'button',

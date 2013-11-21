@@ -6,62 +6,85 @@
  */
 Ext.define('App.util.d3.LineChart', {
 
+	/**
+ 	 * The primary SVG element.  Must be set outside the class
+ 	 * and passed as a configuration item
+ 	 */
 	svg: null,
 	
+	/**
+	 * canvas width, height
+	 */
 	canvasWidth: 400,
-	
 	canvasHeight: 400,
 	
+	/**
+ 	 * "g" elements to hold paths, X/Y axes, and title
+ 	 */
 	gCanvas: null,
-	
-	gXAxis: null,
-	
 	gTitle: null,
-	
+	gXAxis: null,
 	gYAxis: null,
 	
+	/**
+ 	 * X and Y axis functions
+ 	 */
 	xAxis: null,
-	
 	yAxis: null,
 	
-	fillArea: false,
-	
-	panelId: null,
-	
-	xDataMetric: null,
-	
-	yDataMetric: null,
-	
-	yTicks: 12,
-	
-	xTicks: 7,
-	
-	xScalePadding: 0,
-	yScalePadding: 0,
-	
-	canvasLine: null,
-	canvasArea: null,
-	
-	chartTitle: null,
-	
-	yTickFormat: function(d) {
-		return d;
-	},
-	
-	xTickFormat: function(d) {
-		return d;
-	},
-	
-	margins: {
+	/**
+ 	 * default margins
+ 	 */
+ 	margins: {
 		top: 20,
 		right: 10,
 		bottom: 90,
 		left: 90
 	},
 	
-	strokeColor: '#990066',
-	fillColor: '#FFCC99',
+	/**
+ 	 * fillArea = true for area chart, false for line chart
+ 	 */
+	fillArea: false,
 	
+	/**
+	 * x/y data metrics
+	 */
+	xDataMetric: null,
+	yDataMetric: null,
+	
+	/**
+ 	 * ticks and formats
+ 	 */
+ 	xTicks: 7,
+ 	yTicks: 12,
+ 	xTickFormat: function(d) {
+		return d;
+	},
+ 	yTickFormat: function(d) {
+		return d;
+	},
+	
+	/**
+ 	 * scale padding
+ 	 */
+ 	xScalePadding: 0,
+ 	yScalePadding: 0,
+ 	
+ 	/**
+  	 * line/area holders
+  	 */
+  	canvasLine: null,
+  	canvasArea: null,
+	
+	/**
+ 	 * misc.
+ 	 */
+ 	panelId: null,
+ 	chartTitle: null,
+ 	strokeColor: '#990066',
+	fillColor: '#FFCC99',
+ 	
 	constructor: function(config) {
 		var me = this;
 		
@@ -209,16 +232,16 @@ Ext.define('App.util.d3.LineChart', {
 		if(me.fillArea) {
 			me.gCanvas.append('path')
 				.datum(me.graphData)
-				.style('fill', '#FFCC33')
+				.style('fill', me.fillColor)
 				.style('stroke-width', 1)
-				.style('stroke', '#990066')
+				.style('stroke', me.strokeColor)
 				.attr('d', me.canvasArea);
 		} else {
 			me.gCanvas.append('path')
 				.datum(me.graphData)
 				.style('fill', 'none')
 				.style('stroke-width', 1)
-				.style('stroke', '#990066')
+				.style('stroke', me.strokeColor)
 				.attr('d', me.canvasLine);
 		}
 			
@@ -301,9 +324,9 @@ Ext.define('App.util.d3.LineChart', {
 				
 			me.gCanvas.selectAll('path')
 				.datum(me.graphData)
-				.style('fill', '#FFCC33')
+				.style('fill', me.fillColor)
 				.style('stroke-width', 1)
-				.style('stroke', '#990066')
+				.style('stroke', me.strokeColor)
 				.transition()
 				.duration(500)
 				.attr('d', me.canvasArea);
@@ -320,7 +343,7 @@ Ext.define('App.util.d3.LineChart', {
 				.datum(me.graphData)
 				.style('fill', 'none')
 				.style('stroke-width', 1)
-				.style('stroke', '#990066')
+				.style('stroke', me.strokeColor)
 				.transition()
 				.duration(500)
 				.attr('d', me.canvasLine);
@@ -389,5 +412,17 @@ Ext.define('App.util.d3.LineChart', {
 		var me = this;
 		
 		me.yScalePadding = num;
+	},
+	
+	setFillColor: function(color) {
+		var me = this;
+		
+		me.fillColor = color;
+	},
+	
+	setStrokeColor: function(color) {
+		var me = this;
+		
+		me.strokeColor = color;
 	}
 });
