@@ -6,6 +6,11 @@
 	background-repeat: no-repeat;
 }
 
+.icon-area-chart {
+	background-image: url(../img/icons/16x16/area-chart.png) !important;
+	background-repeat: no-repeat;
+}
+
 .icon-arrow-right {
 	background-image: url(../img/icons/16x16/arrow-right.png) !important;
 	background-repeat: no-repeat;
@@ -33,6 +38,11 @@
 
 .icon-film {
 	background-image: url(../img/icons/16x16/film.png) !important;
+	background-repeat: no-repeat;
+}
+
+.icon-line-chart {
+	background-image: url(../img/icons/16x16/line-chart.png) !important;
 	background-repeat: no-repeat;
 }
 
@@ -81,6 +91,10 @@
  */
 .arc path {
 	stroke: #FFFFFF;
+}
+
+.areaLine {
+	fill: none
 }
 
 .axis path, .axis line {
