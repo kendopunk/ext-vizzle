@@ -1,5 +1,6 @@
 /**
  * @class
+ * @author Mark Fehrenbacher (kendopunk@hotmail.com)
  * @memberOf App.store.movie
  * @extend Ext.data.Store
  * @decription Movie data store

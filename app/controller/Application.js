@@ -1,18 +1,23 @@
 /**
  * @class
+ * @author Mark Fehrenbacher (kendopunk@hotmail.com)
  * @memberOf App.controller
  */
 Ext.define('App.controller.Application', {
 	extend: 'Ext.app.Controller',
 	
 	requires: [
+		'App.view.d3.area.MainPanel',
 		'App.view.d3.bar.MainPanel',
 		'App.view.d3.barlegend.MainPanel',
 		'App.view.d3.barlegendlabel.MainPanel',
 		'App.view.d3.barstack.MainPanel',
 		'App.view.d3.barstacklegend.MainPanel',
+		'App.view.d3.buildabar.MainPanel',
+		'App.view.d3.buildapie.MainPanel',
 		'App.view.d3.pie.MainPanel',
-		'App.view.d3.pielegend.MainPanel'
+		'App.view.d3.pielegend.MainPanel',
+		'App.view.d3.scatterplot.MainPanel'
 	],
 	
 	init: function() {

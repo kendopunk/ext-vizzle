@@ -1,5 +1,6 @@
 /**
  * @class
+ * @author Mark Fehrenbacher (kendopunk@hotmail.com)
  * @memberOf App.util.d3
  * @description Generic bar chart
  */
@@ -603,5 +604,5 @@ Ext.define('App.util.d3.BarChart', {
 	 	var me = this;
 	 	
 	 	me.showLabels = bool;
-	} 
+	}
 });

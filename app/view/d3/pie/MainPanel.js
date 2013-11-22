@@ -1,5 +1,6 @@
 /**
  * @class
+ * @author Mark Fehrenbacher (kendopunk@hotmail.com)
  * @memberOf App.view.d3.pie
  * @description Simple pie chart panel
  */
@@ -176,6 +177,7 @@ Ext.define('App.view.d3.pie.MainPanel', {
 					graphData: me.atfData[0]['recoveries'],
 					panelId: me.panelId,
 					chartTitle: me.generateChartTitle('TX'),
+					showLabels: true,
 					labelFunction: function(data, index) {
 						return data.data.caliber;
 					},

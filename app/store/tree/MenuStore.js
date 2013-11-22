@@ -1,5 +1,6 @@
 /**
  * @class
+ * @author Mark Fehrenbacher (kendopunk@hotmail.com)
  * @memberOf App.store.tree
  * @extend Ext.data.TreeStore
  * @description Static store used in construction of Viz Menu
@@ -9,12 +10,12 @@ Ext.define('App.store.tree.MenuStore', {
 	root: {
 		expanded: true,
 		children: [{
-			text: 'D3',
+			text: 'd3.js',
 			expanded: true,
 			children: [{
 				text: '<b>Bar Charts</b>',
 				iconCls: 'icon-bar-chart',
-				expanded: true,
+				//expanded: true,
 				children: [{
 					text: 'Bar Chart',
 					leaf: true,
@@ -40,11 +41,16 @@ Ext.define('App.store.tree.MenuStore', {
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'barstackLegendMainPanel'
+				}, {
+					text: 'Build-A-Bar',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'buildabarMainPanel'
 				}]
 			}, {
 				text: '<b>Pie Charts</b>',
+				// expanded: true,
 				iconCls: 'icon-pie-chart',
-				expanded: true,
 				children: [{
 					text: 'Pie Chart',
 					leaf: true,
@@ -55,6 +61,31 @@ Ext.define('App.store.tree.MenuStore', {
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'pielegendMainPanel'
+				}, {
+					text: 'Build-A-Pie',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'buildapieMainPanel'
+				}]
+			}, {
+				text: '<b>Line/Area Charts</b>',
+				expanded: true,
+				iconCls: 'icon-area-chart',
+				children: [{
+					text: 'Basic Line/Area',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'areaMainPanel'
+				}]
+			}, {
+				text: '<b>Scatterplots</b>',
+				// expanded: true,
+				iconCls: 'icon-scatterplot',
+				children: [{
+					text: 'Basic Scatter',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'scatterMainPanel'
 				}]
 			}]
 		}]

@@ -1,8 +1,15 @@
+/*
+ * @class
+ * @author Mark Fehrenbacher (kendopunk@hotmail.com)
+ * @memberOf App.view.tree
+ * @description Menu tree panel for selecting viz examples
+ */
 Ext.define('App.view.tree.MenuTreePanel', {
 	extend: 'Ext.tree.Panel',
 	requires: [
 		'App.store.tree.MenuStore'
 	],
+	autoScroll: true,
 	width: 200,
 	title: 'Menu Tree Panel',
 	bodyStyle: {

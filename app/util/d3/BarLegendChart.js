@@ -1,5 +1,6 @@
 /**
  * @class
+ * @author Mark Fehrenbacher (kendopunk@hotmail.com)
  * @memberOf KPI.util.d3
  * @description Extended bar chart with legend and flex values
  */
