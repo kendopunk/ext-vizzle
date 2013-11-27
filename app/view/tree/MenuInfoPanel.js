@@ -12,6 +12,8 @@ Ext.define('App.view.tree.MenuInfoPanel', {
 		'App.util.MessageBus'
 	],
 	
+	layout: 'fit',
+	
 	initComponent: function() {
 		var me = this;
 		
