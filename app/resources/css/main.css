@@ -1,3 +1,17 @@
+/** 
+ * nav
+ */
+.northPanelCls {
+	background-image: url('../img/nav/header_bg.png');
+	background-repeat: repeat-x;
+}
+
+#header p {
+	font-family: sans-serif;
+	font-size: 12px;
+	font-weight: bold;
+}
+
 /*
  * 16 x 16 icons
  */
@@ -33,6 +47,11 @@
 
 .icon-dollar {
 	background-image: url(../img/icons/16x16/dollar-sign.png) !important;
+	background-repeat: no-repeat;
+}
+
+.icon-email-send {
+	background-image: url(../img/icons/16x16/email-send.png) !important;
 	background-repeat: no-repeat;
 }
 
