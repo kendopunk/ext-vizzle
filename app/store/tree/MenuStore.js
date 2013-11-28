@@ -93,15 +93,15 @@ Ext.define('App.store.tree.MenuStore', {
 					id: 'scatterMainPanel'
 				}]
 			}]
-		}/*, {
+		}, {
 			text: 'Chart.js',
 			expanded: true,
 			children: [{
-				text: 'Polar Coordinates',
+				text: 'Multiple Examples',
 				leaf: true,
 				iconCls: 'icon-arrow-right',
-				id: 'polarMainPanel'
+				id: 'chartMiscMainPanel'
 			}]
-		}*/]
+		}]
 	}
 });
