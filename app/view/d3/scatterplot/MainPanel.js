@@ -228,7 +228,7 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 			width: 30
 		}, {
 			xtype: 'tbtext',
-			text: '<b>Marker Lines:</b>'
+			text: '<b>Guidelines:</b>'
 		},
 			me.markerLineToggleButton,
 			'->',
@@ -238,7 +238,7 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 		}, 
 			me.scaleZeroButton,
 			me.scaleMinMaxButton,
-			{xtype: 'tbspacer', width: 10}
+			{xtype: 'tbspacer', width: 15}
 		];
 			
 		

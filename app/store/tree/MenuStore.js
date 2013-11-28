@@ -15,7 +15,7 @@ Ext.define('App.store.tree.MenuStore', {
 			children: [{
 				text: '<b>Bar Charts</b>',
 				iconCls: 'icon-bar-chart',
-				//expanded: true,
+				expanded: true,
 				children: [{
 					text: 'Bar Chart',
 					leaf: true,
@@ -49,7 +49,7 @@ Ext.define('App.store.tree.MenuStore', {
 				}]
 			}, {
 				text: '<b>Pie Charts</b>',
-				// expanded: true,
+				//expanded: true,
 				iconCls: 'icon-pie-chart',
 				children: [{
 					text: 'Pie Chart',
@@ -69,17 +69,22 @@ Ext.define('App.store.tree.MenuStore', {
 				}]
 			}, {
 				text: '<b>Line/Area Charts</b>',
-				expanded: true,
+				//expanded: true,
 				iconCls: 'icon-area-chart',
 				children: [{
 					text: 'Basic Line/Area',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'areaMainPanel'
+				}, {
+					text: '"Ticker"',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'tickerMainPanel'
 				}]
 			}, {
 				text: '<b>Scatterplots</b>',
-				// expanded: true,
+				//expanded: true,
 				iconCls: 'icon-scatterplot',
 				children: [{
 					text: 'Basic Scatter',
@@ -88,6 +93,15 @@ Ext.define('App.store.tree.MenuStore', {
 					id: 'scatterMainPanel'
 				}]
 			}]
-		}]
+		}/*, {
+			text: 'Chart.js',
+			expanded: true,
+			children: [{
+				text: 'Polar Coordinates',
+				leaf: true,
+				iconCls: 'icon-arrow-right',
+				id: 'polarMainPanel'
+			}]
+		}*/]
 	}
 });

@@ -32,11 +32,25 @@ Ext.application({
 				xtype: 'panel',
 				height: App.util.Global.titlePanelHeight,
 				bodyStyle: {
-					padding: '5px',
-					'background-color': 'NavajoWhite'
+					padding: '5px'
 				},
-				html: '<b>ExtJS Visualization Examples (D3, et. al.)</b>',
-				region: 'north'
+				bodyCls: 'northPanelCls',
+				contentEl: 'header',
+				region: 'north',
+				bbar: [{
+					xtype: 'tbtext',
+					text: 'ExtJS v4.0.7'
+				},
+					'->',
+				{
+					xtype: 'button',
+					text: 'kendopunk@hotmail.com',
+					href: 'mailto:kendopunk@hotmail.com',
+					iconCls: 'icon-email-send'
+				}, {
+					xtype: 'tbspacer',
+					width: 5
+				}]
 			}, {
 				xtype: 'panel',
 				layout: 'vbox',
@@ -45,7 +59,6 @@ Ext.application({
 					Ext.create('App.view.tree.MenuTreePanel', {
 						height: App.util.Global.treePanelHeight,
 						title: 'Viz Menu',
-						//height: 350,
 						width: '100%',
 						flex: 1,
 						autoScroll: true,
@@ -59,7 +72,6 @@ Ext.application({
 						html: App.util.Global.defaultInfoMessage,
 						layout: 'fit',
 						width: '100%',
-						height: '50%',
 						flex: 1,
 						autoScroll: true
 					})

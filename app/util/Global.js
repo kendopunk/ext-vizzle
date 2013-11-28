@@ -5,11 +5,11 @@
  */
 Ext.define('App.util.Global', {
 	statics: {
-		titlePanelHeight: 40,
+		titlePanelHeight: 55,
 		
 		westPanelWidth: 235,
 		
-		defaultInfoMessage: 'Demonstration of various visualization libraries in ExtJS',
+		defaultInfoMessage: 'Demonstration of various visualization libraries in ExtJS.',
 		
 		svg: {
 			currencyTickFormat: function(d) {

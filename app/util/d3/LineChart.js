@@ -328,7 +328,7 @@ Ext.define('App.util.d3.LineChart', {
 				.style('stroke-width', 1)
 				.style('stroke', me.strokeColor)
 				.transition()
-				.duration(500)
+				.duration(250)
 				.attr('d', me.canvasArea);
 		} else {
 			me.canvasLine = d3.svg.line()
@@ -345,7 +345,7 @@ Ext.define('App.util.d3.LineChart', {
 				.style('stroke-width', 1)
 				.style('stroke', me.strokeColor)
 				.transition()
-				.duration(500)
+				.duration(250)
 				.attr('d', me.canvasLine);
 		}
 
