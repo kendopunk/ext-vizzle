@@ -43,6 +43,7 @@ Ext.define('App.view.d3.bar.VizPanel', {
  			me.defaultMetricText = 'Gross Box Office',
  			me.currentMetric = 'gross',
  			me.baseTitle = 'Box Office Statistics',
+ 			me.btnHighlightCss = 'btn-highlight-peachpuff',
  			me.eventRelay = Ext.create('App.util.MessageBus');
  			
  		/**
@@ -53,6 +54,7 @@ Ext.define('App.view.d3.bar.VizPanel', {
 		  	xtype: 'button',
 		  	iconCls: 'icon-dollar',
 		  	metric: 'gross',
+		  	cls: me.btnHighlightCss,
 		  	text: me.defaultMetricText,
 			handler: me.metricHandler,
 			scope: me
@@ -89,6 +91,15 @@ Ext.define('App.view.d3.bar.VizPanel', {
 	 */
 	metricHandler: function(btn, evt) {
 		var me = this;
+		
+		// button cls
+		Ext.each(me.query('toolbar > button'), function(button) {
+			if(button.metric == btn.metric) {
+				button.addCls(me.btnHighlightCss);
+			} else {
+				button.removeCls(me.btnHighlightCss);
+			}
+		}, me);
 		
 		me.currentMetric = btn.metric;
 		if(btn.metric == 'theaters') {

@@ -130,3 +130,17 @@
 .tinyText {
 	font: 9px/1.1 sans-serif;
 }
+
+/**
+ * ExtJS overrides and additions
+ */
+.btn-highlight-khaki {
+	background: #F0D58C;
+}
+
+.btn-highlight-peachpuff {
+	background: #FFDAB9;
+}
+.btn-highlight-skyblue {
+	background: #87CEEB;
+}

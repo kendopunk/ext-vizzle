@@ -11,7 +11,6 @@ Ext.define('App.controller.Application', {
 		'App.view.d3.area.MainPanel',
 		'App.view.d3.bar.MainPanel',
 		'App.view.d3.barlegend.MainPanel',
-		'App.view.d3.barlegendlabel.MainPanel',
 		'App.view.d3.barstack.MainPanel',
 		'App.view.d3.barstacklegend.MainPanel',
 		'App.view.d3.buildabar.MainPanel',

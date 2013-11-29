@@ -17,20 +17,15 @@ Ext.define('App.store.tree.MenuStore', {
 				iconCls: 'icon-bar-chart',
 				expanded: true,
 				children: [{
-					text: 'Bar Chart',
+					text: 'Basic Bar Chart',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'barMainPanel'	// widget ID
 				}, {
-					text: 'Bar Chart w/Legend',
+					text: 'Bar Chart ++',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'barlegendMainPanel'
-				}, {
-					text: 'Label Toggling',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'barlegendlabelMainPanel'
 				}, {
 					text: 'Stacked Bar Chart',
 					leaf: true,
