@@ -560,5 +560,11 @@ Ext.define('App.util.d3.StackedBarChart', {
  	setChartTitle: function(title) {
 	 	var me = this;
 	 	me.chartTitle = title;
+	},
+
+ 	setShowLabels: function(bool) {
+	 	var me = this;
+	 	
+	 	me.showLabels = bool;
 	}
 });

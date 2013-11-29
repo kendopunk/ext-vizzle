@@ -36,13 +36,15 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
  			me.currentMetric = 'sales',
  			me.defaultMetricText = 'By Total Sales',
  			me.baseTitle = 'Top Albums',
- 			me.eventRelay = Ext.create('App.util.MessageBus');
+ 			me.eventRelay = Ext.create('App.util.MessageBus'),
+ 			me.btnHighlightCss = 'btn-highlight-khaki';
 		
 		/**
  		 * @property
  		 */
-		me.chartDescription = '<b>Stacked Bar Chart w/Legend</b><br><br>'
-		+ 'Again, we use flex values for the chart and the legend to position them relative to one another';
+		me.chartDescription = '<b>Stacked Bar ++</b><br><br>'
+		+ 'Again, we use flex values for the chart and the legend to position them relative to one another.<br><br>'
+		+ 'Toolbar actions added to randomize data and/or append data.';
 			
 		/**
 		 * @property
@@ -57,19 +59,42 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
  		 */
 		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
+		
+		/**
+ 		 * label functions
+ 		 */
+ 		me.salesLabelFn = function(data, index) {
+	 		return Ext.util.Format.number(data.y, '0,000');
+	 	};
+
+		me.pctLabelFn = function(data, index) {
+			return Ext.util.Format.number(data.y, '0.0') + '%';
+		};
+		
+		/**
+		 * tooltip functions
+		 */
 		me.salesTooltipFn = function(data, index) {
-			return '<b>' + data.id + '</b><br>'
+			return '<b>' + data.artist + '</b><br>'
+				+ '<i>' + data.id + '</i><br>'
 				+ data.category + ' Sales: '
 				+ Ext.util.Format.number(data.y, '0,000');
 		};
-		me.salesTickFormat = function(d) {
-			return Ext.util.Format.number(d, '0,000');
-		};
+		
 		me.percentTooltipFn = function(data, index) {
-			return '<b>' + data.id + '</b><br>'
+			return '<b>' + data.artist + '</b><br>'
+				+ '<i>' + data.id + '</i><br>'
 				+ data.category + ' Sales: '
 				+ Ext.util.Format.number(data.y, '0.00') + '%';
 		};
+		
+		/**
+ 		 * axis tick functions
+ 		 */
+ 		me.salesTickFormat = function(d) {
+			return Ext.util.Format.number(d, '0,000');
+		};
+		
 		me.percentTickFormat = function(d) {
 			return Ext.util.Format.number(d, '0') + '%';
 		};
@@ -82,25 +107,27 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 			me.eventRelay.publish('infoPanelUpdate', me.chartDescription);
 		}, me);
 		
-		//////////////////////////////////////////////////
-		// button configurations
-		//////////////////////////////////////////////////
-		me.albumRemoveButton = Ext.create('Ext.button.Button', {
-			text: '',
-			iconCls: 'icon-delete',
-			targetIndex: null,
-			hidden: true,
-			disabled: true,
-			handler: function(btn, e) {
-				me.removeAlbum(btn.targetIndex);
-				btn.disable().hide();
-				me.albumRevertButton.enable().show();
-				me.albumRevertButton.enable().show();
-			},
+		/**
+ 		 * toolbar buttons
+ 		 */
+ 		me.salesMetricButton = Ext.create('Ext.button.Button', {
+			text: 'By Total Sales',
+			metric: 'sales',
+			iconCls: 'icon-album',
+			cls: me.btnHighlightCss,
+			handler: me.metricHandler,
 			scope: me
-		}, me);
+		});
 		
-		me.albumRevertButton = Ext.create('Ext.button.Button', {
+		me.pctMetricButton = Ext.create('Ext.button.Button', {
+			text: 'By Pct. Sales',
+			metric: 'percent',
+			iconCls: 'icon-percent',
+			handler: me.metricHandler,
+			scope: me
+		});
+		
+		me.dataRevertButton = Ext.create('Ext.button.Button', {
 			text: 'Revert Data',
 			tooltip: 'Revert back to original data',
 			iconCls: 'icon-refresh',
@@ -109,17 +136,15 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 				me.albumRevert();
 			},
 			scope: me,
-			hidden: true,
 			disabled: true
 		}, me);
 		
 		me.addRandomButton = Ext.create('Ext.button.Button', {
-			text: 'Add Random Record',
+			text: 'Random Album',
 			iconCls: 'icon-plus',
 			tooltip: 'Add a random album',
-			handler: function() {
-				me.addRandomAlbum();
-			},
+			btnCount: 0,
+			handler: me.addRandomAlbum,
 			scope: me
 		});
 		
@@ -127,24 +152,21 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 		 * @property
 		 * @type Ext.toolbar.Toolbar
 		 */
-		me.tbar =[{
-				xtype: 'button',
-				text: 'By Total Sales',
-				metric: 'sales',
-				iconCls: 'icon-album',
-				handler: me.metricHandler,
-				scope: me
+		me.tbar =[
+			me.salesMetricButton,
+			me.pctMetricButton,
+			{xtype: 'tbspacer', width: 15},
+			{
+				xtype: 'tbtext',
+				text: '<b>Labels:</b>'
 			}, {
 				xtype: 'button',
-				text: 'Percentage Breakdown',
-				metric: 'percent',
-				iconCls: 'icon-percent',
-				handler: me.metricHandler,
+				text: 'ON',
+				cls: me.btnHighlightCss,
+				currentValue: 'on',
+				handler: me.labelHandler,
 				scope: me
-			},
-			'-',
-			me.albumRemoveButton,
-			me.albumRevertButton,
+			}, 
 			'->',
 			{
 				xtype: 'button',
@@ -152,14 +174,16 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 				iconCls: 'icon-arrow-switch',
 				tooltip: 'Make up some random data',
 				handler: function() {
-					me.albumRevertButton.enable();
+					me.dataRevertButton.enable();
 					me.randomizeData();
 				},
 				scope: me
 			},
 			'-',
-			me.addRandomButton
-		]
+			me.addRandomButton,
+			'-',
+			me.dataRevertButton
+		];
 		
 		/**
  		 * @listener
@@ -208,15 +232,11 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 			yTickFormat: me.salesTickFormat,
 			chartTitle: me.generateChartTitle(me.defaultMetricText),
 			handleEvents: true,
-			chartFlex: 6,
-			legendFlex: 1,
+			chartFlex: 5,
+			legendFlex: .75,
 			legendFontSize: 11,
-			mouseEvents: {
-				mouseover: {
-					enabled: true,
-					eventName: 'legendAlbumRemove'
-				}
-			}
+			showLabels: true,
+			labelFunction: me.salesLabelFn
 		});
 		
 		// retrieve the graph data via AJAX and load the visualization
@@ -237,40 +257,6 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 		 	scope: me
 		 });
  	},
- 	
- 	/**
-  	 * @function
-  	 * obj.payload, obj.index
-  	 */
- 	handleRemoveButton: function(obj) {
- 		var me = this;
- 		
- 		me.albumRemoveButton.setText('Remove ' + obj.payload.artist);
- 		me.albumRemoveButton.targetIndex = obj.index;
- 		me.albumRemoveButton.enable().show();
- 		
- 		me.albumRevertButton.show();
- 	},
- 	
- 	/**
-  	 * @function
-  	 * @memberOf App.view.d3.barstack.MainPanel
-  	 * @description Remove a selected album
-  	 */
-  	removeAlbum: function(index) {
-  		var me = this;
-  		
-  		var newData = Ext.clone(me.graphData);
-  		for(i=0; i<newData.length; i++) {
-  			newData[i].values.splice(index, 1);
-  		}
-  		
-  		me.graphData = newData;
-  		me.stackedBarChart.setGraphData(newData);
-  		me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
-		me.stackedBarChart.setYTickFormat(me.salesTickFormat);
-  		me.stackedBarChart.transition();
-  	},
   	
   	/**
    	 * @function
@@ -280,13 +266,17 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
   		var me = this;
   		
   		me.graphData = me.originalGraphData;
+  		
+  		me.salesMetricButton.addCls(me.btnHighlightCss);
+		me.pctMetricButton.removeCls(me.btnHighlightCss);
   	
   		me.stackedBarChart.setGraphData(me.graphData);
+  		me.stackedBarChart.setLabelFunction(me.salesLabelFn);
   		me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
   		me.stackedBarChart.setYTickFormat(me.salesTickFormat);
 		me.stackedBarChart.transition();
 		
-		me.albumRevertButton.disable();
+		me.dataRevertButton.disable();
   	},
   	
   	/**
@@ -297,6 +287,15 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 	metricHandler: function(btn, evt) {
 		var me = this;
 		
+		// button cls
+		Ext.each(me.query('toolbar > button'), function(button) {
+			if(button.metric == btn.metric) {
+				button.addCls(me.btnHighlightCss);
+			} else {
+				button.removeCls(me.btnHighlightCss);
+			}
+		}, me);
+		
 		me.currentMetric = btn.metric;
 		
 		me.stackedBarChart.setChartTitle(me.generateChartTitle(btn.text));
@@ -304,13 +303,14 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 		var dataSet = Ext.clone(me.graphData);
 		
 		if(btn.metric == 'percent') {
-			//me.stackedBarChart.setGraphData(me.normalizePercent(dataSet));
-			
 			var temp = me.normalizePercent(dataSet);
+			
+			me.stackedBarChart.setLabelFunction(me.pctLabelFn);
 			me.stackedBarChart.setGraphData(temp);
 			me.stackedBarChart.setTooltipFunction(me.percentTooltipFn);
 			me.stackedBarChart.setYTickFormat(me.percentTickFormat);
-		} else {			
+		} else {
+			me.stackedBarChart.setLabelFunction(me.salesLabelFn);	
 			me.stackedBarChart.setGraphData(dataSet);
 			me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
 			me.stackedBarChart.setYTickFormat(me.salesTickFormat);
@@ -378,7 +378,7 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 	randomizeData: function() {
 		var me = this;
 		
-		var newData = Ext.clone(me.originalGraphData);
+		var newData = Ext.clone(me.graphData);
 		
 		Ext.each(newData, function(rec) {
 			Ext.each(rec.values, function(v) {
@@ -388,8 +388,12 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 			})
 		});
 		
+		me.salesMetricButton.addCls(me.btnHighlightCss);
+		me.pctMetricButton.removeCls(me.btnHighlightCss);
+		
 		me.graphData = newData;
 		me.stackedBarChart.setGraphData(newData);
+		me.stackedBarChart.setLabelFunction(me.salesLabelFn);
 		me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
 		me.stackedBarChart.setYTickFormat(me.salesTickFormat);
 		me.stackedBarChart.transition();
@@ -398,7 +402,7 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 	/**
  	 * @function
  	 */
- 	addRandomAlbum: function() {
+ 	addRandomAlbum: function(btn) {
  		var me = this;
  		
  		var randomAlbums = [{
@@ -427,28 +431,61 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 	 		artist: 'The Beatles'
 	 	}];
 	 	
-	 	var ind = parseInt(Math.floor(Math.random() * randomAlbums.length));
+	 	var albumToAdd = randomAlbums[btn.btnCount];
 	 	
-	 	var add = randomAlbums[ind];
+	 	btn.btnCount = btn.btnCount + 1;
 	 	
+	 	if(btn.btnCount == randomAlbums.length) {
+		 	btn.disable();
+		 	btn.btnCount = 0;
+		}
+	 	
+	 	// clone and add
 	 	var newData = Ext.clone(me.graphData);
-	 	
 	 	Ext.each(newData, function(rec) {
 	 		rec.values.push({
-	 			id: add.id,
-	 			artist: add.artist,
+	 			id: albumToAdd.id,
+	 			artist: albumToAdd.artist,
 	 			category: rec.category,
 	 			y: parseInt(Math.random() * 5000000)
 	 		})
 	 	});
+	 	
+	 	// button cls
+	 	me.salesMetricButton.addCls(me.btnHighlightCss);
+		me.pctMetricButton.removeCls(me.btnHighlightCss);
  		
+ 		// set and transition
  		me.graphData = newData;
  		me.stackedBarChart.setGraphData(newData);
+ 		me.stackedBarChart.setLabelFunction(me.salesLabelFn);
 		me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
 		me.stackedBarChart.setYTickFormat(me.salesTickFormat);
 		me.stackedBarChart.transition();
+		
+		// allow revert
+		me.dataRevertButton.enable();
+ 	},
  	
- 		
- 		me.addRandomButton.disable();
- 	}
+ 	/** 
+	 * @function
+	 * @description Toggle labels on/off
+	 */
+	labelHandler: function(btn) {
+	 	var me = this;
+	 	
+		if(btn.currentValue == 'on') {
+			btn.currentValue = 'off';
+			btn.setText('OFF');
+			btn.removeCls(me.btnHighlightCss);
+			me.stackedBarChart.setShowLabels(false);
+		} else {
+			btn.currentValue = 'on';
+			btn.setText('ON');
+			btn.addCls(me.btnHighlightCss);
+			me.stackedBarChart.setShowLabels(true);
+		}
+		
+		me.stackedBarChart.transition();
+	},
 });

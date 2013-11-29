@@ -133,7 +133,6 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 				me.albumRevert();
 			},
 			scope: me,
-			hidden: true,
 			disabled: true
 		}, me);
 		
@@ -151,7 +150,7 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 				scope: me
 			}, {
 				xtype: 'button',
-				text: 'Pct. Sales',
+				text: 'By Pct. Sales',
 				metric: 'percent',
 				iconCls: 'icon-percent',
 				handler: me.metricHandler,
@@ -308,7 +307,6 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 	metricHandler: function(btn, evt) {
 		var me = this;
 		
-		// button cls
 		// button cls
 		Ext.each(me.query('toolbar > button'), function(button) {
 			if(button.metric == btn.metric) {
