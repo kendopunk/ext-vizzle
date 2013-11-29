@@ -32,7 +32,7 @@ Ext.define('App.store.tree.MenuStore', {
 					iconCls: 'icon-arrow-right',
 					id: 'barstackMainPanel'
 				}, {
-					text: 'Stacked w/Legend',
+					text: 'Stacked Bar ++',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'barstackLegendMainPanel'
