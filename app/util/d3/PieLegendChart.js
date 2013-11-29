@@ -389,6 +389,8 @@ Ext.define('App.util.d3.PieLegendChart', {
 			
 			// replacements
 			segments.append('text')
+				.transition()
+				.duration(250)
 				.attr('transform', function(d, i) {
 					var c = arc.centroid(d),
 						x = c[0],

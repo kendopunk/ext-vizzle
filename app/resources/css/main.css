@@ -50,6 +50,11 @@
 	background-repeat: no-repeat;
 }
 
+.icon-donut-chart {
+	background-image: url(../img/icons/16x16/donut-chart.png) !important;
+	background-repeat: no-repeat;
+}
+
 .icon-email-send {
 	background-image: url(../img/icons/16x16/email-send.png) !important;
 	background-repeat: no-repeat;

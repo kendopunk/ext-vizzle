@@ -34,13 +34,14 @@ Ext.define('App.view.d3.pielegend.MainPanel', {
  			me.availableStates = [],
  			me.atfData = null,
  			me.defaultMetric = 'recovery',
- 			me.eventRelay = Ext.create('App.util.MessageBus');
+ 			me.eventRelay = Ext.create('App.util.MessageBus'),
+ 			me.btnHighlightCss = 'btn-highlight-peachpuff';
 		
 		/**
  		 * @property
  		 */
-		me.chartDescription = '<b>Pie Chart with Legend</b><br><br>'
-		 	+ 'Arc labels turned off...mouse over legend elements to highlight arcs.';
+		me.chartDescription = '<b>Pie Chart ++</b><br><br>'
+			+ 'Legend added...mouse over legend text elements to highlight arcs.';
 			
 		/**
  		 * @properties
@@ -86,6 +87,44 @@ Ext.define('App.view.d3.pielegend.MainPanel', {
 			targetIndex: 3,
 			handler: me.handleStateSelection,
 			scope: me
+		}, {
+			xtype: 'tbspacer',
+			width: 20
+		}, {
+			xtype: 'button',
+			iconCls: 'icon-pie-chart',
+			tooltip: 'Draw pie chart',
+			handler: function(btn) {
+				me.pieLegendChart.setInnerRadius(0);
+				me.pieLegendChart.transition();
+			},
+			scope: me
+		}, {
+			xtype: 'button',
+			iconCls: 'icon-donut-chart',
+			tooltip: 'Draw donut chart',
+			handler: function(btn) {
+				me.pieLegendChart.setInnerRadius(
+					parseInt(me.pieLegendChart.outerRadius * .75)
+				);
+				me.pieLegendChart.transition();
+			},
+			scope: me
+		},
+		'->',
+		{
+			xtype: 'tbtext',
+			text: '<b>Labels</b>'
+		}, {
+			xtype: 'button',
+			text: 'ON',
+			cls: me.btnHighlightCss,
+			currentValue: 'on',
+			handler: me.labelHandler,
+			scope: me
+		}, {
+			xtype: 'tbspacer',
+			width: 10
 		}];
 		
 		// on activate, publish update to the "Info" panel
@@ -149,7 +188,10 @@ Ext.define('App.view.d3.pielegend.MainPanel', {
 					graphData: me.atfData[0]['recoveries'],
 					panelId: me.panelId,
 					chartTitle: me.generateChartTitle('TX'),
-					showLabels: false,
+					showLabels: true,
+					labelFunction: function(data, index) {
+						return data.data.caliber;
+					},
 					tooltipFunction: function(data, index) {
 						return '<b>' + data.data.caliber + '</b><br>'
 							+ Ext.util.Format.number(data.data.recovery, '0,000')
@@ -200,5 +242,29 @@ Ext.define('App.view.d3.pielegend.MainPanel', {
 		var me = this;
 		
 		return me.baseTitle + ' : ' + append + ' Recoveries';
+	},
+	
+	/** 
+	 * @function
+	 * @description Toggle labels on/off
+	 */
+	labelHandler: function(btn) {
+	 	var me = this;
+	 	
+		if(btn.currentValue == 'on') {
+			btn.currentValue = 'off';
+			btn.setText('OFF');
+			btn.removeCls(me.btnHighlightCss);
+			
+			me.pieLegendChart.setShowLabels(false);
+		} else {
+			btn.currentValue = 'on';
+			btn.setText('ON');
+			btn.addCls(me.btnHighlightCss);
+			
+			me.pieLegendChart.setShowLabels(true);
+		}
+		
+		me.pieLegendChart.transition();
 	}
 });
