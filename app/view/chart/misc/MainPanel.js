@@ -30,7 +30,7 @@ Ext.define('App.view.chart.misc.MainPanel', {
 
 		me.chartDescription = '<b>Chart.js</b><br><br>'
 			+ 'Chart.js uses HTML5 and the canvas element.  While not as flexible and customizable as other libraries, it provides a high-level abstraction for implementing visualizations quickly and easily.<br><br>'
-			+ 'Shout out to jsjoy.com for info on implementing &lt;canvas&gt; in ExtJS (jsjoy.com/blog/62/ext-js-and-canvas-integration).';
+			+ 'Shout out to <a href="http://www.jsjoy.com/blog/62/ext-js-and-canvas-integration">jsjoy.com</a> for info on implementing &lt;canvas&gt; in ExtJS.';
 			
 		/**
  		 * @properties
