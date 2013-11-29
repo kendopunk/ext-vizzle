@@ -20,7 +20,7 @@ Ext.define('App.view.chart.misc.MainPanel', {
 	
 	layout: {
 		type: 'table',
-		columns: 3
+		columns: 2
 	},
 
 	initComponent: function() {
@@ -30,7 +30,7 @@ Ext.define('App.view.chart.misc.MainPanel', {
 
 		me.chartDescription = '<b>Chart.js</b><br><br>'
 			+ 'Chart.js uses HTML5 and the canvas element.  While not as flexible and customizable as other libraries, it provides a high-level abstraction for implementing visualizations quickly and easily.<br><br>'
-			+ 'Shout out to <a href="http://www.jsjoy.com/blog/62/ext-js-and-canvas-integration">jsjoy.com</a> for info on implementing &lt;canvas&gt; in ExtJS.';
+			+ 'Canvas elements placed in ExtJS table layout.  Shout out to <a href="http://www.jsjoy.com/blog/62/ext-js-and-canvas-integration">jsjoy.com</a> for info on implementing &lt;canvas&gt; in ExtJS.';
 			
 		/**
  		 * @properties
@@ -52,13 +52,20 @@ Ext.define('App.view.chart.misc.MainPanel', {
 		 	}
 		 }, {
 	 		xtype: 'box',
-	 		colspan: 2,
 	 		autoEl: {
 		 		tag: 'canvas',
 		 		width: 500,
 		 		height: 250
 		 	}
-		 }];
+		 }, {
+			 xtype: 'box',
+			 colspan: 2,
+			 autoEl: {
+				 tag: 'canvas',
+				 width: 750,
+				 height: 400
+			 }
+		}];
 		
 
 		// on activate, publish update to the "Info" panel
@@ -84,7 +91,7 @@ Ext.define('App.view.chart.misc.MainPanel', {
 		
 		var ctxPolar = me.items.items[0].el.dom.getContext('2d'),
 			ctxLine = me.items.items[1].el.dom.getContext('2d');
-			//ctxRadar = me.items.items[2].el.dom.getContext('2d');
+			ctxRadar = me.items.items[2].el.dom.getContext('2d');
 			
 		////////////////////////////////////////////////////////////
 		// polar coordinates
@@ -115,23 +122,64 @@ Ext.define('App.view.chart.misc.MainPanel', {
 		////////////////////////////////////////////////////////////
 		var lineData = {
 			labels: [
-				"OH", "VA", "MT", "LA", "TX", "UT"
+				'OH', 'VA', 'MT', 'LA', 'TX', 'UT'
 			],
 			datasets: [{
 				fillColor: '#BADCDC',
-				strokeColor: 'black',
-				pointColor: 'red',
-				pointColorStroke: 'white',
+				strokeColor: '#000000',
+				pointColor: '#CC3300',
+				pointColorStroke: '#FFF',
 				data: [112, 88, 173, 77, 105, 166]
 			}, {
 				fillColor: '#FFCC33',
 				strokeColor: '#00FF00',
-				pointColor: 'black',
-				pointColorStroke: 'yellow',
+				pointColor: '#000000',
+				pointColorStroke: '#FFCC00',
 				data: [66, 117, 77, 81, 155, 99]
 			}]
 		};
 		
-		new Chart(ctxLine).Line(lineData);
+		//new Chart(ctxLine).Line(lineData);
+		
+		////////////////////////////////////////////////////////////
+		// radar
+		// TO DO...check Firebug warnings about fill color
+		////////////////////////////////////////////////////////////
+		var d1 = [],
+			d2 = [];
+			
+		for(i=0; i<6; i++) {
+			d1.push(Math.floor(Math.random() * 100));
+		}
+		
+		for(i=0; i<6; i++) {
+			d2.push(Math.floor(Math.random() * 100));
+		}
+		
+		var radarData = {
+			labels: [
+				'Apples',
+				'Oranges',
+				'Bananas',
+				'Peaches',
+				'Star Fruit',
+				'Durian'
+			],
+			datasets: [{
+				fillColor: 'rgba(255, 204, 33, 0.4)',
+				strokeColor: 'rgba(255, 204, 33, 1)',
+				pointColor: 'rgba(204, 204, 204, 1)',
+				pointStrokeColor: 'rgba(200, 200, 200, 1)',
+				data: d1
+			}, {
+				fillColor: 'rgba(151,187,205,0.5)',
+				strokeColor: 'rgba(151,187,205,1)',
+				pointColor: 'rgba(151,187,205,1)',
+				pointStrokeColor: '#FFF',
+				data: d2
+			}]
+		};
+		
+		new Chart(ctxRadar).Radar(radarData);
 	 }
 });
