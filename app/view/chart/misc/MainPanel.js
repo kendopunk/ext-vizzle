@@ -47,23 +47,23 @@ Ext.define('App.view.chart.misc.MainPanel', {
 	 		xtype: 'box',
 	 		autoEl: {
 		 		tag: 'canvas',
-		 		width: 250,
-		 		height: 250
+		 		width: 200,
+		 		height: 200
 		 	}
 		 }, {
 	 		xtype: 'box',
 	 		autoEl: {
 		 		tag: 'canvas',
 		 		width: 500,
-		 		height: 250
+		 		height: 200
 		 	}
 		 }, {
 			 xtype: 'box',
 			 colspan: 2,
 			 autoEl: {
 				 tag: 'canvas',
-				 width: 750,
-				 height: 400
+				 width: 700,
+				 height: 300
 			 }
 		}];
 		
@@ -125,21 +125,21 @@ Ext.define('App.view.chart.misc.MainPanel', {
 				'OH', 'VA', 'MT', 'LA', 'TX', 'UT'
 			],
 			datasets: [{
-				fillColor: '#BADCDC',
-				strokeColor: '#000000',
-				pointColor: '#CC3300',
+				fillColor: 'rgba(186, 220, 220, 0.4)',
+				strokeColor: 'rgba(33, 33, FF, 0.8)',
+				pointColor: 'rgba(204, 51, 0, .8)',
 				pointColorStroke: '#FFF',
 				data: [112, 88, 173, 77, 105, 166]
 			}, {
-				fillColor: '#FFCC33',
-				strokeColor: '#00FF00',
-				pointColor: '#000000',
-				pointColorStroke: '#FFCC00',
+				fillColor: 'rgba(255, 204, 51, .7)',
+				strokeColor: 'rgba(0, 255, 0, .9)',
+				pointColor: 'rgba(0, 0, 0, 1)',
+				pointColorStroke: 'rgba(255, 204, 0, .8)',
 				data: [66, 117, 77, 81, 155, 99]
 			}]
 		};
 		
-		//new Chart(ctxLine).Line(lineData);
+		new Chart(ctxLine).Line(lineData);
 		
 		////////////////////////////////////////////////////////////
 		// radar
