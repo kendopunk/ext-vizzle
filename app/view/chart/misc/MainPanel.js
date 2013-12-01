@@ -1,7 +1,7 @@
 5/**
  * @class
  * @author Mark Fehrenbacher (kendopunk@hotmail.com)
- * @memberOf App.view.chart.polar
+ * @memberOf App.view.chart.misc
  * @description Chart.js miscellaneous charts
  */
 Ext.define('App.view.chart.misc.MainPanel', {
@@ -125,13 +125,13 @@ Ext.define('App.view.chart.misc.MainPanel', {
 				'OH', 'VA', 'MT', 'LA', 'TX', 'UT'
 			],
 			datasets: [{
-				fillColor: 'rgba(186, 220, 220, 0.4)',
+				fillColor: 'rgba(186, 220, 220, .7)',
 				strokeColor: 'rgba(33, 33, FF, 0.8)',
 				pointColor: 'rgba(204, 51, 0, .8)',
 				pointColorStroke: '#FFF',
 				data: [112, 88, 173, 77, 105, 166]
 			}, {
-				fillColor: 'rgba(255, 204, 51, .7)',
+				fillColor: 'rgba(255, 204, 51, .4)',
 				strokeColor: 'rgba(0, 255, 0, .9)',
 				pointColor: 'rgba(0, 0, 0, 1)',
 				pointColorStroke: 'rgba(255, 204, 0, .8)',
