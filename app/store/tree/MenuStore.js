@@ -15,7 +15,7 @@ Ext.define('App.store.tree.MenuStore', {
 			children: [{
 				text: '<b>Bar Charts</b>',
 				iconCls: 'icon-bar-chart',
-				//expanded: true,
+				expanded: true,
 				children: [{
 					text: 'Basic Bar Chart',
 					leaf: true,
@@ -96,6 +96,15 @@ Ext.define('App.store.tree.MenuStore', {
 				leaf: true,
 				iconCls: 'icon-arrow-right',
 				id: 'chartMiscMainPanel'
+			}]
+		}, {
+			text: 'Fabric.js',
+			expanded: true,
+			children: [{
+				text: 'Basic Examples',
+				leaf: true,
+				iconCls: 'icon-arrow-right',
+				id: 'fabricBasicMainPanel'
 			}]
 		}]
 	}

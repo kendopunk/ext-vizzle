@@ -18,7 +18,8 @@ Ext.define('App.controller.Application', {
 		'App.view.d3.pie.MainPanel',
 		'App.view.d3.pielegend.MainPanel',
 		'App.view.d3.scatterplot.MainPanel',
-		'App.view.d3.ticker.MainPanel'
+		'App.view.d3.ticker.MainPanel',
+		'App.view.fabric.basic.MainPanel'
 	],
 	
 	init: function() {

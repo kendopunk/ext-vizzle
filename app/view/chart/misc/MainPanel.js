@@ -125,16 +125,16 @@ Ext.define('App.view.chart.misc.MainPanel', {
 				'OH', 'VA', 'MT', 'LA', 'TX', 'UT'
 			],
 			datasets: [{
-				fillColor: 'rgba(186, 220, 220, .7)',
-				strokeColor: 'rgba(33, 33, FF, 0.8)',
-				pointColor: 'rgba(204, 51, 0, .8)',
-				pointColorStroke: '#FFF',
+				fillColor: 'rgba(255, 204, 33, 0.4)',
+				strokeColor: 'rgba(255, 204, 33, 1)',
+				pointColor: 'rgba(204, 33, 0, .7)',
+				pointStrokeColor: 'rgba(33, 66, 99, .8)',
 				data: [112, 88, 173, 77, 105, 166]
 			}, {
-				fillColor: 'rgba(255, 204, 51, .4)',
-				strokeColor: 'rgba(0, 255, 0, .9)',
-				pointColor: 'rgba(0, 0, 0, 1)',
-				pointColorStroke: 'rgba(255, 204, 0, .8)',
+				fillColor: 'rgba(204, 204, 255, 0.7)',
+				strokeColor: 'rgba(255, 204, 33, 1)',
+				pointColor: 'rgba(204, 204, 204, 1)',
+				pointStrokeColor: 'rgba(99, 99, 99, 0.8)',
 				data: [66, 117, 77, 81, 155, 99]
 			}]
 		};

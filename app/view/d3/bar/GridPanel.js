@@ -20,7 +20,7 @@ Ext.define('App.view.d3.bar.GridPanel', {
 		
 		/**
  		 * Sample for S GRAY
- 		 */
+ 		 
 		me.plugins = [
 			Ext.create('Ext.grid.plugin.CellEditing', {
 				clicksToEdit: 1,
@@ -29,7 +29,7 @@ Ext.define('App.view.d3.bar.GridPanel', {
 					scope: me
 				}
 			}, me)
-		];
+		];*/
 		
 		/**
  		 * event relay

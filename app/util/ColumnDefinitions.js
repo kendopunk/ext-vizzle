@@ -43,13 +43,15 @@ Ext.define('App.util.ColumnDefinitions', {
 			header: 'Release Date',
 			dataIndex: 'release',
 			renderer: function(value, meta) {
-				meta.style = 'background-color:#FFC';
+				//meta.style = 'background-color:#FFC';
 				return value;
-			},
+			}
+			/*,
 			editor: {
 				xtype: 'textfield',
 				allowBlank: false
 			}
+			*/
 		},
 		
 		tickerChange: {
