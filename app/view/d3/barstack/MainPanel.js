@@ -36,7 +36,8 @@ Ext.define('App.view.d3.barstack.MainPanel', {
  			me.currentMetric = 'sales',
  			me.defaultMetricText = 'By Total Sales',
  			me.baseTitle = 'Top Albums',
- 			me.eventRelay = Ext.create('App.util.MessageBus');
+ 			me.eventRelay = Ext.create('App.util.MessageBus'),
+ 			me.btnHighlightCss = 'btn-highlight-khaki';
 		
 		/**
  		 * @property
@@ -60,19 +61,40 @@ Ext.define('App.view.d3.barstack.MainPanel', {
  		 */
 		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
+		
+		/**
+ 		 * label functions
+ 		 */
+ 		me.salesLabelFn = function(data, index) {
+	 		return Ext.util.Format.number(data.y, '0,000');
+	 	};
+
+		me.pctLabelFn = function(data, index) {
+			return Ext.util.Format.number(data.y, '0.0') + '%';
+		};
+		
+		/**
+ 		 * tooltip functions
+ 		 */
 		me.salesTooltipFn = function(data, index) {
 			return '<b>' + data.id + '</b><br>'
 				+ data.category + ' Sales: '
 				+ Ext.util.Format.number(data.y, '0,000');
 		};
-		me.salesTickFormat = function(d) {
-			return Ext.util.Format.number(d, '0,000');
-		};
+		
 		me.percentTooltipFn = function(data, index) {
 			return '<b>' + data.id + '</b><br>'
 				+ data.category + ' Sales: '
 				+ Ext.util.Format.number(data.y, '0.00') + '%';
 		};
+		
+		/**
+ 		 * tick format functions
+ 		 */
+ 		me.salesTickFormat = function(d) {
+			return Ext.util.Format.number(d, '0,000');
+		};
+		
 		me.percentTickFormat = function(d) {
 			return Ext.util.Format.number(d, '0') + '%';
 		};
@@ -111,7 +133,6 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 				me.albumRevert();
 			},
 			scope: me,
-			hidden: true,
 			disabled: true
 		}, me);
 		
@@ -124,11 +145,12 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 				text: 'By Total Sales',
 				metric: 'sales',
 				iconCls: 'icon-album',
+				cls: me.btnHighlightCss,
 				handler: me.metricHandler,
 				scope: me
 			}, {
 				xtype: 'button',
-				text: 'Percentage Breakdown',
+				text: 'By Pct. Sales',
 				metric: 'percent',
 				iconCls: 'icon-percent',
 				handler: me.metricHandler,
@@ -191,7 +213,9 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 					enabled: true,
 					eventName: 'albumRemove'
 				}
-			}
+			},
+			showLabels: true,
+			labelFunction: me.salesLabelFn
 		});
 		
 		// retrieve the graph data via AJAX and load the visualization
@@ -265,7 +289,8 @@ Ext.define('App.view.d3.barstack.MainPanel', {
   		var me = this;
   		
   		me.workingGraphData = me.originalGraphData;
-  	
+  		
+  		me.stackedBarChart.setLabelFunction(me.salesLabelFn);
   		me.stackedBarChart.setGraphData(me.workingGraphData);
   		me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
   		me.stackedBarChart.setYTickFormat(me.salesTickFormat);
@@ -282,6 +307,15 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 	metricHandler: function(btn, evt) {
 		var me = this;
 		
+		// button cls
+		Ext.each(me.query('toolbar > button'), function(button) {
+			if(button.metric == btn.metric) {
+				button.addCls(me.btnHighlightCss);
+			} else {
+				button.removeCls(me.btnHighlightCss);
+			}
+		}, me);
+		
 		me.stackedBarChart.setChartTitle(me.generateChartTitle(btn.text));
 		me.currentMetric = btn.metric;
 		
@@ -290,10 +324,13 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 		if(btn.metric == 'percent') {
 			dataSet = me.normalizePercent(dataSet);
 			
+			me.stackedBarChart.setLabelFunction(me.pctLabelFn);
 			me.stackedBarChart.setGraphData(dataSet);
 			me.stackedBarChart.setTooltipFunction(me.percentTooltipFn);
 			me.stackedBarChart.setYTickFormat(me.percentTickFormat);
-		} else {			
+			
+		} else {
+			me.stackedBarChart.setLabelFunction(me.salesLabelFn);
 			me.stackedBarChart.setGraphData(dataSet);
 			me.stackedBarChart.setTooltipFunction(me.salesTooltipFn);
 			me.stackedBarChart.setYTickFormat(me.salesTickFormat);

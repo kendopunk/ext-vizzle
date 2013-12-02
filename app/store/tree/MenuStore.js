@@ -17,27 +17,22 @@ Ext.define('App.store.tree.MenuStore', {
 				iconCls: 'icon-bar-chart',
 				expanded: true,
 				children: [{
-					text: 'Bar Chart',
+					text: 'Basic Bar Chart',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'barMainPanel'	// widget ID
 				}, {
-					text: 'Bar Chart w/Legend',
+					text: 'Bar Chart ++',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'barlegendMainPanel'
-				}, {
-					text: 'Label Toggling',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'barlegendlabelMainPanel'
 				}, {
 					text: 'Stacked Bar Chart',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'barstackMainPanel'
 				}, {
-					text: 'Stacked w/Legend',
+					text: 'Stacked Bar ++',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'barstackLegendMainPanel'
@@ -57,7 +52,7 @@ Ext.define('App.store.tree.MenuStore', {
 					iconCls: 'icon-arrow-right',
 					id: 'pieMainPanel'
 				}, {
-					text: 'Pie Chart w/Legend',
+					text: 'Pie Chart ++',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'pielegendMainPanel'
@@ -93,15 +88,24 @@ Ext.define('App.store.tree.MenuStore', {
 					id: 'scatterMainPanel'
 				}]
 			}]
-		}/*, {
+		}, {
 			text: 'Chart.js',
 			expanded: true,
 			children: [{
-				text: 'Polar Coordinates',
+				text: 'Multiple Examples',
 				leaf: true,
 				iconCls: 'icon-arrow-right',
-				id: 'polarMainPanel'
+				id: 'chartMiscMainPanel'
 			}]
-		}*/]
+		}, {
+			text: 'Fabric.js',
+			expanded: true,
+			children: [{
+				text: 'Basic Examples',
+				leaf: true,
+				iconCls: 'icon-arrow-right',
+				id: 'fabricBasicMainPanel'
+			}]
+		}]
 	}
 });

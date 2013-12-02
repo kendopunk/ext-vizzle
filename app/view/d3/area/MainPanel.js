@@ -34,7 +34,8 @@ Ext.define('App.view.d3.area.MainPanel', {
  			me.baseTitle = 'Random Price Data over Time',
  			me.defaultXDataMetric = 'timestamp',
  			me.defaultYDataMetric = 'price',
- 			me.eventRelay = Ext.create('App.util.MessageBus');
+ 			me.eventRelay = Ext.create('App.util.MessageBus')
+ 			me.btnHighlightCss = 'btn-highlight-peachpuff';
 		
 		/**
  		 * @property
@@ -55,11 +56,12 @@ Ext.define('App.view.d3.area.MainPanel', {
  		 * @property
  		 */
  		me.lineChartButton = Ext.create('Ext.button.Button', {
- 			text: '<b>[ Line Chart ]</b>',
+ 			text: 'Line Chart',
+ 			cls: me.btnHighlightCss,
  			iconCls: 'icon-line-chart',
  			handler: function(btn) {
-	 			btn.setText('<b>[ Line Chart ]</b>');
-	 			me.areaChartButton.setText('Area Chart');
+	 			btn.addCls(me.btnHighlightCss);
+ 				me.areaChartButton.removeCls(me.btnHighlightCss);
 	 			
 	 			me.lineChart.setFillArea(false);
 	 			me.lineChart.transition();
@@ -71,8 +73,8 @@ Ext.define('App.view.d3.area.MainPanel', {
  			text: 'Area Chart',
  			iconCls: 'icon-area-chart',
  			handler: function(btn) {
-	 			btn.setText('<b>[ Area Chart ]</b>');
-	 			me.lineChartButton.setText('Line Chart');
+	 			btn.addCls(me.btnHighlightCss);
+	 			me.lineChartButton.removeCls(me.btnHighlightCss);
 	 			
 	 			me.lineChart.setFillArea(true);
 	 			me.lineChart.transition();

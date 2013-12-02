@@ -35,7 +35,8 @@ Ext.define('App.view.d3.ticker.MainPanel', {
  			me.baseTitle = 'Stock Price Ticker',
  			me.defaultXDataMetric = 'timestamp',
  			me.defaultYDataMetric = 'price',
- 			me.eventRelay = Ext.create('App.util.MessageBus');
+ 			me.eventRelay = Ext.create('App.util.MessageBus'),
+ 			me.btnHighlightCss = 'btn-highlight-peachpuff';
 		
 		/**
  		 * @property
@@ -55,14 +56,19 @@ Ext.define('App.view.d3.ticker.MainPanel', {
  		 */
  		me.taskMgrButton = Ext.create('Ext.button.Button', {
 	 		text: 'RUNNING',
+	 		cls: me.btnHighlightCss,
 	 		currentValue: 'on',
 	 		handler: function(btn) {	
 	 			if(btn.currentValue == 'on') {
 	 				Ext.TaskManager.stop(me.chartUpdateTask);
+	 				
+	 				btn.removeCls(me.btnHighlightCss);
 	 				btn.currentValue = 'off';
 	 				btn.setText('STOPPED');
 	 			} else {
 	 				Ext.TaskManager.start(me.chartUpdateTask);
+	 				
+	 				btn.addCls(me.btnHighlightCss);
 	 				btn.currentValue = 'ON';
 	 				btn.setText('RUNNING');
 	 			}

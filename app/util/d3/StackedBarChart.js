@@ -24,13 +24,14 @@ Ext.define('App.util.d3.StackedBarChart', {
   	colorScale: d3.scale.category20(),
   	
   	/**
-   	 * "g" elements to hold bars, title, X-axis, and Y-axis
+   	 * "g" elements to hold bars, title, X-axis, Y-axis, and labels
    	 */
    	gCanvas: null,
    	gLayer: null,
    	gTitle: null,
    	gXAxis: null,
    	gYAxis: null,
+   	gLabel: null,
    	
    	/**
      * x and y scales and axes
@@ -56,8 +57,9 @@ Ext.define('App.util.d3.StackedBarChart', {
     layers: null,
     yMax: null,
     chartTitle: null,
-    colorRangeStart: '#000099',
-    colorRangeEnd: '#FFCC33',
+    showLabels: false,
+    colorRangeStart: '#4682B4',
+    colorRangeEnd: '#F4A460',
     
     /**
 	 * Default function for the tooltip
@@ -71,6 +73,10 @@ Ext.define('App.util.d3.StackedBarChart', {
  	 */
  	yTickFormat: function(d) {
  		return Ext.util.Format.number(d, '0,000');
+	},
+	
+	labelFunction: function(data, index) {
+		return 'label';
 	},
 	
 	/**
@@ -230,6 +236,35 @@ Ext.define('App.util.d3.StackedBarChart', {
 				}
 			})
 			.call(d3.helper.tooltip().text(me.tooltipFunction));
+			
+		//////////////////////////////////////////////////
+		// LABELS / TEXT
+		//////////////////////////////////////////////////
+		if(me.showLabels) {
+			me.gLabel = me.gCanvas.selectAll('.label')
+				.data(me.layers)
+				.enter()
+				.append('g')
+				.attr('class', 'label')
+				.selectAll('text')
+				.data(function(d) {
+					return d.values;
+				})
+				.enter()
+				.append('text')
+				.attr('x', function(d) {
+					// scaled X position + (rectWidth / 2)
+					return _xScale(d.id) + Math.floor(_xScale.rangeBand()/2);
+				})
+				.attr('y', function(d) {
+					// scaled yPos + (scaledHeight / 2)
+					return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y))/2);
+				})
+				.style('font-family', 'sans-serif')
+				.style('font-size', '9px')
+				.style('text-anchor', 'middle')
+				.text(me.labelFunction);
+		}
 
 		//////////////////////////////////////////////////
 		// X axis
@@ -296,7 +331,10 @@ Ext.define('App.util.d3.StackedBarChart', {
 			handleEvents = me.handleEvents,
 			eventRelay = me.eventRelay,
 			mouseEvents = me.mouseEvents;
-			 
+		
+		//////////////////////////////////////////////////
+		// BAR / LAYER TRANSITIONS
+		////////////////////////////////////////////////// 
 		// join new layers
 		me.gLayer = me.gCanvas.selectAll('.layer')
 			.data(me.layers);
@@ -314,11 +352,62 @@ Ext.define('App.util.d3.StackedBarChart', {
 			.style('fill', function(d, i) {
 				return colorScale(i);
 			});
+			
+		//////////////////////////////////////////////////
+		// LABEL TRANSITION
+		//////////////////////////////////////////////////
+		if(me.showLabels) {
+			// join new layers
+			me.gLabel = me.gCanvas.selectAll('.label')
+				.data(me.layers);
+				
+			// transition out old labels
+			me.gLabel.exit().remove();
+			
+			// add new
+			var addedLabels = me.gLabel.enter()
+				.append('g')
+				.attr('class', 'label');
+				
+			// text transition
+			var textSelection = me.gLabel.selectAll('text')
+				.data(function(d) {
+					return d.values;
+				});
+				
+			// transition out old text
+			textSelection.exit()
+				.transition()
+				.attr('x', 1000)
+				.duration(500)
+				.remove();
+				
+			// add new text elements
+			textSelection.enter()
+				.append('text');
+			
+			// transition all
+			textSelection.transition()
+				.duration(500)
+				.attr('x', function(d) {
+					// scaled X position + (rectWidth / 2)
+					return _xScale(d.id) + Math.floor(_xScale.rangeBand()/2);
+				})
+				.attr('y', function(d) {
+					// scaled yPos + (scaledHeight / 2)
+					return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y))/2);
+				})
+				.style('font-family', 'sans-serif')
+				.style('font-size', '9px')
+				.style('text-anchor', 'middle')
+				.text(me.labelFunction);
+		} else {
+			me.gCanvas.selectAll('.label').data([]).exit().remove()
+		}
 		
 		//////////////////////////////////////////////////
 		// RECTANGLE TRANSITION
 		//////////////////////////////////////////////////
-		
 		// join new data with old
 		var rectSelection = me.gLayer.selectAll('rect')
 			.data(function(d) {
@@ -371,12 +460,11 @@ Ext.define('App.util.d3.StackedBarChart', {
 		rectSelection.call(d3.helper.tooltip().text(me.tooltipFunction));	
 			
 		//////////////////////////////////////////////////
-		// transition the
+		// TRANSITION AXES
 		//////////////////////////////////////////////////
 		me.gXAxis.transition().duration(500).call(me.xAxis);
 		me.gYAxis.transition().duration(500).call(me.yAxis);
 		
-
 		//////////////////////////////////////////////////
 		// ADJUST THE REPORT TITLE
 		//////////////////////////////////////////////////
@@ -385,11 +473,12 @@ Ext.define('App.util.d3.StackedBarChart', {
 	},
 	
 	/**
- 	 * @function
- 	 * @memberOf App.util.d3.StackedBarChart
- 	 * @description Set the new graphData object
- 	 * @param data Object
- 	 */
+	 *
+	 *
+	 * SETTERS
+	 *
+	 *
+	 */
 	setGraphData: function(data) {
 		var me = this;
 		
@@ -421,10 +510,6 @@ Ext.define('App.util.d3.StackedBarChart', {
 		}, me);
 	},
 	
-	/**
-	 * @function
-	 * @description Set X scale and new X axis definition
-	 */
 	setXScale: function() {
 		var me = this;
 		
@@ -438,11 +523,7 @@ Ext.define('App.util.d3.StackedBarChart', {
 			.tickPadding(6)
 			.orient('bottom');
 	},
-	
-	/**
- 	 * @function
- 	 * @description Set Y scale and new Y axis definition
- 	 */
+
 	setYScale: function() {
 		var me = this;
 		
@@ -458,29 +539,32 @@ Ext.define('App.util.d3.StackedBarChart', {
 			.orient('left');	
 	},
 	
-	/**
- 	 * @private
- 	 */
+	setLabelFunction: function(fn) {
+		var me = this;
+		
+		me.labelFunction = fn;
+	},
+
 	setTooltipFunction: function(fn) {
 		var me = this;
 
 		me.tooltipFunction = fn;
 	},
-	
-	/**
- 	 * @private
- 	 */
+
  	setYTickFormat: function(fn) {
 	 	var me = this;
 	 	
 	 	me.yTickFormat = fn;
 	},
 	
-	/**
- 	 * @private
- 	 */
  	setChartTitle: function(title) {
 	 	var me = this;
 	 	me.chartTitle = title;
+	},
+
+ 	setShowLabels: function(bool) {
+	 	var me = this;
+	 	
+	 	me.showLabels = bool;
 	}
 });

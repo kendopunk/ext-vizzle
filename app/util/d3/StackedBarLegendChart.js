@@ -151,6 +151,35 @@ Ext.define('App.util.d3.StackedBarLegendChart', {
 			.call(d3.helper.tooltip().text(me.tooltipFunction));
 			
 		//////////////////////////////////////////////////
+		// LABELS / TEXT
+		//////////////////////////////////////////////////
+		if(me.showLabels) {
+			me.gLabel = me.gCanvas.selectAll('.label')
+				.data(me.layers)
+				.enter()
+				.append('g')
+				.attr('class', 'label')
+				.selectAll('text')
+				.data(function(d) {
+					return d.values;
+				})
+				.enter()
+				.append('text')
+				.attr('x', function(d) {
+					// scaled X position + (rectWidth / 2)
+					return _xScale(d.id) + Math.floor(_xScale.rangeBand()/2);
+				})
+				.attr('y', function(d) {
+					// scaled yPos + (scaledHeight / 2)
+					return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y))/2);
+				})
+				.style('font-family', 'sans-serif')
+				.style('font-size', '9px')
+				.style('text-anchor', 'middle')
+				.text(me.labelFunction);
+		}
+			
+		//////////////////////////////////////////////////
 		// X axis
 		//////////////////////////////////////////////////
 		var g_ax_translate = canvasHeight - margins.top - margins.bottom;
@@ -244,7 +273,10 @@ Ext.define('App.util.d3.StackedBarLegendChart', {
 			handleEvents = me.handleEvents,
 			eventRelay = me.eventRelay,
 			mouseEvents = me.mouseEvents;
-			 
+			
+		//////////////////////////////////////////////////
+		// TRANSITION THE LAYERS
+		////////////////////////////////////////////////// 
 		// join new layers
 		me.gLayer = me.gCanvas.selectAll('.layer')
 			.data(me.layers);
@@ -266,7 +298,6 @@ Ext.define('App.util.d3.StackedBarLegendChart', {
 		//////////////////////////////////////////////////
 		// RECTANGLE TRANSITION
 		//////////////////////////////////////////////////
-		
 		// join new data with old
 		var rectSelection = me.gLayer.selectAll('rect')
 			.data(function(d) {
@@ -315,18 +346,69 @@ Ext.define('App.util.d3.StackedBarLegendChart', {
 		});
 		
 		// call tooltip function
-		rectSelection.call(d3.helper.tooltip().text(me.tooltipFunction));	
+		rectSelection.call(d3.helper.tooltip().text(me.tooltipFunction));
+		
+		//////////////////////////////////////////////////
+		// LABEL TRANSITION
+		//////////////////////////////////////////////////
+		if(me.showLabels) {
+			// join new layers
+			me.gLabel = me.gCanvas.selectAll('.label')
+				.data(me.layers);
+				
+			// transition out old labels
+			me.gLabel.exit().remove();
+			
+			// add new
+			var addedLabels = me.gLabel.enter()
+				.append('g')
+				.attr('class', 'label');
+				
+			// text transition
+			var textSelection = me.gLabel.selectAll('text')
+				.data(function(d) {
+					return d.values;
+				});
+				
+			// transition out old text
+			textSelection.exit()
+				.transition()
+				.attr('x', 1000)
+				.duration(500)
+				.remove();
+				
+			// add new text elements
+			textSelection.enter()
+				.append('text');
+			
+			// transition all
+			textSelection.transition()
+				.duration(500)
+				.attr('x', function(d) {
+					// scaled X position + (rectWidth / 2)
+					return _xScale(d.id) + Math.floor(_xScale.rangeBand()/2);
+				})
+				.attr('y', function(d) {
+					// scaled yPos + (scaledHeight / 2)
+					return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y))/2);
+				})
+				.style('font-family', 'sans-serif')
+				.style('font-size', '9px')
+				.style('text-anchor', 'middle')
+				.text(me.labelFunction);
+		} else {
+			me.gCanvas.selectAll('.label').data([]).exit().remove()
+		}
 			
 		//////////////////////////////////////////////////
-		// transition the axes
+		// TRANSITION AXES
 		//////////////////////////////////////////////////
 		me.gXAxis.transition().duration(500).call(me.xAxis);
 		me.gYAxis.transition().duration(500).call(me.yAxis);
 		
 		//////////////////////////////////////////////////
-		// LEGEND SQUARES
+		// TRANSITION LEGEND SQUARES
 		//////////////////////////////////////////////////
-		
 		// join new squares with current squares
 		var legendSquareSelection = me.gLegend.selectAll('rect')
 			.data(me.graphData);
@@ -352,7 +434,6 @@ Ext.define('App.util.d3.StackedBarLegendChart', {
 		//////////////////////////////////////////////////
 		// TRANSITION LEGEND TEXT
 		//////////////////////////////////////////////////
-		
 		// join new text with current text
 		var legendTextSelection = me.gLegend.selectAll('text')
 			.data(me.graphData);

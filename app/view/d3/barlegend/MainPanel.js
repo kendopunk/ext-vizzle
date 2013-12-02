@@ -37,13 +37,14 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
  			me.defaultMetricText = 'Gross Box Office',
  			me.currentMetric = 'gross',
  			me.baseTitle = 'Box Office Statistics',
- 			me.eventRelay = Ext.create('App.util.MessageBus');
+ 			me.eventRelay = Ext.create('App.util.MessageBus'),
+ 			me.btnHighlightCss = 'btn-highlight-peachpuff';
 		
 		/**
  		 * @property
  		 */
-		me.chartDescription = '<b>Bar Chart w/Legend</b><br><br>'
-			+ 'Demonstration of a D3 bar chart with legend.  This is a subclass of the generic bar chart.<br><br>'
+		me.chartDescription = '<b>Bar Chart ++</b><br><br>'
+			+ 'Demonstration of a D3 bar chart with legend and label toggling.  This is a subclass of the generic bar chart.<br><br>'
 			+ 'The chart and legend are each contained in separate SVG "g" elements and can be '
 			+ '"flexed" accordingly to adjust the width each "g" occupies in the canvas.';
 			
@@ -62,6 +63,7 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 		  	xtype: 'button',
 		  	iconCls: 'icon-dollar',
 		  	metric: 'gross',
+		  	cls: me.btnHighlightCss,
 		  	text: me.defaultMetricText,
 			handler: me.metricHandler,
 			scope: me
@@ -86,6 +88,21 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 			text: 'IMDB Rating',
 			handler: me.metricHandler,
 			scope: me
+		}, 
+			'->',
+		{
+			xtype: 'tbtext',
+			text: '<b>Labels:</b>'
+		}, {
+			xtype: 'button',
+			text: 'ON',
+			cls: me.btnHighlightCss,
+			currentValue: 'on',
+			handler: me.labelHandler,
+			scope: me
+		}, {
+			xtype: 'tbspacer',
+			width: 10
 		}];
 		
 		// on activate, publish update to the "Info" panel
@@ -108,6 +125,15 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 	 */
 	metricHandler: function(btn, evt) {
 		var me = this;
+		
+		// button cls
+		Ext.each(me.query('toolbar > button'), function(button) {
+			if(button.metric == btn.metric) {
+				button.addCls(me.btnHighlightCss);
+			} else {
+				button.removeCls(me.btnHighlightCss);
+			}
+		}, me);
 		
 		me.currentMetric = btn.metric;
 		me.barLegendChart.setChartTitle(me.generateChartTitle(btn.text));
@@ -201,7 +227,29 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 	 	});
 	 },
 	 
-	 /** 
+	/** 
+	 * @function
+	 * @description Toggle labels on/off
+	 */
+	labelHandler: function(btn) {
+	 	var me = this;
+	 	
+		if(btn.currentValue == 'on') {
+			btn.currentValue = 'off';
+			btn.setText('OFF');
+			btn.removeCls(me.btnHighlightCss);
+			me.barLegendChart.setShowLabels(false);
+		} else {
+			btn.currentValue = 'on';
+			btn.setText('ON');
+			btn.addCls(me.btnHighlightCss);
+			me.barLegendChart.setShowLabels(true);
+		}
+		
+		me.barLegendChart.transition();
+	},
+	
+	/** 
 	 * @function
 	 * @private
 	 * @description Set a new chart title

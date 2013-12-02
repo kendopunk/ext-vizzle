@@ -35,7 +35,8 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
  			me.xDataMetric = 'bulletWeight',
  			me.defaultYDataMetric = 'muzzleVelocity',
  			me.yDataMetric = 'muzzleVelocity',
- 			me.eventRelay = Ext.create('App.util.MessageBus');
+ 			me.eventRelay = Ext.create('App.util.MessageBus'),
+ 			me.btnHighlightCss = 'btn-highlight-peachpuff';
 		
 		/**
  		 * @property
@@ -74,11 +75,11 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
  		 */
 	 	me.scaleZeroButton = Ext.create('Ext.button.Button', {
 	 		text: 'Absolute',
-	 		iconCls: 'icon-tick',
+	 		cls: me.btnHighlightCss,
 	 		handler: function(btn) {
-		 		btn.setIconCls('icon-tick');
-		 		me.scaleMinMaxButton.setIconCls('');
-		 		
+		 		btn.addCls(me.btnHighlightCss);
+		 		me.scaleMinMaxButton.removeCls(me.btnHighlightCss);
+
 		 		me.scatterPlot.setScaleToZero(true);
 		 		
 		 		me.scatterPlot.transition();
@@ -89,8 +90,8 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 		 me.scaleMinMaxButton = Ext.create('Ext.button.Button', {
 	 		text: 'Range-Relative',
 	 		handler: function(btn) {
-		 		btn.setIconCls('icon-tick');
-		 		me.scaleZeroButton.setIconCls('');
+		 		btn.addCls(me.btnHighlightCss);
+		 		me.scaleZeroButton.removeCls(me.btnHighlightCss);
 		 		
 		 		me.scatterPlot.setScaleToZero(false);
 		 		
@@ -104,15 +105,15 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 			 currentValue: 'off',
 			 handler: function(btn) {
 			 	if(btn.currentValue == 'on') {
-				 	btn.setIconCls('');
 				 	btn.currentValue = 'off';
 				 	btn.setText('OFF');
+				 	btn.removeCls(me.btnHighlightCss);
 				 	
 				 	me.scatterPlot.setShowMarkerLines(false);
 			 	} else {
-			 		btn.setIconCls('icon-tick');
 				 	btn.currentValue = 'on';
 				 	btn.setText('ON');
+				 	btn.addCls(me.btnHighlightCss);
 				 	
 				 	me.scatterPlot.setShowMarkerLines(true);
 			 	}
@@ -223,16 +224,17 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 			 	},
 			 	scope: me
 			}
-		}, {
-			xtype: 'tbspacer',
-			width: 30
-		}, {
+		},
+		'->',
+		{
 			xtype: 'tbtext',
 			text: '<b>Guidelines:</b>'
 		},
 			me.markerLineToggleButton,
-			'->',
 		{
+			xtype: 'tbspacer',
+			width: 10
+		}, {
 			xtype: 'tbtext',
 			text: '<b>Scaling:</b>'
 		}, 
