@@ -22,7 +22,8 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 		me.canvas = null,
 			me.eventRelay = Ext.create('App.util.MessageBus'),
 			me.currentOpacity = '1',
-			me.currentAngle = 0;
+			me.currentAngle = 0,
+			me.btnHighlightCss = 'btn-highlight-peachpuff';
 			
 		me.chartDescription = '<b>Fabric.js</b><br><br>'
 			+ 'Fabric.js provides an object model on top of the canvas element.<br><br>'
@@ -99,6 +100,37 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 			}
 		});
 		
+		// drawing mode
+		me.drawingModeButton = Ext.create('Ext.button.Button', {
+			text: 'Drawing is OFF',
+			currentValue: 'off',
+			tooltip: 'Enable drawing mode',
+			handler: function(btn) {
+				if(btn.currentValue == 'off') {
+					me.canvas.isDrawingMode = true;
+					
+					btn.currentValue = 'on';
+					btn.setText('Drawing is ON'),
+					btn.addCls(me.btnHighlightCss);
+					
+					me.dataViewPanel.getEl().mask();
+					
+					me.disableButtons(true);
+				} else {
+					me.canvas.isDrawingMode = false;
+					
+					btn.currentValue = 'off';
+					btn.setText('Drawing is OFF'),
+					btn.removeCls(me.btnHighlightCss);
+					
+					me.dataViewPanel.getEl().unmask();
+					
+					me.disableButtons(false);
+				}
+			},
+			scope: me
+		});
+			
 		// erase all button
 		me.eraseAllButton = Ext.create('Ext.button.Button', {
 			text: 'Erase All',
@@ -108,9 +140,7 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 			
 				me.canvas.clear().renderAll();
 				
-				me.angleCombo.disable();
-				me.opacityCombo.disable();
-				me.eraseAllButton.disable();
+				me.disableButtons(true);
 			},
 			scope: me
 		});
@@ -146,6 +176,8 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 				},
 					me.angleCombo,
 					'->',
+					me.drawingModeButton,
+					'-',
 					me.eraseAllButton
 				]
 			}]
@@ -269,7 +301,7 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 				me.canvas.add(img);
 			});
 			
-			me.enableButtons();
+			me.disableButtons(false);
 			
 			return;
 		}
@@ -285,7 +317,7 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 				angle: me.currentAngle
 			}));
 			
-			me.enableButtons();
+			me.disableButtons(false);
 			
 			return;
 		}
@@ -300,7 +332,7 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 				angle: me.currentAngle
 			}));
 			
-			me.enableButtons();
+			me.disableButtons(false);
 			
 			return;
 		}
@@ -316,7 +348,7 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 				angle: me.currentAngle
 			}));
 			
-			me.enableButtons();
+			me.disableButtons(false);
 			
 			return;
 		}
@@ -326,11 +358,11 @@ Ext.define('App.view.fabric.basic.MainPanel', {
  	 * @function
  	 * @description Enable the canvas toolbar buttons
  	 */
-	enableButtons: function() {
+	disableButtons: function(bool) {
 		var me = this;
 		
-		me.opacityCombo.enable();
-		me.angleCombo.enable();
-		me.eraseAllButton.enable();
+		me.opacityCombo.setDisabled(bool);
+		me.angleCombo.setDisabled(bool);
+		me.eraseAllButton.setDisabled(bool);
 	}
 });
