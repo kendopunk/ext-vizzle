@@ -20,16 +20,104 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 		var me = this;
 		
 		me.canvas = null,
-			me.eventRelay = Ext.create('App.util.MessageBus');
+			me.eventRelay = Ext.create('App.util.MessageBus'),
+			me.currentOpacity = '1',
+			me.currentAngle = 0;
 			
 		me.chartDescription = '<b>Fabric.js</b><br><br>'
 			+ 'Fabric.js provides an object model on top of the canvas element.<br><br>'
 			+ 'Features include SVG-to-canvas and canvas-to-SVG parsers and a built-in interactivity layer (try moving/resizing objects).<br><br>'
-			+ 'I\'m still wrapping my head around the API, but I really like what I see so far.';
+			+ 'Double click an image from the right panel.....Howww-Deeeeeee !!';
 		
 		// width/height of main panel
 		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
-		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
+		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight - 20);
+		
+		// opacity combo
+    	me.opacityCombo = Ext.create('Ext.form.field.ComboBox', {
+    		disabled: true,
+    		store: Ext.create('Ext.data.SimpleStore', {
+				fields: ['value'],
+				data: [
+					['1'],['0.9'],['0.8'],['0.7'],['0.6'],
+					['0.5'],['0.4'],['0.3']
+				]
+			}),
+			displayField: 'value',
+	 		valueField: 'value',
+	 		editable: false,
+		 	typeAhead: true,
+		 	queryMode: 'local',
+		 	triggerAction: 'all',
+		 	width: 75,
+		 	listWidth: 75,
+		 	value: '1',
+		 	listeners: {
+			 	select: function(combo) {
+				 	me.currentOpacity = combo.getValue();
+				 	
+				 	Ext.each(me.canvas.getObjects(), function(obj) {
+					 	obj.setOpacity(combo.getValue());
+					}, me);
+					
+					me.canvas.renderAll();
+			 	},
+			 	scope: me
+			}
+		});
+		
+		// angle combo
+    	me.angleCombo = Ext.create('Ext.form.field.ComboBox', {
+    		disabled: true,
+    		store: Ext.create('Ext.data.SimpleStore', {
+				fields: ['value'],
+				data: [
+					[180],[90],[45],[0],
+					[-45],[-90]
+				]
+			}),
+			displayField: 'value',
+	 		valueField: 'value',
+	 		editable: false,
+		 	typeAhead: true,
+		 	queryMode: 'local',
+		 	triggerAction: 'all',
+		 	width: 75,
+		 	listWidth: 75,
+		 	value: '0',
+		 	listeners: {
+			 	select: function(combo) {
+				 	me.currentAngle = combo.getValue();
+				 	
+				 	Ext.each(me.canvas.getObjects(), function(obj) {
+					 	obj.setAngle(combo.getValue());
+					}, me);
+					
+					me.canvas.renderAll();
+			 	},
+			 	scope: me
+			}
+		});
+		
+		// erase all button
+		me.eraseAllButton = Ext.create('Ext.button.Button', {
+			text: 'Erase All',
+			disabled: true,
+			iconCls: 'icon-eraser',
+			handler: function() {
+			
+				var objectsToRemove = [];
+				
+				Ext.each(me.canvas.getObjects(), function(obj) {
+					objectsToRemove.push(obj);
+				});
+				
+				for(i=0; i<objectsToRemove.length; i++) {
+					me.canvas.remove(objectsToRemove[i]);
+				}
+			},
+			scope: me
+		});
 		
 		// canvas panel
 		me.canvasPanel = Ext.create('Ext.panel.Panel', {
@@ -44,6 +132,26 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 					width: me.width - 150,
 					height: me.height
 				}
+			}],
+			dockedItems: [{
+				xtype: 'toolbar',
+				dock: 'top',
+				items: [{
+	    			xtype: 'tbtext',
+	    			text: '<b>Opacity:</b>'
+	    		}, 
+	    			me.opacityCombo,
+	    		{
+					xtype: 'tbspacer',
+					width: 20
+				}, {
+					xtype: 'tbtext',
+					text: '<b>Angle:</b>'
+				},
+					me.angleCombo,
+					'->',
+					me.eraseAllButton
+				]
 			}]
 		});
 		
@@ -83,20 +191,20 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 		
 		// data view panel
 		me.dataViewPanel = Ext.create('Ext.panel.Panel', {
-			title: 'Dbl Click to Add',
+			title: 'Double Click Element',
 			region: 'center',
 			bodyStyle: {
 				padding: '5px'
 			},
 			width: 150,
 			height: me.height,
+			autoScroll: true,
 			items: Ext.create('Ext.view.View', {
-				autoScroll: true,
 				store: me.dataViewStore,
 				tpl: [
 					'<tpl for=".">',
 						'<div class="thumb-wrap" id="{name}" style="margin-left:auto; margin-right:auto; text-align:center; margin-top:10px;">',
-							'<div class="thumb"><img src="/extd3/app/resources/img/canvas/{file}" title="{name}" width="70"></div>',
+							'<div class="thumb"><img src="app/resources/img/canvas/{file}" title="{name}" width="70"></div>',
 							'<span style="margin-top:5px;">{name}</span>',
 						'</div>',
 					'</tpl>'
@@ -118,39 +226,6 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 			me.canvasPanel,
 			me.dataViewPanel
 		];
-		
-		// top toolbar
-		me.tbar = [{
-			xtype: 'tbtext',
-			text: '<b>Opacity:</b>'
-		}, {
-			xtype: 'combo',
-			store: Ext.create('Ext.data.SimpleStore', {
-				fields: ['value'],
-				data: [
-					['1'],['0.9'],['0.8'],['0.7'],['0.6'],['0.5'],['0.4']
-				]
-			}),
-			displayField: 'value',
-	 		valueField: 'value',
-	 		editable: false,
-		 	typeAhead: true,
-		 	queryMode: 'local',
-		 	triggerAction: 'all',
-		 	width: 75,
-		 	listWidth: 75,
-		 	value: '1',
-		 	listeners: {
-			 	select: function(combo) {
-				 	Ext.each(me.canvas.getObjects(), function(obj) {
-					 	obj.setOpacity(combo.getValue());
-					}, me);
-					
-					me.canvas.renderAll();
-			 	},
-			 	scope: me
-			}
-		}];
 
 		// on activate, publish update to the "Info" panel
 		me.on('activate', function() {
@@ -192,9 +267,13 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 				img.setTop(Math.floor(Math.random() * canvasHeight/2));
 				img.setLeft(Math.floor(Math.random() * canvasWidth/2));
 				img.scale(0.75);
+				img.setOpacity(me.currentOpacity);
+				img.setAngle(me.currentAngle);
 				
 				me.canvas.add(img);
 			});
+			
+			me.enableButtons();
 			
 			return;
 		}
@@ -205,8 +284,12 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 				left: Math.floor(Math.random() * canvasWidth/2),
 				fill: '#' + Math.floor(Math.random()*16777215).toString(16),
 				width: Math.floor(Math.random() * 150),
-				height: Math.floor(Math.random() * 150)
+				height: Math.floor(Math.random() * 150),
+				opacity: me.currentOpacity,
+				angle: me.currentAngle
 			}));
+			
+			me.enableButtons();
 			
 			return;
 		}
@@ -216,8 +299,12 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 				top: Math.floor(Math.random() * canvasHeight/2),
 				left: Math.floor(Math.random() * canvasWidth/2),
 				fill: '#' + Math.floor(Math.random()*16777215).toString(16),
-				radius: Math.floor(Math.random() * 60)
+				radius: Math.floor(Math.random() * 60) + 5,
+				opacity: me.currentOpacity,
+				angle: me.currentAngle
 			}));
+			
+			me.enableButtons();
 			
 			return;
 		}
@@ -227,11 +314,27 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 				top: Math.floor(Math.random() * canvasHeight/2),
 				left: Math.floor(Math.random() * canvasWidth/2),
 				fill: '#' + Math.floor(Math.random()*16777215).toString(16),
-				width: Math.floor(Math.random() * 70),
-				height: Math.floor(Math.random() * 70)
+				width: Math.floor(Math.random() * 50) + 10,
+				height: Math.floor(Math.random() * 50) + 10,
+				opacity: me.currentOpacity,
+				angle: me.currentAngle
 			}));
+			
+			me.enableButtons();
 			
 			return;
 		}
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Enable the canvas toolbar buttons
+ 	 */
+	enableButtons: function() {
+		var me = this;
+		
+		me.opacityCombo.enable();
+		me.angleCombo.enable();
+		me.eraseAllButton.enable();
 	}
 });
