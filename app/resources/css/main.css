@@ -46,6 +46,11 @@
 	background-repeat: no-repeat;
 }
 
+.icon-eraser {
+	background-image: url(../img/icons/16x16/eraser.png) !important;
+	background-repeat: no-repeat;
+}
+
 .icon-film {
 	background-image: url(../img/icons/16x16/film.png) !important;
 	background-repeat: no-repeat;
