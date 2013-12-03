@@ -106,15 +106,7 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 			iconCls: 'icon-eraser',
 			handler: function() {
 			
-				var objectsToRemove = [];
-				
-				Ext.each(me.canvas.getObjects(), function(obj) {
-					objectsToRemove.push(obj);
-				});
-				
-				for(i=0; i<objectsToRemove.length; i++) {
-					me.canvas.remove(objectsToRemove[i]);
-				}
+				me.canvas.clear().renderAll();
 				
 				me.angleCombo.disable();
 				me.opacityCombo.disable();
