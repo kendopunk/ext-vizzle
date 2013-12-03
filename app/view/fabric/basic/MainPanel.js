@@ -115,6 +115,10 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 				for(i=0; i<objectsToRemove.length; i++) {
 					me.canvas.remove(objectsToRemove[i]);
 				}
+				
+				me.angleCombo.disable();
+				me.opacityCombo.disable();
+				me.eraseAllButton.disable();
 			},
 			scope: me
 		});
@@ -299,7 +303,7 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 				top: Math.floor(Math.random() * canvasHeight/2),
 				left: Math.floor(Math.random() * canvasWidth/2),
 				fill: '#' + Math.floor(Math.random()*16777215).toString(16),
-				radius: Math.floor(Math.random() * 60) + 5,
+				radius: Math.floor(Math.random() * 100) + 5,
 				opacity: me.currentOpacity,
 				angle: me.currentAngle
 			}));
@@ -314,8 +318,8 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 				top: Math.floor(Math.random() * canvasHeight/2),
 				left: Math.floor(Math.random() * canvasWidth/2),
 				fill: '#' + Math.floor(Math.random()*16777215).toString(16),
-				width: Math.floor(Math.random() * 50) + 10,
-				height: Math.floor(Math.random() * 50) + 10,
+				width: Math.floor(Math.random() * 75) + 10,
+				height: Math.floor(Math.random() * 75) + 10,
 				opacity: me.currentOpacity,
 				angle: me.currentAngle
 			}));
