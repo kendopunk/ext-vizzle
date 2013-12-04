@@ -162,16 +162,16 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 				 	
 				 	if(combo.getValue() == 'muzzleVelocity') {
 				 		me.scatterPlot.setYTickFormat(me.velocityTickFormat);
-				 		me.scatterPlot.setYScalePadding(50);
+				 		me.scatterPlot.setYScalePadding(20);
 				 	} else if(combo.getValue() == 'energy') {
 				 		me.scatterPlot.setYTickFormat(me.energyTickFormat);
-				 		me.scatterPlot.setYScalePadding(50);
+				 		me.scatterPlot.setYScalePadding(20);
 				 	} else if(combo.getValue() == 'ppr') {
 				 		me.scatterPlot.setYTickFormat(me.pprTickFormat);
-				 		me.scatterPlot.setYScalePadding(.25);
+				 		me.scatterPlot.setYScalePadding(.20);
 				 	} else {
 				 		me.scatterPlot.setYTickFormat(me.weightTickFormat);
-				 		me.scatterPlot.setYScalePadding(50);
+				 		me.scatterPlot.setYScalePadding(20);
 				 	}
 				 	
 				 	me.scatterPlot.setChartTitle(me.generateChartTitle(me.xDataMetric, me.yDataMetric));
@@ -206,16 +206,16 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 				 	
 				 	if(combo.getValue() == 'muzzleVelocity') {
 				 		me.scatterPlot.setXTickFormat(me.velocityTickFormat);
-				 		me.scatterPlot.setXScalePadding(50);
+				 		me.scatterPlot.setXScalePadding(20);
 				 	} else if(combo.getValue() == 'energy') {
 				 		me.scatterPlot.setXTickFormat(me.energyTickFormat);
-				 		me.scatterPlot.setXScalePadding(50);
+				 		me.scatterPlot.setXScalePadding(20);
 				 	} else if(combo.getValue() == 'ppr') {
 					 	me.scatterPlot.setXTickFormat(me.pprTickFormat);
-					 	me.scatterPlot.setXScalePadding(.25);
+					 	me.scatterPlot.setXScalePadding(.20);
 					} else {
 				 		me.scatterPlot.setXTickFormat(me.weightTickFormat);
-				 		me.scatterPlot.setXScalePadding(50);
+				 		me.scatterPlot.setXScalePadding(20);
 				 	}
 				 	
 				 	me.scatterPlot.setChartTitle(me.generateChartTitle(me.xDataMetric, me.yDataMetric));

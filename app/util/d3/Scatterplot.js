@@ -387,12 +387,12 @@ Ext.define('App.util.d3.Scatterplot', {
 				.append('text')
 				.style('font-size', me.labelFontSize)
 				.attr('x', function(d) {
-					return xScale(d[xDataMetric]) + radius + 2;
+					return xScale(d[xDataMetric]);
 				})
 				.attr('y', function(d) {
-					return yScale(d[yDataMetric]) - radius;
+					return yScale(d[yDataMetric]) + ((radius * 2) + 2);
 				})
-				.attr('text-anchor', 'start')
+				.attr('text-anchor', 'middle')
 				.text(me.labelFunction);
 		}
 
@@ -624,10 +624,10 @@ Ext.define('App.util.d3.Scatterplot', {
 			labelSelection.transition()
 				.duration(500)
 				.attr('x', function(d) {
-					return xScale(d[xDataMetric]) + radius + 2;
+					return xScale(d[xDataMetric]);
 				})
 				.attr('y', function(d) {
-					return yScale(d[yDataMetric]) - radius;
+					return yScale(d[yDataMetric]) + ((radius * 2) + 2);
 				})
 				.text(me.labelFunction);
 		}
