@@ -290,7 +290,7 @@ Ext.define('App.view.fabric.basic.MainPanel', {
 			canvasHeight = me.canvasPanel.getHeight();
 		
 		if(record.data.chartTarget == 'image') {
-			var src = '/extd3/app/resources/img/canvas/' + record.data.file;
+			var src = 'app/resources/img/canvas/' + record.data.file;
 			fabric.Image.fromURL(src, function(img) {
 				img.setTop(Math.floor(Math.random() * canvasHeight/2));
 				img.setLeft(Math.floor(Math.random() * canvasWidth/2));
