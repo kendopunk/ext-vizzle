@@ -34,7 +34,8 @@ Ext.define('App.view.d3.pie.MainPanel', {
  			me.availableStates = [],
  			me.atfData = null,
  			me.defaultMetric = 'recovery',
- 			me.eventRelay = Ext.create('App.util.MessageBus');
+ 			me.eventRelay = Ext.create('App.util.MessageBus'),
+ 			me.btnHighlightCss = 'btn-highlight-khaki';
 		
 		/**
  		 * @property
@@ -58,6 +59,7 @@ Ext.define('App.view.d3.pie.MainPanel', {
 			text: 'Texas',
 			abbrev: 'TX',
 			targetIndex: 0,
+			cls: me.btnHighlightCss,
 			handler: me.handleStateSelection,
 			scope: me
 		},
@@ -85,6 +87,7 @@ Ext.define('App.view.d3.pie.MainPanel', {
 			xtype: 'button',
 			text: '0%',
 			innerPct: 0,
+			cls: me.btnHighlightCss,
 			handler: me.innerRadiusHandler,
 			scope: me
 		}, {
@@ -207,6 +210,14 @@ Ext.define('App.view.d3.pie.MainPanel', {
 	 handleStateSelection: function(button, event) {
 	 	var me = this;
 	 	
+	 	// remove the cls
+	 	Ext.each(me.getDockedItems()[0].query('button'), function(btn) {
+		 	if(btn.abbrev) {
+			 	btn.removeCls(me.btnHighlightCss);
+			}
+		}, me);
+		button.addCls(me.btnHighlightCss);
+	 	
 	 	// set chart title
 	 	me.pieChart.setChartTitle(me.generateChartTitle(button.abbrev));
 	 	
@@ -221,6 +232,14 @@ Ext.define('App.view.d3.pie.MainPanel', {
  	 */
 	innerRadiusHandler: function(button, event) {
 	 	var me = this;
+	 	
+	 	// remove the cls
+	 	Ext.each(me.getDockedItems()[0].query('button'), function(btn) {
+		 	if(btn.innerPct >= 0) {
+			 	btn.removeCls(me.btnHighlightCss);
+			}
+		}, me);
+		button.addCls(me.btnHighlightCss);
 	 	
 	 	me.pieChart.setInnerRadius(parseInt(me.pieChart.outerRadius * button.innerPct));
 	 	

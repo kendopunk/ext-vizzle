@@ -241,12 +241,18 @@ Ext.define('App.util.d3.PieChart', {
 					var c = arc.centroid(d),
 						x = c[0],
 						y = c[1],
-						h = Math.sqrt(x*x + y*y);
+						h = Math.sqrt(x*x + y*y),
+						xTrans = (x/h * outerRadius) + (x/h * outerRadius * .05),
+						yTrans = (y/h * outerRadius) + i;
 						
-					return 'translate(' + (x/h * outerRadius) + ',' + ((y/h * outerRadius) + i) + ')';
+					if(yTrans < 0) {
+						yTrans = yTrans - Math.abs(yTrans * .1);
+					}
+					
+					return 'translate(' + xTrans + ',' + yTrans + ')';
 				})
 				.attr('dy', function(d, i) {
-					return i%2 == 0 ? '.35em' : '.95em';
+					return '0.35em';
 				})
 				.attr('text-anchor', function(d) {
 					return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';
@@ -361,12 +367,18 @@ Ext.define('App.util.d3.PieChart', {
 					var c = arc.centroid(d),
 						x = c[0],
 						y = c[1],
-						h = Math.sqrt(x*x + y*y);
+						h = Math.sqrt(x*x + y*y),
+						xTrans = (x/h * outerRadius) + (x/h * outerRadius * .05),
+						yTrans = (y/h * outerRadius) + i;
 						
-					return 'translate(' + (x/h * outerRadius) + ',' + ((y/h * outerRadius) + i) + ')';
+					if(yTrans < 0) {
+						yTrans = yTrans - Math.abs(yTrans * .1);
+					}
+					
+					return 'translate(' + xTrans + ',' + yTrans + ')';
 				})
 				.attr('dy', function(d, i) {
-					return i%2 == 0 ? '.35em' : '.95em';
+					return '0.35em';
 				})
 				.attr('text-anchor', function(d) {
 					return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';

@@ -57,6 +57,7 @@ Ext.define('App.view.d3.pielegend.MainPanel', {
 			xtype: 'button',
 			text: 'Texas',
 			abbrev: 'TX',
+			cls: me.btnHighlightCss,
 			targetIndex: 0,
 			handler: me.handleStateSelection,
 			scope: me
@@ -176,6 +177,7 @@ Ext.define('App.view.d3.pielegend.MainPanel', {
 		 		
 		 		// all the data 
 		 		me.atfData = resp.data;
+		 		
 	 			
 	 			// init pie chart
 	 			me.pieLegendChart = Ext.create('App.util.d3.PieLegendChart', {
@@ -224,6 +226,14 @@ Ext.define('App.view.d3.pielegend.MainPanel', {
 	  */
 	 handleStateSelection: function(button, event) {
 	 	var me = this;
+	 	
+	 	// remove the cls
+	 	Ext.each(me.getDockedItems()[0].query('button'), function(btn) {
+		 	if(btn.abbrev) {
+			 	btn.removeCls(me.btnHighlightCss);
+			}
+		}, me);
+		button.addCls(me.btnHighlightCss);
 	 	
 	 	// set chart title
 	 	me.pieLegendChart.setChartTitle(me.generateChartTitle(button.abbrev));

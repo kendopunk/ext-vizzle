@@ -60,5 +60,23 @@
 		"price": 50.68,
 		"change": 4.35,
 		"pctChange": 9.39
+	}, {
+		"ticker": "CMC",
+		"name": "Comm. Metals",
+		"price": 19.51,
+		"change": 0.04,
+		"pctChange": 0.21
+	}, {
+		"ticker": "HXL",
+		"name": "Hexcel Corp.",
+		"price": 43.13,
+		"change": 0.41,
+		"pctChange": 0.94
+	}, {
+		"ticker": "WGL",
+		"name": "WGL Holdings",
+		"price": 39.38,
+		"change": 0.88,
+		"pctChange": 0.46
 	}]
 }

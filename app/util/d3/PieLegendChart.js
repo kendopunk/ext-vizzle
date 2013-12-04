@@ -99,18 +99,18 @@ Ext.define('App.util.d3.PieLegendChart', {
 			chartWorkingHeight = me.canvasHeight - me.margins.top;
 		if(me.outerRadius == null) {
 			if(chartWorkingWidth < chartWorkingHeight) {
-				me.outerRadius = parseInt(chartWorkingWidth * .42);
+				me.outerRadius = parseInt(chartWorkingWidth * .4);
 			} else {
-				me.outerRadius = parseInt(chartWorkingHeight * .42);
+				me.outerRadius = parseInt(chartWorkingHeight * .4);
 			}
 		} else {
 			if(chartWorkingWidth < chartWorkingHeight) {
 				if(me.outerRadius > chartWorkingWidth) {
-					me.outerRadius = parseInt(chartWorkingWidth * .42);
+					me.outerRadius = parseInt(chartWorkingWidth * .4);
 				}
 			} else {
 				if(me.outerRadius > chartWorkingHeight) {
-					me.outerRadius = parseInt(chartWorkingHeight * .42);
+					me.outerRadius = parseInt(chartWorkingHeight * .4);
 				}
 			}
 		}
@@ -192,16 +192,23 @@ Ext.define('App.util.d3.PieLegendChart', {
 					var c = arc.centroid(d),
 						x = c[0],
 						y = c[1],
-						h = Math.sqrt(x*x + y*y);
+						h = Math.sqrt(x*x + y*y),
+						xTrans = (x/h * outerRadius) + (x/h * outerRadius * .05),
+						yTrans = (y/h * outerRadius) + i;
 						
-					return 'translate(' + (x/h * outerRadius) + ',' + ((y/h * outerRadius) + i) + ')';
+					if(yTrans < 0) {
+						yTrans = yTrans - Math.abs(yTrans * .1);
+					}
+					
+					return 'translate(' + xTrans + ',' + yTrans + ')';
 				})
 				.attr('dy', function(d, i) {
-					return i%2 == 0 ? '.35em' : '.95em';
+					return '0.35em';
 				})
 				.attr('text-anchor', function(d) {
 					return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';
 				})
+				.style('font-size', me.labelFontSize)
 				.text(me.labelFunction);
 		}
 		
@@ -395,16 +402,23 @@ Ext.define('App.util.d3.PieLegendChart', {
 					var c = arc.centroid(d),
 						x = c[0],
 						y = c[1],
-						h = Math.sqrt(x*x + y*y);
+						h = Math.sqrt(x*x + y*y),
+						xTrans = (x/h * outerRadius) + (x/h * outerRadius * .05),
+						yTrans = (y/h * outerRadius) + i;
 						
-					return 'translate(' + (x/h * outerRadius) + ',' + ((y/h * outerRadius) + i) + ')';
+					if(yTrans < 0) {
+						yTrans = yTrans - Math.abs(yTrans * .1);
+					}
+					
+					return 'translate(' + xTrans + ',' + yTrans + ')';
 				})
 				.attr('dy', function(d, i) {
-					return i%2 == 0 ? '.35em' : '.95em';
+					return '0.35em';
 				})
 				.attr('text-anchor', function(d) {
 					return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';
 				})
+				.style('font-size', me.labelFontSize)
 				.text(me.labelFunction);
 		} else {
 			me.gPie.selectAll('text')

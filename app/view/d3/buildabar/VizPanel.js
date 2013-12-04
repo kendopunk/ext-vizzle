@@ -55,7 +55,8 @@ Ext.define('App.view.d3.buildabar.VizPanel', {
  			me.defaultMetricText = 'Price',
  			me.baseTitle = 'Random Stock Data',
  			me.eventRelay = Ext.create('App.util.MessageBus'),
- 			me.dropTarget;
+ 			me.dropTarget,
+ 			me.btnHighlightCss = 'btn-highlight-khaki';
  			
  		/**
   		 * @property
@@ -72,7 +73,7 @@ Ext.define('App.view.d3.buildabar.VizPanel', {
  			text: 'Price',
  			disabled: true,
  			metric: 'price',
- 			iconCls: 'icon-tick',
+ 			cls: me.btnHighlightCss,
  			handler: me.transitionHandler,
  			scope: me
  		});
@@ -224,21 +225,25 @@ Ext.define('App.view.d3.buildabar.VizPanel', {
 	transitionHandler: function(btn, event) {
 		var me = this;
 		
-		btn.setIconCls('icon-tick');
+		btn.addCls(me.btnHighlightCss);
+		
 		me.barChart.setChartTitle(me.generateChartTitle(btn.text));
 		
 		// adjust the buttons
 		if(btn.text == 'Change') {
-			me.priceButton.setIconCls('');
-			me.pctChangeButton.setIconCls('');
+			me.priceButton.removeCls(me.btnHighlightCss);
+			me.pctChangeButton.removeCls(me.btnHighlightCss);
+			
 			me.barChart.setYTickFormat(App.util.Global.svg.currencyTickFormat);
 		} else if(btn.text == '% Change') {
-			me.priceButton.setIconCls('');
-			me.changeButton.setIconCls('');
+			me.priceButton.removeCls(me.btnHighlightCss);
+			me.changeButton.removeCls(me.btnHighlightCss);
+			
 			me.barChart.setYTickFormat(App.util.Global.svg.percentTickFormat);
 		} else {
-			me.changeButton.setIconCls('');
-			me.pctChangeButton.setIconCls('');
+			me.changeButton.removeCls(me.btnHighlightCss);
+			me.pctChangeButton.removeCls(me.btnHighlightCss);
+			
 			me.barChart.setYTickFormat(App.util.Global.svg.currencyTickFormat);
 		}
 		

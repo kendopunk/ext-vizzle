@@ -55,7 +55,8 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
  			me.defaultMetricText = 'Price',
  			me.baseTitle = 'Pie Chart from Stock Data',
  			me.eventRelay = Ext.create('App.util.MessageBus'),
- 			me.dropTarget;
+ 			me.dropTarget,
+ 			me.btnHighlightCss = 'btn-highlight-khaki';
  			
  		/**
   		 * @property
@@ -72,7 +73,7 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
  			text: 'Price',
  			disabled: true,
  			metric: 'price',
- 			iconCls: 'icon-tick',
+ 			cls: me.btnHighlightCss,
  			handler: me.transitionHandler,
  			scope: me
  		});
@@ -226,19 +227,20 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
 	transitionHandler: function(btn, event) {
 		var me = this;
 		
-		btn.setIconCls('icon-tick');
+		btn.addCls(me.btnHighlightCss);
+		
 		me.pieChart.setChartTitle(me.generateChartTitle(btn.text));
 		
 		// adjust the buttons
 		if(btn.text == 'Change') {
-			me.priceButton.setIconCls('');
-			me.pctChangeButton.setIconCls('');
+			me.priceButton.removeCls(me.btnHighlightCss);
+			me.pctChangeButton.removeCls(me.btnHighlightCss);
 		} else if(btn.text == '% Change') {
-			me.priceButton.setIconCls('');
-			me.changeButton.setIconCls('');
+			me.priceButton.removeCls(me.btnHighlightCss);
+			me.changeButton.removeCls(me.btnHighlightCss);
 		} else {
-			me.changeButton.setIconCls('');
-			me.pctChangeButton.setIconCls('');
+			me.changeButton.removeCls(me.btnHighlightCss);
+			me.pctChangeButton.removeCls(me.btnHighlightCss);
 		}
 		
 		me.pieChart.setDataMetric(btn.metric);
