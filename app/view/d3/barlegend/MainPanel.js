@@ -128,10 +128,12 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 		
 		// button cls
 		Ext.each(me.query('toolbar > button'), function(button) {
-			if(button.metric == btn.metric) {
-				button.addCls(me.btnHighlightCss);
-			} else {
-				button.removeCls(me.btnHighlightCss);
+			if(button.metric) {
+				if(button.metric == btn.metric) {
+					button.addCls(me.btnHighlightCss);
+				} else {
+					button.removeCls(me.btnHighlightCss);
+				}
 			}
 		}, me);
 		
