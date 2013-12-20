@@ -1,0 +1,64 @@
+{
+	"success": true,
+	"data": [{
+		"category": "1939",
+		"values": [
+			{"id": "Panzer II", "category": "1939", "y": 15},
+			{"id": "Panzer 38(t)", "category": "1939", "y": 153},
+			{"id": "Panzer III", "category": "1939", "y": 157},
+			{"id": "Panzer IV", "category": "1939", "y": 45},
+			{"id": "Panzer V", "category": "1939", "y": 0},
+			{"id": "Tiger I", "category": "1939", "y": 0}
+		]
+	}, {
+		"category": "1940",
+		"values": [
+			{"id": "Panzer II", "category": "1940", "y": 99},
+			{"id": "Panzer 38(t)", "category": "1940", "y": 367},
+			{"id": "Panzer III", "category": "1940", "y": 1054},
+			{"id": "Panzer IV", "category": "1940", "y": 368},
+			{"id": "Panzer V", "category": "1940", "y": 0},
+			{"id": "Tiger I", "category": "1939", "y": 0}
+		]
+	}, {
+		"category": "1941",
+		"values": [
+			{"id": "Panzer II", "category": "1941", "y": 265},
+			{"id": "Panzer 38(t)", "category": "1941", "y": 678},
+			{"id": "Panzer III", "category": "1941", "y": 2213},
+			{"id": "Panzer IV", "category": "1941", "y": 467},
+			{"id": "Panzer V", "category": "1941", "y": 0},
+			{"id": "Tiger I", "category": "1939", "y": 0}
+		]
+	}, {
+		"category": "1942",
+		"values": [
+			{"id": "Panzer II", "category": "1942", "y": 848},
+			{"id": "Panzer 38(t)", "category": "1942", "y": 652},
+			{"id": "Panzer III", "category": "1942", "y": 2958},
+			{"id": "Panzer IV", "category": "1942", "y": 994},
+			{"id": "Panzer V", "category": "1942", "y": 0},
+			{"id": "Tiger I", "category": "1939", "y": 78}
+		]
+	}, {
+		"category": "1943",
+		"values": [
+			{"id": "Panzer II", "category": "1943", "y": 803},
+			{"id": "Panzer 38(t)", "category": "1943", "y": 1008},
+			{"id": "Panzer III", "category": "1943", "y": 3379},
+			{"id": "Panzer IV", "category": "1943", "y": 3822},
+			{"id": "Panzer V", "category": "1943", "y": 1849},
+			{"id": "Tiger I", "category": "1939", "y": 649}
+		]
+	}, {
+		"category": "1944",
+		"values": [
+			{"id": "Panzer II", "category": "1944", "y": 151},
+			{"id": "Panzer 38(t)", "category": "1944", "y": 2356},
+			{"id": "Panzer III", "category": "1944", "y": 4752},
+			{"id": "Panzer IV", "category": "1944", "y": 6625},
+			{"id": "Panzer V", "category": "1944", "y": 4003},
+			{"id": "Tiger I", "category": "1939", "y": 641}
+		]
+	}]
+}

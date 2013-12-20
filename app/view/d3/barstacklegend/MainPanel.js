@@ -487,5 +487,5 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 		}
 		
 		me.stackedBarChart.transition();
-	},
+	}
 });

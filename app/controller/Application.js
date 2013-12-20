@@ -15,6 +15,7 @@ Ext.define('App.controller.Application', {
 		'App.view.d3.barstacklegend.MainPanel',
 		'App.view.d3.buildabar.MainPanel',
 		'App.view.d3.buildapie.MainPanel',
+		'App.view.d3.hozbarstack.MainPanel',
 		'App.view.d3.pie.MainPanel',
 		'App.view.d3.pielegend.MainPanel',
 		'App.view.d3.scatterplot.MainPanel',

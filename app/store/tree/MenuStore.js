@@ -37,6 +37,11 @@ Ext.define('App.store.tree.MenuStore', {
 					iconCls: 'icon-arrow-right',
 					id: 'barstackLegendMainPanel'
 				}, {
+					text: 'Horizontal Stacked Bar',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'hozBarStackMainPanel'
+				}, {
 					text: 'Build-A-Bar',
 					leaf: true,
 					iconCls: 'icon-arrow-right',

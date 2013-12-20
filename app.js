@@ -18,9 +18,9 @@ Ext.application({
 		'App.util.Global',
 		'App.util.MessageBus',
 		'App.util.GridRenderers',
-		'App.util.ColumnDefinitions',
 		'App.view.tree.MenuTreePanel',
-		'App.view.tree.MenuInfoPanel'
+		'App.view.tree.MenuInfoPanel',
+		'App.util.ColumnDefinitions'
 	],
 	
 	launch: function() {
