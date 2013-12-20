@@ -79,6 +79,7 @@ Ext.define('App.util.d3.HozStackedBarChart', {
 	labelFunction: function(data, index) {
 		return 'label';
 	},
+	labelVAlign: 'middle',
 	
 	/**
  	 * enable the handling of click/mouse events
@@ -140,7 +141,8 @@ Ext.define('App.util.d3.HozStackedBarChart', {
  			eventRelay = me.eventRelay,
  			mouseEvents = me.mouseEvents,
  			barPadding = me.barPadding,
- 			colorScale = me.colorScale;
+ 			colorScale = me.colorScale,
+ 			labelVAlign = me.labelVAlign;
 		 
 		//////////////////////////////////////////////////
 		// get the array of unique "id" properties
@@ -246,7 +248,14 @@ Ext.define('App.util.d3.HozStackedBarChart', {
 					return _xScale(d.y0 + d.y) + Math.floor((_xScale(d.y0) - _xScale(d.y0 + d.y))/2);
 				})
 				.attr('y', function(d) {
-					return _yScale(d.id) + Math.floor(_yScale.rangeBand()/2);
+					// _yScale(d.id) is upper left corner of rectangle
+					if(labelVAlign == 'bottom') {
+						return _yScale(d.id) + Math.floor(_yScale.rangeBand() * .9);
+					} else if(labelVAlign == 'top') {
+						return _yScale(d.id) + Math.floor(_yScale.rangeBand() * .1);
+					} else {
+						return _yScale(d.id) + Math.floor(_yScale.rangeBand()/2);
+					}
 				})
 				.style('font-family', 'sans-serif')
 				.style('font-size', '9px')
@@ -319,7 +328,8 @@ Ext.define('App.util.d3.HozStackedBarChart', {
 			handleEvents = me.handleEvents,
 			eventRelay = me.eventRelay,
 			mouseEvents = me.mouseEvents,
-			barPadding = me.barPadding;
+			barPadding = me.barPadding,
+			labelVAlign = me.labelVAlign;
 		
 		//////////////////////////////////////////////////
 		// BAR / LAYER TRANSITIONS
@@ -382,7 +392,14 @@ Ext.define('App.util.d3.HozStackedBarChart', {
 					return _xScale(d.y0 + d.y) + Math.floor((_xScale(d.y0) - _xScale(d.y0 + d.y))/2);
 				})
 				.attr('y', function(d) {
-					return _yScale(d.id) + Math.floor(_yScale.rangeBand()/2);
+					// _yScale(d.id) is upper left corner of rectangle
+					if(labelVAlign == 'bottom') {
+						return _yScale(d.id) + Math.floor(_yScale.rangeBand() * .85);
+					} else if(labelVAlign == 'top') {
+						return _yScale(d.id) + Math.floor(_yScale.rangeBand() * .15);
+					} else {
+						return _yScale(d.id) + Math.floor(_yScale.rangeBand()/2);
+					}
 				})
 				.style('font-family', 'sans-serif')
 				.style('font-size', '9px')
@@ -550,5 +567,11 @@ Ext.define('App.util.d3.HozStackedBarChart', {
 	 	var me = this;
 	 	
 	 	me.showLabels = bool;
+	},
+	
+	setLabelVAlign: function(align) {
+		var me = this;
+		
+		me.labelVAlign = align;
 	}
 });

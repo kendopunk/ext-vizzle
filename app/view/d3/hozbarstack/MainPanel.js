@@ -63,16 +63,15 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
 		
-		/**
- 		 * label functions
- 		 */
- 		me.salesLabelFn = function(data, index) {
+		////////////////////////////////////////
+		// label functions
+		////////////////////////////////////////
+ 		me.productionLabelFn = function(data, index) {
  			if(data.y == 0) {
 	 			return '';
 	 		}
 	 		return Ext.util.Format.number(data.y, '0,000');
 	 	};
-
 		me.pctLabelFn = function(data, index) {
 			if(data.y == 0) {
 				return '';
@@ -80,24 +79,22 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 			return Ext.util.Format.number(data.y, '0.0') + '%';
 		};
 		
-		/**
- 		 * tooltip functions
- 		 */
-		me.salesTooltipFn = function(data, index) {
-			return '<b>' + data.id + '</b><br>'
-				+ data.category + ' Production: '
-				+ Ext.util.Format.number(data.y, '0,000');
+		////////////////////////////////////////
+		// tooltip functions
+		////////////////////////////////////////
+		me.productionTooltipFn = function(data, index) {
+			return '<b>' + data.category + '</b><br>'
+				+ Ext.util.Format.number(data.y, '0,000') + ' ' + data.id + '&#039;s';
 		};
-		
 		me.percentTooltipFn = function(data, index) {
-			return '<b>' + data.id + '</b><br>'
-				+ data.category + ' Production: '
-				+ Ext.util.Format.number(data.y, '0.00') + '%';
+			return '<b>' + data.category + '</b><br>'
+				+ Ext.util.Format.number(data.y, '0.00') + '% of<br>'
+				+ data.id + ' production.';
 		};
 		
-		/**
- 		 * tick format functions
- 		 */
+		////////////////////////////////////////
+		// tick format functions
+		////////////////////////////////////////
  		me.productionTickFormat = function(d) {
 			return Ext.util.Format.number(d, '0,000');
 		};
@@ -107,12 +104,35 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 		};
 		
 		/**
- 		 * @listener
- 		 * @description On activate, publish a new message to the "Info" panel
+ 		 * @property
+ 		 * @description Vertical alignment selector
  		 */
-		me.on('activate', function() {
-			me.eventRelay.publish('infoPanelUpdate', me.chartDescription);
-		}, me);
+ 		me.valignCombo = Ext.create('Ext.form.field.ComboBox', {
+	 		store: Ext.create('Ext.data.SimpleStore', {
+				fields: ['value'],
+				data: [
+					['top'],
+					['middle'],
+					['bottom']
+				]
+			}),
+			displayField: 'value',
+	 		valueField: 'value',
+	 		editable: false,
+		 	typeAhead: true,
+		 	queryMode: 'local',
+		 	triggerAction: 'all',
+		 	width: 75,
+		 	listWidth: 75,
+		 	value: 'middle',
+		 	listeners: {
+			 	select: function(combo) {
+				 	me.hozStack.setLabelVAlign(combo.getValue());
+				 	me.hozStack.transition();
+			 	},
+			 	scope: me
+			}
+		});
 		
 		/**
 		 * @property
@@ -148,6 +168,14 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 		}, {
 			xtype: 'tbspacer',
 			width: 10
+		}, {
+			xtype: 'tbtext',
+			text: '<b>Label V-Align</b>'
+		},
+			me.valignCombo,
+		{
+			xtype: 'tbspacer',
+			width: 10
 		}];
 		
 		/**
@@ -156,6 +184,14 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
  		 */
 		me.on('afterrender', function(panel) {
 			me.initCanvas();
+		}, me);
+		
+		/**
+ 		 * @listener
+ 		 * @description On activate, publish a new message to the "Info" panel
+ 		 */
+		me.on('activate', function() {
+			me.eventRelay.publish('infoPanelUpdate', me.chartDescription);
 		}, me);
 		
 		me.callParent(arguments);
@@ -193,11 +229,11 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 				bottom: 20,
 				left: 100
 			},
-			tooltipFunction: me.salesTooltipFn,
+			tooltipFunction: me.productionTooltipFn,
 			xTickFormat: me.productionTickFormat,
 			chartTitle: me.generateChartTitle(),
 			showLabels: true,
-			labelFunction: me.salesLabelFn
+			labelFunction: me.productionLabelFn
 		});
 		
 		// retrieve the graph data via AJAX and load the visualization
@@ -234,10 +270,12 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 		
 		// button cls
 		Ext.each(me.query('toolbar > button'), function(button) {
-			if(button.metric == btn.metric) {
-				button.addCls(me.btnHighlightCss);
-			} else {
-				button.removeCls(me.btnHighlightCss);
+			if(button.metric) {
+				if(button.metric == btn.metric) {
+					button.addCls(me.btnHighlightCss);
+				} else {
+					button.removeCls(me.btnHighlightCss);
+				}
 			}
 		}, me);
 		
@@ -255,9 +293,9 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 			me.hozStack.setXTickFormat(me.percentTickFormat);
 			
 		} else {
-			me.hozStack.setLabelFunction(me.salesLabelFn);
+			me.hozStack.setLabelFunction(me.productionLabelFn);
 			me.hozStack.setGraphData(dataSet);
-			me.hozStack.setTooltipFunction(me.salesTooltipFn);
+			me.hozStack.setTooltipFunction(me.productionTooltipFn);
 			me.hozStack.setXTickFormat(me.productionTickFormat);
 		}
 		
@@ -318,11 +356,13 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 			btn.setText('OFF');
 			btn.removeCls(me.btnHighlightCss);
 			me.hozStack.setShowLabels(false);
+			me.valignCombo.disable();
 		} else {
 			btn.currentValue = 'on';
 			btn.setText('ON');
 			btn.addCls(me.btnHighlightCss);
 			me.hozStack.setShowLabels(true);
+			me.valignCombo.enable();
 		}
 		
 		me.hozStack.transition();
