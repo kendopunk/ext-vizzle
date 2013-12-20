@@ -69,7 +69,7 @@ Ext.define('App.view.d3.ticker.MainPanel', {
 	 				Ext.TaskManager.start(me.chartUpdateTask);
 	 				
 	 				btn.addCls(me.btnHighlightCss);
-	 				btn.currentValue = 'ON';
+	 				btn.currentValue = 'on';
 	 				btn.setText('RUNNING');
 	 			}
 	 		}
