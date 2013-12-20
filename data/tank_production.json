@@ -18,7 +18,7 @@
 			{"id": "Panzer III", "category": "1940", "y": 1054},
 			{"id": "Panzer IV", "category": "1940", "y": 368},
 			{"id": "Panzer V", "category": "1940", "y": 0},
-			{"id": "Tiger I", "category": "1939", "y": 0}
+			{"id": "Tiger I", "category": "1940", "y": 0}
 		]
 	}, {
 		"category": "1941",
@@ -28,7 +28,7 @@
 			{"id": "Panzer III", "category": "1941", "y": 2213},
 			{"id": "Panzer IV", "category": "1941", "y": 467},
 			{"id": "Panzer V", "category": "1941", "y": 0},
-			{"id": "Tiger I", "category": "1939", "y": 0}
+			{"id": "Tiger I", "category": "1941", "y": 0}
 		]
 	}, {
 		"category": "1942",
@@ -38,7 +38,7 @@
 			{"id": "Panzer III", "category": "1942", "y": 2958},
 			{"id": "Panzer IV", "category": "1942", "y": 994},
 			{"id": "Panzer V", "category": "1942", "y": 0},
-			{"id": "Tiger I", "category": "1939", "y": 78}
+			{"id": "Tiger I", "category": "1942", "y": 78}
 		]
 	}, {
 		"category": "1943",
@@ -48,7 +48,7 @@
 			{"id": "Panzer III", "category": "1943", "y": 3379},
 			{"id": "Panzer IV", "category": "1943", "y": 3822},
 			{"id": "Panzer V", "category": "1943", "y": 1849},
-			{"id": "Tiger I", "category": "1939", "y": 649}
+			{"id": "Tiger I", "category": "1943", "y": 649}
 		]
 	}, {
 		"category": "1944",
@@ -58,7 +58,7 @@
 			{"id": "Panzer III", "category": "1944", "y": 4752},
 			{"id": "Panzer IV", "category": "1944", "y": 6625},
 			{"id": "Panzer V", "category": "1944", "y": 4003},
-			{"id": "Tiger I", "category": "1939", "y": 641}
+			{"id": "Tiger I", "category": "1944", "y": 641}
 		]
 	}]
 }
