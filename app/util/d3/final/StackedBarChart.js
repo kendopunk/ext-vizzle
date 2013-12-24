@@ -37,6 +37,7 @@ Ext.define('App.util.d3.final.StackedBarChart', {
    	labelFunction: function(data, index) {
 		return 'label';
 	},
+	labelValign: 'middle',
    	layers: null,
    	legendFlex: 1,
    	legendFontSize: '9px',
@@ -123,6 +124,7 @@ Ext.define('App.util.d3.final.StackedBarChart', {
  			eventRelay = me.eventRelay,
  			mouseEvents = me.mouseEvents,
  			showLegend = me.showLegend,
+ 			labelVAlign = me.labelVAlign,
  			chort = me.chartOrientation;
  			
 		//////////////////////////////////////////////////
@@ -273,10 +275,22 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 				})
 				.attr('y', function(d) {
 					if(chort == 'horizontal') {
-						return _yScale(d.id) + Math.floor(_yScale.rangeBand()/2);
+						// _yScale(d.id) is upper left corner of rectangle
+						if(labelVAlign == 'bottom') {
+							return _yScale(d.id) + Math.floor(_yScale.rangeBand() * .9);
+						} else if(labelVAlign == 'top') {
+							return _yScale(d.id) + Math.floor(_yScale.rangeBand() * .1);
+						} else {
+							return _yScale(d.id) + Math.floor(_yScale.rangeBand()/2);
+						}
 					} else {
-						// scaled yPos + (scaledHeight / 2)
-						return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y))/2);
+						if(labelVAlign == 'bottom') {
+							return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y)) * .9);
+						} else if(labelVAlign == 'top') {
+							return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y)) * .1);
+						} else {
+							return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y))/2);
+						}
 					}
 				})
 				.style('font-family', 'sans-serif')
@@ -389,6 +403,7 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 			eventRelay = me.eventRelay,
 			mouseEvents = me.mouseEvents,
 			showLegend = me.showLegend,
+			labelVAlign = me.labelVAlign,
 			chort = me.chartOrientation;
 			
 		//////////////////////////////////////////////////
@@ -529,10 +544,22 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 				})
 				.attr('y', function(d) {
 					if(chort == 'horizontal') {
-						return _yScale(d.id) + Math.floor(_yScale.rangeBand()/2);
+						// _yScale(d.id) is upper left corner of rectangle
+						if(labelVAlign == 'bottom') {
+							return _yScale(d.id) + Math.floor(_yScale.rangeBand() * .85);
+						} else if(labelVAlign == 'top') {
+							return _yScale(d.id) + Math.floor(_yScale.rangeBand() * .15);
+						} else {
+							return _yScale(d.id) + Math.floor(_yScale.rangeBand()/2);
+						}
 					} else {
-						// scaled yPos + (scaledHeight / 2)
-						return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y))/2);
+						if(labelVAlign == 'bottom') {
+							return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y)) * .9);
+						} else if(labelVAlign == 'top') {
+							return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y)) * .1);
+						} else {
+							return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y))/2);
+						}
 					}
 				})
 				.style('font-family', 'sans-serif')
@@ -668,6 +695,12 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 		var me = this;
 		
 		me.labelFunction = fn;
+	},
+	
+	setLabelVAlign: function(align) {
+		var me = this;
+		
+		me.labelVAlign = align;
 	},
 	
 	setMaxValue: function() {
