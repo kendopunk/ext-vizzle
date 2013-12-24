@@ -12,7 +12,7 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.StackedBarChart'
+		'App.util.d3.final.StackedBarChart'
 	],
 	
 	layout: 'fit',
@@ -193,7 +193,7 @@ Ext.define('App.view.d3.barstack.MainPanel', {
 	 		.attr('width', me.canvasWidth)
 	 		.attr('height', me.canvasHeight);
 	 		
-	 	me.stackedBarChart = Ext.create('App.util.d3.StackedBarChart', {
+	 	me.stackedBarChart = Ext.create('App.util.d3.final.StackedBarChart', {
 			svg: me.svg,
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,

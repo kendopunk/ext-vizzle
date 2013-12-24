@@ -29,6 +29,7 @@ Ext.define('App.util.d3.final.BarChart', {
 	gLegend: null,	// "g" element to hold the right-side legend
 	gText: null,	// "g" element to hold the text
 	gTitle: null,	// "g" element to hold the title
+	gXAxis: null,	// "g" element to hold the X axis
 	gYAxis: null,	// "g" element to hold the Y axis
 	graphData: [],	// array of objects for the graph
 	handleEvents: false,

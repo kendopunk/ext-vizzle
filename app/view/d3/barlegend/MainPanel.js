@@ -88,7 +88,7 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 			text: 'IMDB Rating',
 			handler: me.metricHandler,
 			scope: me
-		}, {
+		},/* {
 			xtype: 'tbspacer',
 			width: 25
 		}, {
@@ -108,7 +108,7 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 			iconCls: 'icon-bar-chart-hoz',
 			handler: me.orientationHandler,
 			scope: me
-		},
+		},*/
 			'->',
 		{
 			xtype: 'tbtext',

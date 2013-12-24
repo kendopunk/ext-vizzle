@@ -118,6 +118,7 @@ Ext.define('App.view.d3.bar.VizPanel', {
 					graphData: me.graphData,
 					panelId: me.panelId,
 					showLabels: true,
+					orientation: 'horizontal',
 					labelFunction: function(data, index) {
 						return data.title;
 					},

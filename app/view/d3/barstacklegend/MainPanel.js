@@ -12,7 +12,7 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.StackedBarLegendChart'
+		'App.util.d3.final.StackedBarChart'
 	],
 	
 	layout: 'fit',
@@ -217,7 +217,7 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 	 		.attr('width', me.canvasWidth)
 	 		.attr('height', me.canvasHeight);
 	 		
-	 	me.stackedBarChart = Ext.create('App.util.d3.StackedBarLegendChart', {
+	 	me.stackedBarChart = Ext.create('App.util.d3.final.StackedBarChart', {
 			svg: me.svg,
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,
@@ -234,8 +234,9 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 			handleEvents: true,
 			chartFlex: 5,
 			legendFlex: .75,
-			legendFontSize: 11,
+			legendFontSize: '10px',
 			showLabels: true,
+			showLegend: true,
 			labelFunction: me.salesLabelFn
 		});
 		
