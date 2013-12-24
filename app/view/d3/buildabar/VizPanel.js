@@ -11,7 +11,7 @@ Ext.define('App.view.d3.buildabar.VizPanel', {
 	autoScroll: true,
 	
 	requires: [
-		'App.util.d3.BarChart',
+		'App.util.d3.final.BarChart',
 	],
 	
 	listeners: {
@@ -163,7 +163,7 @@ Ext.define('App.view.d3.buildabar.VizPanel', {
 		}, me);
 
 		// build the chart
-	 	me.barChart = Ext.create('App.util.d3.BarChart', {
+	 	me.barChart = Ext.create('App.util.d3.final.BarChart', {
 			svg: me.svg,
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,

@@ -13,7 +13,7 @@ Ext.define('App.view.d3.bar.VizPanel', {
 	
 	requires: [
 		'App.util.JsonBuilder',
-		'App.util.d3.BarChart',
+		'App.util.d3.final.BarChart',
 		'App.store.movie.MovieMetricStore'
 	],
 	
@@ -69,7 +69,7 @@ Ext.define('App.view.d3.bar.VizPanel', {
 			xtype: 'button',
 			iconCls: 'icon-dollar',
 			metric: 'opening',
-			text: 'Opening Weekend',
+			text: 'Opening Wknd',
 			handler: me.metricHandler,
 			scope: me
 		}, {
@@ -82,38 +82,6 @@ Ext.define('App.view.d3.bar.VizPanel', {
 		}];
 		
 		me.callParent(arguments);
-	},
-	
-	/**
-	 * @function
-	 * @memberOf App.view.d3.bar.VizPanel
-	 * @description Toolbar button handler
-	 */
-	metricHandler: function(btn, evt) {
-		var me = this;
-		
-		// button cls
-		Ext.each(me.query('toolbar > button'), function(button) {
-			if(button.metric == btn.metric) {
-				button.addCls(me.btnHighlightCss);
-			} else {
-				button.removeCls(me.btnHighlightCss);
-			}
-		}, me);
-		
-		me.currentMetric = btn.metric;
-		if(btn.metric == 'theaters') {
-			me.barChart.setYTickFormat(App.util.Global.svg.numberTickFormat);
-		} else if(btn.metric == 'imdbRating') {
-			me.barChart.setYTickFormat(function(d) {
-				return Ext.util.Format.number(d, '0.0');
-			});
-		} else {
-			me.barChart.setYTickFormat(App.util.Global.svg.wholeDollarTickFormat);
-		}
-		me.barChart.setChartTitle(me.generateChartTitle(btn.text));
-		me.barChart.setDataMetric(btn.metric);
-		me.barChart.transition();
 	},
 	
 	/**
@@ -142,12 +110,12 @@ Ext.define('App.view.d3.bar.VizPanel', {
 	 		
 		 		me.graphData = App.util.JsonBuilder.buildMovieDataJson(records);
 
-		 		me.barChart = Ext.create('App.util.d3.BarChart', {
-					svg: me.svg,
+		 		me.barChart = Ext.create('App.util.d3.final.BarChart', {
+			 		svg: me.svg,
 					canvasWidth: me.canvasWidth,
 					canvasHeight: me.canvasHeight,
-					graphData: me.graphData,
 					dataMetric: me.defaultMetric,
+					graphData: me.graphData,
 					panelId: me.panelId,
 					showLabels: true,
 					labelFunction: function(data, index) {
@@ -184,6 +152,38 @@ Ext.define('App.view.d3.bar.VizPanel', {
 			},
 			scope: me
 		});
+	},
+	
+	/**
+	 * @function
+	 * @memberOf App.view.d3.bar.VizPanel
+	 * @description Toolbar button handler
+	 */
+	metricHandler: function(btn, evt) {
+		var me = this;
+		
+		// button cls
+		Ext.each(me.query('toolbar > button'), function(button) {
+			if(button.metric == btn.metric) {
+				button.addCls(me.btnHighlightCss);
+			} else {
+				button.removeCls(me.btnHighlightCss);
+			}
+		}, me);
+		
+		me.currentMetric = btn.metric;
+		if(btn.metric == 'theaters') {
+			me.barChart.setYTickFormat(App.util.Global.svg.numberTickFormat);
+		} else if(btn.metric == 'imdbRating') {
+			me.barChart.setYTickFormat(function(d) {
+				return Ext.util.Format.number(d, '0.0');
+			});
+		} else {
+			me.barChart.setYTickFormat(App.util.Global.svg.wholeDollarTickFormat);
+		}
+		me.barChart.setChartTitle(me.generateChartTitle(btn.text));
+		me.barChart.setDataMetric(btn.metric);
+		me.barChart.transition();
 	},
 	
 	/** 

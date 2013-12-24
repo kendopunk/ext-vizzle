@@ -499,7 +499,7 @@ Ext.define('App.util.d3.StackedBarLegendChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.BarLegendChart
+ 	 * @memberOf App.util.d3.StackedBarLegendChart
  	 * @description Return the width of a flex "unit"
  	 */
 	getFlexUnit: function() {

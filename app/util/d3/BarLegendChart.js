@@ -625,7 +625,7 @@ Ext.define('App.util.d3.BarLegendChart', {
 				return i * legendSquareHeight * 1.75;
 			})
 			.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
-			.text(me.legendTextFunction)
+			.text(me.legendTextFunction);
 			
 		//////////////////////////////////////////////////
 		// TITLE

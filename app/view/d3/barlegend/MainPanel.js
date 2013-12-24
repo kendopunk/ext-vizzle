@@ -12,7 +12,7 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.BarLegendChart',
+		'App.util.d3.final.BarChart',
 		'App.store.movie.MovieStore'
 	],
 	
@@ -32,7 +32,7 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
  			me.svg,
  			me.g,
  			me.panelId,
- 			me.barLegendChart = null,
+ 			me.barChart = null,
  			me.defaultMetric = 'gross',
  			me.defaultMetricText = 'Gross Box Office',
  			me.currentMetric = 'gross',
@@ -78,7 +78,7 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 			xtype: 'button',
 			iconCls: 'icon-dollar',
 			metric: 'opening',
-			text: 'Opening Weekend',
+			text: 'Opening Wknd',
 			handler: me.metricHandler,
 			scope: me
 		}, {
@@ -88,7 +88,27 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 			text: 'IMDB Rating',
 			handler: me.metricHandler,
 			scope: me
+		}, {
+			xtype: 'tbspacer',
+			width: 25
+		}, {
+			xtype: 'tbtext',
+			text: '<b>Orientation:</b>'
+		}, {
+			xtype: 'button',
+			tooltip: 'Vertical',
+			iconCls: 'icon-bar-chart',
+			handler: me.orientationHandler,
+			scope: me
 		}, 
+			'-',
+		{
+			xtype: 'button',
+			tooltip: 'Horizontal',
+			iconCls: 'icon-bar-chart-hoz',
+			handler: me.orientationHandler,
+			scope: me
+		},
 			'->',
 		{
 			xtype: 'tbtext',
@@ -116,40 +136,6 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 		}, me);
 		
 		me.callParent(arguments);
-	},
-	
-	/**
-	 * @function
-	 * @memberOf App.view.d3.barlegend.MainPanel
-	 * @description Toolbar button handler
-	 */
-	metricHandler: function(btn, evt) {
-		var me = this;
-		
-		// button cls
-		Ext.each(me.query('toolbar > button'), function(button) {
-			if(button.metric) {
-				if(button.metric == btn.metric) {
-					button.addCls(me.btnHighlightCss);
-				} else {
-					button.removeCls(me.btnHighlightCss);
-				}
-			}
-		}, me);
-		
-		me.currentMetric = btn.metric;
-		me.barLegendChart.setChartTitle(me.generateChartTitle(btn.text));
-		if(btn.metric == 'theaters') {
-			me.barLegendChart.setYTickFormat(App.util.Global.svg.numberTickFormat);
-		} else if(btn.metric == 'imdbRating') {
-			me.barLegendChart.setYTickFormat(function(d) {
-				return Ext.util.Format.number(d, '0.0');
-			});
-		} else {
-			me.barLegendChart.setYTickFormat(App.util.Global.svg.wholeDollarTickFormat);
-		}
-		me.barLegendChart.setDataMetric(btn.metric);
-		me.barLegendChart.transition();
 	},
 	
 	/**
@@ -185,7 +171,7 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 		 			me.graphData.push(rec);
 		 		}, me);
 	 			
-	 			me.barLegendChart = Ext.create('App.util.d3.BarLegendChart', {
+	 			me.barChart = Ext.create('App.util.d3.final.BarChart', {
 					svg: me.svg,
 					canvasWidth: me.canvasWidth,
 					canvasHeight: me.canvasHeight,
@@ -202,6 +188,7 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 						leftAxis: 85
 					},
 					showLabels: true,
+					showLegend: true,
 					labelFunction: function(data, index) {
 						return data.title;
 					},
@@ -220,7 +207,7 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 				}, me);
 				
 				
-				me.barLegendChart.draw();
+				me.barChart.draw();
 	 		},
 	 		callback: function() {
 	 			me.getEl().unmask();
@@ -228,6 +215,40 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 	 		scope: me
 	 	});
 	 },
+	
+	/**
+	 * @function
+	 * @memberOf App.view.d3.barlegend.MainPanel
+	 * @description Toolbar button handler
+	 */
+	metricHandler: function(btn, evt) {
+		var me = this;
+		
+		// button cls
+		Ext.each(me.query('toolbar > button'), function(button) {
+			if(button.metric) {
+				if(button.metric == btn.metric) {
+					button.addCls(me.btnHighlightCss);
+				} else {
+					button.removeCls(me.btnHighlightCss);
+				}
+			}
+		}, me);
+		
+		me.currentMetric = btn.metric;
+		me.barChart.setChartTitle(me.generateChartTitle(btn.text));
+		if(btn.metric == 'theaters') {
+			me.barChart.setYTickFormat(App.util.Global.svg.numberTickFormat);
+		} else if(btn.metric == 'imdbRating') {
+			me.barChart.setYTickFormat(function(d) {
+				return Ext.util.Format.number(d, '0.0');
+			});
+		} else {
+			me.barChart.setYTickFormat(App.util.Global.svg.wholeDollarTickFormat);
+		}
+		me.barChart.setDataMetric(btn.metric);
+		me.barChart.transition();
+	},
 	 
 	/** 
 	 * @function
@@ -240,15 +261,19 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 			btn.currentValue = 'off';
 			btn.setText('OFF');
 			btn.removeCls(me.btnHighlightCss);
-			me.barLegendChart.setShowLabels(false);
+			me.barChart.setShowLabels(false);
 		} else {
 			btn.currentValue = 'on';
 			btn.setText('ON');
 			btn.addCls(me.btnHighlightCss);
-			me.barLegendChart.setShowLabels(true);
+			me.barChart.setShowLabels(true);
 		}
 		
-		me.barLegendChart.transition();
+		me.barChart.transition();
+	},
+	
+	orientationHandler: function(btn) {
+		return;
 	},
 	
 	/** 
