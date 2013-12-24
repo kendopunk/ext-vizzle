@@ -13,7 +13,7 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.HozStackedBarChart'
+		'App.util.d3.final.StackedBarChart'
 	],
 	
 	layout: 'fit',
@@ -32,7 +32,7 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
  			me.svg,
  			me.g,
  			me.panelId,
- 			me.hozStack = null,
+ 			me.stackedBarChart = null,
  			me.currentMetric = 'total',
  			me.baseTitle = 'German Tank Production in WWII (1939-1944)',
  			me.eventRelay = Ext.create('App.util.MessageBus'),
@@ -41,14 +41,14 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 		/**
  		 * @property
  		 */
-		me.chartDescription = '<b>Horizontal Stacked Bar Chart</b><br><br>'
+		me.chartDescription = '<b>Stacked Bar Orientation</b><br><br>'
+			+ '<i>horizontal / vertical toggling...</i><br><br>'
 			+ 'Took me a while to figure this out...but you can keep the '
 			+ 'd3.layout.stack() call in place (like the vertical stacked bar chart) '
 			+ 'and just get creative with the X and Y scales/axes.<br><br>'
 			+ 'Handles zero-value slices well (no Tiger I&#039;s produced 1939-1941, no '
 			+ 'Panzer V&#039s between 1939-1942)<br><br>'
-			+ 'Data from Wikipedia.<br><br>'
-			+ '<i>Panzer</i> is German for "tank" or "armor".';
+			+ 'Data from Wikipedia.  <i>Panzer</i> is German for "tank" or "armor".';
 			
 		/**
 		 * @property
@@ -127,8 +127,8 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 		 	value: 'middle',
 		 	listeners: {
 			 	select: function(combo) {
-				 	me.hozStack.setLabelVAlign(combo.getValue());
-				 	me.hozStack.transition();
+				 	me.stackedBarChart.setLabelVAlign(combo.getValue());
+				 	me.stackedBarChart.transition();
 			 	},
 			 	scope: me
 			}
@@ -152,6 +152,28 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 			text: 'Production %',
 			metric: 'percent',
 			handler: me.metricHandler,
+			scope: me
+		}, {
+			xtype: 'tbspacer',
+			width: 25
+		}, {
+			xtype: 'tbtext',
+			text: '<b>Orientation:</b>'
+		}, {
+			xtype: 'button',
+			tooltip: 'Vertical',
+			orientationValue: 'vertical',
+			iconCls: 'icon-bar-chart',
+			handler: me.orientationHandler,
+			scope: me
+		}, 
+			'-',
+		{
+			xtype: 'button',
+			tooltip: 'Horizontal',
+			orientationValue: 'horizontal',
+			iconCls: 'icon-bar-chart-hoz',
+			handler: me.orientationHandler,
 			scope: me
 		},
 		'->',
@@ -218,7 +240,7 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 	 		.attr('width', me.canvasWidth)
 	 		.attr('height', me.canvasHeight);
 	 		
-	 	me.hozStack = Ext.create('App.util.d3.HozStackedBarChart', {
+	 	me.stackedBarChart = Ext.create('App.util.d3.final.StackedBarChart', {
 			svg: me.svg,
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,
@@ -233,6 +255,9 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 			xTickFormat: me.productionTickFormat,
 			chartTitle: me.generateChartTitle(),
 			showLabels: true,
+			showLegend: true,
+			chartFlex: 6,
+			legendFlex: .75,
 			labelFunction: me.productionLabelFn
 		});
 		
@@ -248,13 +273,13 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 		 		}, me);
 		 		
 		 		// reverse the values in each category
-		 		Ext.each(me.workingGraphData, function(obj) {
-			 		obj.values = obj.values.reverse();
-			 	});
+		 		//Ext.each(me.workingGraphData, function(obj) {
+			 		//obj.values = obj.values.reverse();
+			 	//});
 			 	
 			 	// set graph data and draw
-		 		me.hozStack.setGraphData(me.workingGraphData);
-		 		me.hozStack.draw();
+		 		me.stackedBarChart.setGraphData(me.workingGraphData);
+		 		me.stackedBarChart.draw();
 		 	},
 		 	scope: me
 		 });
@@ -279,7 +304,7 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 			}
 		}, me);
 		
-		me.hozStack.setChartTitle(me.generateChartTitle(btn.text));
+		me.stackedBarChart.setChartTitle(me.generateChartTitle(btn.text));
 		me.currentMetric = btn.metric;
 		
 		var dataSet = Ext.clone(me.workingGraphData);
@@ -287,19 +312,29 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 		if(btn.metric == 'percent') {
 			dataSet = me.normalizePercent(dataSet);
 			
-			me.hozStack.setLabelFunction(me.pctLabelFn);
-			me.hozStack.setGraphData(dataSet);
-			me.hozStack.setTooltipFunction(me.percentTooltipFn);
-			me.hozStack.setXTickFormat(me.percentTickFormat);
+			me.stackedBarChart.setLabelFunction(me.pctLabelFn);
+			me.stackedBarChart.setGraphData(dataSet);
+			me.stackedBarChart.setTooltipFunction(me.percentTooltipFn);
+			
+			if(me.stackedBarChart.chartOrientation == 'horizontal') {
+				me.stackedBarChart.setXTickFormat(me.percentTickFormat);
+			} else {
+				me.stackedBarChart.setYTickFormat(me.percentTickFormat);
+			}
 			
 		} else {
-			me.hozStack.setLabelFunction(me.productionLabelFn);
-			me.hozStack.setGraphData(dataSet);
-			me.hozStack.setTooltipFunction(me.productionTooltipFn);
-			me.hozStack.setXTickFormat(me.productionTickFormat);
+			me.stackedBarChart.setLabelFunction(me.productionLabelFn);
+			me.stackedBarChart.setGraphData(dataSet);
+			me.stackedBarChart.setTooltipFunction(me.productionTooltipFn);
+			
+			if(me.stackedBarChart.chartOrientation == 'horizontal') {
+				me.stackedBarChart.setXTickFormat(me.productionTickFormat);
+			} else {
+				me.stackedBarChart.setYTickFormat(me.productionTickFormat);
+			}
 		}
 		
-		me.hozStack.transition();
+		me.stackedBarChart.transition();
 	},
   
    	/**
@@ -355,17 +390,17 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 			btn.currentValue = 'off';
 			btn.setText('OFF');
 			btn.removeCls(me.btnHighlightCss);
-			me.hozStack.setShowLabels(false);
+			me.stackedBarChart.setShowLabels(false);
 			me.valignCombo.disable();
 		} else {
 			btn.currentValue = 'on';
 			btn.setText('ON');
 			btn.addCls(me.btnHighlightCss);
-			me.hozStack.setShowLabels(true);
+			me.stackedBarChart.setShowLabels(true);
 			me.valignCombo.enable();
 		}
 		
-		me.hozStack.transition();
+		me.stackedBarChart.transition();
 	},
    	
    	/** 
@@ -377,5 +412,32 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 		var me = this;
 		
 		return me.baseTitle;
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Change the stacked bar orientation (horizontal | vertical)
+ 	 */
+	orientationHandler: function(btn) {
+		var me = this;
+	
+		me.stackedBarChart.setOrientation(btn.orientationValue);
+		
+		// tick formats
+		if(me.currentMetric == 'percent') {
+			if(btn.orientationValue == 'horizontal') {
+				me.stackedBarChart.setXTickFormat(me.percentTickFormat);
+			} else {
+				me.stackedBarChart.setYTickFormat(me.percentTickFormat);
+			}
+		} else {
+			if(btn.orientationValue == 'horizontal') {
+				me.stackedBarChart.setXTickFormat(me.productionTickFormat);
+			} else {
+				me.stackedBarChart.setYTickFormat(me.productionTickFormat);
+			}
+		}
+		
+		me.stackedBarChart.transition();
 	}
 });

@@ -15,12 +15,14 @@ Ext.define('App.util.d3.final.StackedBarChart', {
  	/**
   	 * other configs
   	 */
+  	barPadding: 5,
   	canvasHeight: 500,
   	canvasWidth: 500,
   	chartFlex: 3,
+  	chartOrientation: 'vertical',
   	chartTitle: null,
-  	colorRangeEnd: '#F4A460',
-    colorRangeStart: '#4682B4',
+  	colorRangeStart: null,
+  	colorRangeEnd: null,
   	colorScale: d3.scale.category20(),
   	eventRelay: null,
   	gCanvas: null,
@@ -64,7 +66,6 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 			eventName: null
 		}
 	},
-	orientation: 'vertical',
    	panelId: null,
    	showLabels: false,
    	showLegend: false,
@@ -75,6 +76,9 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 	},
     xAxis: null,
     xScale: null,
+    xTickFormat: function(d) {
+ 		return Ext.util.Format.number(d, '0,000');
+	},
     yAxis: null,
     yScale: null,
     yTickFormat: function(d) {
@@ -108,6 +112,7 @@ Ext.define('App.util.d3.final.StackedBarChart', {
  		// bring configuration vars into local scope
  		//////////////////////////////////////////////////
  		var svg = me.svg,
+ 			barPadding = me.barPadding,
  			canvasWidth = me.canvasWidth,
  			canvasHeight = me.canvasHeight,
  			panelId = me.panelId,
@@ -117,14 +122,18 @@ Ext.define('App.util.d3.final.StackedBarChart', {
  			handleEvents = me.handleEvents,
  			eventRelay = me.eventRelay,
  			mouseEvents = me.mouseEvents,
- 			showLegend = me.showLegend;
+ 			showLegend = me.showLegend,
+ 			chort = me.chartOrientation;
  			
 		//////////////////////////////////////////////////
 		// initialize color scale
 		//////////////////////////////////////////////////
-		var colorScale = me.colorScale = d3.scale.linear()
-		 	.domain([0, me.graphData.length - 1])
-		 	.range([me.colorRangeStart, me.colorRangeEnd]);
+		if(me.colorRangeStart != null && me.colorRangeEnd != null) {
+			me.colorScale = d3.scale.linear()
+		 		.domain([0, me.graphData.length - 1])
+		 		.range([me.colorRangeStart, me.colorRangeEnd]);
+		}
+		var colorScale = me.colorScale;
 		 
 		//////////////////////////////////////////////////
 		// get the array of unique "id" properties
@@ -198,15 +207,33 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 			.attr('fill-opacity', .6)
 			.attr('stroke', 'black')
 			.style('stroke-width', 0.5)
-			.attr('width', me.xScale.rangeBand())
 			.attr('x', function(d) {
-				return _xScale(d.id);
+				if(chort == 'horizontal') {
+					return _xScale(d.y0);
+				} else {
+					return _xScale(d.id);
+				}
+			})
+			.attr('width', function(d) {
+				if(chort == 'horizontal') {
+					return _xScale(d.y0 + d.y) - _xScale(d.y0);
+				} else {
+					return _xScale.rangeBand();
+				}
 			})
 			.attr('y', function(d) {
-				return _yScale(d.y0 + d.y);
+				if(chort == 'horizontal') {
+					return _yScale(d.id);
+				} else {
+					return _yScale(d.y0 + d.y);
+				}
 			})
 			.attr('height', function(d) {
-				return _yScale(d.y0) - _yScale(d.y0 + d.y);
+				if(chort == 'horizontal') {
+					return _yScale.rangeBand() - barPadding;
+				} else {
+					return _yScale(d.y0) - _yScale(d.y0 + d.y);
+				}
 			})
 			.on('mouseover', function(d, i) {
 				if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
@@ -237,12 +264,20 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 				.enter()
 				.append('text')
 				.attr('x', function(d) {
-					// scaled X position + (rectWidth / 2)
-					return _xScale(d.id) + Math.floor(_xScale.rangeBand()/2);
+					if(chort == 'horizontal') {
+						return _xScale(d.y0 + d.y) + Math.floor((_xScale(d.y0) - _xScale(d.y0 + d.y))/2);
+					} else {
+						// scaled X position + (rectWidth / 2)
+						return _xScale(d.id) + Math.floor(_xScale.rangeBand()/2);
+					}
 				})
 				.attr('y', function(d) {
-					// scaled yPos + (scaledHeight / 2)
-					return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y))/2);
+					if(chort == 'horizontal') {
+						return _yScale(d.id) + Math.floor(_yScale.rangeBand()/2);
+					} else {
+						// scaled yPos + (scaledHeight / 2)
+						return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y))/2);
+					}
 				})
 				.style('font-family', 'sans-serif')
 				.style('font-size', '9px')
@@ -325,7 +360,7 @@ Ext.define('App.util.d3.final.StackedBarChart', {
  	 * @memberOf App.util.d3.StackedBarChart
  	 * @description Transition stacked bar chart layout with new data
  	 */
-	transition: function() {
+	transition: function(fap) {
 		var me = this;
 		
 		//////////////////////////////////////////////////
@@ -346,13 +381,15 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 		//////////////////////////////////////////////////
 		var _xScale = me.xScale,
 			_yScale = me.yScale,
+			barPadding = me.barPadding,
 			colorScale = me.colorScale,
 			legendSquareWidth = me.legendSquareWidth,
 			legendSquareHeight = me.legendSquareHeight,
 			handleEvents = me.handleEvents,
 			eventRelay = me.eventRelay,
 			mouseEvents = me.mouseEvents,
-			showLegend = me.showLegend;
+			showLegend = me.showLegend,
+			chort = me.chartOrientation;
 			
 		//////////////////////////////////////////////////
 		// LAYER TRANSITION
@@ -401,15 +438,33 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 			.attr('fill-opacity', .6)
 			.attr('stroke', 'black')
 			.style('stroke-width', 0.5)
-			.attr('width', _xScale.rangeBand())
 			.attr('x', function(d) {
-				return _xScale(d.id);
+				if(chort == 'horizontal') {
+					return _xScale(d.y0);
+				} else {	
+					return _xScale(d.id);
+				}
+			})
+			.attr('width', function(d) {
+				if(chort == 'horizontal') {
+					return _xScale(d.y0 + d.y) - _xScale(d.y0);
+				} else {
+					return _xScale.rangeBand();
+				}
 			})
 			.attr('y', function(d) {
-				return _yScale(d.y0 + d.y);
+				if(chort == 'horizontal') {
+					return _yScale(d.id);
+				} else {
+					return _yScale(d.y0 + d.y);
+				}
 			})
 			.attr('height', function(d) {
-				return _yScale(d.y0) - _yScale(d.y0 + d.y);
+				if(chort == 'horizontal') {
+					return _yScale.rangeBand() - barPadding;
+				} else {
+					return _yScale(d.y0) - _yScale(d.y0 + d.y);
+				}
 			});
 			
 		// call events
@@ -465,12 +520,20 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 			textSelection.transition()
 				.duration(500)
 				.attr('x', function(d) {
-					// scaled X position + (rectWidth / 2)
-					return _xScale(d.id) + Math.floor(_xScale.rangeBand()/2);
+					if(chort == 'horizontal') {
+						return _xScale(d.y0 + d.y) + Math.floor((_xScale(d.y0) - _xScale(d.y0 + d.y))/2);
+					} else {
+						// scaled X position + (rectWidth / 2)
+						return _xScale(d.id) + Math.floor(_xScale.rangeBand()/2);
+					}
 				})
 				.attr('y', function(d) {
-					// scaled yPos + (scaledHeight / 2)
-					return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y))/2);
+					if(chort == 'horizontal') {
+						return _yScale(d.id) + Math.floor(_yScale.rangeBand()/2);
+					} else {
+						// scaled yPos + (scaledHeight / 2)
+						return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y))/2);
+					}
 				})
 				.style('font-family', 'sans-serif')
 				.style('font-size', '9px')
@@ -479,12 +542,6 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 		} else {
 			me.gCanvas.selectAll('.label').data([]).exit().remove()
 		}
-		
-		//////////////////////////////////////////////////
-		// TRANSITION AXES
-		//////////////////////////////////////////////////
-		me.gXAxis.transition().duration(500).call(me.xAxis);
-		me.gYAxis.transition().duration(500).call(me.yAxis);
 		
 		//////////////////////////////////////////////////
 		// LEGEND TRANSITION
@@ -547,6 +604,12 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 		//////////////////////////////////////////////////
 		me.gTitle.selectAll('text')
 			.text(me.chartTitle);
+			
+		//////////////////////////////////////////////////
+		// TRANSITION AXES
+		//////////////////////////////////////////////////
+		me.gXAxis.transition().duration(500).call(me.xAxis);
+		me.gYAxis.transition().duration(500).call(me.yAxis);
 	},
 	
 	/**
@@ -592,10 +655,13 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 		
 		me.graphData = data;
 		
-		// changing the graph data changes the color scale
-		me.colorScale = d3.scale.linear()
-		 	.domain([0, data.length - 1])
-		 	.range([me.colorRangeStart, me.colorRangeEnd]);
+		// changing the graph data changes the color scale, if applicable
+		// and not using category20() etc
+		if(me.colorRangeStart != null & me.colorRangeEnd != null) {
+			me.colorScale = d3.scale.linear()
+		 		.domain([0, data.length - 1])
+		 		.range([me.colorRangeStart, me.colorRangeEnd]);
+		}
 	},
 	
 	setLabelFunction: function(fn) {
@@ -616,6 +682,12 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 		}, me);
 	},
 	
+	setOrientation: function(ort) {
+		var me = this;
+		
+		me.chartOrientation = ort;
+	},
+	
 	setShowLabels: function(bool) {
 	 	var me = this;
 	 	
@@ -630,39 +702,92 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 	
 	setXScale: function() {
 		var me = this;
+		var chartUnits = me.getFlexUnit() * me.chartFlex;
 		
-		if(me.showLegend) {
-			var chartUnits = me.getFlexUnit() * me.chartFlex;
-		
-			me.xScale = d3.scale.ordinal()
-				.domain(me.uniqueIds)
-				.rangeRoundBands([0, chartUnits], .08);
-		} else {
-			me.xScale = d3.scale.ordinal()
-				.domain(me.uniqueIds)
-				.rangeRoundBands([0, me.canvasWidth - me.margins.left - me.margins.right], .08);
+		//
+		// horizontal orientation
+		//
+		if(me.chartOrientation == 'horizontal')
+		{
+			if(me.showLegend) {
+				me.xScale = d3.scale.linear()
+				.domain([0, me.maxValue])
+				.range([0, chartUnits], 0.8);
+			} else {
+				me.xScale = d3.scale.linear()
+				.domain([0, me.maxValue])
+				.range([0, me.canvasWidth - me.margins.right - me.margins.left]);
+			}
+			
+			me.xAxis = d3.svg.axis()
+				.scale(me.xScale)
+				.tickSize(0)
+				.tickPadding(6)
+				.tickFormat(me.xTickFormat)
+				.orient('bottom');
 		}
-	
-		me.xAxis = d3.svg.axis()
-			.scale(me.xScale)
-			.tickSize(0)
-			.tickPadding(6)
-			.orient('bottom');
+		//
+		// vertical orientation
+		//
+		else 
+		{
+			if(me.showLegend) {
+				me.xScale = d3.scale.ordinal()
+					.domain(me.uniqueIds)
+					.rangeRoundBands([0, chartUnits], .08);
+			} else {
+				me.xScale = d3.scale.ordinal()
+					.domain(me.uniqueIds)
+					.rangeRoundBands([0, me.canvasWidth - me.margins.right - me.margins.left], .08);
+			}
+			
+			me.xAxis = d3.svg.axis()
+				.scale(me.xScale)
+				.tickSize(0)
+				.tickPadding(6)
+				.orient('bottom');
+		}
 	},
 
 	setYScale: function() {
 		var me = this;
 		
-		me.yScale = d3.scale.linear()
-			.domain([0, me.maxValue])
-			.range([me.canvasHeight - me.margins.top - me.margins.bottom, 0]);
-			
-		me.yAxis = d3.svg.axis()
-			.scale(me.yScale)
-			.tickSize(0)
-			.tickPadding(6)
-			.tickFormat(me.yTickFormat)
-			.orient('left');	
+		//
+		// horizontal orientation
+		//
+		if(me.chartOrientation == 'horizontal') {
+			me.yScale = d3.scale.ordinal()
+				.domain(me.uniqueIds)
+				.rangeRoundBands([me.canvasHeight - me.margins.top - me.margins.bottom, 0]);
+
+			me.yAxis = d3.svg.axis()
+				.scale(me.yScale)
+				.tickSize(0)
+				.tickPadding(20)
+				.orient('left');	
+		}
+		//
+		// vertical orientation
+		//
+		else
+		{
+			me.yScale = d3.scale.linear()
+				.domain([0, me.maxValue])
+				.range([me.canvasHeight - me.margins.top - me.margins.bottom, 0]);
+				
+			me.yAxis = d3.svg.axis()
+				.scale(me.yScale)
+				.tickSize(0)
+				.tickPadding(6)
+				.tickFormat(me.yTickFormat)
+				.orient('left');
+		}
+	},
+	
+	setXTickFormat: function(fn) {
+		var me = this;
+		
+		me.xTickFormat = fn;
 	},
 	
 	setYTickFormat: function(fn) {
