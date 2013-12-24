@@ -26,6 +26,11 @@
 	background-repeat: no-repeat;
 }
 
+.icon-bar-chart-hoz {
+	background-image: url(../img/icons/16x16/bar-chart-hoz.png) !important;
+	background-repeat: no-repeat;
+}
+
 .icon-delete {
 	background-image: url(../img/icons/16x16/delete.png) !important;
 	background-repeat: no-repeat;
