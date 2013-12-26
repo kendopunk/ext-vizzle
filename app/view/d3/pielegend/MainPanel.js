@@ -12,7 +12,7 @@ Ext.define('App.view.d3.pielegend.MainPanel', {
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.PieLegendChart'
+		'App.util.d3.final.PieChart'
 	],
 	
 	layout: 'fit',
@@ -180,7 +180,7 @@ Ext.define('App.view.d3.pielegend.MainPanel', {
 		 		
 	 			
 	 			// init pie chart
-	 			me.pieLegendChart = Ext.create('App.util.d3.PieLegendChart', {
+	 			me.pieLegendChart = Ext.create('App.util.d3.final.PieChart', {
 					svg: me.svg,
 					canvasWidth: me.canvasWidth,
 					canvasHeight: me.canvasHeight,
@@ -200,6 +200,7 @@ Ext.define('App.view.d3.pielegend.MainPanel', {
 							+ ' recoveries';
 					},
 					dataMetric: 'recovery',
+					showLegend: true,
 					chartFlex: 4,
 					legendFlex: 1,
 					legendTextFunction: function(data, index) {

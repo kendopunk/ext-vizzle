@@ -11,7 +11,7 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
 	autoScroll: true,
 	
 	requires: [
-		'App.util.d3.BarChart',
+		'App.util.d3.final.PieChart',
 	],
 	
 	listeners: {
@@ -143,13 +143,6 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
  			me.canvasHeight = parseInt(me.getHeight() * .95) - 35,
  			me.panelId = '#' + me.body.id;
  			
- 		// outer radius
- 		if(me.canvasWidth < me.canvasHeight) {
-	 		var outerRadius = Math.floor((me.canvasWidth/2) * .7);
- 		} else {
- 			var outerRadius = Math.floor((me.canvasHeight/2) * .7);
- 		}
-	 	
 	 	// init svg
 	 	me.svg = d3.select(me.panelId)
 	 		.append('svg')
@@ -170,11 +163,10 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
 		}, me);
 		
 		// init pie chart
- 		me.pieChart = Ext.create('App.util.d3.PieChart', {
+ 		me.pieChart = Ext.create('App.util.d3.final.PieChart', {
 			svg: me.svg,
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,
-			outerRadius: outerRadius,
 			margins: {
 				top: 40
 			},
@@ -193,7 +185,10 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
 					+ '<br>'
 					+ '% Change: ' + Ext.util.Format.number(data.data.pctChange, '0,000.0') + '%';
 			},
-			dataMetric: me.defaultMetric
+			dataMetric: me.defaultMetric,
+			chartFlex: 3,
+			legendFlex: 1,
+			showLegend: true
 		}, me);
 		
 		me.pieChart.draw();

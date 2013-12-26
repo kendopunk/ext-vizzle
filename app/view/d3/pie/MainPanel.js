@@ -12,7 +12,7 @@ Ext.define('App.view.d3.pie.MainPanel', {
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.PieChart'
+		'App.util.d3.final.PieChart'
 	],
 	
 	layout: 'fit',
@@ -170,10 +170,11 @@ Ext.define('App.view.d3.pie.MainPanel', {
 		 		me.atfData = resp.data;
 	 			
 	 			// init pie chart
-	 			me.pieChart = Ext.create('App.util.d3.PieChart', {
+	 			me.pieChart = Ext.create('App.util.d3.final.PieChart', {
 					svg: me.svg,
 					canvasWidth: me.canvasWidth,
 					canvasHeight: me.canvasHeight,
+					dataMetric: 'recovery',
 					margins: {
 						top: 40
 					},
@@ -188,8 +189,7 @@ Ext.define('App.view.d3.pie.MainPanel', {
 						return '<b>' + data.data.caliber + '</b><br>'
 							+ Ext.util.Format.number(data.data.recovery, '0,000')
 							+ ' recoveries';
-					},
-					dataMetric: 'recovery'
+					}
 				}, me);
 				
 				// draw
