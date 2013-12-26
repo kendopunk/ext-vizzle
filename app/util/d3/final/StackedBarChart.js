@@ -103,7 +103,7 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.StackedBarChart
+ 	 * @memberOf App.util.d3.final.StackedBarChart
  	 * @description Initial drawing
  	 */
  	draw: function() {
@@ -371,7 +371,7 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.StackedBarChart
+ 	 * @memberOf App.util.d3.final.StackedBarChart
  	 * @description Transition stacked bar chart layout with new data
  	 */
 	transition: function(fap) {
