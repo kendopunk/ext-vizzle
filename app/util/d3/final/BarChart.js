@@ -100,11 +100,8 @@ Ext.define('App.util.d3.final.BarChart', {
 		}
 		
 		// make room on top for labels
-		// this must come before the heightOffset assignment
-		// below
-		if(config.showLabels) {
-			me.margins.top += me.labelOffsetTop;
-		}
+		// this must come before the heightOffset assignmentbelow
+		me.margins.top += me.labelOffsetTop;
 		
 		// setting the height offset
 		me.heightOffset = me.canvasHeight - me.margins.top - me.labelOffsetTop;
