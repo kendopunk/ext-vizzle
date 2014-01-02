@@ -626,6 +626,12 @@ Ext.define('App.util.d3.final.PieChart', {
 		me.setArcObject();
 	},
 	
+	setLabelFunction: function(fn) {
+		var me = this;
+		
+		me.labelFunction = fn;
+	},
+	
 	setLegendTextFunction: function(fn) {
 		var me = this;
 		
