@@ -16,6 +16,8 @@ Ext.define('App.view.d3.buildapie.GridPanel', {
 		'App.store.stock.StockStore'
 	],
 	
+	forceFit: true,
+	
 	stripeRows: true,
 	
 	enableDragDrop: true,
