@@ -108,6 +108,28 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
 	 			me.eventRelay.publish('BuildABarRevert');
 	 		}
 	 	});
+	 	
+	 	////////////////////////////////////////
+	 	// label functions
+	 	////////////////////////////////////////
+	 	me.priceLabelFn = function(data, index) {
+		 	return data.data.ticker
+		 		+ ' ('
+		 		+ Ext.util.Format.currency(data.data.price, '$', false, false)
+		 		+ ')';
+		};
+		me.changeLabelFn = function(data, index) {
+			return data.data.ticker
+		 		+ ' ('
+		 		+ Ext.util.Format.number(data.data.change, '0,0.00')
+		 		+ ')';
+		};
+		me.pctChangeLabelFn = function(data, index) {
+			return data.data.ticker
+		 		+ ' ('
+		 		+ Ext.util.Format.number(data.data.pctChange, '0,0.00')
+		 		+ '%)';
+		};
  		
  		/**
   		 * @property
@@ -174,9 +196,7 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
 			panelId: me.panelId,
 			chartTitle: me.generateChartTitle(me.defaultMetricText),
 			showLabels: true,
-			labelFunction: function(data, index) {
-				return data.data.ticker;
-			},
+			labelFunction: me.priceLabelFn,
 			tooltipFunction: function(data, index) {
 				return '<b>' + data.data.name + '</b> (' + data.data.ticker + ')<br><br>'
 					+ 'Close Price: ' + Ext.util.Format.currency(data.data.price)
@@ -186,9 +206,12 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
 					+ '% Change: ' + Ext.util.Format.number(data.data.pctChange, '0,000.0') + '%';
 			},
 			dataMetric: me.defaultMetric,
-			chartFlex: 3,
+			chartFlex: 5,
 			legendFlex: 1,
-			showLegend: true
+			showLegend: true,
+			legendTextFunction: function(data, index) {
+				return data.ticker;
+			}
 		}, me);
 		
 		me.pieChart.draw();
@@ -230,12 +253,15 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
 		if(btn.text == 'Change') {
 			me.priceButton.removeCls(me.btnHighlightCss);
 			me.pctChangeButton.removeCls(me.btnHighlightCss);
+			me.pieChart.setLabelFunction(me.changeLabelFn);
 		} else if(btn.text == '% Change') {
 			me.priceButton.removeCls(me.btnHighlightCss);
 			me.changeButton.removeCls(me.btnHighlightCss);
+			me.pieChart.setLabelFunction(me.pctChangeLabelFn);
 		} else {
 			me.changeButton.removeCls(me.btnHighlightCss);
 			me.pctChangeButton.removeCls(me.btnHighlightCss);
+			me.pieChart.setLabelFunction(me.priceLabelFn);
 		}
 		
 		me.pieChart.setDataMetric(btn.metric);
