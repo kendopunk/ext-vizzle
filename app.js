@@ -47,7 +47,18 @@ Ext.application({
 					text: 'kendopunk@hotmail.com',
 					href: 'mailto:kendopunk@hotmail.com',
 					iconCls: 'icon-email-send'
-				}, {
+				}, 
+					'-',
+				{
+					xtype: 'button',
+					text: 'smarmless.com',
+					handler: function() {	
+						if(location.host == 'localhost:8080') {
+							window.location = '../';
+						}
+					}
+				},
+				{
 					xtype: 'tbspacer',
 					width: 5
 				}]
