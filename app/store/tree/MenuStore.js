@@ -68,6 +68,21 @@ Ext.define('App.store.tree.MenuStore', {
 					id: 'buildapieMainPanel'
 				}]
 			}, {
+				text: '<b>Scatterplots</b>',
+				expanded: true,
+				iconCls: 'icon-scatterplot',
+				children: [{
+					text: 'Basic Scatter',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'scatterMainPanel'
+				}/*, {
+					text: 'Brushes',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'scatterBrushMainPanel'
+				}*/]
+			}, {
 				text: '<b>Line/Area Charts</b>',
 				//expanded: true,
 				iconCls: 'icon-area-chart',
@@ -81,16 +96,6 @@ Ext.define('App.store.tree.MenuStore', {
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'tickerMainPanel'
-				}]
-			}, {
-				text: '<b>Scatterplots</b>',
-				//expanded: true,
-				iconCls: 'icon-scatterplot',
-				children: [{
-					text: 'Basic Scatter',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'scatterMainPanel'
 				}]
 			}]
 		}, {

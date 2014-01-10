@@ -13,6 +13,7 @@ Ext.define('App.view.d3.buildapie.GridPanel', {
 	multiSelect: true,
 	
 	requires: [
+		'App.util.ColumnDefinitions',
 		'App.store.stock.StockStore'
 	],
 	

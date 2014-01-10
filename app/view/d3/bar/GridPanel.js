@@ -12,7 +12,8 @@ Ext.define('App.view.d3.bar.GridPanel', {
 	title: 'Grid',
 	
 	requires: [
-		'Ext.window.MessageBox'
+		'Ext.window.MessageBox',
+		'App.util.ColumnDefinitions'
 	],
 	
 	initComponent: function() {
