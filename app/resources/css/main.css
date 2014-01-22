@@ -61,6 +61,11 @@
 	background-repeat: no-repeat;
 }
 
+.icon-globe {
+	background-image: url(../img/icons/16x16/globe.png) !important;
+	background-repeat: no-repeat;
+}
+
 .icon-line-chart {
 	background-image: url(../img/icons/16x16/line-chart.png) !important;
 	background-repeat: no-repeat;
