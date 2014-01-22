@@ -21,6 +21,7 @@ Ext.define('App.util.d3.geo.Us', {
 	stroke: '#333333',
 	strokeWidth: 0.5,
 	mapScale: 1000,
+	mapRenderedEvent: null,
 	
 	constructor: function(config) {
 		var me = this;
@@ -55,7 +56,9 @@ Ext.define('App.util.d3.geo.Us', {
 			stroke = me.stroke,
 			fill = me.fill,
 			strokeWidth = me.strokeWidth,
-			mouseOverFill = me.mouseOverFill;
+			mouseOverFill = me.mouseOverFill,
+			eventRelay = me.eventRelay,
+			mapRenderedEvent = me.mapRenderedEvent;
 			
 		// load in JSON data
 		d3.json('data/geo_us.json', function(json) {
@@ -81,6 +84,11 @@ Ext.define('App.util.d3.geo.Us', {
 					d3.select(this)
 						.style('fill', fill);
 				});
+				
+			// eventing
+			if(mapRenderedEvent != null) {
+				eventRelay.publish(mapRenderedEvent, true);
+			}
 		});
 	},
 	

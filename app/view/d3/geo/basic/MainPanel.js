@@ -33,7 +33,11 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
  				parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95),
  			me.height = 
 	 			parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight),
-	 		me.map = Ext.create('App.util.d3.geo.Us');
+	 		me.mapRenderedEvent = 'geoBasicRendered',
+	 		me.map = Ext.create('App.util.d3.geo.Us', {
+		 		fill: '#FFFFFF',
+		 		mapRenderedEvent: me.mapRenderedEvent
+		 	}, me);
 		
 		/**
  		 * @property
@@ -55,6 +59,14 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
  		 * other drawing functionality
  		 */
  		me.on('afterrender', me.initCanvas, me);
+ 		
+ 		/**
+  		 * @listener
+  		 * @description After the map template has been, execute the overlay functionality
+  		 */
+  		me.eventRelay.subscribe(me.mapRenderedEvent, me.overlay, me);
+
+ 		
 		me.callParent(arguments);
 	},
 	
@@ -80,5 +92,44 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		me.map.setSvg(me.svg);
 		me.map.setCanvasDimensions(me.canvasWidth, me.canvasHeight);
 		me.map.draw();
+	},
+	
+	overlay: function() {
+		var me = this;
+		
+		me.svg.selectAll('circle')
+			.data([100, 200, 300])
+			.enter()
+			.append('circle')
+			.attr('cx', function(d) {
+				return d;
+			})
+			.attr('cy', function(d) {
+				return d;
+			})
+			.attr('r', 5)
+			.style('fill', 'red');
 	}
+	
+	/*
+svg.selectAll('path')
+				.data(json.features)
+				.enter()
+				.append('path')
+				.attr('d', path)
+				.style('fill', fill)
+				.style('stroke', stroke)
+				.style('stroke-width', strokeWidth)
+				.on('mouseover', function(d) {
+				
+					d3.select(this)
+						.style('fill', function(d) {
+							return mouseOverFill;
+						});
+				})
+				.on('mouseout', function(d) {
+					
+					d3.select(this)
+						.style('fill', fill);
+				});*/
 });
