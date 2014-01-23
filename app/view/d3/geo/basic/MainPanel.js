@@ -23,6 +23,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
  		 * @description SVG properties
  		 */
  		me.svgInitialized = false,
+	 		me.originalGraphData = [],
  			me.graphData = [],
  			me.canvasWidth,
  			me.canvasHeight,
@@ -33,10 +34,11 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
  				parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95),
  			me.height = 
 	 			parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight),
-	 		me.mapRenderedEvent = 'geoBasicRendered',
-	 		me.map = Ext.create('App.util.d3.geo.Us', {
-		 		fill: '#FFFFFF',
-		 		mapRenderedEvent: me.mapRenderedEvent
+	 		me.usMapRenderedEvent = 'geoBasicRendered',
+	 		me.usMap = Ext.create('App.util.d3.geo.Us', {
+		 		fill: '#ECEECE',
+		 		mouseOverFill: '#CCCC99',
+		 		mapRenderedEvent: me.usMapRenderedEvent
 		 	}, me);
 		
 		/**
@@ -64,7 +66,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
   		 * @listener
   		 * @description After the map template has been, execute the overlay functionality
   		 */
-  		me.eventRelay.subscribe(me.mapRenderedEvent, me.overlay, me);
+  		me.eventRelay.subscribe(me.usMapRenderedEvent, me.initData, me);
 
  		
 		me.callParent(arguments);
@@ -89,47 +91,58 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		me.svgInitialized = true;
 		
 		// set map properties
-		me.map.setSvg(me.svg);
-		me.map.setCanvasDimensions(me.canvasWidth, me.canvasHeight);
-		me.map.draw();
+		me.usMap.setSvg(me.svg);
+		me.usMap.setCanvasDimensions(me.canvasWidth, me.canvasHeight);
+		me.usMap.draw();
 	},
 	
-	overlay: function() {
+	/**
+ 	 * @function
+ 	 * @description Data initialization
+ 	 */
+	initData: function() {
 		var me = this;
 		
+		Ext.Ajax.request({
+			url: 'data/tornado.json',
+			method: 'GET',
+			success: function(response, options) {
+				var resp = Ext.decode(response.responseText);
+				me.originalGraphData = resp.data;
+				me.graphData = resp.data;
+			},
+			callback: function() {
+				me.draw();
+			},
+			scope: me
+		});
+	},
+	
+	draw: function() {
+		var me = this;
+		
+		// local scope
+		var usMap = me.usMap;
+		
+		
 		me.svg.selectAll('circle')
-			.data([100, 200, 300])
+			.data(me.graphData)
 			.enter()
 			.append('circle')
-			.attr('cx', function(d) {
-				return d;
+			.attr('cx', function(d, i) {
+				return usMap.getMapCoords(d.long, d.lat)[0];
 			})
-			.attr('cy', function(d) {
-				return d;
+			.attr('cy', function(d, i) {
+				return usMap.getMapCoords(d.long, d.lat)[1];
 			})
-			.attr('r', 5)
-			.style('fill', 'red');
+			.attr('r', 3)
+			.style('fill', '#990066');
 	}
 	
-	/*
-svg.selectAll('path')
-				.data(json.features)
-				.enter()
-				.append('path')
-				.attr('d', path)
-				.style('fill', fill)
-				.style('stroke', stroke)
-				.style('stroke-width', strokeWidth)
-				.on('mouseover', function(d) {
-				
-					d3.select(this)
-						.style('fill', function(d) {
-							return mouseOverFill;
-						});
-				})
-				.on('mouseout', function(d) {
-					
-					d3.select(this)
-						.style('fill', fill);
-				});*/
+	
+	
+	
+	
+	
+	
 });

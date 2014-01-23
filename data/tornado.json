@@ -1,0 +1,391 @@
+{
+	"success": true,
+	"data": [{
+		"year": 2013,
+		"date": "May 20, 2013",
+		"city": "Moore",
+		"state": "OK",
+		"lat": 35.338889,
+		"long": -97.4875,
+		"fatalities": 24,
+		"damages": 2000000000
+	}, {
+		"year": 2011,
+		"date": "May 24, 2011",
+		"city": "El Reno",
+		"state": "OK",
+		"lat": 35.532274,
+		"long": -97.955049,
+		"fatalities": 8,
+		"damages": 35000000
+	}, {
+		"year": 2011,
+		"date": "May 22, 2011",
+		"city": "Joplin",
+		"state": "MO",
+		"lat": 37.084227,
+		"long": -94.513281,		
+		"fatalities": 158,
+		"damages": 2900000000
+	}, {
+		"year": 2011,
+		"date": "April 25-28, 2011",
+		"city": "Various Cities",
+		"state": "AL, AR, MS, TN",
+		"lat": 34.494254,
+		"long": -85.847749,
+		"fatalities": 324,
+		"damages": 11000000000
+	}, {
+		"year": 2008,
+		"date": "May 25, 2008",
+		"city": "Parkersburg",
+		"state": "IA",
+		"lat": 42.577480,
+		"long": -92.786863,
+		"fatalities": 12,
+		"damages": 343000000
+	}, {
+		"year": 2007,
+		"date": "May 4, 2007",
+		"city": "Greensburg",
+		"state": "KS",
+		"lat": 37.602796,
+		"long": -99.292613,
+		"fatalities": 9,
+		"damages": 268000000
+	}, {
+		"year": 1999,
+		"date": "May 3, 1999",
+		"city": "Bridge Creek",
+		"state": "OK",
+		"lat": 35.235064,
+		"long": -97.736708,
+		"fatalities": 36,
+		"damages": 1000000000
+	}, {
+		"year": 1998,
+		"date": "April 16, 1998",
+		"city": "Waynesboro",
+		"state": "TN",
+		"lat": 35.319522,
+		"long": -87.762247,
+		"fatalities": 12,
+		"damages": 133000000
+	}, {
+		"year": 1998,
+		"date": "April 8, 1998",
+		"city": "Oak Grove",
+		"state": "AL",
+		"lat": 33.191782,
+		"long": -86.299420,
+		"fatalities": 41,
+		"damages": null
+	}, {
+		"year": 1997,
+		"date": "May 27, 1997",
+		"city": "Jarrell",
+		"state": "TX",
+		"lat": 30.824909,
+		"long": -97.604454,
+		"fatalities": 28,
+		"damages": 190000000
+	}, {
+		"year": 1996,
+		"date": "July 18, 1996",
+		"city": "Oakfield",
+		"state": "WI",
+		"lat": 43.686101,
+		"long": -88.546495,
+		"fatalities": 0,
+		"damages": 40000000
+	}, {
+		"year": 1992,
+		"date": "June 16, 1992",
+		"city": "Chandler",
+		"state": "MN",
+		"lat": 43.929133,
+		"long": -95.947241,
+		"fatalities": 1,
+		"damages": 242000000
+	}, {
+		"year": 1991,
+		"date": "April 26, 1991",
+		"city": "Andover",
+		"state": "KS",
+		"lat": 37.713904,
+		"long": -97.136429,
+		"fatalities": 22, 
+		"damages": 250000000
+	}, {
+		"year": 1990,
+		"date": "August 28, 1990",
+		"city": "Plainfield",
+		"state": "IL",
+		"lat": 41.615915,
+		"long": -88.204069,
+		"fatalities": 29,
+		"damages": 165000000
+	}, {
+		"year": 1990,
+		"date": "March 13, 1990",
+		"city": "Goessel",
+		"state": "KS",
+		"lat": 38.246399,
+		"long": -97.348923,
+		"fatalities": 2,
+		"damages": 543000000
+	}, {
+		"year": 1985,
+		"date": "May 31, 1985",
+		"city": "Niles",
+		"state": "OH",
+		"lat": 41.182835,
+		"long": -80.765358,
+		"fatalities": 41,
+		"damages": 980000000
+	}, {
+		"year": 1984,
+		"date": "June 7, 1984",
+		"city": "Barneveld",
+		"state": "WI",
+		"lat": 43.015553,
+		"long": -89.895401,
+		"fatalities": 13,
+		"damages": 40000000
+	}, {
+		"year": 1982,
+		"date": "April 2, 1982",
+		"city": "Broken Bow",
+		"state": "OK",
+		"lat": 34.029276,
+		"long": -94.739104,
+		"fatalities": 29,
+		"damages": null
+	}, {
+		"year": 1977,
+		"date": "April 4, 1977",
+		"city": "Birmingham",
+		"state": "AL",
+		"lat": 33.520661,
+		"long": -86.802490,
+		"fatalities": 22,
+		"damages": 25000000
+	}, {
+		"year": 1976,
+		"date": "June 13, 1976",
+		"city": "Jordan",
+		"state": "IA",
+		"lat": 42.049167,
+		"long": -93.783889,
+		"fatalities": 0,
+		"damages": null
+	}, {
+		"year": 1976,
+		"date": "April 19, 1976",
+		"city": "Brownwood",
+		"state": "TX",
+		"lat": 31.709320,
+		"long": -98.991161,
+		"fatalities": 0,
+		"damages": null
+	}, {
+		"year": 1976,
+		"date": "March 26, 1976",
+		"city": "Spiro",
+		"state": "OK",
+		"lat": 35.241207,
+		"long": -94.619944,
+		"fatalities": 2,
+		"damages": null
+	}, {
+		"year": 1974,
+		"date": "April 3, 1974",
+		"city": "Xenia",
+		"state": "OH",
+		"lat": 39.684782,
+		"long": -83.929653,
+		"fatalities": 32,
+		"damages": 100000000
+	}, {
+		"year": 1973,
+		"date": "May 6, 1973",
+		"city": "Valley Mills",
+		"state": "TX",
+		"lat": 31.659328,
+		"long": -97.472238,
+		"fatalities": 0,
+		"damages": null
+	}, {
+		"year": 1971,
+		"date": "February 21, 1971",
+		"city": "Delhi",
+		"state": "LA",
+		"lat": 32.457642,
+		"long": -91.493174,
+		"fatalities": 123,
+		"damages": null
+	}, {
+		"year": 1970,
+		"date": "May 11, 1970",
+		"city": "Lubbock",
+		"state": "TX",
+		"lat": 33.577863,
+		"long": -101.855166,
+		"fatalities": 26,
+		"damages": 1500000000
+	}, {
+		"year": 1968,
+		"date": "June 13, 1968",
+		"city": "Tracy",
+		"state": "MN",
+		"lat": 44.231944,
+		"long": -95.622778,
+		"fatalities": 9,
+		"damages": 43000000
+	}, {
+		"year": 1968,
+		"date": "May 15, 1968",
+		"city": "Charles City",
+		"state": "IA",
+		"lat": 43.066361,
+		"long": -92.672411,
+		"fatalities": 13,
+		"damages": 30000000
+	}, {
+		"year": 1968,
+		"date": "April 23, 1968",
+		"city": "Gallipolis",
+		"state": "OH",
+		"lat": 38.809803,
+		"long": -82.202369,
+		"fatalities": 14,
+		"damages": null
+	}, {
+		"year": 1966,
+		"date": "October 14, 1966",
+		"city": "Belmond",
+		"state": "IA",
+		"lat": 42.846080,
+		"long": -93.614099,
+		"fatalities": 6,
+		"damages": null
+	}, {
+		"year": 1966,
+		"date": "June 8, 1966",
+		"city": "Topeka",
+		"state": "KS",
+		"lat": 39.055824,
+		"long": -95.689018,
+		"fatalities": 18,
+		"damages": 250000000
+	}, {
+		"year": 1966,
+		"date": "March 3, 1966",
+		"city": "Jackson",
+		"state": "MS",
+		"lat": 32.298757,
+		"long": -90.184810,
+		"fatalities": 58,
+		"damages": 17900000
+	}, {
+		"year": 1964,
+		"date": "April 3, 1964",
+		"city": "Wichita Falls",
+		"state": "TX",
+		"lat": 33.913708,
+		"long": -98.493387,
+		"fatalities": 7,
+		"damages": null
+	}, {
+		"year": 1958,
+		"date": "June 4, 1958",
+		"city": "Menomonie",
+		"state": "WI",
+		"lat": 44.875518,
+		"long": -91.919342,
+		"fatalities": 28,
+		"damages": 10000000
+	}, {
+		"year": 1957,
+		"date": "December 18, 1957",
+		"city": "Sunfield",
+		"state": "IL",
+		"lat": 38.064495,
+		"long": -89.240082,
+		"fatalities": 1,
+		"damages": null
+	}, {
+		"year": 1957,
+		"date": "June 20, 1957",
+		"city": "Fargo",
+		"state": "ND",
+		"lat": 46.877186,
+		"long": -96.789803,
+		"fatalities": 10,
+		"damages": 25000000
+	}, {
+		"year": 1957,
+		"date": "May 20, 1957",
+		"city": "Ruskin Heights",
+		"state": "MO",
+		"lat": 38.924525,
+		"long": -94.503157,
+		"fatalities": 44,
+		"damages": 10000000
+	}, {
+		"year": 1956,
+		"date": "April 3, 1956",
+		"city": "Grand Rapids",
+		"state": "MI",
+		"lat": 42.963360,
+		"long": -85.668086,
+		"fatalities": 18,
+		"damages": null
+	}, {
+		"year": 1955,
+		"date": "May 25, 1955",
+		"city": "Udall",
+		"state": "KS",
+		"lat": 37.387522,
+		"long": -97.114206,
+		"fatalities": 100,
+		"damages": null
+	}, {
+		"year": 1953,
+		"date": "December 5, 1953",
+		"city": "Vicksburg",
+		"state": "MS",
+		"lat": 32.352646,
+		"long": -90.877882,
+		"fatalities": 38,
+		"damages": 25000000
+	}, {
+		"year": 1953,
+		"date": "June 8, 1953",
+		"city": "Flint",
+		"state": "MI",
+		"lat": 43.012527,
+		"long": -83.687456,
+		"fatalities": 116,
+		"damages": 19000000
+	}, {
+		"year": 1953,
+		"date": "May 29, 1953",
+		"city": "Ft Rice",
+		"state": "ND",
+		"lat": 46.526105,
+		"long": -100.584288,
+		"fatalities": 2,
+		"damages": null
+	}, {
+		"year": 1953,
+		"date": "May 11, 1953",
+		"city": "Waco",
+		"state": "TX",
+		"lat": 31.549333,
+		"long": -97.146670,
+		"fatalities": 114,
+		"damages": 41200000
+	}]
+}

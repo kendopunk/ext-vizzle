@@ -93,6 +93,19 @@ Ext.define('App.util.d3.geo.Us', {
 	},
 	
 	/**
+	 *
+	 *
+	 * GETTERS
+	 *
+	 *
+	 */
+	getMapCoords: function(long, lat) {
+		var me = this;
+		
+		return me.projection([long, lat]);
+	},
+	
+	/**
  	 *
  	 *
  	 * SETTERS
