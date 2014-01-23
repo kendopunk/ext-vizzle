@@ -71,6 +71,11 @@
 	background-repeat: no-repeat;
 }
 
+.icon-magnify {
+	background-image: url(../img/icons/16x16/magnify.png) !important;
+	background-repeat: no-repeat;
+}
+
 .icon-percent {
 	background-image: url(../img/icons/16x16/percent.png) !important;
 	background-repeat: no-repeat;
