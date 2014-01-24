@@ -56,8 +56,10 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		me.chartDescription = '<b>Basic Geo</b><br><br>'
 			+ '<i>F5/EF5 Tornadoes in the US between 1950-2013.</i><br><br>'
 			+ 'Check year(s) to view tornado activity.  Use Scale/Filter options ' 
-			+ 'to view relative tornado magnitudes (fatalities or estimated damage).<br><br>'
-			+ 'Mouseover circles to display tornado details.';
+			+ 'to view relative tornado magnitudes (fatalities or estimated damage). <b>Note:</b> '
+			+ 'Some circles may disappear if fatality or damage data is unavailable.<br><br>'
+			+ 'Mouseover circles to display tornado details.<br><br>'
+			+ 'Data from Wikipedia, NOAA, and <a href="www.latlong.net">latlong.net</a> (a cool site).';
 		
 		/**
  		 * @properties
@@ -337,6 +339,15 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		// enable the scale/filter buttons
 		////////////////////////////////////////
 		me.enableScaleButtons(true);
+		
+		////////////////////////////////////////
+		// ditch info
+		////////////////////////////////////////
+		me.gInfo.selectAll('text')
+			.transition()
+			.duration(500)
+			.attr('x', 1500)
+			.remove();
 		
 		////////////////////////////////////////
 		// handle the circles
