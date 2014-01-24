@@ -47,7 +47,38 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		 		mapRenderedEvent: me.usMapRenderedEvent,
 		 		mapScale: 850,
 		 		translateOffsetX: -100
-		 	}, me);
+		 	}, me),
+		 	me.circleFillFn = function(data) {
+		 		switch(data.year.toString().substr(0, 3)) {
+			 		case '195':
+			 		return '#FF0000';
+			 		break;
+			 		
+			 		case '196':
+			 		return '#00FFFF';
+			 		break;
+			 		
+			 		case '197':
+			 		return '#CC33FF';
+			 		break;
+			 		
+			 		case '198':
+			 		return '#003366';
+			 		break;
+			 		
+			 		case '199':
+			 		return '#66FF99';
+			 		break;
+			 		
+			 		case '200':
+			 		return '#CC9900';
+			 		break;
+			 		
+			 		default:
+			 		return '#CCCCCC';
+			 		break;
+		 		}
+		 	}
 		
 		/**
  		 * @property
@@ -308,6 +339,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		
 		if(yearFilters.length == 0) {
 			me.svg.selectAll('circle').remove();
+			me.setChartTitle(me.baseTitle);
 			return;
 		}
 		
@@ -395,7 +427,8 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		// local scope
 		var usMap = me.usMap,
 			radiusScale = me.radiusScale,
-			currentScaleFilter = me.currentScaleFilter;
+			currentScaleFilter = me.currentScaleFilter,
+			circleFillFn = me.circleFillFn;
 		
 		// join new with old
 		var circSelection = me.svg.selectAll('circle')
@@ -411,9 +444,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		// add new
 		var newCircles = circSelection.enter()
 			.append('circle')
-			.style('fill', function(d, i) {
-				return '#CCCCCC';
-			})
+			
 			.style('stroke', 'black')
 			.style('stroke-width', 1)
 			.on('mouseover', function(d) {
@@ -425,6 +456,9 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 			.duration(500)
 			.attr('cx', function(d) {
 				return usMap.getMapCoords(d.long, d.lat)[0];
+			})
+			.style('fill', function(d) {
+				return circleFillFn(d);
 			})
 			.attr('cy', function(d) {
 				return usMap.getMapCoords(d.long, d.lat)[1];
@@ -469,7 +503,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 					d3.min(ret, function(d) { return d.fatalities; }),
 					d3.max(ret, function(d) { return d.fatalities; })
 				])
-				.range([4, 15]);
+				.range([4, 20]);
 		}
 		else if(me.currentScaleFilter == 'damages') {
 			ret = Ext.Array.filter(ret, function(item) {
@@ -491,7 +525,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 					d3.min(ret, function(d) { return d.damages; }),
 					d3.max(ret, function(d) { return d.damages; })
 				])
-				.range([4, 15]);
+				.range([4, 20]);
 		} else {
 			me.radiusScale = me.defaultRadiusScale;
 		}
