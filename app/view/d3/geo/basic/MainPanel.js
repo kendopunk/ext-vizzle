@@ -29,15 +29,19 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
  			me.canvasHeight,
  			me.svg,
  			me.gTitle,
- 			me.gCircle,
+ 			me.colorScale = d3.scale.category10(),
  			me.eventRelay = Ext.create('App.util.MessageBus'),
+ 			me.baseTitle = 'F5/EF5 Tornadoes in the US: ',
  			me.btnHighlightCss = 'btn-highlight-khaki',
  			me.width = 
  				parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95),
  			me.height = 
 	 			parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight),
 	 		me.usMapRenderedEvent = 'geoBasicRendered',
-	 		me.yearFilter = ['195'],
+	 		me.yearFilter = ['195', '196', '197', '198', '199', '200', '201'],
+	 		me.currentScaleFilter = 'none',
+	 		me.defaultRadiusScale = function(d) { return 4; },
+	 		me.radiusScale = function(d) { return 4; },
 	 		me.usMap = Ext.create('App.util.d3.geo.Us', {
 		 		fill: '#ECEECE',
 		 		mouseOverFill: '#CCCC99',
@@ -51,26 +55,50 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		me.chartDescription = '<b>Basic Geo</b>';
 		
 		/**
- 		 * @property
- 		 * @description Search button
+ 		 * @properties
+ 		 * @description Toolbar buttons
  		 */
  		me.searchButton = Ext.create('Ext.button.Button', {
-	 		iconCls: 'icon-magnify',
-	 		tooltip: 'Search',
-	 		text: 'Search'
+	 		iconCls: 'icon-page-paintbrush',
+	 		tooltip: 'Draw/Redraw chart',
+	 		text: 'Draw',
+	 		handler: function() {
+		 		me.draw();
+		 	},
+		 	scope: me
 	 	});
+	 	me.noScaleButton = Ext.create('Ext.button.Button', {
+	 		tooltip: 'No scale/filter',
+	 		text: 'None',
+	 		state: 'none',
+	 		disabled: true,
+	 		cls: me.btnHighlightCss,
+	 		handler: me.scaleFilterHandler,
+	 		scope: me
+		});
+	 	me.fatalitiesButton = Ext.create('Ext.button.Button', {
+		 	iconCls: 'icon-skull-and-bones',
+		 	tooltip: 'By fatalities',
+		 	text: 'Fatalities',
+		 	state: 'fatalities',
+		 	disabled: true,
+	 		handler: me.scaleFilterHandler,
+	 		scope: me
+		});
+		me.damagesButton = Ext.create('Ext.button.Button', {
+		 	iconCls: 'icon-dollar',
+		 	tooltip: 'By total damages',
+		 	text: 'Damages',
+		 	state: 'damages',
+		 	disabled: true,
+	 		handler: me.scaleFilterHandler,
+	 		scope: me
+		});
 		
 		/**
  	 	 * @property
  	 	 * @description Docked items
  	 	 */
- 	 	 /*,
-		 	 	listeners: {
-			 	 	change: function(field) {
-				 	 	console.log(field.checked);
-				 	 	console.debug(field.inputValue);
-				 	}
-				 }*/
  	 	me.dockedItems = [{
 	 	 	xtype: 'toolbar',
 	 	 	dock: 'top',
@@ -79,7 +107,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		 	 	width: 10
 		 	}, {
 		 	 	xtype: 'checkboxfield',
-		 	 	boxLabel: '1950-59',
+		 	 	boxLabel: '1950s',
 		 	 	name: 'years',
 		 	 	inputValue: '195',
 		 	 	checked: true
@@ -88,7 +116,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 			 	width: 7
 			}, {
 		 	 	xtype: 'checkboxfield',
-		 	 	boxLabel: '1960-69',
+		 	 	boxLabel: '1960s',
 		 	 	name: 'years',
 		 	 	inputValue: '196',
 		 	 	checked: true
@@ -97,7 +125,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 			 	width: 7
 			}, {
 		 	 	xtype: 'checkboxfield',
-		 	 	boxLabel: '1970-79',
+		 	 	boxLabel: '1970s',
 		 	 	name: 'years',
 		 	 	inputValue: '197',
 		 	 	checked: true
@@ -106,7 +134,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 			 	width: 7
 			}, {
 		 	 	xtype: 'checkboxfield',
-		 	 	boxLabel: '1980-89',
+		 	 	boxLabel: '1980s',
 		 	 	name: 'years',
 		 	 	inputValue: '198',
 		 	 	checked: true
@@ -115,7 +143,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 			 	width: 7
 			}, {
 		 	 	xtype: 'checkboxfield',
-		 	 	boxLabel: '1990-99',
+		 	 	boxLabel: '1990s',
 		 	 	name: 'years',
 		 	 	inputValue: '199',
 		 	 	checked: true
@@ -124,7 +152,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 			 	width: 7
 			}, {
 		 	 	xtype: 'checkboxfield',
-		 	 	boxLabel: '2000-09',
+		 	 	boxLabel: '2000s',
 		 	 	name: 'years',
 		 	 	inputValue: '200',
 		 	 	checked: true
@@ -139,9 +167,25 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		 	 	checked: true
 		 	}, {
 			 	xtype: 'tbspacer',
-			 	width: 20
+			 	width: 10
 			},
-				me.searchButton
+				me.searchButton,
+				'->',
+			{
+				xtype: 'tbtext',
+				text: '<b>Scale/Filter:</b>'
+			},
+				me.noScaleButton,
+			{
+				xtype: 'tbspacer',
+				width: 3
+			},
+				me.fatalitiesButton,
+			{
+				xtype: 'tbspacer',
+				width: 3
+			},
+				me.damagesButton
 			]
 		}];
 		
@@ -178,7 +222,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 	 	var me = this;
 	 	
 		me.canvasWidth = parseInt(me.width * .95);
-		me.canvasHeight = parseInt(me.height * .95);
+		me.canvasHeight = parseInt(me.height * .95) - 60;
 		me.panelId = '#' + me.body.id;
 		
 		// init SVG
@@ -189,10 +233,8 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		me.svgInitialized = true;
 		
 		// title "g"
-		me.titleG = me.svg.append('svg:g');
-		
-		// circle "g"
-		me.gCircle = me.svg.append('svg:g');
+		me.gTitle = me.svg.append('svg:g')
+			.attr('transform', 'translate(15,25)');
 		
 		// set map properties
 		me.usMap.setSvg(me.svg);
@@ -202,7 +244,8 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 	
 	/**
  	 * @function
- 	 * @description Data initialization
+ 	 * @description Extract data via AJAX, set the working data set
+ 	 * and then move on to filtering
  	 */
 	initData: function() {
 		var me = this;
@@ -213,8 +256,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 			success: function(response, options) {
 				var resp = Ext.decode(response.responseText);
 				
-				me.originalGraphData = resp.data;
-				me.graphData = me.filterData(resp.data);
+				me.originalGraphData = me.graphData = resp.data;
 				
 				me.draw();
 			},
@@ -222,44 +264,231 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		});
 	},
 	
-	filterData: function(dat) {
+	/**
+ 	 * @function
+ 	 */
+	draw: function() {
 		var me = this,
-			ret = [];
-			
-		Ext.each(dat, function(d) {
-			if(me.yearFilter.indexOf(d.year.toString().substr(0, 3)) >=0) {
-				ret.push(d);
+			yearFilters = [];
+		
+		////////////////////////////////////////
+		// figure out the years to filter on
+		////////////////////////////////////////
+		var checkboxes = me.query('toolbar[dock=top] checkboxfield');
+		if(checkboxes.length == 0) {
+			return;
+		}
+		
+		Ext.each(checkboxes, function(cbx) {
+			if(cbx.checked) {
+				yearFilters.push(cbx.inputValue);
+			}
+		});
+		
+		if(yearFilters.length == 0) {
+			return;
+		}
+		
+		////////////////////////////////////////
+		// filter on year selections
+		////////////////////////////////////////
+		var workingData = [];
+		Ext.each(me.originalGraphData, function(d) {
+			if(yearFilters.indexOf(d.year.toString().substr(0, 3)) >=0) {
+				workingData.push(d);
 			}
 		}, me);
+		
+		////////////////////////////////////////
+		// further filter on damages or fatalities
+		////////////////////////////////////////
+		workingData = me.runtimeFilter(workingData);
+	
+		////////////////////////////////////////
+		// handle the title
+		////////////////////////////////////////
+		me.setChartTitle(me.baseTitle + 
+			Ext.Array.map(yearFilters, function(y) {
+				return y + '0s';
+			}).join(', ')
+		);
+
+		////////////////////////////////////////
+		// enable the scale/filter buttons
+		////////////////////////////////////////
+		me.enableScaleButtons(true);
+		
+		////////////////////////////////////////
+		// handle the circles
+		////////////////////////////////////////
+		me.handleCircles(workingData);
+	},
+	
+	/**
+ 	 * @function
+ 	 */
+	scaleFilterHandler: function(btn, evt) {
+		var me = this;
+		
+		btn.addCls(me.btnHighlightCss);
+		me.currentScaleFilter = btn.state;
+		
+		// change button class
+		if(btn.state == 'fatalities') {
+			me.noScaleButton.removeCls(me.btnHighlightCss);
+			me.damagesButton.removeCls(me.btnHighlightCss);
+		} else if(btn.state == 'damages') {
+			me.noScaleButton.removeCls(me.btnHighlightCss);
+			me.fatalitiesButton.removeCls(me.btnHighlightCss);
+		} else {
+			me.fatalitiesButton.removeCls(me.btnHighlightCss);
+			me.damagesButton.removeCls(me.btnHighlightCss);
+		}
+		
+		me.draw();
+	},
+	
+	/**
+	 * @function
+	 */
+	handleCircles: function(data) {
+		var me = this;
+		
+		// local scope
+		var usMap = me.usMap,
+			colorScale = me.colorScale,
+			radiusScale = me.radiusScale,
+			currentScaleFilter = me.currentScaleFilter;
+		
+		// join new with old
+		var circSelection = me.svg.selectAll('circle')
+			.data(data);
+			
+		// transition out the old
+		circSelection.exit()
+			.transition()
+			.duration(500)
+			.attr('r', 0)
+			.remove();
+
+		// add new circles
+		var newCircles = circSelection.enter()
+			.append('circle')
+			.style('fill', function(d, i) {
+				return '#CCCCCC';
+			})
+			.style('stroke', 'black')
+			.style('stroke-width', 1);
+		
+		// transition all
+		circSelection.transition()
+			.duration(500)
+			.attr('cx', function(d) {
+				return usMap.getMapCoords(d.long, d.lat)[0];
+			})
+			.attr('cy', function(d) {
+				return usMap.getMapCoords(d.long, d.lat)[1];
+			})
+			.attr('r', function(d) {
+				if(currentScaleFilter == 'fatalities') {
+					return radiusScale(d.fatalities);
+				} else if(currentScaleFilter == 'damages') {
+					return radiusScale(d.damages);
+				} else {
+					return 4;
+				}
+			});
+	},
+	
+	/**
+	 * @function
+	 * @description Runtime filtering and sorting based on fatalities or damages
+	 */
+	runtimeFilter: function(data) {
+		var me = this;
+		
+		var ret = Ext.clone(data);
+		
+		if(me.currentScaleFilter == 'fatalities') {
+			ret = Ext.Array.filter(ret, function(item) {
+				return item.fatalities != null;
+			});
+			
+			// sort fatalities high to low
+			ret = Ext.Array.sort(ret, function(a, b) {
+				if(a.fatalities > b.fatalities) {
+					return -1;
+				} else if(a.fatalities < b.fatalities) {
+					return 1;
+				}
+				return 0;
+			});
+			
+			me.radiusScale = d3.scale.linear()
+				.domain([
+					d3.min(ret, function(d) { return d.fatalities; }),
+					d3.max(ret, function(d) { return d.fatalities; })
+				])
+				.range([4, 15]);
+		}
+		else if(me.currentScaleFilter == 'damages') {
+			ret = Ext.Array.filter(ret, function(item) {
+				return item.damages != null;
+			});
+			
+			// sort damages high to low
+			ret = Ext.Array.sort(ret, function(a, b) {
+				if(a.damages > b.damages) {
+					return -1;
+				} else if(a.damages < b.damages) {
+					return 1;
+				}
+				return 0;
+			});
+			
+			me.radiusScale = d3.scale.linear()
+				.domain([
+					d3.min(ret, function(d) { return d.damages; }),
+					d3.max(ret, function(d) { return d.damages; })
+				])
+				.range([4, 15]);
+		} else {
+			me.radiusScale = me.defaultRadiusScale;
+		}
 		
 		return ret;
 	},
 	
-	draw: function() {
+	/**
+ 	 * @function
+ 	 */
+	enableScaleButtons: function(bool) {
 		var me = this;
 		
-		// local scope
-		var usMap = me.usMap;
+		me.noScaleButton.setDisabled(!bool);
+	 	me.fatalitiesButton.setDisabled(!bool);
+	 	me.damagesButton.setDisabled(!bool);
+	},
+
+	/**
+ 	 * @function
+ 	 */
+	setChartTitle: function(title) {
+		var me = this;
 		
+		// remove
+		me.gTitle.selectAll('text').remove();
 		
-		me.svg.selectAll('circle')
-			.data(me.graphData)
+		// add
+		me.gTitle.selectAll('text')
+			.data([title])
 			.enter()
-			.append('circle')
-			.attr('cx', function(d, i) {
-				return usMap.getMapCoords(d.long, d.lat)[0];
-			})
-			.attr('cy', function(d, i) {
-				return usMap.getMapCoords(d.long, d.lat)[1];
-			})
-			.attr('r', 3)
-			.style('fill', '#990066');
+			.append('text')
+			.style('fill', '#444444')
+			.style('font-weight', 'bold')
+			.style('font-family', 'sans-serif')
+			.text(function(d) {
+				return d;
+			});
 	}
-	
-	
-	
-	
-	
-	
-	
 });
