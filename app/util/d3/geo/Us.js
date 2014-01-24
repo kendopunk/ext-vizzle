@@ -22,6 +22,8 @@ Ext.define('App.util.d3.geo.Us', {
 	strokeWidth: 0.5,
 	mapScale: 1000,
 	mapRenderedEvent: null,
+	translateOffsetX: 0,
+	translateOffsetY: 0,
 	
 	constructor: function(config) {
 		var me = this;
@@ -41,8 +43,8 @@ Ext.define('App.util.d3.geo.Us', {
 		// define map projection
 		me.projection = d3.geo.albersUsa()
 			.translate([
-				me.canvasWidth/2,
-				me.canvasHeight/2
+				(me.canvasWidth/2) + me.translateOffsetX,
+				(me.canvasHeight/2) + me.translateOffsetY
 			])
 			.scale([me.mapScale]);
 			

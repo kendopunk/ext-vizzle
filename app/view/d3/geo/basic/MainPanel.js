@@ -29,7 +29,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
  			me.canvasHeight,
  			me.svg,
  			me.gTitle,
- 			me.colorScale = d3.scale.category10(),
+ 			me.gInfo,
  			me.eventRelay = Ext.create('App.util.MessageBus'),
  			me.baseTitle = 'F5/EF5 Tornadoes in the US: ',
  			me.btnHighlightCss = 'btn-highlight-khaki',
@@ -38,35 +38,31 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
  			me.height = 
 	 			parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight),
 	 		me.usMapRenderedEvent = 'geoBasicRendered',
-	 		me.yearFilter = ['195', '196', '197', '198', '199', '200', '201'],
 	 		me.currentScaleFilter = 'none',
 	 		me.defaultRadiusScale = function(d) { return 4; },
 	 		me.radiusScale = function(d) { return 4; },
 	 		me.usMap = Ext.create('App.util.d3.geo.Us', {
 		 		fill: '#ECEECE',
 		 		mouseOverFill: '#CCCC99',
-		 		mapRenderedEvent: me.usMapRenderedEvent
+		 		mapRenderedEvent: me.usMapRenderedEvent,
+		 		mapScale: 850,
+		 		translateOffsetX: -100
 		 	}, me);
 		
 		/**
  		 * @property
  		 * @description Chart description
  		 */
-		me.chartDescription = '<b>Basic Geo</b>';
+		me.chartDescription = '<b>Basic Geo</b><br><br>'
+			+ '<i>F5/EF5 Tornadoes in the US between 1950-2013.</i><br><br>'
+			+ 'Check year(s) to view tornado activity.  Use Scale/Filter options ' 
+			+ 'to view relative tornado magnitudes (fatalities or estimated damage).<br><br>'
+			+ 'Mouseover circles to display tornado details.';
 		
 		/**
  		 * @properties
  		 * @description Toolbar buttons
  		 */
- 		me.searchButton = Ext.create('Ext.button.Button', {
-	 		iconCls: 'icon-page-paintbrush',
-	 		tooltip: 'Draw/Redraw chart',
-	 		text: 'Draw',
-	 		handler: function() {
-		 		me.draw();
-		 	},
-		 	scope: me
-	 	});
 	 	me.noScaleButton = Ext.create('Ext.button.Button', {
 	 		tooltip: 'No scale/filter',
 	 		text: 'None',
@@ -110,7 +106,10 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		 	 	boxLabel: '1950s',
 		 	 	name: 'years',
 		 	 	inputValue: '195',
-		 	 	checked: true
+		 	 	listeners: {
+			 	 	change: me.checkboxChange,
+			 	 	scope: me
+			 	}
 		 	}, {
 			 	xtype: 'tbspacer',
 			 	width: 7
@@ -119,7 +118,10 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		 	 	boxLabel: '1960s',
 		 	 	name: 'years',
 		 	 	inputValue: '196',
-		 	 	checked: true
+		 	 	listeners: {
+			 	 	change: me.checkboxChange,
+			 	 	scope: me
+			 	}
 		 	}, {
 			 	xtype: 'tbspacer',
 			 	width: 7
@@ -128,7 +130,10 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		 	 	boxLabel: '1970s',
 		 	 	name: 'years',
 		 	 	inputValue: '197',
-		 	 	checked: true
+		 	 	listeners: {
+			 	 	change: me.checkboxChange,
+			 	 	scope: me
+			 	}
 		 	}, {
 			 	xtype: 'tbspacer',
 			 	width: 7
@@ -137,7 +142,10 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		 	 	boxLabel: '1980s',
 		 	 	name: 'years',
 		 	 	inputValue: '198',
-		 	 	checked: true
+		 	 	listeners: {
+			 	 	change: me.checkboxChange,
+			 	 	scope: me
+			 	}
 		 	}, {
 			 	xtype: 'tbspacer',
 			 	width: 7
@@ -146,7 +154,10 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		 	 	boxLabel: '1990s',
 		 	 	name: 'years',
 		 	 	inputValue: '199',
-		 	 	checked: true
+		 	 	listeners: {
+			 	 	change: me.checkboxChange,
+			 	 	scope: me
+			 	}
 		 	}, {
 			 	xtype: 'tbspacer',
 			 	width: 7
@@ -155,7 +166,10 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		 	 	boxLabel: '2000s',
 		 	 	name: 'years',
 		 	 	inputValue: '200',
-		 	 	checked: true
+		 	 	listeners: {
+			 	 	change: me.checkboxChange,
+			 	 	scope: me
+			 	}
 		 	}, {
 			 	xtype: 'tbspacer',
 			 	width: 7
@@ -164,13 +178,12 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		 	 	boxLabel: '2010-13',
 		 	 	name: 'years',
 		 	 	inputValue: '201',
-		 	 	checked: true
-		 	}, {
-			 	xtype: 'tbspacer',
-			 	width: 10
-			},
-				me.searchButton,
-				'->',
+		 	 	listeners: {
+			 	 	change: me.checkboxChange,
+			 	 	scope: me
+			 	}
+		 	},
+		 		'->',
 			{
 				xtype: 'tbtext',
 				text: '<b>Scale/Filter:</b>'
@@ -235,7 +248,12 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		// title "g"
 		me.gTitle = me.svg.append('svg:g')
 			.attr('transform', 'translate(15,25)');
-		
+			
+		// info "g"
+		var xTrans = me.canvasWidth - 200;
+		me.gInfo = me.svg.append('svg:g')
+			.attr('transform', 'translate(' + xTrans + ',40)');
+
 		// set map properties
 		me.usMap.setSvg(me.svg);
 		me.usMap.setCanvasDimensions(me.canvasWidth, me.canvasHeight);
@@ -266,6 +284,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 	
 	/**
  	 * @function
+ 	 * @description Draw/transition the overlay tornado data (circles)
  	 */
 	draw: function() {
 		var me = this,
@@ -286,6 +305,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		});
 		
 		if(yearFilters.length == 0) {
+			me.svg.selectAll('circle').remove();
 			return;
 		}
 		
@@ -324,6 +344,13 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		me.handleCircles(workingData);
 	},
 	
+	checkboxChange: function() {
+		var me = this;
+		
+		me.draw();
+	
+	},
+	
 	/**
  	 * @function
  	 */
@@ -356,7 +383,6 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		
 		// local scope
 		var usMap = me.usMap,
-			colorScale = me.colorScale,
 			radiusScale = me.radiusScale,
 			currentScaleFilter = me.currentScaleFilter;
 		
@@ -364,23 +390,26 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		var circSelection = me.svg.selectAll('circle')
 			.data(data);
 			
-		// transition out the old
+		// remove old
 		circSelection.exit()
 			.transition()
 			.duration(500)
 			.attr('r', 0)
 			.remove();
-
-		// add new circles
+			
+		// add new
 		var newCircles = circSelection.enter()
 			.append('circle')
 			.style('fill', function(d, i) {
 				return '#CCCCCC';
 			})
 			.style('stroke', 'black')
-			.style('stroke-width', 1);
+			.style('stroke-width', 1)
+			.on('mouseover', function(d) {
+				me.showInfo(d);
+			});
 		
-		// transition all
+		// transition all (radius only)
 		circSelection.transition()
 			.duration(500)
 			.attr('cx', function(d) {
@@ -490,5 +519,63 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 			.text(function(d) {
 				return d;
 			});
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Show tornado information in the "gInfo" <g> element
+ 	 */
+	showInfo: function(data) {
+		var me = this;
+
+		////////////////////////////////////////
+		// build text data
+		////////////////////////////////////////
+		var textData = [];
+		
+		textData.push(data.date);
+		
+		textData.push(' ');
+
+		textData.push(data.city + ', ' + data.state);
+		
+		textData.push(' ');
+		
+		var fatalities = data.fatalities == null ? 'Unknown' : Ext.util.Format.number(data.fatalities, '0,000');
+		textData.push('Fatalities', '- ' + fatalities);
+		
+		var damages = data.damages == null ? 'Unknown' : Ext.util.Format.currency(data.damages, false, '0', false);
+		textData.push('Est. Damages', '- ' + damages);
+		
+		////////////////////////////////////////
+		// join
+		////////////////////////////////////////
+		var textSelection = me.gInfo.selectAll('text')
+			.data(textData);
+			
+		////////////////////////////////////////
+		// remove
+		////////////////////////////////////////
+		textSelection.exit().remove();
+		
+		////////////////////////////////////////
+		// add new
+		////////////////////////////////////////
+		var xPos = yPos = 0;
+		var newText = textSelection.enter()
+			.append('text')
+			.attr('x', xPos)
+			.attr('y', function(d, i) {
+				yPos += 12;
+				return yPos;
+			})
+			.style('font-weight', function(d, i) {
+				return i == 0 ? 'bold' : 'normal';
+			});
+			
+		////////////////////////////////////////
+		// transition
+		////////////////////////////////////////
+		textSelection.transition().text(String);
 	}
 });
