@@ -76,6 +76,11 @@
 	background-repeat: no-repeat;
 }
 
+.icon-page-paintbrush {
+	background-image: url(../img/icons/16x16/page-paintbrush.png) !important;
+	background-repeat: no-repeat;
+}
+
 .icon-percent {
 	background-image: url(../img/icons/16x16/percent.png) !important;
 	background-repeat: no-repeat;
@@ -103,6 +108,11 @@
 
 .icon-scatterplot {
 	background-image: url(../img/icons/16x16/scatterplot.png) !important;
+	background-repeat: no-repeat;
+}
+
+.icon-skull-and-bones {
+	background-image: url(../img/icons/16x16/skull-and-bones.png) !important;
 	background-repeat: no-repeat;
 }
 
