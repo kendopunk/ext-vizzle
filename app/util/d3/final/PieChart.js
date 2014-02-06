@@ -1,7 +1,7 @@
 /**
  * @class
  * @author Mark Fehrenbacher (kendopunk@hotmail.com)
- * @memberOf App.util.d3
+ * @memberOf App.util.d3.final
  * @description Simple pie chart class
  */
 Ext.define('App.util.d3.final.PieChart', {

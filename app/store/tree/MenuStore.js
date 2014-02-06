@@ -78,35 +78,35 @@ Ext.define('App.store.tree.MenuStore', {
 					id: 'geoBasicMainPanel'
 				}]
 			}, {
-				text: '<b>Scatterplots</b>',
+				text: '<b>Misc</b>',
 				expanded: true,
 				iconCls: 'icon-scatterplot',
 				children: [{
-					text: 'Basic Scatter',
+					text: 'Basic Scatterplot',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'scatterMainPanel'
+				}, {
+					text: 'Treemap',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'treemapBasicMainPanel'
+				}, {
+					text: 'Line/Area Chart',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'areaMainPanel'
+				}, {
+					text: 'Area "Ticker"',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'tickerMainPanel'
 				}/*, {
 					text: 'Brushes',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'scatterBrushMainPanel'
 				}*/]
-			}, {
-				text: '<b>Line/Area Charts</b>',
-				expanded: true,
-				iconCls: 'icon-area-chart',
-				children: [{
-					text: 'Basic Line/Area',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'areaMainPanel'
-				}, {
-					text: '"Ticker"',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'tickerMainPanel'
-				}]
 			}]
 		}, {
 			text: 'Chart.js',

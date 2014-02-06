@@ -1,0 +1,80 @@
+{
+	"name": "root",
+	"children": [{
+		"team": "Baltimore",
+		"sbwins": 3,
+		"avgpts": 28
+	}, {
+		"team": "Chicago",
+		"sbwins": 1,
+		"avgpts": 46
+	}, {
+		"team": "Dallas",
+		"sbwins": 5,
+		"avgpts": 32
+	}, {
+		"team": "Denver",
+		"sbwins": 2,
+		"avgpts": 32.5
+	}, {
+		"team": "Green Bay",
+		"sbwins": 4,
+		"avgpts": 33.5
+	}, {
+		"team": "Indianapolis",
+		"sbwins": 1,
+		"avgpts": 29
+	}, {
+		"team": "Kansas City",
+		"sbwins": 1,
+		"avgpts": 23
+	}, {
+		"team": "Miami",
+		"sbwins": 2,
+		"avgpts": 19
+	}, {
+		"team": "New England",
+		"sbwins": 3,
+		"avgpts": 25.33
+	}, {
+		"team": "New Orleans",
+		"sbwins": 1,
+		"avgpts": 31
+	}, {
+		"team": "NY Giants",
+		"sbwins": 4,
+		"avgpts": 24.25
+	}, {
+		"team": "NY Jets",
+		"sbwins": 1,
+		"avgpts": 16
+	}, {
+		"team": "LA/Oakland",
+		"sbwins": 3,
+		"avgpts": 32.33
+	}, {
+		"team": "Pittsburgh",
+		"sbwins": 5,
+		"avgpts": 24
+	}, {
+		"team": "San Francisco",
+		"sbwins": 5,
+		"avgpts": 37.6
+	}, {
+		"team": "Seattle",
+		"sbwins": 1,
+		"avgpts": 43
+	}, {
+		"team": "St Louis",
+		"sbwins": 1,
+		"avgpts": 23
+	}, {
+		"team": "Tampa Bay",
+		"sbwins": 1,
+		"avgpts": 48
+	}, {
+		"team": "Washington",
+		"sbwins": 3,
+		"avgpts": 35.33
+	}]
+}
