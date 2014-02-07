@@ -143,6 +143,8 @@ Ext.define('App.util.d3.final.TreeMap', {
 		var defaultMetric = me.defaultMetric,
 			colorDefinedInData = me.colorDefinedInData,
 			colorDefinedInDataIndex = me.colorDefinedInDataIndex;
+			
+		//me.treemap.sticky(me.sticky);
 		
 		me.rootDiv.selectAll('div')
 			.data(me.treemap.value(function(d) {return d[defaultMetric];}))
@@ -212,5 +214,11 @@ Ext.define('App.util.d3.final.TreeMap', {
 		var me = this;
 		
 		me.chartTitle = title;
+	},
+	
+	setSticky: function(st) {
+		var me = this;
+		
+		me.sticky = st;
 	}
 });
