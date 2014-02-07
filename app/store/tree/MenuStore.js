@@ -87,7 +87,7 @@ Ext.define('App.store.tree.MenuStore', {
 					iconCls: 'icon-arrow-right',
 					id: 'scatterMainPanel'
 				}, {
-					text: 'Treemap',
+					text: 'Basic Treemap',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'treemapBasicMainPanel'

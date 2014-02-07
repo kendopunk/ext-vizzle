@@ -24,6 +24,7 @@ Ext.define('App.util.d3.final.TreeMap', {
 		left: 10
 	},
 	graphData: [],
+	sticky: true,
 	treemapValueFunction: function(d) {
 		return 'value';
 	},
@@ -32,7 +33,13 @@ Ext.define('App.util.d3.final.TreeMap', {
 	},
 	cellTranslationFunction: function() {
 		
-		this.style('left', function(d) {
+		this.style('visibility', function(d) {
+			if(d.value <= 0) {
+				return 'hidden';
+			}
+			return 'visible';
+		})
+		.style('left', function(d) {
 			if(d.parent !== undefined) {
 				return d.x + d.parent.margins.left + 'px';
 			}
@@ -45,11 +52,17 @@ Ext.define('App.util.d3.final.TreeMap', {
 			return d.y + d.margins.top + 'px';
 		})
 		.style('width', function(d) {
+			if(d.value <= 0) {
+				return '0px';
+			}
 			return d.dx - 1 + 'px';
 		})
 		.style('height', function(d) {
+			if(d.value <= 0) {
+				return '0px';
+			}
 			return d.dy - 1 + 'px';
-		});
+		})
 	},
 	
 	/**
@@ -71,7 +84,7 @@ Ext.define('App.util.d3.final.TreeMap', {
 		// init treemap
 		me.treemap = d3.layout.treemap()
 			.size([me.canvasWidth, me.canvasHeight])
-			.sticky(true)
+			.sticky(me.sticky)
 			.value(function(d) { return d[defaultMetric];});
 		
 		// init the root "<div>"
@@ -127,14 +140,24 @@ Ext.define('App.util.d3.final.TreeMap', {
 	transition: function() {
 		var me = this;
 		
-		var defaultMetric = me.defaultMetric;
+		var defaultMetric = me.defaultMetric,
+			colorDefinedInData = me.colorDefinedInData,
+			colorDefinedInDataIndex = me.colorDefinedInDataIndex;
 		
 		me.rootDiv.selectAll('div')
-			.data(me.treemap.value(function(d) { return d[defaultMetric]; }))
+			.data(me.treemap.value(function(d) {return d[defaultMetric];}))
+			.style('background', function(d, i) {
+				if(colorDefinedInData) {
+			 		return d.children ? null : d[colorDefinedInDataIndex];
+		 		} else {
+			 		return d.children ? null : colorScale(i);
+			 	}
+			})
 			.transition()
 			.duration(1500)
 			.call(me.cellTranslationFunction)
 			.text(me.textFunction);
+
 		
 		me.handleTitle();
 	},
@@ -163,7 +186,6 @@ Ext.define('App.util.d3.final.TreeMap', {
 				.text(me.chartTitle);
 		}
 	},
-	
 	
 	/**
 	 *

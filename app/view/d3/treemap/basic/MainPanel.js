@@ -39,9 +39,9 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
  		 */
 		me.chartDescription = '<b>Basic Treemap</b><br><br>'
 		 + '<i>Some random NFL team statistics...</i><br><br>'
-		 + 'Data from <a href="http://www.pro-football-reference.com/teams/">pro-football-reference.com</a>.  '
-		 + 'Team hex colors from <a href="http://teamcolors.arc90.com/">teamcolors.arc90.com</a>.  '
-		 + 'Team values from Forbes.';
+		 + 'Win/loss data from <a href="http://www.pro-football-reference.com/teams/">pro-football-reference.com</a>.<br><br>'
+		 + 'Franchise value data from Forbes.<br><br>'
+		 + 'Team hex colors from <a href="http://teamcolors.arc90.com/">teamcolors.arc90.com</a>.';
 
 		/**
  		 * @properties
@@ -58,7 +58,9 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 			data: [
 				['Franchise Wins', 'wins'],
 				['Franchise Losses', 'losses'],
-				['Franchise Value', 'teamvalue']
+				['Franchise Value', 'teamvalue'],
+				['Super Bowl Wins', 'sb'],
+				['Conference Championships', 'conf']
 			]
 		});
 		
@@ -75,6 +77,12 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 			return d.children ? null : d.team + ' ($' 
 				+ Ext.util.Format.number(d.teamvalue/1000000000, '0.000')
 				+ ' bn)';
+		};
+		me.sbTextFunction = function(d, i) {
+			return d.children ? null : d.team + ' (' + d.sb + ')';
+		};
+		me.confTextFunction = function(d, i) {
+			return d.children ? null : d.team + ' (' + d.conf + ')';
 		};
 	 	
 		/**
@@ -96,8 +104,8 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 			 	typeAhead: true,
 			 	queryMode: 'local',
 			 	triggerAction: 'all',
-			 	width: 160,
-			 	listWidth: 160,
+			 	width: 200,
+			 	listWidth: 200,
 			 	value: 'wins',
 			 	listeners: {
 			 		select: function(combo) {
@@ -105,6 +113,10 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 					 		me.treemap.setTextFunction(me.valueTextFunction);
 					 	} else if(combo.getValue() == 'losses') {
 						 	me.treemap.setTextFunction(me.lossesTextFunction);
+						} else if(combo.getValue() == 'sb') {
+							me.treemap.setTextFunction(me.sbTextFunction);
+						} else if(combo.getValue() == 'conf') {
+							me.treemap.setTextFunction(me.confTextFunction);
 						} else {
 							me.treemap.setTextFunction(me.winsTextFunction);
 						}
@@ -166,7 +178,8 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 	 				chartTitle: me.buildChartTitle(me.defaultMetric),
 	 				colorDefinedInData: true,
 	 				defaultMetric: me.defaultMetric,
-	 				textFunction: me.winsTextFunction
+	 				textFunction: me.winsTextFunction,
+	 				sticky: true
 	 			});
 				
 				me.treemap.draw();
@@ -193,6 +206,10 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 			
 			case 'sb':
 			return ret + ': Super Bowl Wins';
+			break;
+			
+			case 'teamvalue':
+			return ret + ': Estimated Franchise Value';
 			break;
 			
 			case 'conf':
