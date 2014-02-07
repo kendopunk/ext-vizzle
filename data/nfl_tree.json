@@ -1,80 +1,260 @@
 {
 	"name": "root",
 	"children": [{
-		"team": "Baltimore",
-		"sbwins": 3,
-		"avgpts": 28
+		"team": "Cardinals",
+		"wins": 511,
+		"losses": 716,
+		"sb": 0,
+		"conf": 1,
+		"color": "#870619",
+		"teamvalue": 961000000
 	}, {
-		"team": "Chicago",
-		"sbwins": 1,
-		"avgpts": 46
+		"team": "Falcons",
+		"wins": 316,
+		"losses": 414,
+		"sb": 0,
+		"conf": 1,
+		"color": "#BD0D18",
+		"teamvalue": 933000000
 	}, {
-		"team": "Dallas",
-		"sbwins": 5,
-		"avgpts": 32
+		"team": "Ravens",
+		"wins": 158,
+		"losses": 129,
+		"sb": 2,
+		"conf": 2,
+		"color": "#280353",
+		"teamvalue": 1227000000
 	}, {
-		"team": "Denver",
-		"sbwins": 2,
-		"avgpts": 32.5
+		"team": "Bills",
+		"wins": 376,
+		"losses": 436,
+		"sb": 0,
+		"conf": 4,
+		"color": "#00338D",
+		"teamvalue": 870000000
 	}, {
-		"team": "Green Bay",
-		"sbwins": 4,
-		"avgpts": 33.5
+		"team": "Panthers",
+		"wins": 144,
+		"losses": 160,
+		"sb": 0,
+		"conf": 1,
+		"color": "#0088CE",
+		"teamvalue": 1057000000
 	}, {
-		"team": "Indianapolis",
-		"sbwins": 1,
-		"avgpts": 29
+		"team": "Bears",
+		"wins": 730,
+		"losses": 534,
+		"sb": 1,
+		"conf": 2,
+		"color": "#DD4814",
+		"teamvalue": 1252000000
 	}, {
-		"team": "Kansas City",
-		"sbwins": 1,
-		"avgpts": 23
+		"team": "Bengals",
+		"wins": 316,
+		"losses": 390,
+		"sb": 0,
+		"conf": 2,
+		"color": "#FB4F14",
+		"teamvalue": 924000000
 	}, {
-		"team": "Miami",
-		"sbwins": 2,
-		"avgpts": 19
+		"team": "Browns",
+		"wins": 498,
+		"losses": 433,
+		"sb": 0,
+		"conf": 0,
+		"color": "#E34912",
+		"teamvalue": 1005000000
 	}, {
-		"team": "New England",
-		"sbwins": 3,
-		"avgpts": 25.33
+		"team": "Cowboys",
+		"wins": 464,
+		"losses": 348,
+		"sb": 5,
+		"conf": 8,
+		"color": "#8C8B8A",
+		"teamvalue": 2300000000
 	}, {
-		"team": "New Orleans",
-		"sbwins": 1,
-		"avgpts": 31
+		"team": "Broncos",
+		"wins": 432,
+		"losses": 378,
+		"sb": 2,
+		"conf": 6,
+		"color": "#FB4F14",
+		"teamvalue": 1161000000
 	}, {
-		"team": "NY Giants",
-		"sbwins": 4,
-		"avgpts": 24.25
+		"team": "Lions",
+		"wins": 517,
+		"losses": 620,
+		"sb": 0,
+		"conf": 0,
+		"color": "#006DB0",
+		"teamvalue": 900000000
 	}, {
-		"team": "NY Jets",
-		"sbwins": 1,
-		"avgpts": 16
+		"team": "Packers",
+		"wins": 698,
+		"losses": 537,
+		"sb": 4,
+		"conf": 5,
+		"color": "#213D30",
+		"teamvalue": 1183000000
 	}, {
-		"team": "LA/Oakland",
-		"sbwins": 3,
-		"avgpts": 32.33
+		"team": "Texans",
+		"wins": 79,
+		"losses": 113,
+		"sb": 0,
+		"conf": 0,
+		"color": "#B31B34",
+		"teamvalue": 1450000000
 	}, {
-		"team": "Pittsburgh",
-		"sbwins": 5,
-		"avgpts": 24
+		"team": "Colts",
+		"wins": 475,
+		"losses": 420,
+		"sb": 2,
+		"conf": 4,
+		"color": "#003B7B",
+		"teamvalue": 1200000000
 	}, {
-		"team": "San Francisco",
-		"sbwins": 5,
-		"avgpts": 37.6
+		"team": "Jaguars",
+		"wins": 144,
+		"losses": 160,
+		"sb": 0,
+		"conf": 0,
+		"color": "#007198",
+		"value": 840000000
 	}, {
-		"team": "Seattle",
-		"sbwins": 1,
-		"avgpts": 43
+		"team": "Chiefs",
+		"wins": 415,
+		"losses": 393,
+		"sb": 1,
+		"conf": 2,
+		"color": "#B20032",
+		"teamvalue": 1009000000
 	}, {
-		"team": "St Louis",
-		"sbwins": 1,
-		"avgpts": 23
+		"team": "Dolphins",
+		"wins": 415,
+		"losses": 317,
+		"sb": 2,
+		"conf": 5,
+		"color": "#006666",
+		"teamvalue": 1074000000
 	}, {
-		"team": "Tampa Bay",
-		"sbwins": 1,
-		"avgpts": 48
+		"team": "Vikings",
+		"wins": 431,
+		"losses": 365,
+		"sb": 0,
+		"conf": 4,
+		"color": "#3B0160",
+		"teamvalue": 1007000000
 	}, {
-		"team": "Washington",
-		"sbwins": 3,
-		"avgpts": 35.33
+		"team": "Patriots",
+		"wins": 438,
+		"losses": 373,
+		"sb": 3,
+		"conf": 7,
+		"color": "#0D254C",
+		"teamvalue": 1800000000
+	}, {
+		"team": "Saints",
+		"wins": 317,
+		"losses": 400,
+		"sb": 1,
+		"conf": 1,
+		"color": "#D2B887",
+		"teamvalue": 1004000000
+	}, {
+		"team": "Giants",
+		"wins": 661,
+		"losses": 547,
+		"sb": 4,
+		"conf": 5,
+		"color": "#192F6B",
+		"teamvalue": 1550000000
+	}, {
+		"team": "Jets",
+		"wins": 373,
+		"losses": 439,
+		"sb": 1,
+		"conf": 1,
+		"color": "#0C371D",
+		"teamvalue": 1380000000
+	}, {
+		"team": "Raiders",
+		"wins": 434,
+		"losses": 375,
+		"sb": 3,
+		"conf": 5,
+		"color": "#333333",
+		"teamvalue": 825000000
+	}, {
+		"team": "Eagles",
+		"wins": 531,
+		"losses": 567,
+		"sb": 0,
+		"conf": 2,
+		"color": "#708090",
+		"teamvalue": 1314000000
+	}, {
+		"team": "Steelers",
+		"wins": 569,
+		"losses": 519,
+		"sb": 6,
+		"conf": 8,
+		"color": "#000000",
+		"teamvalue": 1118000000
+	}, {
+		"team": "Chargers",
+		"wins": 408,
+		"losses": 401,
+		"sb": 0,
+		"conf": 1,
+		"color": "#5B92E5",
+		"teamvalue": 949000000
+	}, {
+		"team": "49ers",
+		"wins": 545,
+		"losses": 431,
+		"sb": 5,
+		"conf": 6,
+		"color": "#AF1E2C",
+		"teamvalue": 1224000000
+	}, {
+		"team": "Seahawks",
+		"wins": 293,
+		"losses": 303,
+		"sb": 0,
+		"conf": 1,
+		"color": "#4EAE47",
+		"teamvalue": 1081000000
+	}, {
+		"team": "Rams",
+		"wins": 527,
+		"losses": 523,
+		"sb": 1,
+		"conf": 3,
+		"color": "#C9AF74",
+		"teamvalue": 875000000
+	}, {
+		"team": "Buccaneers",
+		"wins": 233,
+		"losses": 362,
+		"sb": 1,
+		"conf": 1,
+		"color": "#89765F",
+		"teamvalue": 1067000000
+	}, {
+		"team": "Titans/Oilers",
+		"wins": 399,
+		"losses": 415,
+		"sb": 0,
+		"conf": 1,
+		"color": "#648FCC",
+		"teamvalue": 1055000000
+	}, {
+		"team": "Redskins",
+		"wins": 565,
+		"losses": 546,
+		"sb": 3,
+		"conf": 5,
+		"color": "#773141",
+		"teamvalue": 1700000000
 	}]
 }

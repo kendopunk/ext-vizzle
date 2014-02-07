@@ -29,15 +29,20 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
  			me.canvasWidth,
  			me.canvasHeight,
  			me.panelId,
- 			me.baseTitle = 'Superbowl Teams',
+ 			me.defaultMetric = 'wins',
+ 			me.baseTitle = 'NFL Team Stats',
  			me.eventRelay = Ext.create('App.util.MessageBus'),
  			me.btnHighlightCss = 'btn-highlight-peachpuff';
 		
 		/**
  		 * @property
  		 */
-		me.chartDescription = '<b>Basic Treemap</b>';
-			
+		me.chartDescription = '<b>Basic Treemap</b><br><br>'
+		 + '<i>Some random NFL team statistics...</i><br><br>'
+		 + 'Data from <a href="http://www.pro-football-reference.com/teams/">pro-football-reference.com</a>.  '
+		 + 'Team hex colors from <a href="http://teamcolors.arc90.com/">teamcolors.arc90.com</a>.  '
+		 + 'Team values from Forbes.';
+
 		/**
  		 * @properties
  		 * @description layout vars
@@ -45,36 +50,32 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
 		
- 		me.winsButton = Ext.create('Ext.button.Button', {
-	 		text: 'By Wins',
-	 		metric: 'sbwins',
-	 		cls: me.btnHighlightCss,
-	 		disabled: true,
-	 		handler: function(btn) {
-		 		btn.addCls(me.btnHighlightCss);
-		 		me.avgPtsButton.removeCls(me.btnHighlightCss);
-		 		
-		 		me.treemap.setChartTitle(me.buildChartTitle(btn.metric));
-		 		
-		 		me.treemap.transition();
-	 		},
-	 		scope: me
-	 	});
-	 	
-	 	me.avgPtsButton = Ext.create('Ext.button.Button', {
-	 		text: 'By Avg. Points',
-	 		metric: 'avgpts',
-	 		disabled: true,
-	 		handler: function(btn) {
-		 		btn.addCls(me.btnHighlightCss);
-		 		me.winsButton.removeCls(me.btnHighlightCss);
-		 		
-		 		me.treemap.setChartTitle(me.buildChartTitle(btn.metric));
-		 		
-		 		me.treemap.transition();
-	 		},
-	 		scope: me
-	 	});
+		/**
+		 * metric combo store
+		 */
+		me.metricStore = Ext.create('Ext.data.SimpleStore', {
+			fields: ['display', 'value'],
+			data: [
+				['Franchise Wins', 'wins'],
+				['Franchise Losses', 'losses'],
+				['Franchise Value', 'teamvalue']
+			]
+		});
+		
+		////////////////////////////////////////
+		// text functions
+		////////////////////////////////////////
+		me.winsTextFunction = function(d, i) {
+			return d.children ? null : d.team + ' (' + d.wins + ')';
+		};
+		me.lossesTextFunction = function(d, i) {
+			return d.children ? null : d.team + ' (' + d.losses + ')';
+		};
+		me.valueTextFunction = function(d, i) {
+			return d.children ? null : d.team + ' ($' 
+				+ Ext.util.Format.number(d.teamvalue/1000000000, '0.000')
+				+ ' bn)';
+		};
 	 	
 		/**
  		 * top toolbar
@@ -83,13 +84,42 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 	 		xtype: 'toolbar',
 	 		dock: 'top',
 	 		items: [{
-		 		xtype: 'tbspacer',
-		 		width: 10
-		 	},
-		 		me.winsButton,
-		 		'-',
-		 		me.avgPtsButton
-		 	]
+		 		xtype: 'tbtext',
+		 		text: '<b>Metric:</b>'
+		 	}, {
+			 	xtype: 'combo',
+			 	name: 'metric',
+			 	store: me.metricStore,
+			 	displayField: 'display',
+			 	valueField: 'value',
+			 	editable: false,
+			 	typeAhead: true,
+			 	queryMode: 'local',
+			 	triggerAction: 'all',
+			 	width: 160,
+			 	listWidth: 160,
+			 	value: 'wins',
+			 	listeners: {
+			 		select: function(combo) {
+				 		if(combo.getValue() == 'teamvalue') {
+					 		me.treemap.setTextFunction(me.valueTextFunction);
+					 	} else if(combo.getValue() == 'losses') {
+						 	me.treemap.setTextFunction(me.lossesTextFunction);
+						} else {
+							me.treemap.setTextFunction(me.winsTextFunction);
+						}
+			 		
+				 		me.treemap.setChartTitle(
+					 		me.buildChartTitle(combo.getValue())
+					 	);
+					 	
+					 	me.treemap.setDefaultMetric(combo.getValue());
+					 	
+					 	me.treemap.transition();
+			 		}
+			 	},
+			 	scope: me
+			}]
 	 	};
 		
 		// on activate, publish update to the "Info" panel
@@ -133,15 +163,13 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 	 				canvasWidth: me.canvasWidth,
 	 				canvasHeight: me.canvasHeight,
 	 				graphData: resp,
-	 				chartTitle: me.buildChartTitle('sbwins'),
-	 				textFunction: function(d, i) {
-		 				return d.children ? null : d.team + ' (' + d.sbwins + ')';
-		 			}
+	 				chartTitle: me.buildChartTitle(me.defaultMetric),
+	 				colorDefinedInData: true,
+	 				defaultMetric: me.defaultMetric,
+	 				textFunction: me.winsTextFunction
 	 			});
 				
 				me.treemap.draw();
-				
-				me.enableButtons(true);
 	 		},
 	 		callback: function() {
 		 		me.getEl().unmask();
@@ -150,25 +178,29 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 	 	});
 	},
 	
-	enableButtons: function(turnOn) {
-		var me = this;
-		
-		me.winsButton.setDisabled(!turnOn);
-		me.avgPtsButton.setDisabled(!turnOn);
-	},
-	
+	/**
+	 * @function
+	 */
 	buildChartTitle: function(metric) {
 		var me = this;
 		
 		var ret = me.baseTitle;
 		
 		switch(metric) {
-			case 'avgpts':
-			return ret + ': By Avg Points';
+			case 'losses':
+			return ret + ': Franchise Losses';
+			break;
+			
+			case 'sb':
+			return ret + ': Super Bowl Wins';
+			break;
+			
+			case 'conf':
+			return ret + ': Conference Championships since Start of Super Bowl';
 			break;
 			
 			default:
-			return ret + ': By # of Wins';
+			return ret + ': Franchise Wins';
 			break;
 		}
 	}

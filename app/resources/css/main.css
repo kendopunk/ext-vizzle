@@ -160,13 +160,14 @@
 	fill: #333333;
 }
 
-.treepanelCell {
+.nflTreeCell {
 	border: solid 1px white;
-	font: 10px sans-serif;
+	color: white;
+	font: bold 9px sans-serif;
 	line-height: 12px;
 	overflow: hidden;
 	position: absolute;
-	padding: 3px;
+	padding: 2px;
 }
 
 .tinyText {
