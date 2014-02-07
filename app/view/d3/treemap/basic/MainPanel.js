@@ -116,9 +116,9 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 					 	me.treemap.setDefaultMetric(combo.getValue());
 					 	
 					 	me.treemap.transition();
-			 		}
-			 	},
-			 	scope: me
+			 		},
+			 		scope: me
+			 	}
 			}]
 	 	};
 		
