@@ -12,12 +12,17 @@ Ext.define('App.util.d3.final.TreeMap', {
 	svg: null,
 	gTitle: null,
 	
+	divClass: 'treecell',
+	
 	canvasWidth: 500,
 	canvasHeight: 500,
 	colorScale: d3.scale.category20c(),
 	colorDefinedInData: false,
 	colorDefinedInDataIndex: 'color',
-	defaultMetric: 'value',
+	fixedColorRange: [],
+	fixedColorScale: null,
+	sizeMetric: 'value',
+	colorMetric: 'value',	// only necessary if fixeColorRange is defined
 	/** margins required **/
 	margins: {
 		top: 20,
@@ -73,7 +78,8 @@ Ext.define('App.util.d3.final.TreeMap', {
 		
 		Ext.apply(me, config);
 		
-		var defaultMetric = me.defaultMetric;
+		var sizeMetric = me.sizeMetric,
+			colorMetric = me.colorMetric;
 		
 		// init svg
 		me.svg = d3.select(me.panelId)
@@ -85,7 +91,7 @@ Ext.define('App.util.d3.final.TreeMap', {
 		me.treemap = d3.layout.treemap()
 			.size([me.canvasWidth, me.canvasHeight])
 			.sticky(me.sticky)
-			.value(function(d) { return d[defaultMetric];});
+			.value(function(d) { return d[sizeMetric];});
 		
 		// init the root "<div>"
 		me.rootDiv = d3.select(me.panelId)
@@ -96,6 +102,20 @@ Ext.define('App.util.d3.final.TreeMap', {
 			 
 		// add margins object to every data element
 		me.graphData.margins = me.margins;
+		
+		// ordinal color scale
+		if(me.fixedColorRange.length > 0) {
+			me.fixedColorScale = d3.scale.linear()
+				.domain([
+					d3.min(me.graphData.children, function(d) {
+						return d[colorMetric];
+					}),
+					d3.max(me.graphData.children, function(d) {
+						return d[colorMetric];
+					})
+				])
+				.range(me.fixedColorRange);
+		}
 	},
 	
 	/**
@@ -109,21 +129,26 @@ Ext.define('App.util.d3.final.TreeMap', {
 			treemapValueFunction = me.treemapValueFunction,
 			colorScale = me.colorScale,
 			colorDefinedInData = me.colorDefinedInData,
-			colorDefinedInDataIndex = me.colorDefinedInDataIndex;
+			colorDefinedInDataIndex = me.colorDefinedInDataIndex,
+			fixedColorScale = me.fixedColorScale,
+			sizeMetric = me.sizeMetric,
+			colorMetric = me.colorMetric;
 
 		me.rootDiv.data([graphData])
 		 	.selectAll('div')
 		 	.data(me.treemap.nodes)
 		 	.enter()
 		 	.append('div')
-		 	.attr('class', 'nflTreeCell')
+		 	.attr('class', me.divClass)
 		 	.attr('marginTop', me.margins.top)
 		 	.attr('marginLeft', me.margins.left)
 		 	.style('background', function(d, i) {
 		 		if(colorDefinedInData) {
 			 		return d.children ? null : d[colorDefinedInDataIndex];
+		 		} else if(fixedColorScale != null) {
+		 			return d.children ? null : fixedColorScale(d[colorMetric]);
 		 		} else {
-			 		return d.children ? null : colorScale(i);
+			 		return d.children ? null : colorScale();
 			 	}
 			})
 			.call(me.cellTranslationFunction)
@@ -140,17 +165,36 @@ Ext.define('App.util.d3.final.TreeMap', {
 	transition: function() {
 		var me = this;
 		
-		var defaultMetric = me.defaultMetric,
+		var sizeMetric = me.sizeMetric,
+			colorMetric = me.colorMetric,
+			colorScale = me.colorScale,
 			colorDefinedInData = me.colorDefinedInData,
-			colorDefinedInDataIndex = me.colorDefinedInDataIndex;
+			colorDefinedInDataIndex = me.colorDefinedInDataIndex,
+			fixedColorScale = null;
 			
-		//me.treemap.sticky(me.sticky);
+		// change the fixed color scale ??
+		if(me.fixedColorRange.length > 0) {
+			me.fixedColorScale = d3.scale.linear()
+				.domain([
+					d3.min(me.graphData.children, function(d) {
+						return d[colorMetric];
+					}),
+					d3.max(me.graphData.children, function(d) {
+						return d[colorMetric];
+					})
+				])
+				.range(me.fixedColorRange);
+				
+			fixedColorScale = me.fixedColorScale;
+		}
 		
 		me.rootDiv.selectAll('div')
-			.data(me.treemap.value(function(d) {return d[defaultMetric];}))
+			.data(me.treemap.value(function(d) {return d[sizeMetric];}))
 			.style('background', function(d, i) {
 				if(colorDefinedInData) {
 			 		return d.children ? null : d[colorDefinedInDataIndex];
+		 		} else if(fixedColorScale != null) {
+		 			return d.children ? null : fixedColorScale(d[colorMetric]);
 		 		} else {
 			 		return d.children ? null : colorScale(i);
 			 	}
@@ -198,10 +242,16 @@ Ext.define('App.util.d3.final.TreeMap', {
 	 *
 	 *
 	 */
-	setDefaultMetric: function(metric) {
+	setSizeMetric: function(metric) {
 		var me = this;
 		
-		me.defaultMetric = metric;
+		me.sizeMetric = metric;
+	},
+	
+	setColorMetric: function(metric) {
+		var me = this;
+		
+		me.colorMetric = metric;
 	},
 	
 	setTextFunction: function(fn) {

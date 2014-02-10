@@ -24,6 +24,23 @@ Ext.define('App.util.GridRenderers', {
 		// wrap text
 		wordWrap: function(value) {
 			return '<div style="white-space:normal !important">' + value + '</div>';
+		},
+		
+		// int to IP address
+		longToIp: function(value) {
+			var ret = '';
+			
+			if(!isNaN(value) && value.toString().length >=1 && (value >= 0 || value <= 4294967295)) {
+				ret = Math.floor(value / Math.pow(256, 3))
+				+ '.'
+				+ Math.floor((value % Math.pow(256, 3)) / Math.pow(256, 2))
+				+ '.'
+				+ Math.floor(((value % Math.pow(256, 3)) % Math.pow(256, 2)) / Math.pow(256, 1))
+				+ '.'
+				+ Math.floor((((value % Math.pow(256, 3)) % Math.pow(256, 2)) % Math.pow(256, 1)) / Math.pow(256, 0));
+			}
+			
+			return ret;
 		}
 	}
 });

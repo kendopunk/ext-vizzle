@@ -160,6 +160,15 @@
 	fill: #333333;
 }
 
+.treecell {
+	border: solid 1px white;
+	font: 9px sans-serif;
+	line-height: 12px;
+	overflow: hidden;
+	position: absolute;
+	padding: 2px;
+}
+
 .nflTreeCell {
 	border: solid 1px white;
 	color: white;

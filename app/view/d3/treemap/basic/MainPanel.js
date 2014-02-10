@@ -2,7 +2,7 @@
  * @class
  * @author Mark Fehrenbacher (kendopunk@hotmail.com)
  * @memberOf App.view.d3.scatterplot
- * @description Simple scatterplot panel
+ * @description Simple treemap panel
  */
 Ext.define('App.view.d3.treemap.basic.MainPanel', {
 	extend: 'Ext.Panel',
@@ -29,7 +29,8 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
  			me.canvasWidth,
  			me.canvasHeight,
  			me.panelId,
- 			me.defaultMetric = 'wins',
+ 			me.sizeMetric = 'wins',
+ 			me.colorMetric = 'wins',
  			me.baseTitle = 'NFL Team Stats',
  			me.eventRelay = Ext.create('App.util.MessageBus'),
  			me.btnHighlightCss = 'btn-highlight-peachpuff';
@@ -147,7 +148,7 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 					 		me.buildChartTitle(combo.getValue())
 					 	);
 					 	
-					 	me.treemap.setDefaultMetric(combo.getValue());
+					 	me.treemap.setSizeMetric(combo.getValue());
 					 	
 					 	me.treemap.transition();
 			 		},
@@ -202,11 +203,13 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 	 				canvasWidth: me.canvasWidth,
 	 				canvasHeight: me.canvasHeight,
 	 				graphData: resp,
-	 				chartTitle: me.buildChartTitle(me.defaultMetric),
+	 				chartTitle: me.buildChartTitle(me.sizeMetric),
 	 				colorDefinedInData: true,
-	 				defaultMetric: me.defaultMetric,
+	 				sizeMetric: me.sizeMetric,
+	 				colorMetric: me.colorMetric,
 	 				textFunction: me.winsTextFunction,
-	 				sticky: true
+	 				sticky: true,
+	 				divClass: 'nflTreeCell'
 	 			});
 				
 				me.treemap.draw();

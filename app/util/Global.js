@@ -9,7 +9,7 @@ Ext.define('App.util.Global', {
 		
 		westPanelWidth: 235,
 		
-		defaultInfoMessage: 'Demonstration of various visualization libraries in ExtJS.',
+		defaultInfoMessage: 'Demonstrating various visualization libraries in ExtJS.  Heavy on the D3 side.',
 		
 		svg: {
 			currencyTickFormat: function(d) {
