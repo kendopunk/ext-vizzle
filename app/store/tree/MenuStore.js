@@ -27,6 +27,11 @@ Ext.define('App.store.tree.MenuStore', {
 					iconCls: 'icon-arrow-right',
 					id: 'barlegendMainPanel'
 				}, {
+					text: 'Grouped Bar Chart',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'bargroupMainPanel'
+				}, {
 					text: 'Stacked Bar Chart',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
