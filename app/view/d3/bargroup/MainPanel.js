@@ -142,12 +142,24 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,
 			graphData: [],
+			fixedColorRange: {
+				'1950s': 'green',
+				'1960s': 'red',
+				'1970s': 'blue',
+				'1980s': 'orange',
+				'1990s': 'gray',
+				'2000': 'purple'
+			},
+			fixedColorRangeIndex: 'name',
 			margins: {
 				top: 40,
 				right: 10,
 				bottom: 80,
 				left: 100,
 				leftAxis: 85
+			},
+			yTickFormat: function(d) {
+				return Ext.util.Format.number(d, '0.0') + ' lbs';
 			}
 		});
 		
@@ -240,8 +252,7 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
 				 		id: ind.toString(),
 				 		name: entry.year,
 				 		value: c.percapita,
-				 		grouper: c.type,
-				 		color: colorScale(colorInd)
+				 		grouper: c.type
 				 	});
 				 	
 				 	ind++;

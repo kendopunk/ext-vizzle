@@ -18,6 +18,9 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 	canvasWidth: 400,
 	colorScale: d3.scale.category20(),
 	
+	fixedColorRange: null,
+	fixedColorRangeIndex: null,
+	
 	gBar: null,
 	gBarLabel: null,
 	gGrouper: null,
@@ -68,7 +71,9 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
  			colorScale = me.colorScale,
  			xMetric = me.xMetric,
 	 		yMetric = me.yMetric,
-	 		margins = me.margins;
+	 		margins = me.margins,
+	 		fixedColorRange = me.fixedColorRange,
+	 		fixedColorRangeIndex = me.fixedColorRangeIndex;
 
  		//////////////////////////////////////////////////
  		// "gBar"
@@ -121,14 +126,16 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 				return _yScale(d[yMetric]) - margins.bottom;
 			})
 			.style('fill', function(d, i) {
-				return colorScale(i);
+				if(fixedColorRange != null && fixedColorRangeIndex != null) {
+					return fixedColorRange[d.name];
+				} else {
+					return colorScale(i);
+				}
 			})
+			.style('opacity', 0.6)
 			.style('stroke', 'black')
-			.style('stroke-width', 1)
-			.on('mouseover', function(d) {
-				console.debug(d.name);
-			});
-			
+			.style('stroke-width', 1);
+
 		//////////////////////////////////////////////////
 		// call the X axis function
 		//////////////////////////////////////////////////
@@ -161,7 +168,9 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
  			colorScale = me.colorScale,
  			xMetric = me.xMetric,
 	 		yMetric = me.yMetric,
-	 		margins = me.margins;
+	 		margins = me.margins,
+	 		fixedColorRange = me.fixedColorRange,
+	 		fixedColorRangeIndex = me.fixedColorRangeIndex;
 	 		
 		//////////////////////////////////////////////////
 		// reset the x/y scales
@@ -194,9 +203,7 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 			
 		// add new bars
 		var newBars = rectSelection.enter()
-			.append('rect')
-			.style('stroke', 'black')
-			.style('stroke-width', 1);
+			.append('rect');
 			
 		// transition all
 		rectSelection.transition()
@@ -214,8 +221,17 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 				return _yScale(d[yMetric]) - margins.bottom;
 			})
 			.style('fill', function(d, i) {
-				return colorScale(i);
-			});
+				if(fixedColorRange != null && fixedColorRangeIndex != null) {
+					console.log(d.name);
+					console.log(fixedColorRange[d.name]);
+					return fixedColorRange[d.name];
+				} else {
+					return colorScale(i);
+				}
+			})
+			.style('opacity', 0.6)
+			.style('stroke', 'black')
+			.style('stroke-width', 1);
 			
 		//////////////////////////////////////////////////
 		//
@@ -288,7 +304,8 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 		me.yAxis = d3.svg.axis()
 			.scale(me.yAxisScale)
 			.orient('left')
-			.ticks(10);
+			.ticks(10)
+			.tickFormat(me.yTickFormat);
 	},
 	
 	/**
