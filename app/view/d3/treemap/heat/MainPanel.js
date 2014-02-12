@@ -74,6 +74,16 @@ Ext.define('App.view.d3.treemap.heat.MainPanel', {
 			]
 		});
 		
+		////////////////////////////////////////
+		// label/tooltip functions
+		////////////////////////////////////////
+		me.tooltipFn = function(d, i) {
+			return '<b>sPort</b>: ' + d.sport + '<br>'
+				+ '<b>dport</b>: ' + d.dport + '<br>'
+				+ '<b>bytes:</b>: ' + Ext.util.Format.number(d.bytes, '0,000') + '<br>'
+				+ '<b>packets:</b> ' + Ext.util.Format.number(d.packets, '0,000') + '<br>'
+				+ '<b>duration</b> ' + Ext.util.Format.number(d.duration, '0.000') + ' ms';
+		};
 		me.ipTextFunction = function(d, i) {
 			return App.util.GridRenderers.longToIp(d.sip) 
 				+ ' - '
@@ -185,7 +195,9 @@ Ext.define('App.view.d3.treemap.heat.MainPanel', {
 	 				textFunction: me.ipTextFunction,
 	 				sticky: true,
 	 				fixedColorRange: ['#90EE90', '#FF0000'],
-	 				mode: 'slice'
+	 				mode: 'slice',
+	 				showTooltips: true,
+	 				tooltipFunction: me.tooltipFn
 	 			});
 				
 				me.treemap.draw();

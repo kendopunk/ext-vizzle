@@ -30,6 +30,10 @@ Ext.define('App.util.d3.final.TreeMap', {
 	},
 	graphData: [],
 	sticky: true,
+	showTooltips: false,
+	tooltipFunction: function(d, i) {
+		return 'tooltip';
+	},
 	treemapValueFunction: function(d) {
 		return 'value';
 	},
@@ -142,6 +146,9 @@ Ext.define('App.util.d3.final.TreeMap', {
 		 	.attr('class', me.divClass)
 		 	.attr('marginTop', me.margins.top)
 		 	.attr('marginLeft', me.margins.left)
+		 	.attr('applyTip', function(d, i) {
+			 	if(!d.children) { return 'yes'; }
+		 	})
 		 	.style('background', function(d, i) {
 		 		if(colorDefinedInData) {
 			 		return d.children ? null : d[colorDefinedInDataIndex];
@@ -153,6 +160,12 @@ Ext.define('App.util.d3.final.TreeMap', {
 			})
 			.call(me.cellTranslationFunction)
 			.text(me.textFunction);
+			
+		// apply tooltips
+		if(me.showTooltips) {
+			me.rootDiv.selectAll('[applyTip=yes]')
+				.call(d3.helper.tooltip().text(me.tooltipFunction));
+		}
 			
 		me.handleTitle();
 	},
@@ -190,6 +203,9 @@ Ext.define('App.util.d3.final.TreeMap', {
 		
 		me.rootDiv.selectAll('div')
 			.data(me.treemap.value(function(d) {return d[sizeMetric];}))
+			.attr('applyTip', function(d, i) {
+			 	if(!d.children) { return 'yes'; }
+		 	})
 			.style('background', function(d, i) {
 				if(colorDefinedInData) {
 			 		return d.children ? null : d[colorDefinedInDataIndex];
@@ -203,8 +219,13 @@ Ext.define('App.util.d3.final.TreeMap', {
 			.duration(1500)
 			.call(me.cellTranslationFunction)
 			.text(me.textFunction);
+			
+		// apply tooltips
+		if(me.showTooltips) {
+			me.rootDiv.selectAll('[applyTip=yes]')
+				.call(d3.helper.tooltip().text(me.tooltipFunction));
+		}
 
-		
 		me.handleTitle();
 	},
 	
