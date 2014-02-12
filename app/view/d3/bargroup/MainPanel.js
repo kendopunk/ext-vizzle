@@ -25,21 +25,22 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
  		 * @description SVG properties
  		 */
  		me.svgInitialized = false,
- 			me.meatData = [],
- 			me.dairyData = [],
+ 			me.workingData = [],
+ 			me.dataIndex = 'meat',
  			me.canvasWidth,
  			me.canvasHeight,
  			me.svg,
  			me.panelId,
  			me.groupedBarChart = null,
  			me.eventRelay = Ext.create('App.util.MessageBus'),
- 			me.btnHighlightCss = 'btn-highlight-peachpuff';
+ 			me.btnHighlightCss = 'btn-highlight-peachpuff',
+ 			me.cbxHighlightCss = 'btn-highlight-khaki';
 		
 		/**
  		 * @property
  		 */
 		me.chartDescription = '<b>Grouped Bar Chart</b><br><br>'
-			+ '<i>Statistics on meat/protein consumption in the US over the last 50 years...</i><br><br>'
+			+ '<i>Meat & Dairy consumption (lbs. per capita) in the US over the last 50 years...</i><br><br>'
 			+ 'Use the checkboxes to view decade-to-decade comparisons<br><br>'
 			+ 'Data from <a href="http://www.usda.gov">USDA</a>.';
 			
@@ -49,6 +50,40 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
  		 */
 		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
+		
+		//////////////////////////////////////////////////
+		// toolbar buttons
+		//////////////////////////////////////////////////
+		me.meatButton = Ext.create('Ext.button.Button', {
+			iconCls: 'icon-steak',
+			text: 'Meat',
+			cls: me.btnHighlightCss,
+			tooltip: 'Meat',
+			handler: function(btn) {
+				me.dataIndex = 'meat';
+				btn.addCls(me.btnHighlightCss);
+				
+				me.dairyButton.removeCls(me.btnHighlightCss);
+				
+				me.draw();
+			},
+			scope: me
+		});
+		
+		me.dairyButton = Ext.create('Ext.button.Button', {
+			iconCls: 'icon-cow',
+			text: 'Dairy',
+			tooltip: 'Dairy',
+			handler: function(btn) {
+				me.dataIndex = 'dairy';
+				btn.addCls(me.btnHighlightCss);
+				
+				me.meatButton.removeCls(me.btnHighlightCss);
+				
+				me.draw();
+			},
+			scope: me
+		});
 		
 		/**
  		 * runtime configuration of checkboxes
@@ -80,6 +115,10 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
 		 	 	xtype: 'tbspacer',
 		 	 	width: 10
 		 	},
+		 		me.meatButton,
+		 		'-',
+		 		me.dairyButton,
+		 	{xtype: 'tbspacer', width: 30},
 		 		checkboxData
 		 	]
 		}];
@@ -97,8 +136,17 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
 		me.callParent(arguments);
 	},
 	
-	checkboxChange: function() {
+	/**
+ 	 * @function
+ 	 */
+	checkboxChange: function(cbx, oldVal, newVal) {
 		var me = this;
+		
+		if(cbx.checked) {
+			cbx.addCls(me.cbxHighlightCss);
+		} else {
+			cbx.removeCls(me.cbxHighlightCss);
+		}
 		
 		me.draw();
 	},
@@ -124,6 +172,8 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
 		 	.attr('width', me.canvasWidth)
 		 	.attr('height', me.canvasHeight);
 		 	
+		var colorScale = d3.scale.category20();
+		 	
 		/*
 		// temporary border
 		var border = me.svg.append('rect')
@@ -143,12 +193,12 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
 			canvasHeight: me.canvasHeight,
 			graphData: [],
 			fixedColorRange: {
-				'1950s': 'green',
-				'1960s': 'red',
-				'1970s': 'blue',
-				'1980s': 'orange',
-				'1990s': 'gray',
-				'2000': 'purple'
+				'1950s': colorScale(1),
+				'1960s': colorScale(2),
+				'1970s': colorScale(3),
+				'1980s': colorScale(4),
+				'1990s': colorScale(5),
+				'2000': colorScale(6),
 			},
 			fixedColorRangeIndex: 'name',
 			margins: {
@@ -160,6 +210,11 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
 			},
 			yTickFormat: function(d) {
 				return Ext.util.Format.number(d, '0.0') + ' lbs';
+			},
+			tooltipFunction: function(d, i) {
+				return '<b>' + d.name + ' ' + d.grouper + ' Consumption</b><br>'
+					+ Ext.util.Format.number(d.value, '0.0')
+					+ ' lbs/person.';
 			}
 		});
 		
@@ -211,9 +266,9 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
 				success: function(response) {
 					var resp = Ext.JSON.decode(response.responseText);
 				
-					me.meatData = resp.data;
+					me.workingData = resp;
 					
-					me.graphData = me.normalizeJsonData(resp.data, filterData);
+					me.graphData = me.normalizeJsonData(resp[me.dataIndex], filterData);
 					me.groupedBarChart.setGraphData(me.graphData);
 					me.groupedBarChart.draw();
 					me.groupedBarChart.triggerGroupers(false);
@@ -225,8 +280,7 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
 				scope: me
 			});
 		} else {
-		
-			me.graphData = me.normalizeJsonData(me.meatData, filterData);
+			me.graphData = me.normalizeJsonData(me.workingData[me.dataIndex], filterData);
 			me.groupedBarChart.setGraphData(me.graphData);
 			me.groupedBarChart.transition();
 			me.groupedBarChart.triggerGroupers(true);
@@ -252,7 +306,8 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
 				 		id: ind.toString(),
 				 		name: entry.year,
 				 		value: c.percapita,
-				 		grouper: c.type
+				 		grouper: c.type,
+				 		color: colorScale(colorInd)
 				 	});
 				 	
 				 	ind++;

@@ -18,6 +18,9 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 	canvasWidth: 400,
 	colorScale: d3.scale.category20(),
 	
+	colorDefinedInData: false,
+	colorDefinedInDataIndex: 'color',
+	
 	fixedColorRange: null,
 	fixedColorRangeIndex: null,
 	
@@ -29,12 +32,20 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 	
 	graphData: [],
 	grouperField: 'grouper',
+	labelFontSize: '10px',
+	labelMetric: 'name',
 	margins: {
 		top: 10,
 		right: 10,
 		bottom: 10,
 		left: 100,
 		leftAxis: 85
+	},
+	
+	showLabels: true,
+	
+	tooltipFunction: function(d, i) {
+		return 'tooltip';
 	},
 
 	xAxis: null,
@@ -72,6 +83,8 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
  			xMetric = me.xMetric,
 	 		yMetric = me.yMetric,
 	 		margins = me.margins,
+	 		colorDefinedInData = me.colorDefinedInData,
+	 		colorDefinedInDataIndex = me.colorDefinedInDataIndex,
 	 		fixedColorRange = me.fixedColorRange,
 	 		fixedColorRangeIndex = me.fixedColorRangeIndex;
 
@@ -79,6 +92,12 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
  		// "gBar"
  		//////////////////////////////////////////////////
  		me.gBar = me.svg.append('svg:g')
+	 		.attr('transform', 'translate(' + me.margins.left + ', 0)');
+	 		
+	 	//////////////////////////////////////////////////
+ 		// "gBarLabel"...rotated labels on each bar
+ 		//////////////////////////////////////////////////
+ 		me.gBarLabel = me.svg.append('svg:g')
 	 		.attr('transform', 'translate(' + me.margins.left + ', 0)');
 	 		
 	 	//////////////////////////////////////////////////
@@ -126,7 +145,10 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 				return _yScale(d[yMetric]) - margins.bottom;
 			})
 			.style('fill', function(d, i) {
-				if(fixedColorRange != null && fixedColorRangeIndex != null) {
+				if(colorDefinedInData) {
+					return d[colorDefinedInDataIndex];
+				}
+				else if(fixedColorRange != null && fixedColorRangeIndex != null) {
 					return fixedColorRange[d.name];
 				} else {
 					return colorScale(i);
@@ -134,7 +156,13 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 			})
 			.style('opacity', 0.6)
 			.style('stroke', 'black')
-			.style('stroke-width', 1);
+			.style('stroke-width', 1)
+			.call(d3.helper.tooltip().text(me.tooltipFunction))
+			
+		//////////////////////////////////////////////////
+		// handle the bar labels
+		//////////////////////////////////////////////////
+		me.handleBarLabels();
 
 		//////////////////////////////////////////////////
 		// call the X axis function
@@ -169,6 +197,8 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
  			xMetric = me.xMetric,
 	 		yMetric = me.yMetric,
 	 		margins = me.margins,
+	 		colorDefinedInData = me.colorDefinedInData,
+	 		colorDefinedInDataIndex = me.colorDefinedInDataIndex,
 	 		fixedColorRange = me.fixedColorRange,
 	 		fixedColorRangeIndex = me.fixedColorRangeIndex;
 	 		
@@ -201,9 +231,8 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 		var newBars = rectSelection.enter()
 			.append('rect');
 			
-		// add new bars
-		var newBars = rectSelection.enter()
-			.append('rect');
+		// call tooltip function
+		rectSelection.call(d3.helper.tooltip().text(me.tooltipFunction));
 			
 		// transition all
 		rectSelection.transition()
@@ -221,9 +250,10 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 				return _yScale(d[yMetric]) - margins.bottom;
 			})
 			.style('fill', function(d, i) {
-				if(fixedColorRange != null && fixedColorRangeIndex != null) {
-					console.log(d.name);
-					console.log(fixedColorRange[d.name]);
+				if(colorDefinedInData) {
+					return d[colorDefinedInDataIndex];
+				}
+				else if(fixedColorRange != null && fixedColorRangeIndex != null) {
 					return fixedColorRange[d.name];
 				} else {
 					return colorScale(i);
@@ -234,12 +264,59 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 			.style('stroke-width', 1);
 			
 		//////////////////////////////////////////////////
+		// handle the bar labels
+		//////////////////////////////////////////////////
+		me.handleBarLabels();
+			
+		//////////////////////////////////////////////////
 		//
 		// re-call the Y axis function
 		//
 		//////////////////////////////////////////////////
 		me.gYAxis.transition().duration(500).call(me.yAxis);
  	},
+ 	
+ 	/**
+  	 * @function
+  	 * @description Handle bar labels
+  	 */
+  	handleBarLabels: function() {
+  		var me = this;
+  		
+  		var canvasHeight = me.canvasHeight,
+	  		barPadding = me.barPadding,
+	  		labelMetric = me.labelMetric,
+	  		margins = me.margins,
+	  		_xScale = me.xScale,
+	  		xMetric = me.xMetric;
+	  		
+	  	// remove
+	  	me.gBarLabel.selectAll('text').remove();
+	  	
+	  	if(me.showLabels) {
+	  		me.gBarLabel.selectAll('text')
+		  		.data(me.graphData)
+		  		.enter()
+		  		.append('text')
+		  		.style('font-size', me.labelFontSize)
+		  		.attr('x', function(d, i) {
+			  		return _xScale(d[xMetric]) + parseInt((_xScale.rangeBand() - barPadding)/2);
+			  	})
+			  	.attr('y', function(d) {
+				  	return canvasHeight - parseInt(margins.bottom * 1.2);
+				})
+				.attr('transform', function(d) {
+					// rotation needs to happen around the text's X and Y position
+					var x = _xScale(d[xMetric]) + parseInt((_xScale.rangeBand() - barPadding)/2);
+					var y = canvasHeight - parseInt(margins.bottom * 1.3);
+					return 'rotate(-90,' + x + ',' + y + ')';
+				})	
+			  	.style('text-anchor', 'start')
+			  	.text(function(d) {
+				  	return d[labelMetric];
+				});
+		}
+  	},
  	
 	/**
  	 * @function
@@ -412,16 +489,16 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 		////////////////////////////////////////
 		me.gGrouper.selectAll('text')
 			.data(finalData)
-			 .enter()
-			 .append('text')
-			 .attr('x', function(d) {
-				 var xMin = d.pathData[0].x;
-				 var xMax = d.pathData[d.pathData.length-1].x;
-				 	
-				 return parseInt((xMin + xMax)/2);
-			 })
-			 .attr('y', me.canvasHeight - me.margins.bottom + 30)
-			 .style('font-family', 'sans-serif')
+			.enter()
+			.append('text')
+			.attr('x', function(d) {
+				var xMin = d.pathData[0].x;
+				var xMax = d.pathData[d.pathData.length-1].x;
+				
+				return parseInt((xMin + xMax)/2);
+			})
+			.attr('y', me.canvasHeight - me.margins.bottom + 30)
+			.style('font-family', 'sans-serif')
 			.style('font-size', '9px')
 			.style('text-anchor', 'middle')
 			.text(function(d) {
