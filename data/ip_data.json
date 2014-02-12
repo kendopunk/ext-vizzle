@@ -16,12 +16,12 @@
          "finnoack":0
       }, {
          "protocol":6,
-         "packets":6,
+         "packets":33,
          "icmptype":0,
          "tcpflags":"S",
          "stime":1105114037.0910001,
          "initflags":"S",
-         "duration":272.988,
+         "duration":572.988,
          "sport":38858,
          "sip":945819105,
          "bytes":360,
@@ -133,7 +133,7 @@
          "tcpflags":"S",
          "stime":1105115418.099,
          "initflags":"S",
-         "duration":20.995000000000001,
+         "duration":150.229,
          "sport":55138,
          "sip":1988386156,
          "bytes":240,
@@ -170,7 +170,7 @@
          "finnoack":0
       }, {
          "protocol":6,
-         "packets":4,
+         "packets":17,
          "icmptype":0,
          "tcpflags":"S",
          "stime":1105115474.625,
@@ -212,7 +212,7 @@
          "finnoack":0
       }, {
          "protocol":6,
-         "packets":6,
+         "packets":99,
          "icmptype":0,
          "tcpflags":"S",
          "stime":1105115609.6329999,
@@ -254,7 +254,7 @@
          "finnoack":0
       }, {
          "protocol":6,
-         "packets":6,
+         "packets":18,
          "icmptype":0,
          "tcpflags":"S",
          "stime":1105116150.2449999,
@@ -296,7 +296,7 @@
          "finnoack":0
       }, {
          "protocol":6,
-         "packets":3,
+         "packets":72,
          "icmptype":0,
          "tcpflags":"S",
          "stime":1105116591.191,
@@ -310,7 +310,7 @@
          "finnoack":0
       }, {
          "protocol":6,
-         "packets":5,
+         "packets":11,
          "icmptype":0,
          "tcpflags":"S",
          "stime":1105116559.852,
@@ -366,7 +366,7 @@
          "finnoack":0
       }, {
          "protocol":6,
-         "packets":5,
+         "packets":35,
          "icmptype":0,
          "tcpflags":"S",
          "stime":1105116788.8959999,
@@ -380,7 +380,7 @@
          "finnoack":0
       }, {
          "protocol":6,
-         "packets":5,
+         "packets":25,
          "icmptype":0,
          "tcpflags":"S",
          "stime":1105116789.448,
@@ -394,7 +394,7 @@
          "finnoack":0
       }, {
          "protocol":6,
-         "packets":4,
+         "packets":14,
          "icmptype":193,
          "tcpflags":"FSPA",
          "stime":1105117048.283,
