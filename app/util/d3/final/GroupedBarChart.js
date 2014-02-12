@@ -12,7 +12,7 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 	 */
 	svg: null,
 	
-	barPadding: 0,
+	barPadding: 3,
 	
 	canvasHeight: 400,
 	canvasWidth: 400,
