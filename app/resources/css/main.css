@@ -31,6 +31,11 @@
 	background-repeat: no-repeat;
 }
 
+.icon-cow {
+	background-image: url(../img/icons/16x16/cow.png) !important;
+	background-repeat: no-repeat;
+}
+
 .icon-delete {
 	background-image: url(../img/icons/16x16/delete.png) !important;
 	background-repeat: no-repeat;
@@ -101,11 +106,6 @@
 	background-repeat: no-repeat;
 }
 
-.icon-stacked-bar-chart {
-	background-image: url(../img/icons/16x16/stacked-bar-chart.png) !important;
-	background-repeat: no-repeat;
-}
-
 .icon-scatterplot {
 	background-image: url(../img/icons/16x16/scatterplot.png) !important;
 	background-repeat: no-repeat;
@@ -113,6 +113,16 @@
 
 .icon-skull-and-bones {
 	background-image: url(../img/icons/16x16/skull-and-bones.png) !important;
+	background-repeat: no-repeat;
+}
+
+.icon-stacked-bar-chart {
+	background-image: url(../img/icons/16x16/stacked-bar-chart.png) !important;
+	background-repeat: no-repeat;
+}
+
+.icon-steak {
+	background-image: url(../img/icons/16x16/steak.png) !important;
 	background-repeat: no-repeat;
 }
 
@@ -186,10 +196,12 @@
 /**
  * ExtJS overrides and additions
  */
+.btn-highlight-aquamarine {
+	background: #66CDAA;
+}
 .btn-highlight-khaki {
 	background: #F0D58C;
 }
-
 .btn-highlight-peachpuff {
 	background: #FFDAB9;
 }
