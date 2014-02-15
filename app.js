@@ -52,9 +52,7 @@ Ext.application({
 					xtype: 'button',
 					text: 'smarmless.com',
 					handler: function() {	
-						if(location.host == 'localhost:8080') {
-							window.location = '../';
-						}
+						window.location='http://www.smarmless.com';
 					}
 				},
 				{
