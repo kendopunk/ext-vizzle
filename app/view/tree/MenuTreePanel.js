@@ -10,11 +10,10 @@ Ext.define('App.view.tree.MenuTreePanel', {
 		'App.store.tree.MenuStore'
 	],
 	autoScroll: true,
+	frame: false,
+	border: false,
 	width: 200,
 	title: 'Menu Tree Panel',
-	bodyStyle: {
-		padding: '5px'
-	},
 	store: Ext.create('App.store.tree.MenuStore'),
 	rootVisible: false,
 	initComponent: function() {
