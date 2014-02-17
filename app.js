@@ -57,7 +57,7 @@ Ext.application({
 				{
 					xtype: 'button',
 					text: 'smarmless.com',
-					handler: function() {	
+					handler: function() {
 						window.location = 'http://www.smarmless.com';
 					}
 				},
