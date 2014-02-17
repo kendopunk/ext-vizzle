@@ -34,11 +34,17 @@ Ext.application({
 					padding: '5px'
 				},
 				bodyCls: 'northPanelCls',
-				contentEl: 'header',
+				//contentEl: 'header',
+				html: '<b>smarmless.com</b> - Visualizations in ExtJS',
 				region: 'north',
 				bbar: [{
 					xtype: 'tbtext',
 					text: 'ExtJS v4.0.7'
+				},
+					'-',
+				{
+					xtype: 'tbtext',
+					text: 'D3 v3'
 				},
 					'->',
 				{
@@ -52,9 +58,7 @@ Ext.application({
 					xtype: 'button',
 					text: 'smarmless.com',
 					handler: function() {	
-						if(location.host == 'localhost:8080') {
-							window.location = '../';
-						}
+						window.location = 'http://www.smarmless.com';
 					}
 				},
 				{
@@ -93,10 +97,8 @@ Ext.application({
 				plain: true,
 				region: 'center',
 				listeners: {
-					/**
-					 * If there are no more tabs, then set the "Info" panel
-					 * message back to the globally-defined message
-					 */
+					// If there are no more tabs, then set the "Info" panel
+					// message back to the globally-defined message
  					remove: function(tabPanel) {
 						if(tabPanel.items.items.length == 0) {
 							var eventRelay = Ext.create('App.util.MessageBus');
@@ -108,6 +110,10 @@ Ext.application({
 					}
 				}
 			}]
-		})
+		});
+
+		if(Ext.get('page-loader')) {
+			Ext.get('page-loader').remove();
+		}
 	}
 });
