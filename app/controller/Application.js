@@ -22,6 +22,7 @@ Ext.define('App.controller.Application', {
 		'App.view.d3.pielegend.MainPanel',
 		'App.view.d3.scatterbrush.MainPanel',
 		'App.view.d3.scatterplot.MainPanel',
+		'App.view.d3.slope.debt.MainPanel',
 		'App.view.d3.ticker.MainPanel',
 		'App.view.d3.treemap.basic.MainPanel',
 		'App.view.d3.treemap.heat.MainPanel',

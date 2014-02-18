@@ -102,6 +102,11 @@ Ext.define('App.store.tree.MenuStore', {
 					iconCls: 'icon-arrow-right',
 					id: 'treemapHeatMainPanel'
 				}, {
+					text: 'Slopegraph',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'debtSlopeMainPanel'
+				}, {
 					text: 'Line/Area Chart',
 					leaf: true,
 					iconCls: 'icon-arrow-right',

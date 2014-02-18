@@ -1,0 +1,269 @@
+{
+   "success":true,
+   "data":[
+      {
+         "year":2013,
+         "debt":16738,
+         "gdp":16913,
+         "notes":[
+            "Sequestration reduced government spending.",
+            "Obama's payroll tax holiday raised revenue.",
+            "The debt hit $17 trillion a few days after the end of the fiscal year."
+         ]
+      },
+      {
+         "year":2012,
+         "debt":16066,
+         "gdp":16356,
+         "notes":[
+            "Obama extended Bush tax cuts.",
+            "$900 billion in defense spending.",
+            "Moody's cuts credit ratings of 15 major banks."
+         ]
+      },
+      {
+         "year":2011,
+         "debt":14790,
+         "gdp":15612,
+         "notes":[
+            "Obama Stimulus Act (ARRA) spent $120 billion.",
+            "Commodity prices soar."
+         ]
+      },
+      {
+         "year":2010,
+         "debt":13562,
+         "gdp":15050,
+         "notes":[
+            "ARRA budgeted $400 billion.",
+            "Obama signs landmark health care overhaul bill.",
+            "Californians’ income falls for the first time since WWII."
+         ]
+      },
+      {
+         "year":2009,
+         "debt":11910,
+         "gdp":14384,
+         "notes":[
+            "War on Terror cost $79 billion.",
+            "Fed funds rate lowered to 0%.",
+            "Barack Obama inaugurated as the 44th President of the U.S."
+         ]
+      },
+      {
+         "year":2008,
+         "debt":10025,
+         "gdp":14844,
+         "notes":[
+            "Economy contracted 3.7% in Q3 '08, 1.8% in Q1 '08.",
+            "War on Terror cost $197.6 billion.",
+            "Bank Bailout Bill cost $350 billion."
+         ]
+      },
+      {
+         "year":2007,
+         "debt":9008,
+         "gdp":14572,
+         "notes":[
+            "Fed injects $41bn in temporary reserves into US money markets.",
+            "Rising default rates hit subprime mortgage industry hard."
+         ]
+      },
+      {
+         "year":2006,
+         "debt":8507,
+         "gdp":13911,
+         "notes":[
+            "$24.7bn clean-up for Katrina",
+            "California's bond rating goes from A+ from A."
+         ]
+      },
+      {
+         "year":2005,
+         "debt":7933,
+         "gdp":13207,
+         "notes":[
+            "Fed funds rate raised from 2.25% to 4.25%",
+            "CPI posts biggest drop since 1949."
+         ]
+      },
+      {
+         "year":2004,
+         "debt":7379,
+         "gdp":12369,
+         "notes":[
+            "OPEC production quota cut.",
+            "Fed funds rate raised from 1% to 2.25%."
+         ]
+      },
+      {
+         "year":2003,
+         "debt":6783,
+         "gdp":11628,
+         "notes":[
+            "Unemployment at 6%",
+            "Operation Iraqi Freedom begins."
+         ]
+      },
+      {
+         "year":2002,
+         "debt":6228,
+         "gdp":11040,
+         "notes":[
+            "WorldCom files for bankruptcy protection.",
+            "GDP up 6.1% in Q1."
+         ]
+      },
+      {
+         "year":2001,
+         "debt":5807,
+         "gdp":10644,
+         "notes":[
+            "Nasdaq jumped a record 14.17%.",
+            "September 11th attacks.",
+            "GDP down 1.3% in Q3."
+         ]
+      },
+      {
+         "year":2000,
+         "debt":5674,
+         "gdp":10364,
+         "notes":[
+            "DJI hit record high of 11,722.98",
+            "China granted permanent normal trade relations with US.",
+            "Dow and Nasdaq record losing years for the first time since 1990."
+         ]
+      },
+      {
+         "year":1999,
+         "debt":5656,
+         "gdp":9719,
+         "notes":[
+            "The Euro is introduced, creating a single market in Europe.",
+            "Brazil devalues its currency.",
+            "Crude oil futures hit 9-year high @ $26.60 pbbl"
+         ]
+      },
+      {
+         "year":1998,
+         "debt":5526,
+         "gdp":9147,
+         "notes":[
+            "The U.S. trade deficit for January widened to its worst level in six years.",
+            "S&P stock index passes the 1000 milestone for the first time."
+         ]
+      },
+      {
+         "year":1997,
+         "debt":5413,
+         "gdp":8692,
+         "notes":[
+            "DJI avg tops 7000 mark.",
+            "China regains sovereignty over Hong Kong",
+            "Crashing currencies in Asia."
+         ]
+      },
+      {
+         "year":1996,
+         "debt":5225,
+         "gdp":8159,
+         "notes":[
+            "Fed Govt shutdown, budget talks stalled.",
+            "Minimum wage goes from $4.25 to 4.75",
+            "DJI avg tops 6000 mark."
+         ]
+      },
+      {
+         "year":1995,
+         "debt":4974,
+         "gdp":7707,
+         "notes":[
+            "US trade deficit soars by 68 percent to $12.2 billion",
+            "Dollar hits post WWII lows against Yen and Mark.",
+            "Fed funds rate reduced from 5.75% to 5.50%."
+         ]
+      },
+      {
+         "year":1994,
+         "debt":4693,
+         "gdp":7352,
+         "notes":[
+            "Fed funds rate raised from 3.0% to 5.5%.",
+            "GATT approved."
+         ]
+      },
+      {
+         "year":1993,
+         "debt":4411,
+         "gdp":6904,
+         "notes":[
+            "Bomb blast rocks WTC.",
+            "NAFTA is passed."
+         ]
+      },
+      {
+         "year":1992,
+         "debt":4065,
+         "gdp":6587,
+         "notes":[
+            "Hurricane Andrew",
+            "LA riots"
+         ]
+      },
+      {
+         "year":1991,
+         "debt":3665,
+         "gdp":6218,
+         "notes":[
+            "Prime rate cut from 10% to 9.5%",
+            "Operation Desert Storm."
+         ]
+      },
+      {
+         "year":1990,
+         "debt":3233,
+         "gdp":6030,
+         "notes":[
+            "Prime rate cut from 10.5% to 10%",
+            "Iraq invades Kuwait.",
+            "Fed gasoline tax up 5c/gal."
+         ]
+      },
+      {
+         "year":1989,
+         "debt":2857,
+         "gdp":5712,
+         "notes":[
+            "Savings and Loan crisis cost $125 billion."
+         ]
+      },
+      {
+         "year":1988,
+         "debt":2602,
+         "gdp":5300,
+         "notes":[
+            "Dow Jones Industrials close over 2,500 for the first time.",
+            "Discount rate raised from 6% to 6.5%."
+         ]
+      },
+      {
+         "year":1987,
+         "debt":2350,
+         "gdp":4901,
+         "notes":[
+            "Fannie Mae announces it will not enter home equity loan market.",
+            "Dollar hits postwar lows against Yen and Mark."
+         ]
+      },
+      {
+         "year":1986,
+         "debt":2125,
+         "gdp":4620,
+         "notes":[
+            "Challenger/Chernobyl",
+            "Paul Volcker warns of public and private debt buildup as a threat to the economy.",
+            "President Reagan lowered tax rates."
+         ]
+      }
+   ]
+}
