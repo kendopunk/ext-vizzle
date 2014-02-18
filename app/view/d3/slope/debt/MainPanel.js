@@ -78,7 +78,8 @@ Ext.define('App.view.d3.slope.debt.MainPanel', {
 		// tooltip function
 		//////////////////////////////////////////////////
 		me.tooltipFn = function(data, index) {
-			return '<b>' + data.year + '</b><br><br>'
+			return '<b>' + data.year + '</b><br>'
+				+ 'Debt ' + Ext.util.Format.number((data.debt/data.gdp)*100, '0,000') + '% of GDP<br><br>'
 				+ '<b>Notable Events:</b><br>-'
 				+ data.notes.join('<br>-');
 		};
