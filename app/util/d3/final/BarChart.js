@@ -194,6 +194,7 @@ Ext.define('App.util.d3.final.BarChart', {
 		// configure the rectangle "g" element
 		// text "g" element, and
 		// Y axis "g" element
+		// title "g" element
 		//////////////////////////////////////////////////
 		me.gBar = me.svg.append('svg:g');
 		if(me.showLegend) {
@@ -204,6 +205,15 @@ Ext.define('App.util.d3.final.BarChart', {
 			me.gText.attr('transform', 'translate(' + me.margins.left + ', 0)');
 		}
 		me.gYAxis = me.svg.append('svg:g');
+		me.gTitle = me.svg.append('svg:g')
+			.attr('transform', 'translate(15,' + parseInt(me.margins.top/2) + ')');
+		
+		//////////////////////////////////////////////////
+		// init the legend "g", regardless of "showLegend"
+		//////////////////////////////////////////////////
+		var legendTranslateX = me.margins.left + (me.getFlexUnit() * me.chartFlex) + me.spaceBetweenChartAndLegend;		
+		me.gLegend = me.svg.append('svg:g')
+			.attr('transform', 'translate(' + legendTranslateX + ', ' + me.margins.top + ')');
 		
 		//////////////////////////////////////////////////
 		// set scales
@@ -215,225 +225,42 @@ Ext.define('App.util.d3.final.BarChart', {
 		//////////////////////////////////////////////////
 		// bring class vars into local scope
 		//////////////////////////////////////////////////
-		var barPadding = me.barPadding,
-			eventRelay = me.eventRelay,
-			canvasHeight = me.canvasHeight,
-			canvasWidth = me.canvasWidth,
+		var margins = me.margins,
 			chartFlex = me.chartFlex,
-			chartTitle = me.chartTitle,
-			colorScale = me.colorScale,
-			dataMetric = me.dataMetric,
-			graphData = me.graphData,
-			handleEvents = me.handleEvents,
-			labelDistanceFromBar = me.labelDistanceFromBar,
 			legendFlex = me.legendFlex,
-			legendSquareHeight = me.legendSquareHeight,
-			legendSquareWidth = me.legendSquareWidth,
-			margins = me.margins,
-			mouseEvents = me.mouseEvents,
-			oneFlexUnit = me.getFlexUnit(),
-			showLegend = me.showLegend,
 			spaceBetweenChartAndLegend = me.spaceBetweenChartAndLegend,
-			xScale = me.xScale,
-			yAxis = me.yAxis,
-			yScale = me.yScale;
+			yAxis = me.yAxis;
 		
 		//////////////////////////////////////////////////
 		// draw rectangle / bars
 		//////////////////////////////////////////////////
-		me.gBar.selectAll('rect')
-			.data(graphData)
-			.enter()
-			.append('rect')
-			.attr('x', function(d, i) {
-				return xScale(i);
-			})
-			.attr('y', function(d) {
-				return canvasHeight - yScale(d[dataMetric]);
-			})
-			.attr('width', function(d) {	
-				if(showLegend) {
-					return ((oneFlexUnit * chartFlex)/graphData.length) - barPadding;
-				} else {
-					return (canvasWidth - (margins.left + margins.right))/graphData.length - barPadding;
-				}
-			})
-			.attr('height', function(d) {
-				return yScale(d[dataMetric]) - margins.bottom;
-			})
-			.attr('fill', function(d, i) {
-				return colorScale(i);
-			})
-			.attr('defaultOpacity', .6)
-			.style('opacity', .6)
-			.style('stroke', '#333333')
-			.style('stroke-width', 1)
-			.call(d3.helper.tooltip().text(me.tooltipFunction))
-			.on('mouseover', function(d, i) {
-				
-				if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
-					eventRelay.publish(mouseEvents.mouseover.eventName, {
-						payload: d,
-						index: i
-					});
-				}
-				
-				d3.select(this).style('opacity', .9);
-			})
-			.on('mouseout', function(d) {
-				var el = d3.select(this);
-				el.style('opacity', el.attr('defaultOpacity'));
-			});
+		me.handleBars();
 		
 		//////////////////////////////////////////////////
-		// construct labels, if applicable
+		// handle labels, if applicable
 		//////////////////////////////////////////////////
 		if(me.showLabels) {
-			me.gText.selectAll('text')
-				.data(graphData)
-				.enter()
-				.append('text')
-				.style('font-size', me.labelFontSize)
-				.attr('x', function(d, i) {
-					return xScale(i);
-				})
-				.attr('y', function(d) {
-					return canvasHeight - yScale(d[dataMetric]) - labelDistanceFromBar;
-				})
-				.attr('text-anchor', 'start')
-				.text(me.labelFunction);
+			me.handleLabels();
 		}
 		
 		//////////////////////////////////////////////////
 		// call the Y axis function
 		//////////////////////////////////////////////////
 		me.gYAxis.attr('class', 'axis')
-			.attr('transform', 'translate(' + margins.leftAxis + ', 0)')
+			.attr('transform', 'translate(' + me.margins.leftAxis + ', 0)')
 			.call(yAxis);
-		
+			
 		//////////////////////////////////////////////////
-		// handle the legend, if applicable
+		// handle the legend
 		//////////////////////////////////////////////////
-		var legendTranslateX = margins.left 
-			+ (me.getFlexUnit() * chartFlex) 
-			+ spaceBetweenChartAndLegend;
-				
-		me.gLegend = me.svg.append('svg:g')
-			.attr('transform', 'translate(' + legendTranslateX + ', ' + me.margins.top + ')');
-			
-		if(showLegend) {	
-			// bring bars into local scope
-			var bars = me.gBar;
-			
-			// legend squares
-			me.gLegend.selectAll('rect')
-				.data(me.graphData)
-				.enter()
-				.append('rect')
-				.attr('x', 0)
-				.attr('y', function(d, i) {
-					return i * legendSquareHeight * 1.75;
-				})
-				.attr('width', me.legendSquareWidth)
-				.attr('height', me.legendSquareHeight)
-				.attr('fill', function(d, i) {
-					return colorScale(i);
-				})
-				.style('defaultOpacity', 1)
-				.style('opacity', 1)
-				.on('mouseover', function(d, i) {
-					// fade this rectangle
-					d3.select(this).style('opacity', .4);
-					
-					// outline the bars
-					bars.selectAll('rect').filter(function(e, j) {
-						return i == j;
-					})
-					.style('stroke', '#000000')
-					.style('stroke-width', 2)
-					.style('opacity', 1)
-					.attr('transform', 'translate(0, -10)');
-				})
-				.on('mouseout', function(d, i) {
-					// unfade this rect
-					var el = d3.select(this);
-					el.style('opacity', el.attr('defaultOpacity'));
-					
-					// back to normal
-					bars.selectAll('rect').filter(function(e, j) {
-						return i == j;
-					})
-					.style('stroke', 0)
-					.style('stroke-width', null)
-					.style('opacity', .6)
-					.transition()
-					.duration(500)
-					.attr('transform', 'translate(0,0)');
-				});
-			
-			// legend text elements
-			me.gLegend.selectAll('text')
-				.data(me.graphData)
-				.enter()
-				.append('text')
-				.attr('x', legendSquareWidth * 2)
-				.attr('y', function(d, i) {
-					return i * legendSquareHeight * 1.75;
-				})
-				.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
-				.text(me.legendTextFunction)
-				.style('font-size', me.legendFontSize)
-				.on('mouseover', function(d, i) {
-					// highlight text
-					d3.select(this)
-						.style('fill', '#000099')
-						.style('font-weight', 'bold');
-					
-					// outline the bars
-					bars.selectAll('rect').filter(function(e, j) {
-						return i == j;
-					})
-					.style('stroke', '#000000')
-					.style('stroke-width', 2)
-					.style('opacity', 1)
-					.attr('transform', 'translate(0,' + (me.labelDistanceFromBar-3) * -1 + ')'); 
-				})
-				.on('mouseout', function(d, i) {
-					// un-highlight text
-					var el = d3.select(this);
-					el.style('fill', '#000000')
-						.style('font-weight', 'normal');
-						
-					// back to normal
-					bars.selectAll('rect').filter(function(e, j) {
-						return i == j;
-					})
-					.style('stroke', 0)
-					.style('stroke-width', null)
-					.style('opacity', .6)
-					.transition()
-					.duration(500)
-					.attr('transform', 'translate(0,0)');
-				});
+		if(me.showLegend) {
+			me.handleLegend();
 		}
 			
 		//////////////////////////////////////////////////
-		// chart title
+		// init chart "g" and draw
 		//////////////////////////////////////////////////
-		me.gTitle = me.svg.append('svg:g')
-			.attr('transform', 'translate(15,' + parseInt(me.margins.top/2) + ')');
-		if(me.chartTitle != null) {
-			me.gTitle.selectAll('text')
-				.data([me.chartTitle])
-				.enter()
-				.append('text')
-				.style('fill', '#333333')
-				.style('font-weight', 'bold')
-				.style('font-family', 'sans-serif')
-				.text(function(d) {
-					return d;
-				});
-		}
+		me.handleChartTitle();
 	},
 	
 	/**
@@ -452,46 +279,81 @@ Ext.define('App.util.d3.final.BarChart', {
 		me.setYAxisScale(me.dataMetric);
 		
 		//////////////////////////////////////////////////
-		// vars into local scope
+		// transition bars
 		//////////////////////////////////////////////////
-		var barPadding = me.barPadding,
-			canvasHeight = me.canvasHeight,
-			canvasWidth = me.canvasWidth,
-			chartFlex = me.chartFlex,
-			colorScale = me.colorScale,
-			dataMetric = me.dataMetric,
+		me.handleBars();
+		
+		//////////////////////////////////////////////////
+		// handle labels...or remove, if applicable
+		//////////////////////////////////////////////////
+		if(me.showLabels) {
+			me.handleLabels();
+		} else {
+			me.gText.selectAll('text')
+				.transition()
+				.duration(250)
+				.attr('x', -100)
+				.remove();
+		}
+		
+		//////////////////////////////////////////////////
+		// handle legend
+		//////////////////////////////////////////////////
+		if(me.showLegend) {
+			me.handleLegend();
+		}
+		
+		//////////////////////////////////////////////////
+		// handle chart title
+		//////////////////////////////////////////////////
+		me.handleChartTitle();
+		
+		//////////////////////////////////////////////////
+		// re-call the Y axis function
+		//////////////////////////////////////////////////
+		me.svg.selectAll('g.axis').transition().duration(500).call(me.yAxis);
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Handle the bars/rects for the bar chart
+ 	 */
+ 	handleBars: function() {
+	 	var me = this;
+	 	
+	 	// local scope
+		var handleEvents = me.handleEvents,
 			eventRelay = me.eventRelay,
-			graphData = me.graphData,
-			handleEvents = me.handleEvents,
-			labelDistanceFromBar = me.labelDistanceFromBar,
-			legendFlex = me.legendFlex,
-			legendSquareWidth = me.legendSquareWidth,
-			legendSquareHeight = me.legendSquareHeight,
-			margins = me.margins,
-			mouseEvents = me.mouseEvents;
-			oneFlexUnit = me.getFlexUnit(),
-			showLegend = me.showLegend,
+			mouseEvents = me.mouseEvents,
+			eventRelay = me.eventRelay,
 			xScale = me.xScale,
-			yScale = me.yScale;
-			
-		//////////////////////////////////////////////////
-		//
-		// rectangle transition
-		//
-		//////////////////////////////////////////////////
-		// join new data with old data
-		var rectSelection = me.gBar.selectAll('rect')
-			.data(me.graphData);
-			
-		// transition out old bars
-		rectSelection.exit()
+			canvasWidth = me.canvasWidth,
+			canvasHeight = me.canvasHeight,
+			yScale = me.yScale,
+			dataMetric = me.dataMetric,
+			showLegend = me.showLegend,
+			graphData = me.graphData,
+			chartFlex = me.chartFlex,
+			legendFlex = me.legendFlex,
+			oneFlexUnit = me.getFlexUnit(),
+			barPadding = me.barPadding,
+			margins = me.margins,
+			colorScale = me.colorScale,
+			gLegend = me.gLegend;
+	 	
+	 	// join new with old
+	 	var rectSelection = me.gBar.selectAll('rect')
+	 		.data(me.graphData);
+	 		
+	 	// transition out old
+ 		rectSelection.exit()
 			.transition()
 			.duration(500)
 			.attr('width', 0)
 			.remove();
 			
 		// add new bars
-		var newBars = rectSelection.enter()
+		rectSelection.enter()
 			.append('rect')
 			.attr('defaultOpacity', .6)
 			.style('opacity', .6)
@@ -508,14 +370,30 @@ Ext.define('App.util.d3.final.BarChart', {
 			}
 				
 			d3.select(this).style('opacity', .9);
+			
+			if(showLegend) {
+				gLegend.selectAll('text').filter(function(e, j) {
+					return e[dataMetric] == d[dataMetric];
+				})
+				.style('fill', '#990066')
+				.style('font-weight', 'bold');
+			}
 		})
 		.on('mouseout', function(d) {
 			var el = d3.select(this);
 			el.style('opacity', el.attr('defaultOpacity'));
+			
+			if(showLegend) {
+				gLegend.selectAll('text').filter(function(e, j) {
+					return e[dataMetric] == d[dataMetric];
+				})
+				.style('fill', '#000000')
+				.style('font-weight', 'normal');
+			}
 		})
 		.call(d3.helper.tooltip().text(me.tooltipFunction));
 		
-		// transition rectangles
+		// transition all rectangles
 		rectSelection.transition()
 			.duration(500)
 			.attr('x', function(d, i) {
@@ -537,183 +415,202 @@ Ext.define('App.util.d3.final.BarChart', {
 			.attr('fill', function(d, i) {
 				return colorScale(i);
 			});
+ 	
+ 	},
+ 	
+ 	/**
+  	 * @function
+  	 * @description Handle drawing/transitioning of labels
+  	 */
+ 	handleLabels: function() {
+	 	var me = this;
+	 	
+	 	// local scope
+	 	var labelFontSize = me.labelFontSize,
+	 		canvasHeight = me.canvasHeight,
+	 		canvasWidth = me.canvasWidth,
+	 		xScale = me.xScale,
+	 		yScale = me.yScale,
+	 		dataMetric = me.dataMetric,
+	 		labelDistanceFromBar = me.labelDistanceFromBar,
+	 		labelFunction = me.labelFunction;
+	 		
+	 	// join new with old
+		var labelSelection = me.gText.selectAll('text')
+			.data(me.graphData);
+			
+		// remove old
+		labelSelection.exit().remove();
 		
-		//////////////////////////////////////////////////
-		//
-		// label transition
-		//
-		//////////////////////////////////////////////////
-		if(me.showLabels) {
-			// join
-			var labelSelection = me.gText.selectAll('text')
-				.data(me.graphData);
-
-			// remove
-			labelSelection.exit().remove();
-			
-			// new labels
-			var newLabels = labelSelection.enter()
-				.append('text')
-				.style('font-size', me.labelFontSize)
-				.attr('textAnchor', 'start');
-				
-			// transition all
-			labelSelection.transition()
-				.duration(250)
-				.attr('x', function(d, i) {
-					return xScale(i);
-				})
-				.attr('y', function(d) {
-					return canvasHeight - yScale(d[dataMetric]) - labelDistanceFromBar;
-				})
-				.text(me.labelFunction);	
-		} else {
-			me.gText.selectAll('text')
-				.transition()
-				.duration(250)
-				.attr('x', -100)
-				.remove();
-		}
+		// add new labels
+		labelSelection.enter()
+			.append('text')
+			.style('font-size', me.labelFontSize)
+			.attr('textAnchor', 'start');
 		
-		//////////////////////////////////////////////////
-		//
-		// legend transition
-		//
-		//////////////////////////////////////////////////
-		if(showLegend) {
-			// bring the bar "g" into local scope
-			var bars = me.gBar;
+		// transition all
+		labelSelection.transition()
+			.duration(250)
+			.attr('x', function(d, i) {
+				return xScale(i);
+			})
+			.attr('y', function(d) {
+				return canvasHeight - yScale(d[dataMetric]) - labelDistanceFromBar;
+			})
+			.text(me.labelFunction);
+	},
+ 	
+	/**
+	 * @function
+	 * @description Handle the bar chart legend
+	 */
+	handleLegend: function() {
+		var me = this;
+		
+		// local scope
+		var bars = me.gBar,
+			colorScale = me.colorScale,
+			legendSquareHeight = me.legendSquareHeight,
+			legendSquareWidth = me.legendSquareWidth;
 			
-			//
-			// SQUARES
-			//
-			
-			// join new squares with current squares
-			var legendSquareSelection = me.gLegend.selectAll('rect')
-				.data(me.graphData);
+		////////////////////////////////////////
+		// LEGEND SQUARES
+		////////////////////////////////////////
+		// join new squares with current squares
+		var legendSquareSelection = me.gLegend.selectAll('rect')
+			.data(me.graphData);
 				
-			// remove old squares
-			legendSquareSelection.exit().remove();
+		// remove old squares
+		legendSquareSelection.exit().remove();
 			
-			// add new squares
-			legendSquareSelection.enter().append('rect')
-				.style('defaultOpacity', 1)
+		// add new squares
+		legendSquareSelection.enter().append('rect')
+			.style('defaultOpacity', 1)
+			.style('opacity', 1)
+			.on('mouseover', function(d, i) {
+				// fade this rectangle
+				d3.select(this).style('opacity', .4);
+					
+				// outline the bars
+				bars.selectAll('rect').filter(function(e, j) {
+					return i == j;
+				})
+				.style('stroke', '#000000')
+				.style('stroke-width', 2)
 				.style('opacity', 1)
-				.on('mouseover', function(d, i) {
-					// fade this rectangle
-					d3.select(this).style('opacity', .4);
+				.attr('transform', 'translate(0, -10)');
+			})
+			.on('mouseout', function(d, i) {
+				// unfade this rect
+				var el = d3.select(this);
+				el.style('opacity', el.attr('defaultOpacity'));
 					
-					// outline the bars
-					bars.selectAll('rect').filter(function(e, j) {
-						return i == j;
-					})
-					.style('stroke', '#000000')
-					.style('stroke-width', 2)
-					.style('opacity', 1)
-					.attr('transform', 'translate(0, -10)');
+				// back to normal
+				bars.selectAll('rect').filter(function(e, j) {
+					return i == j;
 				})
-				.on('mouseout', function(d, i) {
-					// unfade this rect
-					var el = d3.select(this);
-					el.style('opacity', el.attr('defaultOpacity'));
-					
-					// back to normal
-					bars.selectAll('rect').filter(function(e, j) {
-						return i == j;
-					})
-					.style('stroke', 0)
-					.style('stroke-width', null)
-					.style('opacity', .6)
-					.transition()
-					.duration(500)
-					.attr('transform', 'translate(0,0)');
+				.style('stroke', 0)
+				.style('stroke-width', null)
+				.style('opacity', .6)
+				.transition()
+				.duration(500)
+				.attr('transform', 'translate(0,0)');
 			});
+		
+		// transition all squares
+		legendSquareSelection.transition()
+			.attr('x', 0)
+			.attr('y', function(d, i) {
+				return i * legendSquareHeight * 1.75;
+			})
+			.attr('width', me.legendSquareWidth)
+			.attr('height', me.legendSquareHeight)
+			.attr('fill', function(d, i) {
+				return colorScale(i);
+			});
+		
+		////////////////////////////////////////
+		// LEGEND TEXT
+		////////////////////////////////////////
+		// join new text with current text
+		var legendTextSelection = me.gLegend.selectAll('text')
+			.data(me.graphData);
+				
+		// remove old text
+		legendTextSelection.exit().remove();
 			
-			// transition all squares
-			legendSquareSelection.transition()
-				.attr('x', 0)
-				.attr('y', function(d, i) {
-					return i * legendSquareHeight * 1.75;
+		// add new text
+		legendTextSelection.enter().append('text')
+			.style('font-size', me.legendFontSize)
+			.on('mouseover', function(d, i) {
+				// highlight text
+				d3.select(this)
+					.style('fill', '#990066')
+					.style('font-weight', 'bold');
+				
+				// outline the bars
+				bars.selectAll('rect').filter(function(e, j) {
+					return i == j;
 				})
-				.attr('width', me.legendSquareWidth)
-				.attr('height', me.legendSquareHeight)
-				.attr('fill', function(d, i) {
-					return colorScale(i);
-				});
-				
-			//
-			// TEXT
-			//
-			
-			// join new text with current text
-			var legendTextSelection = me.gLegend.selectAll('text')
-				.data(me.graphData);
-				
-			// remove old text
-			legendTextSelection.exit().remove();
-			
-			// add new text
-			legendTextSelection.enter().append('text')
-				.style('font-size', me.legendFontSize)
-				.on('mouseover', function(d, i) {
-					// highlight text
-					d3.select(this)
-						.style('fill', '#000099')
-						.style('font-weight', 'bold');
+				.style('stroke', '#000000')
+				.style('stroke-width', 2)
+				.style('opacity', 1)
+				.attr('transform', 'translate(0,' + (me.labelDistanceFromBar-3) * -1 + ')'); 
+			})
+			.on('mouseout', function(d, i) {
+				// un-highlight text
+				var el = d3.select(this);
+				el.style('fill', '#000000')
+					.style('font-weight', 'normal');
 					
-					// outline the bars
-					bars.selectAll('rect').filter(function(e, j) {
-						return i == j;
-					})
-					.style('stroke', '#000000')
-					.style('stroke-width', 2)
-					.style('opacity', 1)
-					.attr('transform', 'translate(0,' + (me.labelDistanceFromBar-3) * -1 + ')'); 
+				// back to normal
+				bars.selectAll('rect').filter(function(e, j) {
+					return i == j;
 				})
-				.on('mouseout', function(d, i) {
-					// un-highlight text
-					var el = d3.select(this);
-					el.style('fill', '#000000')
-						.style('font-weight', 'normal');
-						
-					// back to normal
-					bars.selectAll('rect').filter(function(e, j) {
-						return i == j;
-					})
-					.style('stroke', 0)
-					.style('stroke-width', null)
-					.style('opacity', .6)
-					.transition()
-					.duration(500)
-					.attr('transform', 'translate(0,0)');
-				});
-				
-			// transition all text
-			legendTextSelection.transition()
-				.attr('x', legendSquareWidth * 2)
-				.attr('y', function(d, i) {
-					return i * legendSquareHeight * 1.75;
-				})
-				.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
-				.text(me.legendTextFunction);
+				.style('stroke', 0)
+				.style('stroke-width', null)
+				.style('opacity', .6)
+				.transition()
+				.duration(500)
+				.attr('transform', 'translate(0,0)');
+			});
+		
+		// transition all text
+		legendTextSelection.transition()
+			.attr('x', legendSquareWidth * 2)
+			.attr('y', function(d, i) {
+				return i * legendSquareHeight * 1.75;
+			})
+			.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
+			.text(me.legendTextFunction);
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Draw/transition the chart title
+ 	 */
+	handleChartTitle: function() {
+		var me = this,
+			ct;
+		
+		if(me.chartTitle == null) {
+			ct = '';
+		} else {
+			ct = me.chartTitle;
 		}
 		
-		//////////////////////////////////////////////////
-		//
-		// title transition
-		//
-		//////////////////////////////////////////////////
-		if(me.chartTitle != null) {
-			me.gTitle.selectAll('text')
-				.text(me.chartTitle);
-		}
+		me.gTitle.selectAll('text').remove();
 		
-		//////////////////////////////////////////////////
-		//
-		// re-call the Y axis function
-		//
-		//////////////////////////////////////////////////
-		me.svg.selectAll('g.axis').transition().duration(500).call(me.yAxis);
+		me.gTitle.selectAll('text')
+			.data([ct])
+			.enter()
+			.append('text')
+			.style('fill', '#333333')
+			.style('font-weight', 'bold')
+			.style('font-family', 'sans-serif')
+			.text(function(d) {
+				return d;
+			});
 	},
 	
 	/**

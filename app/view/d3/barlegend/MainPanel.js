@@ -44,7 +44,7 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
  		 * @property
  		 */
 		me.chartDescription = '<b>Bar Chart ++</b><br><br>'
-			+ 'Demonstration of a D3 bar chart with legend and label toggling.  This is a subclass of the generic bar chart.<br><br>'
+			+ 'Label toggling and legend/legend transitions with mouseover events.<br><br>'
 			+ 'The chart and legend are each contained in separate SVG "g" elements and can be '
 			+ '"flexed" accordingly to adjust the width each "g" occupies in the canvas.';
 			
