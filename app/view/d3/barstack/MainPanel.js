@@ -43,9 +43,9 @@ Ext.define('App.view.d3.barstack.MainPanel', {
  		 * @property
  		 */
 		me.chartDescription = '<b>Stacked Bar Chart</b><br><br>'
-			+ '<i>Sales of some of the top-selling albums of all time in the US, UK, and Canada. '
-		 	+ 'Data from Wikipedia (for the most part)</i><br><br>'
-			+ 'Demonstration of a D3 stacked bar chart using stack layout.<br><br>'
+			+ '<i>Sales of some of the top-selling albums of all time in the US, UK, and Canada.</i><br><br>'
+		 	+ 'Data from Wikipedia (for the most part)<br><br>'
+			+ 'Demonstration of a D3 stacked bar chart using stack layout. A stacked bar chart is sometimes referred to as a <i>column chart</i> (Excel, et. al.)<br><br>'
 			+ 'Check out the mouseover events...hee-hee, shamone.'
 			
 		/**
