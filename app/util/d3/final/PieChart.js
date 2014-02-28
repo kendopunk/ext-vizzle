@@ -24,6 +24,7 @@ Ext.define('App.util.d3.final.PieChart', {
 	dataMetric: null,
 	eventRelay: null,
 	gLegend: null,			// "g" element to hold the legend (if applicable)
+	gLabel: null,
 	gPie: null,				// "g" element to hold the pie chart
 	gTitle: null,			// "g" element to hold the title
 	graphData: [],
@@ -152,20 +153,25 @@ Ext.define('App.util.d3.final.PieChart', {
 		var innerRadius = me.innerRadius;
 		
 		//////////////////////////////////////////////////
-		// set the pie "g" element
+		// pie "g"
+		// chart title "g"
+		// legend "g"
+		// label "g"
 		//////////////////////////////////////////////////
 		me.gPie = me.svg.append('svg:g')
 			.attr('transform', 'translate(' + chartTranslateX + ',' + chartTranslateY + ')');
 			
-		//////////////////////////////////////////////////
-		// the legend "g"
-		//////////////////////////////////////////////////
+		me.gTitle = me.svg.append('svg:g')
+			.attr('transform', 'translate(15,' + parseInt(me.margins.top/2) + ')');
+			
 		me.gLegend = me.svg.append('svg:g');
 		if(showLegend) {
 			legendTranslateX = (me.getFlexUnit() * me.chartFlex) + me.spaceBetweenChartAndLegend;
 			legendTranslateY = me.margins.top;
 			me.gLegend.attr('transform', 'translate(' + legendTranslateX + ',' + legendTranslateY + ')');
 		}
+		
+		me.gLabel = me.svg.append('svg:g');
 		
 		//////////////////////////////////////////////////
 		// set the pie layout
@@ -203,142 +209,58 @@ Ext.define('App.util.d3.final.PieChart', {
 		//////////////////////////////////////////////////
 		// append the paths
 		//////////////////////////////////////////////////
+		var gLegend = me.gLegend;
+		
 		segments.append('path')
 			.attr('d', me.arcObject)
 			.style('fill', function(d, i) {
 				return colorScale(i);
 			})
-			.attr('defaultOpacity', .6)
 			.style('opacity', .6)
 			.call(d3.helper.tooltip().text(me.tooltipFunction))
 			.on('mouseover', function(d, i) {
+				// wedge stroke = black
 				d3.select(this)
-					.style('opacity', 1)
-					.style('stroke', '#000000')
-					.style('stroke-width', 1);
+				.style('opacity', 1)
+				.style('stroke', '#000000');
+				
+				if(showLegend) {
+					gLegend.selectAll('text').filter(function(e, j) {
+						return e[dataMetric] == d.data[dataMetric];
+					})
+					.style('fill', '#990066')
+					.style('font-weight', 'bold');
+				}
 			})
 			.on('mouseout', function(d) {
-				var el = d3.select(this);
-				el.style('opacity', el.attr('defaultOpacity'));
-				el.style('stroke', 'white')
-				el.style('stroke-width', 1);
+				// wedge stroke revert to white
+				d3.select(this)
+				.style('opacity', .6)
+				.style('stroke', 'white');
+				
+				if(showLegend) {
+					gLegend.selectAll('text').filter(function(e, j) {
+						return e[dataMetric] == d.data[dataMetric];
+					})
+					.style('fill', '#000000')
+					.style('font-weight', 'normal');
+				}
 			});
 		
 		//////////////////////////////////////////////////
-		// show labels ??
+		// LABELS, if applicable
 		//////////////////////////////////////////////////
-		if(me.showLabels) {
-			var arc = me.arcObject;
-			
-			segments.append('text')
-				.attr('transform', function(d, i) {
-					var c = arc.centroid(d),
-						x = c[0],
-						y = c[1],
-						h = Math.sqrt(x*x + y*y),
-						xTrans = (x/h * outerRadius) + (x/h * outerRadius * .05),
-						yTrans = (y/h * outerRadius) + i;
-						
-					if(yTrans < 0) {
-						yTrans = yTrans - Math.abs(yTrans * .1);
-					}
-					
-					return 'translate(' + xTrans + ',' + yTrans + ')';
-				})
-				.attr('dy', function(d, i) {
-					return '0.35em';
-				})
-				.attr('text-anchor', function(d) {
-					return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';
-				})
-				.style('font-size', me.labelFontSize)
-				.text(me.labelFunction);
-		}
+		if(me.showLabels) { me.handleLabels(); }
 		
 		//////////////////////////////////////////////////
-		// chart title
+		// LEGEND, if applicable
 		//////////////////////////////////////////////////
-		me.gTitle = me.svg.append('svg:g')
-			.attr('transform', 'translate(15,' + parseInt(me.margins.top/2) + ')');
-		if(me.chartTitle != null) {
-			me.gTitle.selectAll('text')
-				.data([me.chartTitle])
-				.enter()
-				.append('text')
-				.style('fill', '#444444')
-				.style('font-weight', 'bold')
-				.style('font-family', 'sans-serif')
-				.text(function(d) {
-					return d;
-				});
-		}
-		
+		if(me.showLegend) { me.handleLegend(); }
+
 		//////////////////////////////////////////////////
-		// legend, if applicable
+		// CHART TITLE
 		//////////////////////////////////////////////////
-		if(showLegend) {
-			// pie layout into local scope
-			var thePie = me.gPie;
-			
-			//
-			// squares
-			//
-			me.gLegend.selectAll('rect')
-				.data(me.graphData)
-				.enter()
-				.append('rect')
-				.attr('x', 0)
-				.attr('y', function(d, i) {
-					return i * legendSquareHeight * 1.75;
-				})
-				.attr('width', me.legendSquareWidth)
-				.attr('height', me.legendSquareHeight)
-				.attr('fill', function(d, i) {
-					return colorScale(i);
-				})
-				.style('defaultOpacity', 1)
-				.style('opacity', 1);
-			
-			//
-			// text elements
-			//
-			me.gLegend.selectAll('text')
-				.data(me.graphData)
-				.enter()
-				.append('text')
-				.attr('x', legendSquareWidth * 2)
-				.attr('y', function(d, i) {
-					return i * legendSquareHeight * 1.75;
-				})
-				.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
-				.text(me.legendTextFunction)
-				.on('mouseover', function(d, i) {
-					// highlight this text
-					d3.select(this)
-						.style('fill', '#000099')
-						.style('font-weight', 'bold');
-						
-					// highlight the selected arc
-					thePie.selectAll('.arc').filter(function(e, j) {
-						return i == j;
-					})
-					.transition()
-					.attr('transform', 'scale(1.1, 1.1)');
-				})
-				.on('mouseout', function(d, i) {
-					// un-highlight this text
-					var el = d3.select(this);
-					el.style('fill', '#000000')
-						.style('font-weight', 'normal');
-					
-					// select the arc and transition
-					thePie.selectAll('.arc').filter(function(e, j) {
-						return i == j;
-					})
-					.transition()
-					.attr('transform', 'scale(1,1)');
-				});
-		}
+		me.handleChartTitle();
 	},
 	
 	/**
@@ -362,7 +284,8 @@ Ext.define('App.util.d3.final.PieChart', {
 			legendSquareHeight = me.legendSquareHeight,
 			mouseEvents = me.mouseEvents,
 			outerRadius = me.outerRadius,
-			showLegend = me.showLegend;
+			showLegend = me.showLegend,
+			gLegend = me.gLegend;
 
 		//////////////////////////////////////////////////
 		// new value function for pie layout
@@ -405,21 +328,35 @@ Ext.define('App.util.d3.final.PieChart', {
 			.style('fill', function(d, i) {
 				return colorScale(i);
 			})
-			.attr('defaultOpacity', .6)
 			.style('opacity', .6)
 			.call(d3.helper.tooltip().text(me.tooltipFunction))
 			.on('mouseover', function(d) {
-				
+				// wedge stroke black
 				d3.select(this)
 					.style('opacity', 1)
-					.style('stroke', '#000000')
-					.style('stroke-width', 1);
+					.style('stroke', '#000000');
+					
+				if(showLegend) {
+					gLegend.selectAll('text').filter(function(e, j) {
+						return e[dataMetric] == d.data[dataMetric];
+					})
+					.style('fill', '#990066')
+					.style('font-weight', 'bold');
+				}
 			})
 			.on('mouseout', function(d) {
-				var el = d3.select(this);
-				el.style('opacity', el.attr('defaultOpacity'));
-				el.style('stroke', 'white')
-				el.style('stroke-width', 1);
+				// wedge stroke revert to white
+				d3.select(this);
+					el.style('opacity', .6)
+					el.style('stroke', 'white');
+					
+				if(showLegend) {
+					gLegend.selectAll('text').filter(function(e, j) {
+						return e[dataMetric] == d.data[dataMetric];
+					})
+					.style('fill', '#000000')
+					.style('font-weight', 'normal');
+				}
 			});
 			
 		//////////////////////////////////////////////////
@@ -432,38 +369,10 @@ Ext.define('App.util.d3.final.PieChart', {
 			.attr('d', me.arcObject);
 		
 		//////////////////////////////////////////////////
-		// transition labels...or get rid of
+		// LABELS
 		//////////////////////////////////////////////////
 		if(me.showLabels) {
-			var arc = me.arcObject;
-			
-			// remove current text elements
-			me.gPie.selectAll('text').remove();
-			
-			// replacements
-			segments.append('text')
-				.attr('transform', function(d, i) {
-					var c = arc.centroid(d),
-						x = c[0],
-						y = c[1],
-						h = Math.sqrt(x*x + y*y),
-						xTrans = (x/h * outerRadius) + (x/h * outerRadius * .05),
-						yTrans = (y/h * outerRadius) + i;
-						
-					if(yTrans < 0) {
-						yTrans = yTrans - Math.abs(yTrans * .1);
-					}
-					
-					return 'translate(' + xTrans + ',' + yTrans + ')';
-				})
-				.attr('dy', function(d, i) {
-					return '0.35em';
-				})
-				.attr('text-anchor', function(d) {
-					return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';
-				})
-				.style('font-size', me.labelFontSize)
-				.text(me.labelFunction);
+			me.handleLabels();
 		} else {
 			me.gPie.selectAll('text')
 				.transition()
@@ -471,98 +380,166 @@ Ext.define('App.util.d3.final.PieChart', {
 				.attr('y', 1000)
 				.remove();
 		}
-				
-		//////////////////////////////////////////////////
-		// transition chart title
-		//////////////////////////////////////////////////
-		var titleSelection = me.gTitle.selectAll('text');
-		if(me.chartTitle) {
-			titleSelection.text(me.chartTitle);
-		} else {
-			titleSelection.text('');
-		}
-		
-		//////////////////////////////////////////////////
-		// handle legend transition, if applicable
-		//////////////////////////////////////////////////
-		if(showLegend) {
-			// gPie into local scope
-			var thePie = me.gPie;
-			
-			//
-			// legend squares
-			//
-			
-			// join new squares with current squares
-			var legendSquareSelection = me.gLegend.selectAll('rect')
-				.data(me.graphData);
-			
-			// remove old text
-			legendSquareSelection.exit().remove();
-		
-			// add new squares
-			legendSquareSelection.enter().append('rect')
 
-			// transition all
-			legendSquareSelection.transition()
-				.attr('x', 0)
-				.attr('y', function(d, i) {
-					return i * legendSquareHeight * 1.75;
-				})
-				.attr('width', me.legendSquareWidth)
-				.attr('height', me.legendSquareHeight)
-				.attr('fill', function(d, i) {
-					return colorScale(i);
-				});
-				
-			//
-			// legend text
-			//
-			
-			// join new text with current text
-			var legendTextSelection = me.gLegend.selectAll('text')
-				.data(me.graphData);
-			
-			// remove old text
-			legendTextSelection.exit().remove();
+		//////////////////////////////////////////////////
+		// LEGEND
+		//////////////////////////////////////////////////
+		if(me.showLegend) { me.handleLegend(); }
 		
-			// add new
-			legendTextSelection.enter().append('text')
-				.attr('x', legendSquareWidth * 2)
-				.attr('y', function(d, i) {
-					return i * legendSquareHeight * 1.75;
-				})
-				.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
-				.on('mouseover', function(d, i) {
-					// highlight this text
-					d3.select(this)
-						.style('fill', '#000099')
-						.style('font-weight', 'bold');
+		//////////////////////////////////////////////////
+		// CHART TITLE
+		//////////////////////////////////////////////////
+		me.handleChartTitle();
+	},
+	
+	/**
+	 * @function
+	 * @description Handle the arc labels
+	 */
+	handleLabels: function() {
+		var me = this;
+		
+		// local scope
+		var arc = me.arcObject,
+			outerRadius = me.outerRadius;
+			
+		// get arcs
+		var segments = me.gPie.selectAll('.arc');
+		
+		// remove existing text from the arcs
+		segments.selectAll('text').remove();
+		
+		// append new text to the arcs
+		segments.append('text')
+			.attr('transform', function(d, i) {
+				var c = arc.centroid(d),
+					x = c[0],
+					y = c[1],
+					h = Math.sqrt(x*x + y*y),
+					xTrans = (x/h * outerRadius) + (x/h * outerRadius * .05),
+					yTrans = (y/h * outerRadius) + i;
 						
-					// highlight the selected arc
-					thePie.selectAll('.arc').filter(function(e, j) {
-						return i == j;
-					})
-					.transition()
-					.attr('transform', 'scale(1.1, 1.1)');
-				})
-				.on('mouseout', function(d, i) {
-					// un-highlight this text
-					var el = d3.select(this);
-					el.style('fill', '#000000')
-						.style('font-weight', 'normal');
-					
-					// select the arc and transition
-					thePie.selectAll('.arc').filter(function(e, j) {
-						return i == j;
-					})
-					.transition()
-					.attr('transform', 'scale(1,1)');
-				});
+				if(yTrans < 0) {
+					yTrans = yTrans - Math.abs(yTrans * .1);
+				}
+				
+				return 'translate(' + xTrans + ',' + yTrans + ')';
+			})
+			.attr('dy', function(d, i) {
+				return '0.35em';
+			})
+			.attr('text-anchor', function(d) {
+				return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';
+			})
+			.style('font-size', me.labelFontSize)
+			.text(me.labelFunction);
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Handle the chart legend
+ 	 */
+ 	handleLegend: function() {
+	 	var me = this;
+	 	
+	 	// local scope
+	 	var thePie = me.gPie,
+	 		legendSquareHeight = me.legendSquareHeight,
+	 		legendSquareWidth = me.legendSquareWidth,
+	 		colorScale = me.colorScale
+	 	
+	 	////////////////////////////////////////
+	 	// LEGEND SQUARES
+	 	////////////////////////////////////////
+	 	// join new with old
+		var legendSquareSelection = me.gLegend.selectAll('rect')
+				.data(me.graphData);
+				
+		// remove old squares
+		legendSquareSelection.exit().remove();
+			
+		// add new squares
+		legendSquareSelection.enter().append('rect')
+
+		// transition all
+		legendSquareSelection.transition()
+			.attr('x', 0)
+			.attr('y', function(d, i) {
+				return i * legendSquareHeight * 1.75;
+			})
+			.attr('width', me.legendSquareWidth)
+			.attr('height', me.legendSquareHeight)
+			.attr('fill', function(d, i) {
+				return colorScale(i);
+			});
 		
-			// transition all
-			legendTextSelection.transition().text(me.legendTextFunction);
-		}
+		////////////////////////////////////////
+	 	// LEGEND TEXT
+	 	////////////////////////////////////////
+		// join new text with current text
+		var legendTextSelection = me.gLegend.selectAll('text')
+			.data(me.graphData);
+			
+		// remove old text
+		legendTextSelection.exit().remove();
+		
+		// add new
+		legendTextSelection.enter().append('text')
+			.attr('x', legendSquareWidth * 2)
+			.attr('y', function(d, i) {
+				return i * legendSquareHeight * 1.75;
+			})
+			.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
+			.on('mouseover', function(d, i) {
+				// highlight this text
+				d3.select(this)
+					.style('fill', '#990066')
+					.style('font-weight', 'bold');
+						
+				// highlight the selected arc
+				thePie.selectAll('.arc').filter(function(e, j) {
+					return i == j;
+				})
+				.transition()
+				.attr('transform', 'scale(1.1, 1.1)');
+			})
+			.on('mouseout', function(d, i) {
+				// un-highlight this text
+				d3.select(this)
+					.style('fill', '#000000')
+					.style('font-weight', 'normal');
+					
+				// select the arc and transition
+				thePie.selectAll('.arc').filter(function(e, j) {
+					return i == j;
+				})
+				.transition()
+				.attr('transform', 'scale(1,1)');
+			});
+		
+		// transition all
+		legendTextSelection.transition().text(me.legendTextFunction);
+	},
+	
+	/**
+	 * @function
+	 * @description Handle the chart title
+	 */
+	handleChartTitle: function() {
+		var me = this;
+		
+		var ct = me.chartTitle == null ? '' : me.chartTitle;
+		
+		me.gTitle.selectAll('text').remove();
+		
+		me.gTitle.selectAll('text')
+			.data([ct])
+			.enter()
+			.append('text')
+			.style('fill', '#444444')
+			.style('font-weight', 'bold')
+			.style('font-family', 'sans-serif')
+			.text(String);
 	},
 	
 	/**
