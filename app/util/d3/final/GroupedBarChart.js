@@ -74,47 +74,21 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
  		var me = this;
  		
  		//////////////////////////////////////////////////
- 		// local scope
- 		//////////////////////////////////////////////////
- 		var barPadding = me.barPadding,
- 			canvasHeight = me.canvasHeight,
- 			canvasWidth = me.canvasWidth,
- 			colorScale = me.colorScale,
- 			xMetric = me.xMetric,
-	 		yMetric = me.yMetric,
-	 		margins = me.margins,
-	 		colorDefinedInData = me.colorDefinedInData,
-	 		colorDefinedInDataIndex = me.colorDefinedInDataIndex,
-	 		fixedColorRange = me.fixedColorRange,
-	 		fixedColorRangeIndex = me.fixedColorRangeIndex;
-
- 		//////////////////////////////////////////////////
+ 		// bar "g"
+ 		// bar label "g"
+ 		// grouper "g"
+ 		// x axis "g"
+ 		// y axis "g"
  		// "gBar"
  		//////////////////////////////////////////////////
  		me.gBar = me.svg.append('svg:g')
 	 		.attr('transform', 'translate(' + me.margins.left + ', 0)');
-	 		
-	 	//////////////////////////////////////////////////
- 		// "gBarLabel"...rotated labels on each bar
- 		//////////////////////////////////////////////////
- 		me.gBarLabel = me.svg.append('svg:g')
+		me.gBarLabel = me.svg.append('svg:g')
 	 		.attr('transform', 'translate(' + me.margins.left + ', 0)');
-	 		
-	 	//////////////////////////////////////////////////
-	 	// "gGrouper" (grouped X axis)
-	 	//////////////////////////////////////////////////
-	 	me.gGrouper = me.svg.append('svg:g')
+		me.gGrouper = me.svg.append('svg:g')
 	 		.attr('transform', 'translate(' + me.margins.left + ',0)');
-	 		
-	 	//////////////////////////////////////////////////
- 		// "gXAxis"
- 		//////////////////////////////////////////////////
- 		me.gXAxis = me.svg.append('svg:g');
- 		
- 		//////////////////////////////////////////////////
- 		// "gYAxis"
- 		//////////////////////////////////////////////////
- 		me.gYAxis = me.svg.append('svg:g');
+		me.gXAxis = me.svg.append('svg:g');
+		me.gYAxis = me.svg.append('svg:g');
  		
 		//////////////////////////////////////////////////
 		// set X and Y scales, bring into local scope
@@ -126,38 +100,9 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 			_xAxis = me.xAxis, _yAxis = me.yAxis;
 		
 		//////////////////////////////////////////////////
-		// draw rectangles
+		// RECTS
 		//////////////////////////////////////////////////
-		me.gBar.selectAll('rect')
-			.data(me.graphData)
-			.enter()
-			.append('rect')
-			.attr('x', function(d) {
-				return _xScale(d[xMetric]);
-			})
-			.attr('y', function(d) {
-				return canvasHeight - _yScale(d[yMetric]);
-			})
-			.attr('width', function(d) {
-				return _xScale.rangeBand() - barPadding;
-			})
-			.attr('height', function(d) {
-				return _yScale(d[yMetric]) - margins.bottom;
-			})
-			.style('fill', function(d, i) {
-				if(colorDefinedInData) {
-					return d[colorDefinedInDataIndex];
-				}
-				else if(fixedColorRange != null && fixedColorRangeIndex != null) {
-					return fixedColorRange[d.name];
-				} else {
-					return colorScale(i);
-				}
-			})
-			.style('opacity', 0.6)
-			.style('stroke', 'black')
-			.style('stroke-width', 1)
-			.call(d3.helper.tooltip().text(me.tooltipFunction))
+		me.handleBars();
 			
 		//////////////////////////////////////////////////
 		// handle the bar labels
@@ -167,16 +112,16 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 		//////////////////////////////////////////////////
 		// call the X axis function
 		//////////////////////////////////////////////////
-		var gXAxisTranslateY = canvasHeight - margins.bottom;
+		var gXAxisTranslateY = me.canvasHeight - me.margins.bottom;
 		me.gXAxis.attr('class','axis')
-			.attr('transform', 'translate(' + margins.leftAxis + ', ' + gXAxisTranslateY + ')')
+			.attr('transform', 'translate(' + me.margins.leftAxis + ', ' + gXAxisTranslateY + ')')
 			.call(_xAxis);
 			
 		//////////////////////////////////////////////////
 		// call the Y axis function
 		//////////////////////////////////////////////////
 		me.gYAxis.attr('class', 'axis')
-			.attr('transform', 'translate(' + margins.leftAxis + ', 0)')
+			.attr('transform', 'translate(' + me.margins.leftAxis + ', 0)')
 			.call(_yAxis);
  	},
  	
@@ -186,21 +131,6 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
  	 */
  	transition: function() {
  		var me = this;
- 		
- 		//////////////////////////////////////////////////
- 		// local scope
- 		//////////////////////////////////////////////////
- 		var barPadding = me.barPadding,
- 			canvasHeight = me.canvasHeight,
- 			canvasWidth = me.canvasWidth,
- 			colorScale = me.colorScale,
- 			xMetric = me.xMetric,
-	 		yMetric = me.yMetric,
-	 		margins = me.margins,
-	 		colorDefinedInData = me.colorDefinedInData,
-	 		colorDefinedInDataIndex = me.colorDefinedInDataIndex,
-	 		fixedColorRange = me.fixedColorRange,
-	 		fixedColorRangeIndex = me.fixedColorRangeIndex;
 	 		
 		//////////////////////////////////////////////////
 		// reset the x/y scales
@@ -212,24 +142,65 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 			_xAxis = me.xAxis, _yAxis = me.yAxis;
 		
 		//////////////////////////////////////////////////
-		//
-		// RECTANGLE TRANSITION
-		//
+		// RECTS
 		//////////////////////////////////////////////////
-		// join new data with old
-		var rectSelection = me.gBar.selectAll('rect')
-			.data(me.graphData);
+		me.handleBars();
 			
-		// transition out old bars
+		//////////////////////////////////////////////////
+		// handle the bar labels
+		//////////////////////////////////////////////////
+		me.handleBarLabels();
+			
+		//////////////////////////////////////////////////
+		// re-call the Y axis function
+		//////////////////////////////////////////////////
+		me.gYAxis.transition().duration(500).call(me.yAxis);
+ 	},
+ 	
+ 	/**
+  	 * @function
+  	 * @description Handle bars
+  	 */
+  	handleBars: function() {
+	  	var me = this;
+	  	
+	  	// local scope
+	  	var barPadding = me.barPadding,
+ 			canvasHeight = me.canvasHeight,
+ 			canvasWidth = me.canvasWidth,
+ 			colorScale = me.colorScale,
+ 			xMetric = me.xMetric,
+ 			_xScale = me.xScale,
+	 		yMetric = me.yMetric,
+	 		_yScale = me.yScale,
+	 		margins = me.margins,
+	 		colorDefinedInData = me.colorDefinedInData,
+	 		colorDefinedInDataIndex = me.colorDefinedInDataIndex,
+	 		fixedColorRange = me.fixedColorRange,
+	 		fixedColorRangeIndex = me.fixedColorRangeIndex;
+	 		
+	 	// join new data with old
+	 	var rectSelection = me.gBar.selectAll('rect')
+	 		.data(me.graphData);
+	 	
+	 	// transition out old bars
 		rectSelection.exit()
 			.transition()
 			.duration(500)
 			.attr('width', 0)
 			.remove();
 
-		// add new bars
-		var newBars = rectSelection.enter()
-			.append('rect');
+		// add new bars w/ mouseover evenrts
+		rectSelection.enter()
+			.append('rect')
+			.on('mouseover', function(d, i) {
+				d3.select(this).style('opacity', 1)
+					.style('stroke-width', 2);
+			})
+			.on('mouseout', function(d, i) {
+				d3.select(this).style('opacity', 0.6)
+					.style('stroke-width', 1);
+			});
 			
 		// call tooltip function
 		rectSelection.call(d3.helper.tooltip().text(me.tooltipFunction));
@@ -262,19 +233,7 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 			.style('opacity', 0.6)
 			.style('stroke', 'black')
 			.style('stroke-width', 1);
-			
-		//////////////////////////////////////////////////
-		// handle the bar labels
-		//////////////////////////////////////////////////
-		me.handleBarLabels();
-			
-		//////////////////////////////////////////////////
-		//
-		// re-call the Y axis function
-		//
-		//////////////////////////////////////////////////
-		me.gYAxis.transition().duration(500).call(me.yAxis);
- 	},
+	},
  	
  	/**
   	 * @function
