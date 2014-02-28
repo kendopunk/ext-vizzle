@@ -15,7 +15,7 @@
 			"caliber": "12ga",
 			"recovery": 1190
 		}, {
-			"caliber": ".45 cal",
+			"caliber": ".45 ACP",
 			"recovery": 1121
 		}, {
 			"caliber": ".380 ACP",
@@ -51,7 +51,7 @@
 			"caliber": "12ga",
 			"recovery": 712
 		}, {
-			"caliber": ".45 cal",
+			"caliber": ".45 ACP",
 			"recovery": 586
 		}, {
 			"caliber": ".32 cal",
@@ -84,7 +84,7 @@
 			"caliber": "12ga",
 			"recovery": 111
 		}, {
-			"caliber": ".45 cal",
+			"caliber": ".45 ACP",
 			"recovery": 50
 		}, {
 			"caliber": "7.62mm",

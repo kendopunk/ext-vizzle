@@ -243,6 +243,8 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 				}
 			})
 			.on('mouseover', function(d, i) {
+				d3.select(this).style('stroke-width', 2).style('opacity', 1);
+					
 				if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
 					eventRelay.publish(
 						mouseEvents.mouseover.eventName,
@@ -252,6 +254,9 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 						}
 					);
 				}
+			})
+			.on('mouseout', function(d, i) {
+				d3.select(this).style('stroke-width', 1).style('opacity', .6);
 			})
 			.call(d3.helper.tooltip().text(me.tooltipFunction));
 		
@@ -395,6 +400,8 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 			
 		// call events
 		rectSelection.on('mouseover', function(d, i) {
+			d3.select(this).style('stroke-width', 2).style('opacity', 1);
+			
 			if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
 				eventRelay.publish(
 					mouseEvents.mouseover.eventName,
@@ -404,6 +411,9 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 					}
 				);
 			}
+		})
+		.on('mouseout', function(d, i) {
+			d3.select(this).style('stroke-width', 1).style('opacity', .6);
 		});
 
 		// call tooltip function

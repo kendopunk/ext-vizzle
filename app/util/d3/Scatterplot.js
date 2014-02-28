@@ -177,6 +177,359 @@ Ext.define('App.util.d3.Scatterplot', {
 	/**
  	 * @function
  	 * @memberOf App.util.d3.Scatterplot
+ 	 * @description Draw the initial bar chart
+ 	 */
+	draw: function() {
+		var me = this;
+		
+		//////////////////////////////////////////////////
+		// sanity check
+		//////////////////////////////////////////////////
+		if(me.svg == null || me.xDataMetric == null || me.yDataMetric == null) {
+			Ext.Msg.alert('Configuration Error', 
+				'Missing required configuration data needed<br>to render visualization.'
+			);
+			return;
+		}
+		
+		//////////////////////////////////////////////////
+		// scatter "g"
+		// horizontal marker "g"
+		// vertical marker "g"
+		// label "g"
+		// x axis "g"
+		// y axis "g"
+		// chart title "g"
+		//////////////////////////////////////////////////
+		me.gScatter = me.svg.append('svg:g');
+		me.gHorizontalMarker = me.svg.append('svg:g');
+		me.gVerticalMarker = me.svg.append('svg:g');
+		me.gLabel = me.svg.append('svg:g');
+		me.gXAxis = me.svg.append('svg:g');
+		me.gYAxis = me.svg.append('svg:g');
+		me.gTitle = me.svg.append('svg:g')
+			.attr('transform', 'translate(15,' + parseInt(me.margins.top/2) + ')');
+		
+		//////////////////////////////////////////////////
+		// set scales
+		//////////////////////////////////////////////////
+		me.setXScale(me.xDataMetric);
+		me.setYScale(me.yDataMetric);
+			
+		//////////////////////////////////////////////////
+		// sanity check
+		//////////////////////////////////////////////////
+		if(me.graphData.length == 0) {
+			return;
+		}
+		
+		//////////////////////////////////////////////////
+		// handle circles
+		//////////////////////////////////////////////////
+		me.handleCircles();
+		
+		//////////////////////////////////////////////////
+		// guidelines
+		//////////////////////////////////////////////////
+		if(me.showMarkerLines) {
+			me.handleMarkerLines();
+		}
+		
+		//////////////////////////////////////////////////
+		// labels
+		//////////////////////////////////////////////////
+		if(me.showLabels) {
+			me.handleLabels();
+		}
+
+		//////////////////////////////////////////////////
+		// call the X-axis
+		//////////////////////////////////////////////////
+		var xAxTrans = me.canvasHeight - me.margins.bottom;
+		me.gXAxis.attr('class', 'axis')
+			.attr('transform', 'translate(0, ' + xAxTrans + ')')
+			.call(me.xAxis);
+			
+		//////////////////////////////////////////////////
+		// call the Y-axis
+		//////////////////////////////////////////////////	
+		me.gYAxis.attr('class', 'axis')
+			.attr('transform', 'translate(' + me.margins.left + ', 0)')
+			.call(me.yAxis);
+			
+		//////////////////////////////////////////////////
+		// chart title
+		//////////////////////////////////////////////////
+		me.handleChartTitle();
+	},
+	
+	/**
+ 	 * @function
+ 	 * @memberOf App.util.d3.Scatterplot
+ 	 * @description Transition the bar chart
+ 	 */
+	transition: function() {
+		var me = this;
+		
+		//////////////////////////////////////////////////
+		// set scales
+		//////////////////////////////////////////////////
+		me.setXScale(me.xDataMetric);
+		me.setYScale(me.yDataMetric);
+		
+		//////////////////////////////////////////////////
+		// handle circles
+		//////////////////////////////////////////////////
+		me.handleCircles();
+
+		//////////////////////////////////////////////////
+		// transition marker lines
+		//////////////////////////////////////////////////
+		if(me.showMarkerLines) {
+			me.handleMarkerLines();
+		} else {
+			me.clearMarkerLines();
+		}
+
+		//////////////////////////////////////////////////
+		// labels
+		//////////////////////////////////////////////////
+		if(me.showLabels) {
+			me.handleLabels(); 
+		} else {
+			me.gLabel.selectAll('text').remove();
+		}
+		
+		//////////////////////////////////////////////////
+		// TITLE
+		//////////////////////////////////////////////////
+		me.handleChartTitle();
+		
+		//////////////////////////////////////////////////
+		// transition the axes
+		//////////////////////////////////////////////////
+		me.gXAxis.transition().duration(500).call(me.xAxis);
+		me.gYAxis.transition().duration(500).call(me.yAxis);
+	},
+	
+	/**
+ 	 * @function
+ 	 */
+ 	handleCircles: function() {
+	 	var me = this;
+	 	
+	 	// local scope
+	 	var xScale = me.xScale,
+	 		xDataMetric = me.xDataMetric,
+		 	yScale = me.yScale,
+		 	yDataMetric = me.yDataMetric;
+	 	
+	 	// join new to old
+	 	var circSelection = me.gScatter.selectAll('circle')
+	 		.data(me.graphData);
+	 		
+	 	// transition out old
+	 	circSelection.exit()
+		 	.transition()
+		 	.duration(500)
+		 	.attr('r', 0)
+		 	.remove();
+		 	
+		// add new
+		circSelection.enter()
+			.append('circle')
+			.attr('defaultOpacity', .6)
+			.style('fill', me.colorScaleFunction)
+			.style('opacity', .6)
+			.style('stroke', '#333333')
+			.style('stroke-width', 1);
+			
+		// apply events
+		circSelection.on('mouseover', function(d, i) {
+				d3.select(this).style('opacity', .9);
+			})
+			.on('mouseout', function(d) {
+				var el = d3.select(this);
+				el.style('opacity', el.attr('defaultOpacity'));
+			})
+			.call(d3.helper.tooltip().text(me.tooltipFunction));
+			
+		// transition all
+		circSelection.transition()
+			.duration(500)
+			.attr('cx', function(d) {
+				return xScale(d[xDataMetric]);
+			})
+			.attr('cy', function(d) {
+				return yScale(d[yDataMetric]);
+			})
+			.attr('r', me.radius);
+	},
+	
+	/**
+	 * @function
+	 * @description Handle labels
+	 */
+	handleLabels: function() {
+		var me = this;
+		
+		// local scope
+		var xScale = me.xScale,
+			xDataMetric = me.xDataMetric,
+			yScale = me.yScale,
+			yDataMetric = me.yDataMetric,
+			radius = me.radius;
+		
+		// join new with old
+		var labelSelection = me.gLabel.selectAll('text')
+			.data(me.graphData);
+			
+		// remove
+		labelSelection.exit().remove();
+			
+		// new labels
+		labelSelection.enter()
+			.append('text')
+			.style('font-size', me.labelFontSize)
+			.attr('text-anchor', 'start');
+				
+		// transition all
+		labelSelection.transition()
+			.duration(500)
+			.attr('x', function(d) {
+				return xScale(d[xDataMetric]);
+			})
+			.attr('y', function(d) {
+				return yScale(d[yDataMetric]) + ((radius * 2) + 2);
+			})
+			.text(me.labelFunction);
+	},
+	
+	/**
+	 * @function
+	 * @description Handle marker lines / guidelines
+	 */
+	handleMarkerLines: function() {
+		var me = this;
+		
+		// local scope
+		var xScale = me.xScale,
+			xDataMetric = me.xDataMetric,
+			yScale = me.yScale,
+			yDataMetric = me.yDataMetric;
+		
+		////////////////////////////////////////////
+		// HOZ
+		////////////////////////////////////////////
+		// join
+		var hLines = me.gHorizontalMarker.selectAll('line')
+			.data(me.graphData);
+				
+		hLines.exit()
+			.transition()
+			.attr('x2', me.margins.left)
+			.remove();
+				
+		hLines.enter()
+			.append('svg:line')
+			.style('stroke', '#BBBBBB')
+			.style('stroke-width', 1)
+			.style('stroke-dasharray', ("7,3"));
+				
+		hLines.transition()
+			.duration(600)
+			.attr('x1', me.margins.left)
+			.attr('x2', function(d) {
+				return xScale(d[xDataMetric]);
+			})
+			.attr('y1', function(d) {
+				return yScale(d[yDataMetric]);
+			})
+			.attr('y2', function(d) {
+				return yScale(d[yDataMetric]);
+			});
+			
+		////////////////////////////////////////////
+		// VERT
+		////////////////////////////////////////////
+		var vLines = me.gVerticalMarker.selectAll('line')
+			.data(me.graphData);
+				
+		vLines.exit()
+			.transition()
+			.attr('y2', me.canvasHeight - me.margins.bottom)
+			.remove();
+				
+		vLines.enter()
+			.append('svg:line')
+			.style('stroke', '#BBBBBB')
+			.style('stroke-width', 1)
+			.style('stroke-dasharray', ("7,3"));
+			
+		vLines.transition()
+			.duration(600)
+			.attr('x1', function(d) {
+				return xScale(d[xDataMetric]);
+			})
+			.attr('x2', function(d) {
+				return xScale(d[xDataMetric]);
+			})
+			.attr('y1', function(d) {
+				return yScale(d[yDataMetric]);
+			})
+			.attr('y2', me.canvasHeight - me.margins.bottom);
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Remove the marker lines
+ 	 */
+ 	clearMarkerLines: function() {
+	 	var me = this;
+	 	
+		me.gHorizontalMarker.selectAll('line')
+			 .transition()
+			.duration(500)
+			.attr('x2', me.margins.left)
+			.each('end', function() {
+				d3.select(this).remove();
+			});
+			
+		me.gVerticalMarker.selectAll('line')
+			.transition()
+			.duration(500)
+			.attr('y1', me.canvasHeight - me.margins.bottom)
+			.each('end', function() {
+				d3.select(this).remove();
+			});
+ 	},
+	
+	/**
+	 * @function
+	 * @description Handle the chart title drawing / transitioning
+	 */
+	handleChartTitle: function() {
+		var me = this;
+		
+		var ct = me.chartTitle == null ? '' : me.chartTitle;
+		
+		me.gTitle.selectAll('text').remove();
+	
+		me.gTitle.selectAll('text')
+			.data([ct])
+			.enter()
+			.append('text')
+			.style('fill', '#444444')
+			.style('font-weight', 'bold')
+			.style('font-family', 'sans-serif')
+			.text(function(d) {
+				return d;
+			});
+	},
+	
+	/**
+ 	 * @function
+ 	 * @memberOf App.util.d3.Scatterplot
  	 * @description Set the horizontal scale
  	 * @param metric String
  	 */
@@ -246,409 +599,9 @@ Ext.define('App.util.d3.Scatterplot', {
 	},
 	
 	/**
- 	 * @function
- 	 * @memberOf App.util.d3.Scatterplot
- 	 * @description Draw the initial bar chart
- 	 */
-	draw: function() {
-		var me = this;
-		
-		//////////////////////////////////////////////////
-		// sanity check
-		//////////////////////////////////////////////////
-		if(me.svg == null || me.xDataMetric == null || me.yDataMetric == null) {
-			Ext.Msg.alert('Configuration Error', 
-				'Missing required configuration data needed<br>to render visualization.'
-			);
-			return;
-		}
-		
-		//////////////////////////////////////////////////
-		// set "g" elements
-		//////////////////////////////////////////////////
-		me.gScatter = me.svg.append('svg:g');
-		me.gHorizontalMarker = me.svg.append('svg:g');
-		me.gVerticalMarker = me.svg.append('svg:g');
-		me.gLabel = me.svg.append('svg:g');
-		me.gXAxis = me.svg.append('svg:g');
-		me.gYAxis = me.svg.append('svg:g');
-		
-		//////////////////////////////////////////////////
-		// set scales
-		//////////////////////////////////////////////////
-		me.setXScale(me.xDataMetric);
-		me.setYScale(me.yDataMetric);
-		
-		//////////////////////////////////////////////////
-		// bring ExtJS variables
-		// into local scope for use in D3
-		//////////////////////////////////////////////////
-		var xScale = me.xScale,
-			xAxis = me.xAxis,
-			yScale = me.yScale,
-			yAxis = me.yAxis,
-			radius = me.radius,
-			canvasHeight = me.canvasHeight,
-			canvasWidth = me.canvasWidth,
-			xDataMetric = me.xDataMetric,
-			yDataMetric = me.yDataMetric,
-			margins = me.margins,
-			graphData = me.graphData,
-			colorScale = me.colorScale,
-			handleEvents = me.handleEvents,
-			eventRelay = me.eventRelay,
-			mouseEvents = me.mouseEvents;
-			
-		//////////////////////////////////////////////////
-		// sanity check
-		//////////////////////////////////////////////////
-		if(me.graphData.length == 0) {
-			return;
-		}
-		
-		//////////////////////////////////////////////////
-		// draw the circles
-		//////////////////////////////////////////////////
-		me.gScatter.selectAll('circle')
-			.data(me.graphData)
-			.enter()
-			.append('circle')
-			.attr('cx', function(d) {
-				return xScale(d[xDataMetric]);
-			})
-			.attr('cy', function(d) {
-				return yScale(d[yDataMetric]);
-			})
-			.attr('r', me.radius)
-			.style('fill', me.colorScaleFunction)
-			.attr('defaultOpacity', .6)
-			.style('opacity', .6)
-			.style('stroke', '#333333')
-			.style('stroke-width', 1)
-			.call(d3.helper.tooltip().text(me.tooltipFunction))
-			.on('mouseover', function(d, i) {
-				d3.select(this).style('opacity', .9);
-			})
-			.on('mouseout', function(d) {
-				var el = d3.select(this);
-				el.style('opacity', el.attr('defaultOpacity'));
-			});
-		
-		//////////////////////////////////////////////////
-		// marker lines, if applicable
-		//////////////////////////////////////////////////
-		if(me.showMarkerLines) {
-			// horizontal
-			me.gHorizontalMarker.selectAll('line')
-				.data(me.graphData)
-				.enter()
-				.append('svg:line')
-				.attr('x1', me.margins.left)
-				.attr('x2', function(d) {
-					return xScale(d[xDataMetric]);
-				})
-				.attr('y1', function(d) {
-					return yScale(d[yDataMetric]);
-				})
-				.attr('y2', function(d) {
-					return yScale(d[yDataMetric]);
-				})
-				.style('stroke', '#BBBBBB')
-				.style('stroke-width', 1)
-				.style('stroke-dasharray', ("7,3"));
-				
-			// vertical
-			me.gVerticalMarker.selectAll('line')
-				.data(me.graphData)
-				.enter()
-				.append('svg:line')
-				.attr('x1', function(d) {
-					return xScale(d[xDataMetric]);
-				})
-				.attr('x2', function(d) {
-					return xScale(d[xDataMetric]);
-				})
-				.attr('y1', function(d) {
-					return yScale(d[yDataMetric]);
-				})
-				.attr('y2', me.canvasHeight - me.margins.bottom)
-				.style('stroke', '#BBBBBB')
-				.style('stroke-width', 1)
-				.style('stroke-dasharray', ("7,3"));
-		}
-		
-		//////////////////////////////////////////////////
-		// construct labels, if applicable
-		//////////////////////////////////////////////////
-		if(me.showLabels) {
-			me.gLabel.selectAll('text')
-				.data(me.graphData)
-				.enter()
-				.append('text')
-				.style('font-size', me.labelFontSize)
-				.attr('x', function(d) {
-					return xScale(d[xDataMetric]);
-				})
-				.attr('y', function(d) {
-					return yScale(d[yDataMetric]) + ((radius * 2) + 2);
-				})
-				.attr('text-anchor', 'middle')
-				.text(me.labelFunction);
-		}
-
-		//////////////////////////////////////////////////
-		// call the X-axis
-		//////////////////////////////////////////////////
-		var xAxTrans = canvasHeight - margins.bottom;
-		me.gXAxis.attr('class', 'axis')
-			.attr('transform', 'translate(0, ' + xAxTrans + ')')
-			.call(xAxis);
-			
-		//////////////////////////////////////////////////
-		// call the Y-axis
-		//////////////////////////////////////////////////	
-		me.gYAxis.attr('class', 'axis')
-			.attr('transform', 'translate(' + margins.left + ', 0)')
-			.call(yAxis);
-			
-		//////////////////////////////////////////////////
-		// chart title
-		//////////////////////////////////////////////////
-		me.gTitle = me.svg.append('svg:g')
-			.attr('transform', 'translate(15,' + parseInt(me.margins.top/2) + ')');
-		
-		if(me.chartTitle != null) {
-			me.gTitle.selectAll('text')
-				.data([me.chartTitle])
-				.enter()
-				.append('text')
-				.style('fill', '#444444')
-				.style('font-weight', 'bold')
-				.style('font-family', 'sans-serif')
-				.text(function(d) {
-					return d;
-				});
-		}
-	},
-	
-	/**
- 	 * @function
- 	 * @memberOf App.util.d3.Scatterplot
- 	 * @description Transition the bar chart
- 	 */
-	transition: function() {
-		var me = this;
-		
-		//////////////////////////////////////////////////
-		// set scales
-		//////////////////////////////////////////////////
-		me.setXScale(me.xDataMetric);
-		me.setYScale(me.yDataMetric);
-		
-		//////////////////////////////////////////////////
-		// local vars
-		//////////////////////////////////////////////////
-		var xScale = me.xScale,
-			yScale = me.yScale,
-			xDataMetric = me.xDataMetric,
-			yDataMetric = me.yDataMetric,
-			radius = me.radius;
-		
-		//////////////////////////////////////////////////
-		// join new circles with old
-		//////////////////////////////////////////////////
-		var circSelection = me.gScatter.selectAll('circle')
-			.data(me.graphData);
-			
-		//////////////////////////////////////////////////
-		// transition out old circles
-		//////////////////////////////////////////////////
-		circSelection.exit()
-			.transition()
-			.duration(500)
-			.attr('r', 0)
-			.remove();
-
-		//////////////////////////////////////////////////
-		// add new circles
-		//////////////////////////////////////////////////
-		var newCircles = circSelection.enter()
-			.append('circle')
-			.attr('cx', function(d) {
-				return xScale(d[xDataMetric]);
-			})
-			.attr('cy', function(d) {
-				return yScale(d[yDataMetric]);
-			})
-			.attr('r', me.radius)
-			.style('fill', me.colorScaleFunction)
-			.attr('defaultOpacity', .6)
-			.style('opacity', .6)
-			.style('stroke', '#333333')
-			.style('stroke-width', 1)
-		
-		//////////////////////////////////////////////////
-		// apply the events
-		//////////////////////////////////////////////////
-		circSelection.on('mouseover', function(d, i) {
-				d3.select(this).style('opacity', .9);
-			})
-			.on('mouseout', function(d) {
-				var el = d3.select(this);
-				el.style('opacity', el.attr('defaultOpacity'));
-			})
-			.call(d3.helper.tooltip().text(me.tooltipFunction));
-			
-		//////////////////////////////////////////////////
-		// transition all
-		//////////////////////////////////////////////////
-		circSelection.transition()
-			.duration(500)
-			.attr('cx', function(d) {
-				return xScale(d[xDataMetric]);
-			})
-			.attr('cy', function(d) {
-				return yScale(d[yDataMetric]);
-			})
-			.attr('r', me.radius);
-			
-			
-		//////////////////////////////////////////////////
-		// transition marker lines
-		//////////////////////////////////////////////////
-		if(me.showMarkerLines) {
-		
-			//////////////////////////////////////////////////
-			// horizontal
-			// - join
-			// - remove
-			// - add
-			// - transition
-			//////////////////////////////////////////////////
-			var hLines = me.gHorizontalMarker.selectAll('line')
-				.data(me.graphData);
-				
-			hLines.exit()
-				.transition()
-				.attr('x2', me.margins.left)
-				.remove();
-				
-			var newLines = hLines.enter()
-				.append('svg:line')
-				.style('stroke', '#BBBBBB')
-				.style('stroke-width', 1)
-				.style('stroke-dasharray', ("7,3"));
-				
-			hLines.transition()
-				.duration(600)
-				.attr('x1', me.margins.left)
-				.attr('x2', function(d) {
-					return xScale(d[xDataMetric]);
-				})
-				.attr('y1', function(d) {
-					return yScale(d[yDataMetric]);
-				})
-				.attr('y2', function(d) {
-					return yScale(d[yDataMetric]);
-				});
-		
-			//////////////////////////////////////////////////
-			// horizontal
-			// - join
-			// - remove
-			// - add
-			// - transition
-			//////////////////////////////////////////////////
-			var vLines = me.gVerticalMarker.selectAll('line')
-				.data(me.graphData);
-				
-			vLines.exit()
-				.transition()
-				.attr('y2', me.canvasHeight - me.margins.bottom)
-				.remove();
-				
-			var newLines = vLines.enter()
-				.append('svg:line')
-				.style('stroke', '#BBBBBB')
-				.style('stroke-width', 1)
-				.style('stroke-dasharray', ("7,3"));
-				
-			vLines.transition()
-				.duration(600)
-				.attr('x1', function(d) {
-					return xScale(d[xDataMetric]);
-				})
-				.attr('x2', function(d) {
-					return xScale(d[xDataMetric]);
-				})
-				.attr('y1', function(d) {
-					return yScale(d[yDataMetric]);
-				})
-				.attr('y2', me.canvasHeight - me.margins.bottom);
-		} else {
-			 me.gHorizontalMarker.selectAll('line')
-			 	.transition()
-				.duration(500)
-				.attr('x2', me.margins.left)
-				.each('end', function() {
-					d3.select(this).remove();
-				});
-			
-			me.gVerticalMarker.selectAll('line')
-				.transition()
-				.duration(500)
-				.attr('y1', me.canvasHeight - me.margins.bottom)
-				.each('end', function() {
-					d3.select(this).remove();
-				});
-		}
-		
-		//////////////////////////////////////////////////
-		// transition labels
-		//////////////////////////////////////////////////
-		if(me.showLabels) {
-			// join
-			var labelSelection = me.gLabel.selectAll('text')
-				.data(me.graphData);
-				
-			// remove
-			labelSelection.exit().remove();
-			
-			// new labels
-			var newLabels = labelSelection.enter()
-				.append('text')
-				.style('font-size', me.labelFontSize)
-				.attr('text-anchor', 'start');
-				
-			// transition all
-			labelSelection.transition()
-				.duration(500)
-				.attr('x', function(d) {
-					return xScale(d[xDataMetric]);
-				})
-				.attr('y', function(d) {
-					return yScale(d[yDataMetric]) + ((radius * 2) + 2);
-				})
-				.text(me.labelFunction);
-		}
-		
-		//////////////////////////////////////////////////
-		// TITLE
-		//////////////////////////////////////////////////
-		if(me.chartTitle != null) {
-			me.gTitle.selectAll('text')
-				.text(me.chartTitle);
-		}
-		
-		//////////////////////////////////////////////////
-		// transition the axes
-		//////////////////////////////////////////////////
-		me.gXAxis.transition().duration(500).call(me.xAxis);
-		me.gYAxis.transition().duration(500).call(me.yAxis);
-	},
-	
-	/**
+	 *
  	 * SETTERS
+ 	 *
  	 */
  	setColorScaleFunction: function(fn) {
 	 	var me = this;

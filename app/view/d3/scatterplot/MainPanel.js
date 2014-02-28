@@ -110,15 +110,15 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 				 	btn.removeCls(me.btnHighlightCss);
 				 	
 				 	me.scatterPlot.setShowMarkerLines(false);
+				 	me.scatterPlot.clearMarkerLines();
 			 	} else {
 				 	btn.currentValue = 'on';
 				 	btn.setText('ON');
 				 	btn.addCls(me.btnHighlightCss);
 				 	
 				 	me.scatterPlot.setShowMarkerLines(true);
+				 	me.scatterPlot.handleMarkerLines();
 			 	}
-			 	
-			 	me.scatterPlot.transition();
 			 },
 			 scope: me
 		});
