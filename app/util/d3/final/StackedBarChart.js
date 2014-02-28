@@ -23,7 +23,7 @@ Ext.define('App.util.d3.final.StackedBarChart', {
   	chartTitle: null,
   	colorRangeStart: null,
   	colorRangeEnd: null,
-  	colorScale: d3.scale.category20(),
+  	colorScale: d3.scale.category10(),
   	eventRelay: null,
   	gCanvas: null,
   	gLabel: null,
@@ -123,7 +123,6 @@ Ext.define('App.util.d3.final.StackedBarChart', {
  			handleEvents = me.handleEvents,
  			eventRelay = me.eventRelay,
  			mouseEvents = me.mouseEvents,
- 			showLegend = me.showLegend,
  			labelVAlign = me.labelVAlign,
  			chort = me.chartOrientation;
  			
@@ -168,26 +167,32 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 			 _yScale = me.yScale;
 		
 		//////////////////////////////////////////////////
-		// "gCanvas" element
+		// canvas "g"
+		// title "g"
+		// legend "g"
+		// x axis "g"
+		// y axis "g"
+		// layers "g"
 		//////////////////////////////////////////////////
 		me.gCanvas = me.svg.append('svg:g')
 			.attr('transform', 'translate(' + me.margins.left + ', ' + me.margins.top + ')');
 			
-		//////////////////////////////////////////////////
-		// "gLegend" element, if applicable
-		//////////////////////////////////////////////////
-		me.gLegend = me.svg.append('svg:g');
-		if(showLegend) {
-			var legendTranslateX = me.margins.left + 
-				(me.getFlexUnit() * me.chartFlex)
-				+ me.spaceBetweenChartAndLegend;
-			me.gLegend = me.svg.append('svg:g')
-				.attr('transform', 'translate(' + legendTranslateX + ', ' +  margins.top + ')');
-		}
+		me.gTitle = me.svg.append('svg:g')
+			.attr('transform', 'translate(15,' + parseInt(me.margins.top/2) + ')');
+			
+		var legendTranslateX = me.margins.left
+			+ (me.getFlexUnit() * me.chartFlex)
+			+ me.spaceBetweenChartAndLegend;
+		me.gLegend = me.svg.append('svg:g')
+			.attr('transform', 'translate(' + legendTranslateX + ', ' +  margins.top + ')');
+			
+		var g_ax_translate = canvasHeight - margins.top - margins.bottom;
+		me.gXAxis = me.gCanvas.append('svg:g')
+			.attr('class', 'axis')
+			.attr('transform', 'translate(0, ' + g_ax_translate + ')');
+			
+		me.gYAxis = me.gCanvas.append('svg:g').attr('class', 'axis');	
 		
-		//////////////////////////////////////////////////
-		// "gLayer" element
-		//////////////////////////////////////////////////
 		me.gLayer = me.gCanvas.selectAll('.layer')
 			.data(me.layers)
 			.enter()
@@ -198,7 +203,7 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 			});
 			
 		//////////////////////////////////////////////////
-		// draw rectangles
+		// BARS
 		//////////////////////////////////////////////////
 		me.gLayer.selectAll('rect')
 			.data(function(d) {
@@ -206,9 +211,9 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 			})
 			.enter()
 			.append('rect')
-			.attr('fill-opacity', .6)
-			.attr('stroke', 'black')
+			.style('stroke', 'black')
 			.style('stroke-width', 0.5)
+			.style('opacity', .6)
 			.attr('x', function(d) {
 				if(chort == 'horizontal') {
 					return _xScale(d.y0);
@@ -249,124 +254,31 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 				}
 			})
 			.call(d3.helper.tooltip().text(me.tooltipFunction));
-			
-		//////////////////////////////////////////////////
-		// LABELS / TEXT
-		//////////////////////////////////////////////////
-		if(me.showLabels) {
-			me.gLabel = me.gCanvas.selectAll('.label')
-				.data(me.layers)
-				.enter()
-				.append('g')
-				.attr('class', 'label')
-				.selectAll('text')
-				.data(function(d) {
-					return d.values;
-				})
-				.enter()
-				.append('text')
-				.attr('x', function(d) {
-					if(chort == 'horizontal') {
-						return _xScale(d.y0 + d.y) + Math.floor((_xScale(d.y0) - _xScale(d.y0 + d.y))/2);
-					} else {
-						// scaled X position + (rectWidth / 2)
-						return _xScale(d.id) + Math.floor(_xScale.rangeBand()/2);
-					}
-				})
-				.attr('y', function(d) {
-					if(chort == 'horizontal') {
-						// _yScale(d.id) is upper left corner of rectangle
-						if(labelVAlign == 'bottom') {
-							return _yScale(d.id) + Math.floor(_yScale.rangeBand() * .9);
-						} else if(labelVAlign == 'top') {
-							return _yScale(d.id) + Math.floor(_yScale.rangeBand() * .1);
-						} else {
-							return _yScale(d.id) + Math.floor(_yScale.rangeBand()/2);
-						}
-					} else {
-						if(labelVAlign == 'bottom') {
-							return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y)) * .9);
-						} else if(labelVAlign == 'top') {
-							return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y)) * .1);
-						} else {
-							return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y))/2);
-						}
-					}
-				})
-				.style('font-family', 'sans-serif')
-				.style('font-size', '9px')
-				.style('text-anchor', 'middle')
-				.text(me.labelFunction);
-		}
-
-		//////////////////////////////////////////////////
-		// X axis
-		//////////////////////////////////////////////////
-		var g_ax_translate = canvasHeight - margins.top - margins.bottom;
-		me.gXAxis = me.gCanvas.append('svg:g')
-			.attr('class', 'axis')
-			.attr('transform', 'translate(0, ' + g_ax_translate + ')');
-		me.gXAxis.call(me.xAxis);
 		
 		//////////////////////////////////////////////////
-		// Y axis
+		// LABELS, if applicable
 		//////////////////////////////////////////////////
-		me.gYAxis = me.gCanvas.append('svg:g')
-			.attr('class', 'axis');	
-		me.gYAxis.call(me.yAxis);
+		if(me.showLabels) {
+			me.handleLabels();
+		}
 		
 		//////////////////////////////////////////////////
 		// LEGEND, if applicable
 		//////////////////////////////////////////////////
-		if(showLegend) {
-			// legend rectangles
-			me.gLegend.selectAll('rect')
-				.data(me.graphData)
-				.enter()
-				.append('rect')
-				.attr('x', 0)
-				.attr('y', function(d, i) {
-					return i * legendSquareHeight * 1.75;
-				})
-				.attr('width', me.legendSquareWidth)
-				.attr('height', me.legendSquareHeight)
-				.attr('fill', function(d, i) {
-					return colorScale(i);
-				});
-				
-			// legend text
-			me.gLegend.selectAll('text')
-				.data(me.graphData)
-				.enter()
-				.append('text')
-				.attr('x', legendSquareWidth * 2)
-				.attr('y', function(d, i) {
-					return i * legendSquareHeight * 1.75;
-				})
-				.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
-				.style('font-size', me.legendFontSize)
-				.text(function(d) {
-					return d.category.toUpperCase();
-				});
+		if(me.showLegend) {
+			me.handleLegend();
 		}
 		
 		//////////////////////////////////////////////////
-		// TITLE
+		// CALL X/Y
 		//////////////////////////////////////////////////
-		me.gTitle = me.svg.append('svg:g')
-			.attr('transform', 'translate(15,' + parseInt(me.margins.top/2) + ')');
-		if(me.chartTitle != null) {
-			me.gTitle.selectAll('text')
-				.data([me.chartTitle])
-				.enter()
-				.append('text')
-				.style('fill', '#333333')
-				.style('font-weight', 'bold')
-				.style('font-family', 'sans-serif')
-				.text(function(d) {
-					return d;
-				});
-		}
+		me.gXAxis.call(me.xAxis);
+		me.gYAxis.call(me.yAxis);
+		
+		//////////////////////////////////////////////////
+		// CHART TITLE
+		//////////////////////////////////////////////////
+		me.handleChartTitle();
 	},
 	
 	/**
@@ -402,7 +314,6 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 			handleEvents = me.handleEvents,
 			eventRelay = me.eventRelay,
 			mouseEvents = me.mouseEvents,
-			showLegend = me.showLegend,
 			labelVAlign = me.labelVAlign,
 			chort = me.chartOrientation;
 			
@@ -417,7 +328,7 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 		me.gLayer.exit().remove();
 
 		// add new layers
-		var addedLayers = me.gLayer.enter()
+		me.gLayer.enter()
 			.append('g')
 			.attr('class', 'layer');
 			
@@ -450,9 +361,9 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 		// transition all 
 		rectSelection.transition()
 			.duration(500)
-			.attr('fill-opacity', .6)
-			.attr('stroke', 'black')
+			.style('stroke', 'black')
 			.style('stroke-width', 0.5)
+			.style('opacity', .6)
 			.attr('x', function(d) {
 				if(chort == 'horizontal') {
 					return _xScale(d.y0);
@@ -496,147 +407,220 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 		});
 
 		// call tooltip function
-		rectSelection.call(d3.helper.tooltip().text(me.tooltipFunction));	
-			
+		rectSelection.call(d3.helper.tooltip().text(me.tooltipFunction));
+		
 		//////////////////////////////////////////////////
-		// LABEL TRANSITION
+		// LABELS, if applicable
 		//////////////////////////////////////////////////
 		if(me.showLabels) {
-			// join new layers
-			me.gLabel = me.gCanvas.selectAll('.label')
-				.data(me.layers);
-				
-			// transition out old labels
-			me.gLabel.exit().remove();
-			
-			// add new
-			var addedLabels = me.gLabel.enter()
-				.append('g')
-				.attr('class', 'label');
-				
-			// text transition
-			var textSelection = me.gLabel.selectAll('text')
-				.data(function(d) {
-					return d.values;
-				});
-				
-			// transition out old text
-			textSelection.exit()
-				.transition()
-				.attr('x', 1000)
-				.duration(500)
-				.remove();
-				
-			// add new text elements
-			textSelection.enter()
-				.append('text');
-			
-			// transition all
-			textSelection.transition()
-				.duration(500)
-				.attr('x', function(d) {
-					if(chort == 'horizontal') {
-						return _xScale(d.y0 + d.y) + Math.floor((_xScale(d.y0) - _xScale(d.y0 + d.y))/2);
-					} else {
-						// scaled X position + (rectWidth / 2)
-						return _xScale(d.id) + Math.floor(_xScale.rangeBand()/2);
-					}
-				})
-				.attr('y', function(d) {
-					if(chort == 'horizontal') {
-						// _yScale(d.id) is upper left corner of rectangle
-						if(labelVAlign == 'bottom') {
-							return _yScale(d.id) + Math.floor(_yScale.rangeBand() * .85);
-						} else if(labelVAlign == 'top') {
-							return _yScale(d.id) + Math.floor(_yScale.rangeBand() * .15);
-						} else {
-							return _yScale(d.id) + Math.floor(_yScale.rangeBand()/2);
-						}
-					} else {
-						if(labelVAlign == 'bottom') {
-							return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y)) * .9);
-						} else if(labelVAlign == 'top') {
-							return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y)) * .1);
-						} else {
-							return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y))/2);
-						}
-					}
-				})
-				.style('font-family', 'sans-serif')
-				.style('font-size', '9px')
-				.style('text-anchor', 'middle')
-				.text(me.labelFunction);
+			me.handleLabels();
 		} else {
-			me.gCanvas.selectAll('.label').data([]).exit().remove()
+			me.gCanvas.selectAll('.label').data([]).exit().remove();
 		}
 		
 		//////////////////////////////////////////////////
-		// LEGEND TRANSITION
+		// LEGEND, if applicable
 		//////////////////////////////////////////////////
-		if(showLegend) {
-			
-			/**
- 			 * legend rectangles
- 			 */
-			// join new squares with current squares
-			var legendSquareSelection = me.gLegend.selectAll('rect')
-				.data(me.graphData);
-			
-			// remove old text
-			legendSquareSelection.exit().remove();
-		
-			// add new squares
-			legendSquareSelection.enter().append('rect');
-		
-			// transition all
-			legendSquareSelection.transition()
-				.attr('x', 0)
-				.attr('y', function(d, i) {
-					return i * legendSquareHeight * 1.75;
-				})
-				.attr('width', me.legendSquareWidth)
-				.attr('height', me.legendSquareHeight)
-				.attr('fill', function(d, i) {
-					return colorScale(i);
-				});
-				
-			/**
- 			 * legend text
- 			 */
-			// join new text with current text
-			var legendTextSelection = me.gLegend.selectAll('text')
-				.data(me.graphData);
-				
-			// remove old text
-			legendTextSelection.exit().remove();
-			
-			// add new
-			legendTextSelection.enter().append('text');
-			
-			// transition all
-			legendTextSelection.transition()
-				.attr('x', legendSquareWidth * 2)
-				.attr('y', function(d, i) {
-					return i * legendSquareHeight * 1.75;
-				})
-				.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
-				.style('font-size', me.legendFontSize)
-				.text(function(d) {
-					return d.category.toUpperCase();
-				});
+		if(me.showLegend) {
+			me.handleLegend();
 		}
 		
 		//////////////////////////////////////////////////
-		// ADJUST THE REPORT TITLE
+		// CHART TITLE
 		//////////////////////////////////////////////////
-		me.gTitle.selectAll('text')
-			.text(me.chartTitle);
-			
+		me.handleChartTitle();
+		
 		//////////////////////////////////////////////////
 		// TRANSITION AXES
 		//////////////////////////////////////////////////
 		me.gXAxis.transition().duration(500).call(me.xAxis);
 		me.gYAxis.transition().duration(500).call(me.yAxis);
+	},
+ 	
+	/**
+	 * @function
+	 * @description Handle the bar chart labels
+	 */
+	handleLabels: function() {
+		var me = this;
+		
+		//
+		// local scope
+		//
+		var chort = me.chartOrientation,
+			_xScale = me.xScale,
+			_yScale = me.yScale,
+			labelVAlign = me.labelVAlign;
+		
+		// join new layers
+		me.gLabel = me.gCanvas.selectAll('.label')
+			.data(me.layers);
+			
+		// transition out old labels
+		me.gLabel.exit().remove();
+		
+		// add new
+		var addedLabels = me.gLabel.enter()
+			.append('g')
+			.attr('class', 'label');
+				
+		// text transition
+		var textSelection = me.gLabel.selectAll('text')
+			.data(function(d) {
+					return d.values;
+			});
+			
+		// transition out old text
+		textSelection.exit()
+			.transition()
+			.attr('x', 1000)
+			.duration(500)
+			.remove();
+				
+		// add new text elements
+		textSelection.enter()
+			.append('text');
+			
+		// transition all
+		textSelection.transition()
+			.duration(500)
+			.attr('x', function(d) {
+				if(chort == 'horizontal') {
+					return _xScale(d.y0 + d.y) + Math.floor((_xScale(d.y0) - _xScale(d.y0 + d.y))/2);
+				} else {
+					// scaled X position + (rectWidth / 2)
+					return _xScale(d.id) + Math.floor(_xScale.rangeBand()/2);
+				}
+			})
+			.attr('y', function(d) {
+				if(chort == 'horizontal') {
+					// _yScale(d.id) is upper left corner of rectangle
+					if(labelVAlign == 'bottom') {
+						return _yScale(d.id) + Math.floor(_yScale.rangeBand() * .85);
+					} else if(labelVAlign == 'top') {
+						return _yScale(d.id) + Math.floor(_yScale.rangeBand() * .15);
+					} else {
+						return _yScale(d.id) + Math.floor(_yScale.rangeBand()/2);
+					}
+				} else {
+					if(labelVAlign == 'bottom') {
+						return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y)) * .9);
+					} else if(labelVAlign == 'top') {
+						return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y)) * .1);
+					} else {
+						return _yScale(d.y0 + d.y) + Math.floor((_yScale(d.y0) - _yScale(d.y0 + d.y))/2);
+					}
+				}
+			})
+			.style('font-family', 'sans-serif')
+			.style('font-size', '9px')
+			.style('text-anchor', 'middle')
+			.text(me.labelFunction);
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Handle the legend
+ 	 */
+ 	handleLegend: function() {
+	 	var me = this;
+	 	
+	 	// local scope
+	 	var legendSquareHeight = me.legendSquareHeight,
+	 		legendSquareWidth = me.legendSquareWidth,
+	 		colorScale = me.colorScale,
+	 		gCanvas = me.gCanvas;
+	 		
+	 	////////////////////////////////////////
+	 	// legend rectangles
+	 	////////////////////////////////////////
+	 	// join new with old
+	 	var legendSquareSelection = me.gLegend.selectAll('rect')
+		 	.data(me.graphData);
+		 	
+		// remove old squares
+		legendSquareSelection.exit().remove();
+		
+		// add new squares
+		legendSquareSelection.enter().append('rect');
+		
+		// transition all
+		legendSquareSelection.transition()
+			.attr('x', 0)
+			.attr('y', function(d, i) {
+				return i * legendSquareHeight * 1.75;
+			})
+			.attr('width', me.legendSquareWidth)
+			.attr('height', me.legendSquareHeight)
+			.attr('fill', function(d, i) {
+				return colorScale(i);
+			});
+			
+		////////////////////////////////////////
+	 	// legend text
+	 	////////////////////////////////////////
+	 	// join new text with current text
+	 	var legendTextSelection = me.gLegend.selectAll('text')
+		 	.data(me.graphData);
+		
+		// remove old text
+		legendTextSelection.exit().remove();
+			
+		// add new
+		legendTextSelection.enter().append('text')
+			.on('mouseover', function(d, i) {
+				// opacity 1
+				gCanvas.selectAll('.layer').filter(function(e, j) {
+					return i == j;
+				})
+				.selectAll('rect')
+				.style('stroke-width', 2)
+				.style('opacity', 1);
+			})
+			.on('mouseout', function(d, i) {
+				// opacity .6
+				gCanvas.selectAll('.layer').filter(function(e, j) {
+					return i == j;
+				})
+				.selectAll('rect')
+				.style('stroke-width', 1)
+				.style('opacity', .6);
+			});
+			
+		// transition all
+		legendTextSelection.transition()
+			.attr('x', legendSquareWidth * 2)
+			.attr('y', function(d, i) {
+				return i * legendSquareHeight * 1.75;
+			})
+			.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
+			.style('font-size', me.legendFontSize)
+			.text(function(d) {
+				return d.category.toUpperCase();
+			});
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Handle the chart title
+ 	 */
+ 	handleChartTitle: function() {
+	 	var me = this;
+	 	
+	 	var ct = me.chartTitle == null ? '' : me.chartTitle;
+	 	
+	 	me.gTitle.selectAll('text').remove();
+	 	
+		me.gTitle.selectAll('text')
+			.data([ct])
+			.enter()
+			.append('text')
+			.style('fill', '#333333')
+			.style('font-weight', 'bold')
+			.style('font-family', 'sans-serif')
+			.text(function(d) {
+				return d;
+			});
 	},
 	
 	/**

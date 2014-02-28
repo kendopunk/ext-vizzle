@@ -244,6 +244,7 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 			svg: me.svg,
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,
+			colorScale: d3.scale.category20(),
 			panelId: me.panelId,
 			margins: {
 				top: 40,
