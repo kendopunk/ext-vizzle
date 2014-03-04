@@ -55,6 +55,7 @@ Ext.define('App.view.d3.slope.debt.MainPanel', {
 
  		me.chartDescription = '<b>Edward Tufte\'s Slopegraph</b><br><br>'
 	 		+ '<i>US national debt vs GDP, 1986-2013.</i><br><br>'
+	 		+ 'Use the year slider in the top toolbar to adjust range.<br><br>'
 	 		+ 'Red indicates debt/GDP ratio >= 90%...uses a threshold scale for line color with domain of 0.9.  Tooltips triggered by left axis text mouseover.<br><br>'
 	 		+ 'Data from <a href="http://useconomy.about.com/od/usdebtanddeficit/a/National-Debt-by-Year.htm">about.com</a> and <a href="http://www.dof.ca.gov/html/fs_data/LatestEconData/Chronology/chronology.htm">California DOF</a>.<br><br>'
 		 	+ 'See this <a href="http://www.visualisingdata.com/index.php/2013/12/in-praise-of-slopegraphs/">good article</a> for more info...';
