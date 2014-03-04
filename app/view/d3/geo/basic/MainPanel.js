@@ -387,11 +387,16 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		me.handleCircles(workingData);
 	},
 	
-	checkboxChange: function() {
+	checkboxChange: function(cbx) {
 		var me = this;
 		
+		if(cbx.checked) {
+			cbx.addCls(me.btnHighlightCss);
+		} else {
+			cbx.removeCls(me.btnHighlightCss);
+		}
+
 		me.draw();
-	
 	},
 	
 	/**
@@ -429,8 +434,46 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 			radiusScale = me.radiusScale,
 			currentScaleFilter = me.currentScaleFilter,
 			circleFillFn = me.circleFillFn;
+			
+		// remove all
+		me.svg.selectAll('circle').remove();
 		
-		// join new with old
+		// add new
+		var circSelection = me.svg.selectAll('circle')
+			.data(data)
+			.enter()
+			.append('circle')
+			.style('stroke', 'black')
+			.style('stroke-width', 1)
+			.on('mouseover', function(d) {
+				me.showInfo(d);
+			});
+			
+		// transition (radius only)
+		circSelection.transition()
+			.duration(500)
+			.attr('cx', function(d) {
+				return usMap.getMapCoords(d.long, d.lat)[0];
+			})
+			.style('fill', function(d) {
+				return circleFillFn(d);
+			})
+			.attr('cy', function(d) {
+				return usMap.getMapCoords(d.long, d.lat)[1];
+			}).attr('r', function(d) {
+				if(currentScaleFilter == 'fatalities') {
+					return radiusScale(d.fatalities);
+				} else if(currentScaleFilter == 'damages') {
+					return radiusScale(d.damages);
+				} else {
+					return 4;
+				}
+			});
+			
+			
+			
+		
+		/*// join new with old
 		var circSelection = me.svg.selectAll('circle')
 			.data(data);
 			
@@ -471,7 +514,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 				} else {
 					return 4;
 				}
-			});
+			});*/
 	},
 	
 	/**
