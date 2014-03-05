@@ -293,7 +293,9 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 			if(button.metric == btn.metric) {
 				button.addCls(me.btnHighlightCss);
 			} else {
-				button.removeCls(me.btnHighlightCss);
+				if(button.metric !== undefined) {
+					button.removeCls(me.btnHighlightCss);
+				}
 			}
 		}, me);
 		

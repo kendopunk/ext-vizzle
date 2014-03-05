@@ -254,9 +254,29 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 						}
 					);
 				}
+				
+				/*
+				if(me.showLegend) {
+					me.gLegend.selectAll('text').filter(function(e, j) {
+						return e.category == d.category;
+					})
+					.style('fill', '#990066')
+					.style('font-weight', 'bold');
+				}
+				*/
 			})
 			.on('mouseout', function(d, i) {
 				d3.select(this).style('stroke-width', 1).style('opacity', .6);
+				
+				/*
+				if(me.showLegend) {
+					me.gLegend.selectAll('text').filter(function(e, j) {
+						return e.category == d.category;
+					})
+					.style('fill', '#000000')
+					.style('font-weight', 'normal');
+				}
+				*/
 			})
 			.call(d3.helper.tooltip().text(me.tooltipFunction));
 		
@@ -579,7 +599,10 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 		// add new
 		legendTextSelection.enter().append('text')
 			.on('mouseover', function(d, i) {
-				// opacity 1
+				// highlight text
+				d3.select(this).style('fill', '#990066').style('font-weight', 'bold');
+				
+				// rect opacity 1
 				gCanvas.selectAll('.layer').filter(function(e, j) {
 					return i == j;
 				})
@@ -588,7 +611,10 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 				.style('opacity', 1);
 			})
 			.on('mouseout', function(d, i) {
-				// opacity .6
+				// unhighlight text
+				d3.select(this).style('fill', '#000000').style('font-weight', 'normal');
+				
+				// rect opacity .6
 				gCanvas.selectAll('.layer').filter(function(e, j) {
 					return i == j;
 				})
