@@ -267,7 +267,7 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 				.attr('transform', function(d) {
 					// rotation needs to happen around the text's X and Y position
 					var x = _xScale(d[xMetric]) + parseInt((_xScale.rangeBand() - barPadding)/2);
-					var y = canvasHeight - parseInt(margins.bottom * 1.3);
+					var y = canvasHeight - parseInt(margins.bottom * 1.2);
 					return 'rotate(-90,' + x + ',' + y + ')';
 				})	
 			  	.style('text-anchor', 'start')
