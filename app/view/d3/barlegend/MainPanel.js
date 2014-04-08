@@ -1,7 +1,7 @@
 /**
  * @class
  * @author Mark Fehrenbacher (kendopunk@hotmail.com)
- * @memberOf App.view.d3.barlegendlegend
+ * @memberOf App.view.d3.barlegend
  * @description Bar chart with legend
  */
 Ext.define('App.view.d3.barlegend.MainPanel', {

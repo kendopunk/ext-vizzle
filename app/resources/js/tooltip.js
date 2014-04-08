@@ -9,7 +9,7 @@ d3.helper.tooltip = function(){
         background: '#FFFFCC',
         padding: '3px',
         border: '1px',
-        font: '10px, sans-serif',
+        font: '9px, sans-serif',
         border: '1px solid'
     };
 
@@ -48,8 +48,13 @@ d3.helper.tooltip = function(){
         .on('mouseout.tooltip', function(pD, pI){
             // Remove tooltip
             tooltipDiv.remove();
-        });
-
+        })
+        .on('click.tooltip', function() {
+	        tooltipDiv.remove();
+	    })
+        .on('dblclick.tooltip', function() {
+	        tooltipDiv.remove();
+	    });
     }
 
     tooltip.attr = function(_x){

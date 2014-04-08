@@ -21,6 +21,8 @@ Ext.define('App.util.d3.final.BarChart', {
 	chartFlex: 3,
 	chartTitle: null,
 	colorScale: d3.scale.category20(),
+	colorDefinedInData: false,
+	colorDefinedInDataIndex: 'color',
 	dataMetric: null,	// default metric, i.e. data[dataMetric] to use when
 						// initializing the drawing
 	desiredYIncrements: null,
@@ -343,6 +345,8 @@ Ext.define('App.util.d3.final.BarChart', {
 			barPadding = me.barPadding,
 			margins = me.margins,
 			colorScale = me.colorScale,
+			colorDefinedInData = me.colorDefinedInData,
+			colorDefinedInDataIndex = me.colorDefinedInDataIndex,
 			gLegend = me.gLegend;
 	 	
 	 	// join new with old
@@ -395,6 +399,15 @@ Ext.define('App.util.d3.final.BarChart', {
 				.style('font-weight', 'normal');
 			}
 		})
+		.on('dblclick', function(d) {
+			if(mouseEvents != null
+				&& mouseEvents.dblclick
+				&& mouseEvents.dblclick.eventName
+				&& eventRelay
+			) {
+				eventRelay.publish(mouseEvents.dblclick.eventName, d);
+			}
+		})
 		.call(d3.helper.tooltip().text(me.tooltipFunction));
 		
 		// transition all rectangles
@@ -417,9 +430,12 @@ Ext.define('App.util.d3.final.BarChart', {
 				return yScale(d[dataMetric]) - margins.bottom;
 			})
 			.attr('fill', function(d, i) {
-				return colorScale(i);
+				if(colorDefinedInData && colorDefinedInDataIndex) {
+					return d[colorDefinedInDataIndex];
+				} else {
+					return colorScale(i);
+				}
 			});
- 	
  	},
  	
  	/**

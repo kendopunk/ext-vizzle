@@ -27,6 +27,11 @@ Ext.define('App.store.tree.MenuStore', {
 					iconCls: 'icon-arrow-right',
 					id: 'barlegendMainPanel'
 				}, {
+					text: 'Mouse Events',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'battleMainPanel'
+				}, {
 					text: 'Grouped Bar Chart',
 					leaf: true,
 					iconCls: 'icon-arrow-right',

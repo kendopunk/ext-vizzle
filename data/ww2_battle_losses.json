@@ -1,0 +1,67 @@
+{
+	"success":true,
+	"data":[{
+		"battle": "Guadalcanal",
+		"color": "CadetBlue",
+		"casualties": {
+			"allied": 7100,
+			"axis": 31000
+		}
+	}, {
+		"battle": "Okinawa",
+		"color": "DarkKhaki",
+		"casualties": {
+			"allied": 12000,
+			"axis": 110000
+		}
+	}, {
+		"battle": "Monte Cassino",
+		"color": "#000099",
+		"casualties": {
+			"allied": 55000,
+			"axis": 20000
+		}
+	}, {
+		"battle": "Luzon",
+		"color": "DarkSalmon",
+		"casualties": {
+			"allied": 8310,
+			"axis": 205535
+		}
+	}, {
+		"battle": "Kasserine Pass",
+		"color": "Gold",
+		"casualties": {
+			"allied": 10000,
+			"axis": 2000
+		}
+	}, {
+		"battle": "El Alamein I",
+		"color": "Green",
+		"casualties": {
+			"allied": 13250,
+			"axis": 10000
+		}
+	}, {
+		"battle": "El Alamein II",
+		"color": "#990066",
+		"casualties": {
+			"allied": 13560,
+			"axis": 30542
+		}
+	}, {
+		"battle": "Peleliu",
+		"color": "#999999",
+		"casualties": {
+			"allied": 10804,
+			"axis": 10695
+		}
+	}, {
+		"battle": "Anzio",
+		"color": "#CC3300",
+		"casualties": {
+			"allied": 43000,
+			"axis": 40000
+		}
+	}]
+}
