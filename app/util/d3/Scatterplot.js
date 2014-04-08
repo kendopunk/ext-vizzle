@@ -208,7 +208,11 @@ Ext.define('App.util.d3.Scatterplot', {
 		me.gXAxis = me.svg.append('svg:g');
 		me.gYAxis = me.svg.append('svg:g');
 		me.gTitle = me.svg.append('svg:g')
-			.attr('transform', 'translate(15,' + parseInt(me.margins.top/2) + ')');
+			.attr('transform', 'translate('
+			+ parseInt(me.canvasWidth/2)
+			+ ','
+			+ parseInt(me.margins.top/2)
+			+ ')');
 		
 		//////////////////////////////////////////////////
 		// set scales
@@ -522,6 +526,7 @@ Ext.define('App.util.d3.Scatterplot', {
 			.style('fill', '#444444')
 			.style('font-weight', 'bold')
 			.style('font-family', 'sans-serif')
+			.style('text-anchor', 'middle')
 			.text(function(d) {
 				return d;
 			});

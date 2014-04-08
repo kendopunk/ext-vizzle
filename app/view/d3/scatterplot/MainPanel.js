@@ -303,7 +303,7 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 					radius: 8,
 					margins: {
 						top: 60,
-						right: 5,
+						right: 20,
 						bottom: 75,
 						left: 75
 					},

@@ -10,6 +10,8 @@ Ext.define('App.view.d3.bar.VizPanel', {
 	plain: true,
 	autoScroll: true,
 	collapsible: true,
+	collapsed: false,
+	hideCollapseTool: true,
 	
 	requires: [
 		'App.util.JsonBuilder',
@@ -50,35 +52,39 @@ Ext.define('App.view.d3.bar.VizPanel', {
   		 * @property
   		 * @type Ext.toolbar.Toolbar
   		 */
-  		me.tbar = [{
-		  	xtype: 'button',
-		  	iconCls: 'icon-dollar',
-		  	metric: 'gross',
-		  	cls: me.btnHighlightCss,
-		  	text: me.defaultMetricText,
-			handler: me.metricHandler,
-			scope: me
-		}, {
-			xtype: 'button',
-			iconCls: 'icon-film',
-			metric: 'theaters',
-			text: '# Theaters',
-			handler: me.metricHandler,
-			scope: me
-		}, {
-			xtype: 'button',
-			iconCls: 'icon-dollar',
-			metric: 'opening',
-			text: 'Opening Wknd',
-			handler: me.metricHandler,
-			scope: me
-		}, {
-			xtype: 'button',
-			iconCls: 'icon-star',
-			metric: 'imdbRating',
-			text: 'IMDB Rating',
-			handler: me.metricHandler,
-			scope: me
+  		me.dockedItems = [{
+	  		xtype: 'toolbar',
+	  		dock: 'top',
+	  		items: [{
+			  	xtype: 'button',
+			  	iconCls: 'icon-dollar',
+			  	metric: 'gross',
+			  	cls: me.btnHighlightCss,
+			  	text: me.defaultMetricText,
+				handler: me.metricHandler,
+				scope: me
+			}, {
+				xtype: 'button',
+				iconCls: 'icon-film',
+				metric: 'theaters',
+				text: '# Theaters',
+				handler: me.metricHandler,
+				scope: me
+			}, {
+				xtype: 'button',
+				iconCls: 'icon-dollar',
+				metric: 'opening',
+				text: 'Opening Wknd',
+				handler: me.metricHandler,
+				scope: me
+			}, {
+				xtype: 'button',
+				iconCls: 'icon-star',
+				metric: 'imdbRating',
+				text: 'IMDB Rating',
+				handler: me.metricHandler,
+				scope: me
+			}]
 		}];
 		
 		me.callParent(arguments);

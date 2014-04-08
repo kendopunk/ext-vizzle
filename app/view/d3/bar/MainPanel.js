@@ -18,6 +18,9 @@ Ext.define('App.view.d3.bar.MainPanel', {
 	],
 	
 	layout: 'border',
+	defaults: {
+		split: true
+	},
 	
 	initComponent: function() {
 		var me = this;
@@ -51,7 +54,8 @@ Ext.define('App.view.d3.bar.MainPanel', {
 			width: me.vizPanelWidth,
 			height: me.vizPanelHeight,
 			dataStore: movieStore,
-			layout: 'fit'
+			layout: 'fit',
+			autoScroll: true
 		});
 		
 		// grid panel (center)

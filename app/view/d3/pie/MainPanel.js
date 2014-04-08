@@ -176,7 +176,8 @@ Ext.define('App.view.d3.pie.MainPanel', {
 					canvasHeight: me.canvasHeight,
 					dataMetric: 'recovery',
 					margins: {
-						top: 40
+						top: 40,
+						legend: 60
 					},
 					graphData: me.atfData[0]['recoveries'],
 					panelId: me.panelId,

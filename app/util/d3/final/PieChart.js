@@ -37,7 +37,8 @@ Ext.define('App.util.d3.final.PieChart', {
   	legendSquareHeight: 10,
   	legendTextFunction: function(data, index) { return 'legend item'; },
 	margins: {
-		top: 30
+		top: 30,
+		legend: 50
 	},
 	mouseEvents: {
  		mouseover: {
@@ -111,18 +112,6 @@ Ext.define('App.util.d3.final.PieChart', {
 			showLegend = me.showLegend;
 			
 		//////////////////////////////////////////////////
-		// chart translation X/Y...based on the use or 
-		// omission of the legend
-		//////////////////////////////////////////////////
-		if(showLegend) {
-			chartTranslateX = parseInt((me.getFlexUnit() * me.chartFlex)/2);
-			chartTranslateY = parseInt(me.canvasHeight/2) + me.margins.top;
-		} else {
-			chartTranslateX = parseInt(me.canvasWidth/2);
-			chartTranslateY = parseInt(me.canvasHeight/2) + me.margins.top;
-		}
-		
-		//////////////////////////////////////////////////
 		// set the outer radius if not specified
 		// take into account use of the legend
 		//////////////////////////////////////////////////
@@ -151,7 +140,20 @@ Ext.define('App.util.d3.final.PieChart', {
 			me.innerRadius = parseInt(me.outerRadius * .75);
 		}
 		var innerRadius = me.innerRadius;
-		
+			
+		//////////////////////////////////////////////////
+		// chart translation X/Y...based on the use or 
+		// omission of the legend
+		//////////////////////////////////////////////////
+		if(showLegend) {
+			chartTranslateX = parseInt((me.getFlexUnit() * me.chartFlex)/2);
+			//chartTranslateY = parseInt(me.canvasHeight/2) + me.margins.top;
+			chartTranslateY = me.outerRadius + me.margins.legend;
+		} else {
+			chartTranslateX = parseInt(me.canvasWidth/2);
+			chartTranslateY = parseInt(me.canvasHeight/2) + me.margins.top;
+		}
+
 		//////////////////////////////////////////////////
 		// pie "g"
 		// chart title "g"
@@ -162,12 +164,16 @@ Ext.define('App.util.d3.final.PieChart', {
 			.attr('transform', 'translate(' + chartTranslateX + ',' + chartTranslateY + ')');
 			
 		me.gTitle = me.svg.append('svg:g')
-			.attr('transform', 'translate(15,' + parseInt(me.margins.top/2) + ')');
+			.attr('transform', 'translate('
+			+ parseInt(me.canvasWidth/2)
+			+ ','
+			+ parseInt(me.margins.top/2)
+			+ ')');
 			
 		me.gLegend = me.svg.append('svg:g');
 		if(showLegend) {
 			legendTranslateX = (me.getFlexUnit() * me.chartFlex) + me.spaceBetweenChartAndLegend;
-			legendTranslateY = me.margins.top;
+			legendTranslateY = me.margins.legend;
 			me.gLegend.attr('transform', 'translate(' + legendTranslateX + ',' + legendTranslateY + ')');
 		}
 		
@@ -198,12 +204,17 @@ Ext.define('App.util.d3.final.PieChart', {
 			.append('g')
 			.attr('class', 'arc')
 			.on('mouseover', function(d, i) {
+				d3.select(this).attr('transform', 'scale(1.1, 1.1)');
+				
 				if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
 					eventRelay.publish(mouseEvents.mouseover.eventName, {
 						payload: d,
 						index: i
 					});
 				}
+			})
+			.on('mouseout', function(d, i) {
+				d3.select(this).attr('transform', 'scale(1)');
 			});
 			
 		//////////////////////////////////////////////////
@@ -312,12 +323,17 @@ Ext.define('App.util.d3.final.PieChart', {
 			.append('g')
 			.attr('class', 'arc')
 			.on('mouseover', function(d, i) {
+				d3.select(this).attr('transform', 'scale(1.1, 1.1)');
+				
 				if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
 					eventRelay.publish(mouseEvents.mouseover.eventName, {
 						payload: d,
 						index: i
 					});
 				}
+			})
+			.on('mouseout', function(d, i) {
+				d3.select(this).attr('transform', 'scale(1)');
 			});
 			
 		//////////////////////////////////////////////////
@@ -539,6 +555,7 @@ Ext.define('App.util.d3.final.PieChart', {
 			.style('fill', '#444444')
 			.style('font-weight', 'bold')
 			.style('font-family', 'sans-serif')
+			.style('text-anchor', 'middle')
 			.text(String);
 	},
 	

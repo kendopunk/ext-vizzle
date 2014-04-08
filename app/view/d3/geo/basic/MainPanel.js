@@ -280,7 +280,9 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 		
 		// title "g"
 		me.gTitle = me.svg.append('svg:g')
-			.attr('transform', 'translate(15,25)');
+			.attr('transform', 'translate('
+			+ parseInt(me.canvasWidth/2)
+			+ ',30)');
 			
 		// info "g"
 		var xTrans = me.canvasWidth - 200;
@@ -604,6 +606,7 @@ Ext.define('App.view.d3.geo.basic.MainPanel', {
 			.style('fill', '#444444')
 			.style('font-weight', 'bold')
 			.style('font-family', 'sans-serif')
+			.style('text-anchor', 'middle')
 			.text(function(d) {
 				return d;
 			});

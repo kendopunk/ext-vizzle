@@ -190,7 +190,8 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,
 			margins: {
-				top: 40
+				top: 40,
+				legend: 75
 			},
 			graphData: me.graphData,
 			panelId: me.panelId,

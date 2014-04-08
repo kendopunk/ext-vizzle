@@ -153,8 +153,8 @@ Ext.define('App.view.d3.pielegend.MainPanel', {
 	 	
 	 	// initialize SVG, width, height
  		me.svgInitialized = true,
- 			me.canvasWidth = parseInt(me.getWidth() * .95),
- 			me.canvasHeight = parseInt(me.getHeight() * .95) - 35,
+ 			me.canvasWidth = parseInt(me.getWidth() * .85),
+ 			me.canvasHeight = parseInt(me.getHeight() * .95) - 40,
  			me.panelId = '#' + me.body.id;
 	 	
 	 	// init svg
@@ -185,7 +185,8 @@ Ext.define('App.view.d3.pielegend.MainPanel', {
 					canvasWidth: me.canvasWidth,
 					canvasHeight: me.canvasHeight,
 					margins: {
-						top: 40
+						top: 40,
+						legend: 75
 					},
 					graphData: me.atfData[0]['recoveries'],
 					panelId: me.panelId,

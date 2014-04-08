@@ -65,6 +65,8 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
 				
 				me.dairyButton.removeCls(me.btnHighlightCss);
 				
+				me.groupedBarChart.setChartTitle('Meat Consumption');
+				
 				me.draw();
 			},
 			scope: me
@@ -79,6 +81,8 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
 				btn.addCls(me.btnHighlightCss);
 				
 				me.meatButton.removeCls(me.btnHighlightCss);
+				
+				me.groupedBarChart.setChartTitle('Dairy Consumption');
 				
 				me.draw();
 			},
@@ -192,6 +196,7 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,
 			graphData: [],
+			chartTitle: 'Meat Consumption',
 			fixedColorRange: {
 				'1950s': colorScale(1),
 				'1960s': colorScale(2),

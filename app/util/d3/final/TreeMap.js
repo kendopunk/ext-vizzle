@@ -238,7 +238,9 @@ Ext.define('App.util.d3.final.TreeMap', {
 		
 		if(me.gTitle == null) {
 			me.gTitle = me.svg.append('svg:g')
-				.attr('transform', 'translate(15, 15)');
+				.attr('transform', 'translate('
+				+ parseInt(me.canvasWidth/2)
+				+ ', 15)');
 				
 			me.gTitle.selectAll('text')
 				.data([me.chartTitle])
@@ -247,6 +249,7 @@ Ext.define('App.util.d3.final.TreeMap', {
 				.style('fill', '#444444')
 				.style('font-weight', 'bold')
 				.style('font-family', 'sans-serif')
+				.style('text-anchor', 'middle')
 				.text(String);
 		} else {
 			me.gTitle.selectAll('text')

@@ -178,7 +178,11 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 			.attr('transform', 'translate(' + me.margins.left + ', ' + me.margins.top + ')');
 			
 		me.gTitle = me.svg.append('svg:g')
-			.attr('transform', 'translate(15,' + parseInt(me.margins.top/2) + ')');
+			.attr('transform', 'translate('
+			+ parseInt(me.canvasWidth/2)
+			+ ','
+			+ parseInt(me.margins.top/2)
+			+ ')');
 			
 		var legendTranslateX = me.margins.left
 			+ (me.getFlexUnit() * me.chartFlex)
@@ -654,6 +658,7 @@ Ext.define('App.util.d3.final.StackedBarChart', {
 			.style('fill', '#333333')
 			.style('font-weight', 'bold')
 			.style('font-family', 'sans-serif')
+			.style('text-anchor', 'middle')
 			.text(function(d) {
 				return d;
 			});

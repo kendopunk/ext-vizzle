@@ -97,7 +97,11 @@ Ext.define('App.util.d3.final.SlopeGraph', {
 		me.gRight = me.svg.append('svg:g');
 		me.gConnector = me.svg.append('svg:g');
 		me.gTitle = me.svg.append('svg:g')
-			.attr('transform', 'translate(15,20)');
+			.attr('transform', 'translate('
+			+ parseInt(me.canvasWidth/2)
+			+ ','
+			+ parseInt(me.margins.top/2)
+			+ ')');
 		
 		//////////////////////////////////////////////////
 		// KEEP THIS ORDER !!
@@ -375,6 +379,7 @@ Ext.define('App.util.d3.final.SlopeGraph', {
 			.style('fill', '#444444')
 			.style('font-weight', 'bold')
 			.style('font-family', 'sans-serif')
+			.style('text-anchor', 'middle');
 			
 		titleSelection.transition().text(String);
 	},

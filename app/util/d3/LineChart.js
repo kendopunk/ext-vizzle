@@ -171,10 +171,15 @@ Ext.define('App.util.d3.LineChart', {
 		// set "g" elements
 		//////////////////////////////////////////////////
 		me.gCanvas = me.svg.append('svg:g');
-		me.gTitle = me.svg.append('svg:g');
 		me.gXAxis = me.svg.append('svg:g');
 		me.gYAxis = me.svg.append('svg:g');
-		
+		me.gTitle = me.svg.append('svg:g')
+			.attr('transform', 'translate('
+			+ parseInt(me.canvasWidth/2)
+			+ ','
+			+ parseInt(me.margins.top/2)
+			+ ')');
+			
 		//////////////////////////////////////////////////
 		// set scales
 		//////////////////////////////////////////////////
@@ -248,9 +253,6 @@ Ext.define('App.util.d3.LineChart', {
 		//////////////////////////////////////////////////
 		// chart title
 		//////////////////////////////////////////////////
-		me.gTitle = me.svg.append('svg:g')
-			.attr('transform', 'translate(15,' + parseInt(me.margins.top/2) + ')');
-		
 		if(me.chartTitle != null) {
 			me.gTitle.selectAll('text')
 				.data([me.chartTitle])
@@ -259,6 +261,7 @@ Ext.define('App.util.d3.LineChart', {
 				.style('fill', '#444444')
 				.style('font-weight', 'bold')
 				.style('font-family', 'sans-serif')
+				.style('text-anchor', 'middle')
 				.text(function(d) {
 					return d;
 				});

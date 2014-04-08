@@ -16,6 +16,7 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 	
 	canvasHeight: 400,
 	canvasWidth: 400,
+	chartTitle: 'Grouped Bar Chart',
 	colorScale: d3.scale.category20(),
 	
 	colorDefinedInData: false,
@@ -26,6 +27,7 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 	
 	gBar: null,
 	gBarLabel: null,
+	gTitle: null,
 	gGrouper: null,
 	gXAxis: null,
 	gYAxis: null,
@@ -89,6 +91,12 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 	 		.attr('transform', 'translate(' + me.margins.left + ',0)');
 		me.gXAxis = me.svg.append('svg:g');
 		me.gYAxis = me.svg.append('svg:g');
+		me.gTitle = me.svg.append('svg:g')
+			.attr('transform', 'translate('
+			+ parseInt(me.canvasWidth/2)
+			+ ','
+			+ parseInt(me.margins.top/2)
+			+ ')');
  		
 		//////////////////////////////////////////////////
 		// set X and Y scales, bring into local scope
@@ -100,14 +108,11 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 			_xAxis = me.xAxis, _yAxis = me.yAxis;
 		
 		//////////////////////////////////////////////////
-		// RECTS
+		// bars, bar labels and chart title
 		//////////////////////////////////////////////////
 		me.handleBars();
-			
-		//////////////////////////////////////////////////
-		// handle the bar labels
-		//////////////////////////////////////////////////
 		me.handleBarLabels();
+		me.handleChartTitle();
 
 		//////////////////////////////////////////////////
 		// call the X axis function
@@ -142,14 +147,11 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 			_xAxis = me.xAxis, _yAxis = me.yAxis;
 		
 		//////////////////////////////////////////////////
-		// RECTS
+		// bars, bar labels, and chart title
 		//////////////////////////////////////////////////
 		me.handleBars();
-			
-		//////////////////////////////////////////////////
-		// handle the bar labels
-		//////////////////////////////////////////////////
 		me.handleBarLabels();
+		me.handleChartTitle();
 			
 		//////////////////////////////////////////////////
 		// re-call the Y axis function
@@ -466,6 +468,33 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
  	},
  	
  	/**
+ 	 * @function
+ 	 * @description Draw/transition the chart title
+ 	 */
+	handleChartTitle: function() {
+		var me = this,
+			ct;
+		
+		if(me.chartTitle == null) {
+			ct = '';
+		} else {
+			ct = me.chartTitle;
+		}
+		
+		me.gTitle.selectAll('text').remove();
+		
+		me.gTitle.selectAll('text')
+			.data([ct])
+			.enter()
+			.append('text')
+			.style('fill', '#333333')
+			.style('font-weight', 'bold')
+			.style('font-family', 'sans-serif')
+			.style('text-anchor', 'middle')
+			.text(String);
+	},
+ 	
+ 	/**
   	 *
   	 *
   	 * SETTERS
@@ -476,5 +505,11 @@ Ext.define('App.util.d3.final.GroupedBarChart', {
 	  	var me = this;
 	  	
 	  	me.graphData = d;
+	},
+	
+	setChartTitle: function(title) {
+		var me = this;
+		
+		me.chartTitle = title;
 	}
 });
