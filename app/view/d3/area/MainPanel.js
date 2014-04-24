@@ -98,6 +98,30 @@ Ext.define('App.view.d3.area.MainPanel', {
 			 	}
 			}
 		});
+		me.labelToggleButton = Ext.create('Ext.button.Button', {
+			text: 'ON',
+			currentValue: 'on',
+			cls: me.btnHighlightCss,
+			handler: function(btn) {
+			 	if(btn.currentValue == 'on') {
+				 	btn.currentValue = 'off';
+				 	btn.setText('OFF');
+				 	btn.removeCls(me.btnHighlightCss);
+				 	
+				 	me.lineChart.setShowLabels(false);
+			 	} else {
+				 	btn.currentValue = 'on';
+				 	btn.setText('ON');
+				 	btn.addCls(me.btnHighlightCss);
+				 	
+				 	me.lineChart.setShowLabels(true);
+			 	}
+			 	
+			 	me.lineChart.transition();
+			 },
+			 scope: me
+		});
+		
 		me.dockedItems = [{
 			xtype: 'toolbar',
 			dock: 'top',
@@ -127,6 +151,12 @@ Ext.define('App.view.d3.area.MainPanel', {
 				},
 				'->',
 				{
+					xtype: 'tbtext',
+					text: '<b>Labels:</b>'
+				},
+					me.labelToggleButton,
+					'-',
+				{
 			 		xtype: 'button',
 					text: 'Randomize',
 					iconCls: 'icon-arrow-switch',
@@ -137,9 +167,9 @@ Ext.define('App.view.d3.area.MainPanel', {
 					},
 					scope: me
 				}, {
-				xtype: 'tbspacer',
-				width: 10
-			}]
+					xtype: 'tbspacer',
+					width: 10
+				}]
 		}];
 		
 		//////////////////////////////////////////////////

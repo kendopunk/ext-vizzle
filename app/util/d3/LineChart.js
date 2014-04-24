@@ -545,5 +545,11 @@ Ext.define('App.util.d3.LineChart', {
 		var me = this;
 		
 		me.strokeColor = color;
+	},
+	
+	setShowLabels: function(bool) {
+		var me = this;
+		
+		me.showLabels = bool;
 	}
 });

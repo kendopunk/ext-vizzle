@@ -121,12 +121,7 @@ Ext.define('App.store.tree.MenuStore', {
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'tickerMainPanel'
-				}/*, {
-					text: 'Brushes',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'scatterBrushMainPanel'
-				}*/]
+				}]
 			}]
 		}, {
 			text: 'Chart.js',
