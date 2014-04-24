@@ -30,7 +30,7 @@ Ext.define('App.view.d3.ticker.MainPanel', {
  			me.canvasHeight,
  			me.svg,
  			me.panelId,
- 			me.maxDatesToShow = 50,
+ 			me.maxDatesToShow = 25,
  			me.defaultIncrement = 3000;	// 3s
  			me.baseTitle = 'Stock Price Ticker',
  			me.defaultXDataMetric = 'timestamp',
@@ -48,8 +48,8 @@ Ext.define('App.view.d3.ticker.MainPanel', {
  		 * @properties
  		 * @description layout vars
  		 */
-		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
-		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight) - 150;
+		me.width = parseInt(Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth);
+		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight) - 10;
 		
 		/**
  		 * task manager button
@@ -57,6 +57,7 @@ Ext.define('App.view.d3.ticker.MainPanel', {
  		me.taskMgrButton = Ext.create('Ext.button.Button', {
 	 		text: 'RUNNING',
 	 		cls: me.btnHighlightCss,
+	 		tooltip: 'Toggle ticker on/off',
 	 		currentValue: 'on',
 	 		handler: function(btn) {	
 	 			if(btn.currentValue == 'on') {
@@ -88,15 +89,16 @@ Ext.define('App.view.d3.ticker.MainPanel', {
 		
 		Ext.TaskManager.start(me.chartUpdateTask);
 		
-		me.tbar = [{
-			xtype: 'tbtext',
-			text: '<b>Ticker</b>'
-		}, {
-			xtype: 'tbspacer',
-			width: 10
-		},
-			me.taskMgrButton
-		];
+		me.dockedItems = [{
+			xtype: 'toolbar',
+			dock: 'top',
+			items: [{
+				xtype: 'tbtext',
+				text: '<b>Ticker:</b>'
+			},
+				me.taskMgrButton
+			]
+		}];
 
 		// on activate, publish update to the "Info" panel
 		me.on('activate', function() {
@@ -157,9 +159,21 @@ Ext.define('App.view.d3.ticker.MainPanel', {
 			yTickFormat: function(d) {
 				return Ext.util.Format.currency(d);
 			},
-			strokeColor: 'black',
+			strokeColor: '#0000FF',
 			fillArea: true,
-			fillColor: 'peachpuff'
+			fillColor: '#DDDDDD',
+			markerFillColor: 'red',
+			markerStrokeColor: 'black',
+			showLabels: true,
+			labelSkipCount: 5,
+			labelFunction: function(d, i) {
+				return Ext.util.Format.currency(d.price, 0, false, 0);
+			},
+			tooltipFunction: function(d, i) {
+				return '<b>' + Ext.util.Format.currency(d.price, 0, false, 0) + '</b>'
+					+ '<br>'
+					+ new Date(d.timestamp).toLocaleDateString();
+			}
 		});
 		
 		me.lineChart.draw();
@@ -173,7 +187,7 @@ Ext.define('App.view.d3.ticker.MainPanel', {
 	 	var me = this,
 	 		ret = [],
 	 		d = new Date(),
-	 		currentPrice = 15;
+	 		currentPrice = 7.5;
 	 		
 	 	var baseTimestamp = d.getTime();
 	 	

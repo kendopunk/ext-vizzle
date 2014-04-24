@@ -466,7 +466,7 @@ Ext.define('App.util.d3.final.BarChart', {
 		labelSelection.enter()
 			.append('text')
 			.style('font-size', me.labelFontSize)
-			.attr('textAnchor', 'start');
+			.attr('text-anchor', 'start');
 		
 		// transition all
 		labelSelection.transition()

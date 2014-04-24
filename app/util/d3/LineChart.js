@@ -12,79 +12,68 @@ Ext.define('App.util.d3.LineChart', {
  	 */
 	svg: null,
 	
-	/**
-	 * canvas width, height
-	 */
 	canvasWidth: 400,
 	canvasHeight: 400,
 	
-	/**
- 	 * "g" elements to hold paths, X/Y axes, and title
- 	 */
 	gCanvas: null,
+	gLabel: null,
+	gMarker: null,
 	gTitle: null,
 	gXAxis: null,
 	gYAxis: null,
 	
-	/**
- 	 * X and Y axis functions
- 	 */
-	xAxis: null,
-	yAxis: null,
-	
-	/**
- 	 * default margins
- 	 */
- 	margins: {
+	margins: {
 		top: 20,
 		right: 10,
 		bottom: 90,
 		left: 90
 	},
-	
-	/**
- 	 * fillArea = true for area chart, false for line chart
- 	 */
 	fillArea: false,
+	panelId: null,
+	chartTitle: '',
+ 	strokeColor: '#0000FF',
+	fillColor: '#FFFFCC',
 	
-	/**
-	 * x/y data metrics
-	 */
+	showLabels: true,
+	labelClass: 'labelText',
+	labelSkipCount: 1,		// every 2nd, 3rd, 4th, etc.
+	labelFunction: function(data, index) {
+		return 'label';
+	},
+	
+	showMarkers: true,
+	markerFillColor: '#FFCC33',
+	markerStrokeColor: '#333333',
+	markerStrokeWidth: 1,
+	markerRadius: 4,
+	tooltipFunction: function(data, index) {
+		return 'tooltip';
+	},
+	
+	// x stuff
+	xAxis: null,
 	xDataMetric: null,
+	xTicks: 7,
+	xTickFormat: function(d) {
+		return d;
+	},
+	xScalePadding: 0,
+	
+	// y stuff
+	yAxis: null,
 	yDataMetric: null,
-	
-	/**
- 	 * ticks and formats
- 	 */
- 	xTicks: 7,
- 	yTicks: 12,
- 	xTickFormat: function(d) {
+	yTicks: 12,
+	yTickFormat: function(d) {
 		return d;
 	},
- 	yTickFormat: function(d) {
-		return d;
-	},
+	yScalePadding: 0,
 	
-	/**
- 	 * scale padding
- 	 */
- 	xScalePadding: 0,
- 	yScalePadding: 0,
- 	
  	/**
   	 * line/area holders
   	 */
   	canvasLine: null,
   	canvasArea: null,
 	
-	/**
- 	 * misc.
- 	 */
- 	panelId: null,
- 	chartTitle: null,
- 	strokeColor: '#990066',
-	fillColor: '#FFCC99',
- 	
 	constructor: function(config) {
 		var me = this;
 		
@@ -98,67 +87,12 @@ Ext.define('App.util.d3.LineChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.Scatterplot
- 	 * @description Set the horizontal scale
- 	 * @param metric String
- 	 */
-	setXScale: function(metric) {
-		var me = this;
-		
-		me.xScale = d3.scale.linear()
-			.domain([
-				d3.min(me.graphData, function(d) { return d[metric]; }),
-				d3.max(me.graphData, function(d) { return d[metric]; })
-			])
-			.range([
-				me.margins.left,
-				me.canvasWidth - me.margins.right
-			]);
-			
-		me.xAxis = d3.svg.axis()
-			.scale(me.xScale)
-			.orient('bottom')
-			.ticks(me.xTicks)
-			.tickFormat(me.xTickFormat);
-	},
-	
-	/**
- 	 * @function
- 	 * @memberOf App.util.d3.Scatterplot
- 	 * @description Set the vertical (y) scale
- 	 * @param metric String
- 	 */
-	setYScale: function(metric) {
-		var me = this;
-		
-		var yScalePadding = me.yScalePadding;
-			
-		me.yScale = d3.scale.linear()
-			.domain([
-				0,
-				d3.max(me.graphData, function(d) { return d[metric] + yScalePadding })
-			])
-			.range([
-				me.canvasHeight - me.margins.bottom,
-				me.margins.top
-			]);
-			
-
-		me.yAxis = d3.svg.axis()
-			.scale(me.yScale)
-			.orient('left')
-			.ticks(me.yTicks)
-			.tickFormat(me.yTickFormat);	
-	},
-	
-	/**
- 	 * @function
  	 */
 	draw: function() {
 		var me = this;
 		
 		//////////////////////////////////////////////////
-		// sanity check
+		// sanity check (1)
 		//////////////////////////////////////////////////
 		if(me.svg == null || me.xDataMetric == null || me.yDataMetric == null) {
 			Ext.Msg.alert('Configuration Error', 
@@ -168,9 +102,16 @@ Ext.define('App.util.d3.LineChart', {
 		}
 		
 		//////////////////////////////////////////////////
+		// sanity check (2)
+		//////////////////////////////////////////////////
+		if(me.graphData.length == 0) { return; }
+		
+		//////////////////////////////////////////////////
 		// set "g" elements
 		//////////////////////////////////////////////////
 		me.gCanvas = me.svg.append('svg:g');
+		me.gLabel = me.svg.append('svg:g');
+		me.gMarker = me.svg.append('svg:g');
 		me.gXAxis = me.svg.append('svg:g');
 		me.gYAxis = me.svg.append('svg:g');
 		me.gTitle = me.svg.append('svg:g')
@@ -200,36 +141,18 @@ Ext.define('App.util.d3.LineChart', {
 			yDataMetric = me.yDataMetric,
 			margins = me.margins,
 			graphData = me.graphData;
-			
-		//////////////////////////////////////////////////
-		// sanity check
-		//////////////////////////////////////////////////
-		if(me.graphData.length == 0) {
-			return;
-		}
 		
 		//////////////////////////////////////////////////
-		// init canvasLine
+		// initialize canvasLine, canvasArea functoins
 		//////////////////////////////////////////////////
 		me.canvasLine = d3.svg.line()
-			.x(function(d) {
-				return xScale(d[xDataMetric]);
-			})
-			.y(function(d) {
-				return yScale(d[yDataMetric]);
-			});
-		
-		//////////////////////////////////////////////////
-		// init canvasArea
-		//////////////////////////////////////////////////
+			.x(function(d) { return xScale(d[xDataMetric]); })
+			.y(function(d) { return yScale(d[yDataMetric]); });
+			
 		me.canvasArea = d3.svg.area()
-			.x(function(d) {
-				return xScale(d[xDataMetric]);
-			})
+			.x(function(d) { return xScale(d[xDataMetric]); })
 			.y0(me.canvasHeight - me.margins.bottom)
-			.y1(function(d) {
-				return yScale(d[yDataMetric]);
-			});
+			.y1(function(d) { return yScale(d[yDataMetric]); });
 		
 		//////////////////////////////////////////////////
 		// line OR area view
@@ -249,38 +172,23 @@ Ext.define('App.util.d3.LineChart', {
 				.style('stroke', me.strokeColor)
 				.attr('d', me.canvasLine);
 		}
-			
-		//////////////////////////////////////////////////
-		// chart title
-		//////////////////////////////////////////////////
-		if(me.chartTitle != null) {
-			me.gTitle.selectAll('text')
-				.data([me.chartTitle])
-				.enter()
-				.append('text')
-				.style('fill', '#444444')
-				.style('font-weight', 'bold')
-				.style('font-family', 'sans-serif')
-				.style('text-anchor', 'middle')
-				.text(function(d) {
-					return d;
-				});
-		}
 		
 		//////////////////////////////////////////////////
-		// call the X-axis
+		// handle markers, chart title
+		//////////////////////////////////////////////////
+		me.handleLabels();
+		me.handleMarkers();
+		me.handleChartTitle();
+		
+		//////////////////////////////////////////////////
+		// axis modifications
 		//////////////////////////////////////////////////
 		var xAxTrans = canvasHeight - margins.bottom;
 		me.gXAxis.attr('class', 'axis')
-			.attr('transform', 'translate(0, ' + xAxTrans + ')')
-			.call(xAxis);
-			
-		//////////////////////////////////////////////////
-		// call the Y-axis
-		//////////////////////////////////////////////////	
+			.attr('transform', 'translate(0, ' + xAxTrans + ')');
 		me.gYAxis.attr('class', 'axis')
-			.attr('transform', 'translate(' + margins.left + ', 0)')
-			.call(yAxis);
+			.attr('transform', 'translate(' + margins.left + ', 0)');
+		me.callAxes();
 	},
 	
 	/**
@@ -351,14 +259,224 @@ Ext.define('App.util.d3.LineChart', {
 				.duration(250)
 				.attr('d', me.canvasLine);
 		}
-
+		
 		//////////////////////////////////////////////////
-		// re-call the X and Y axes
+		// handle markers, chart title, axes
 		//////////////////////////////////////////////////
-		// transition().duration(500)
-		me.gXAxis.call(me.xAxis);
-		me.gYAxis.call(me.yAxis);
+		me.handleLabels();
+		me.handleMarkers();
+		me.handleChartTitle();
+		me.callAxes();
  	},
+ 	
+ 	/**
+  	 * @function
+  	 * @description Handle labels
+  	 */
+  	handleLabels: function() {
+  		var me = this;
+  		
+  		// extinguish (kesu)
+  		if(!me.showLabels) {
+	  		me.gLabel.selectAll('text').remove();
+	  		return;
+	  	}
+  		
+  		var xScale = me.xScale,
+  			xDataMetric = me.xDataMetric,
+  			yScale = me.yScale,
+  			yDataMetric = me.yDataMetric,
+  			markerRadius = me.markerRadius,
+  			labelSkipCount = me.labelSkipCount;
+  			
+  		// join new with old
+  		var labelSelection = me.gLabel.selectAll('text')
+	  		.data(me.graphData);
+	  		
+	  	// transition out old
+	  	labelSelection.exit()
+		  	.transition()
+		  	.duration(250)
+		  	.attr('x', -200)
+		  	.remove();
+		
+		// add new
+		labelSelection.enter()
+			.append('text')
+			.attr('class', me.labelClass)
+			.attr('text-anchor', 'start');
+			
+		// transition all
+		labelSelection.transition()
+			.duration(250)
+			.attr('x', function(d, i) {
+				return xScale(d[xDataMetric]) - (markerRadius * 4);
+			})
+			.attr('y', function(d) {
+				return yScale(d[yDataMetric]) - (markerRadius * 3);
+			})
+			.text(function(d, i) {
+				if(labelSkipCount > 1) {
+					if(i> 0 && i % labelSkipCount == 0) {
+						return me.labelFunction(d, i);
+					}
+					return '';
+				} else {
+					return me.labelFunction(d, i);
+				}
+			});
+  	},
+ 	
+ 	/**
+  	 * @function
+  	 * @description Handle the circle markers on the paths
+  	 */
+  	handleMarkers: function() {
+  		var me = this;
+  		
+  		// extinguish (kesu)
+  		if(!me.showMarkers) {
+  			me.gMarker.selectAll('circle').remove();
+  			return;
+  		}
+  		
+  		var xScale = me.xScale,
+  			xDataMetric = me.xDataMetric,
+  			yScale = me.yScale,
+  			yDataMetric = me.yDataMetric,
+  			markerRadius = me.markerRadius;
+  			
+  		// join new with old
+  		var markerSelection = me.gMarker.selectAll('circle')
+	  		.data(me.graphData);
+	  		
+	  	// transition out old
+	  	markerSelection.exit()
+		  	.transition()
+		  	.duration(250)
+		  	.attr('width', 0)
+		  	.remove();
+		  	
+		// add new
+		markerSelection.enter()
+			.append('circle')
+			.attr('r', me.markerRadius)
+			.style('fill', me.markerFillColor)
+			.style('stroke', me.markerStrokeColor)
+			.style('stroke-width', me.markerStrokeWidth)
+			.on('mouseover', function(d, i) {
+				d3.select(this).transition().duration(0).attr('r', function() {
+					return markerRadius * 3;
+				});
+			})
+			.on('mouseout', function(d, i) {
+				d3.select(this)
+					.transition()
+					.duration(250)
+					.attr('r', markerRadius)
+					.ease('bounce');
+			});
+			
+		// transition all
+		markerSelection.transition()
+			.duration(250)
+			.attr('cx', function(d) {
+				return xScale(d[xDataMetric]);
+			})
+			.attr('cy', function(d) {
+				return yScale(d[yDataMetric]);
+			});
+		
+		// call the tooltip helper
+		markerSelection.call(d3.helper.tooltip().text(me.tooltipFunction));
+	},
+ 	
+ 	/**
+  	 * @function
+  	 * @description Handle generation/transition of the chart title
+  	 */
+ 	handleChartTitle: function() {
+ 		var me = this;
+ 		
+ 		me.gTitle.selectAll('text').remove();
+ 		
+ 		if(me.chartTitle != null) {
+			me.gTitle.selectAll('text')
+				.data([me.chartTitle])
+				.enter()
+				.append('text')
+				.style('fill', '#444444')
+				.style('font-weight', 'bold')
+				.style('font-family', 'sans-serif')
+				.style('text-anchor', 'middle')
+				.text(String);
+		}
+	},
+	
+ 	/**
+ 	 * @function
+ 	 * @description Call the X/Y axes generation/transition functions
+ 	 */
+ 	callAxes: function() {
+	 	var me = this;
+	 	me.gXAxis.call(me.xAxis);
+		me.gYAxis.call(me.yAxis);
+	},
+	
+ 	/**
+ 	 * @function
+ 	 * @memberOf App.util.d3.Scatterplot
+ 	 * @description Set the horizontal scale
+ 	 * @param metric String
+ 	 */
+	setXScale: function(metric) {
+		var me = this;
+		
+		me.xScale = d3.scale.linear()
+			.domain([
+				d3.min(me.graphData, function(d) { return d[metric]; }),
+				d3.max(me.graphData, function(d) { return d[metric]; })
+			])
+			.range([
+				me.margins.left,
+				me.canvasWidth - me.margins.right
+			]);
+			
+		me.xAxis = d3.svg.axis()
+			.scale(me.xScale)
+			.orient('bottom')
+			.ticks(me.xTicks)
+			.tickFormat(me.xTickFormat);
+	},
+	
+	/**
+ 	 * @function
+ 	 * @memberOf App.util.d3.Scatterplot
+ 	 * @description Set the vertical (y) scale
+ 	 * @param metric String
+ 	 */
+	setYScale: function(metric) {
+		var me = this;
+		
+		var yScalePadding = me.yScalePadding;
+			
+		me.yScale = d3.scale.linear()
+			.domain([
+				0,
+				d3.max(me.graphData, function(d) { return d[metric] + yScalePadding })
+			])
+			.range([
+				me.canvasHeight - me.margins.bottom,
+				me.margins.top
+			]);
+			
+
+		me.yAxis = d3.svg.axis()
+			.scale(me.yScale)
+			.orient('left')
+			.ticks(me.yTicks)
+			.tickFormat(me.yTickFormat);	
+	},
 	
 	/**
  	 * SETTERS

@@ -49,26 +49,27 @@ Ext.define('App.view.d3.area.MainPanel', {
  		 * @properties
  		 * @description layout vars
  		 */
-		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
+		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .98);
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
 		
-		/**
- 		 * @property
- 		 */
- 		me.lineChartButton = Ext.create('Ext.button.Button', {
+		////////////////////////////////////////
+		// TOOLBAR/COMPONENTS
+		////////////////////////////////////////
+		me.lineChartButton = Ext.create('Ext.button.Button', {
  			text: 'Line Chart',
  			cls: me.btnHighlightCss,
  			iconCls: 'icon-line-chart',
  			handler: function(btn) {
 	 			btn.addCls(me.btnHighlightCss);
  				me.areaChartButton.removeCls(me.btnHighlightCss);
+ 				
+ 				me.fillMenu.setDisabled(true);
 	 			
 	 			me.lineChart.setFillArea(false);
 	 			me.lineChart.transition();
  			},
  			scope: me
  		});
- 		
  		me.areaChartButton = Ext.create('Ext.button.Button', {
  			text: 'Area Chart',
  			iconCls: 'icon-area-chart',
@@ -76,71 +77,77 @@ Ext.define('App.view.d3.area.MainPanel', {
 	 			btn.addCls(me.btnHighlightCss);
 	 			me.lineChartButton.removeCls(me.btnHighlightCss);
 	 			
+	 			me.fillMenu.setDisabled(false);
+	 			
 	 			me.lineChart.setFillArea(true);
 	 			me.lineChart.transition();
  			},
  			scope: me
  		});
-		
-		/**
- 		 *@property
- 		 */
- 		me.tbar = [
-	 		me.lineChartButton,
-	 		'-',
-	 		me.areaChartButton,
-	 	{xtype: 'tbspacer', width: 30},
-	 	{
-	 		xtype: 'button',
-	 		text: 'Colors',
-	 		menu: [{
-		 		text: 'Stroke',
-		 		menu: {
-			 		xtype: 'colormenu',
-			 		listeners: {
-				 		select: function(menu, color) {
-				 			me.lineChart.setStrokeColor('#' + color);
-				 			me.lineChart.transition();
-				 		},
-				 		scope: me
-				 	}
+ 		me.fillMenu = Ext.create('Ext.menu.Item', {
+			text: 'Fill',
+			disabled: true,
+			menu: {
+				xtype: 'colormenu',
+				listeners: {
+			 		select: function(menu, color) {
+			 			me.lineChart.setFillColor('#' + color);
+			 			me.lineChart.transition();
+			 		},
+			 		scope: me
 			 	}
-			}, {
-				text: 'Fill',
-				menu: {
-					xtype: 'colormenu',
-					listeners: {
-				 		select: function(menu, color) {
-				 			me.lineChart.setFillColor('#' + color);
-				 			me.lineChart.transition();
-				 		},
-				 		scope: me
-				 	}
-				}
+			}
+		});
+		me.dockedItems = [{
+			xtype: 'toolbar',
+			dock: 'top',
+			items: [
+				me.lineChartButton,
+				'-',
+				me.areaChartButton,
+				'-',
+				{
+			 		xtype: 'button',
+			 		text: 'Colors',
+			 		menu: [{
+				 		text: 'Stroke',
+				 		menu: {
+					 		xtype: 'colormenu',
+					 		listeners: {
+						 		select: function(menu, color) {
+						 			me.lineChart.setStrokeColor('#' + color);
+						 			me.lineChart.transition();
+						 		},
+						 		scope: me
+						 	}
+					 	}
+					},
+						me.fillMenu
+					]
+				},
+				'->',
+				{
+			 		xtype: 'button',
+					text: 'Randomize',
+					iconCls: 'icon-arrow-switch',
+					tooltip: 'Make up some random data',
+					handler: function() {
+						me.lineChart.setGraphData(me.generateGraphData());
+						me.lineChart.transition();
+					},
+					scope: me
+				}, {
+				xtype: 'tbspacer',
+				width: 10
 			}]
-		},
-	 		'->',
-	 	{
-	 		xtype: 'button',
-			text: 'Randomize',
-			iconCls: 'icon-arrow-switch',
-			tooltip: 'Make up some random data',
-			handler: function() {
-				me.lineChart.setGraphData(me.generateGraphData());
-				me.lineChart.transition();
-			},
-			scope: me
-		}, {
-			xtype: 'tbspacer',
-			width: 10
 		}];
-
-		// on activate, publish update to the "Info" panel
+		
+		//////////////////////////////////////////////////
+		// LISTENERS
+		//////////////////////////////////////////////////
 		me.on('activate', function() {
 			me.eventRelay.publish('infoPanelUpdate', me.chartDescription);
 		}, me);
-		
-		// after render, initialize the canvas
 		me.on('afterrender', function(panel) {
 			me.initCanvas();
 		}, me);
@@ -158,7 +165,7 @@ Ext.define('App.view.d3.area.MainPanel', {
 		
 		// initialize SVG, width, height
  		me.svgInitialized = true,
- 			me.canvasWidth = parseInt(me.getWidth() * .95),
+ 			me.canvasWidth = parseInt(me.getWidth() * .98),
  			me.canvasHeight = parseInt(me.getHeight() * .95),
  			me.panelId = '#' + me.body.id;
 	 	
@@ -193,6 +200,16 @@ Ext.define('App.view.d3.area.MainPanel', {
 			},
 			yTickFormat: function(d) {
 				return Ext.util.Format.currency(d);
+			},
+			showLabels: true,
+			labelSkipCount: 2,
+			labelFunction: function(d, i) {
+				return Ext.util.Format.currency(d.price, 0, false, 0);
+			},
+			tooltipFunction: function(d, i) {
+				return '<b>' + Ext.util.Format.currency(d.price, 0, false, 0) + '</b>'
+					+ '<br>'
+					+ new Date(d.timestamp).toLocaleDateString();
 			}
 		});
 		
@@ -213,8 +230,10 @@ Ext.define('App.view.d3.area.MainPanel', {
 	 	d.setSeconds(0);
 	 	
 	 	var baseTimestamp = d.getTime(),
-	 		currentPrice = 15,
-	 		loopLimit = Math.ceil(Math.random() * 300);
+	 		currentPrice = 4,
+	 		minEl = 10,
+	 		maxEl = 40,
+	 		loopLimit = Math.floor(Math.random() * (maxEl - minEl + 1)) + minEl;
 		
 		for(i=0; i<loopLimit; i++) {
 		
