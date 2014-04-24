@@ -47,7 +47,7 @@ Ext.define('App.view.d3.pielegend.MainPanel', {
  		 * @properties
  		 * @description layout vars
  		 */
-		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
+		me.width = parseInt(Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth);
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
 		
 		me.tbar = [{
@@ -153,8 +153,8 @@ Ext.define('App.view.d3.pielegend.MainPanel', {
 	 	
 	 	// initialize SVG, width, height
  		me.svgInitialized = true,
- 			me.canvasWidth = parseInt(me.getWidth() * .85),
- 			me.canvasHeight = parseInt(me.getHeight() * .95) - 40,
+ 			me.canvasWidth = parseInt(me.getWidth() * .98),
+ 			me.canvasHeight = parseInt(me.getHeight() * .98) - 40,
  			me.panelId = '#' + me.body.id;
 	 	
 	 	// init svg

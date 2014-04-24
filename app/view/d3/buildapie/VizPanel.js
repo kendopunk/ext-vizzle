@@ -21,7 +21,7 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
 			panel.dropTarget = Ext.create('Ext.dd.DropTarget', panel.body.dom, {
 		 		ddGroup: 'vizPanelDDGroup',
 		 		notifyEnter: function(ddSource, e, data) {
-			 		console.log('entered panel...');
+			 		//console.log('entered panel...');
 			 	},
 			 	notifyDrop: function(ddSource, e, data) {
 			 		if(!panel.svgInitialized) {
@@ -161,8 +161,8 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
 	 	
 	 	// initialize SVG, width, height
  		me.svgInitialized = true,
- 			me.canvasWidth = parseInt(me.getWidth() * .95),
- 			me.canvasHeight = parseInt(me.getHeight() * .95) - 35,
+ 			me.canvasWidth = parseInt(me.getWidth() * .99),
+ 			me.canvasHeight = parseInt(me.getHeight() * .99) - 35,
  			me.panelId = '#' + me.body.id;
  			
 	 	// init svg
@@ -207,7 +207,7 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
 					+ '% Change: ' + Ext.util.Format.number(data.data.pctChange, '0,000.0') + '%';
 			},
 			dataMetric: me.defaultMetric,
-			chartFlex: 5,
+			chartFlex: 4,
 			legendFlex: 1,
 			showLegend: true,
 			legendTextFunction: function(data, index) {

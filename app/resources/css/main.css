@@ -139,6 +139,12 @@
 /**
  * SVG
  */
+ 
+/** easily recognize the bounding box 
+svg {
+	border: solid 1px black;
+}**/
+
 .arc path {
 	stroke: #FFFFFF;
 }
@@ -191,6 +197,24 @@
 
 .tinyText {
 	font: 9px/1.1 sans-serif;
+}
+
+.legendText {
+	font: 9px/1.1 sans-serif;
+}
+
+.legendTextBold {
+	font: bold 9px/1.1 sans-serif;
+}
+
+.labelText {
+	font: 9px/1.1 sans-serif;
+}
+
+.labelTextItalic {
+	font: 10px/1.1 sans-serif;
+	font-style: italic;
+	fill: #333333;
 }
 
 /**

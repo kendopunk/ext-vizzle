@@ -29,7 +29,7 @@ Ext.define('App.view.d3.buildapie.MainPanel', {
 		me.gridPanelWidth = 330,
 			me.vizPanelWidth = parseInt(
 				Ext.getBody().getViewSize().width
-				- 330
+				- 300
 				- App.util.Global.westPanelWidth
 			),
 			me.vizPanelHeight = parseInt(

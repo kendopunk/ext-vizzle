@@ -48,7 +48,7 @@ Ext.define('App.view.d3.pie.MainPanel', {
  		 * @properties
  		 * @description layout vars
  		 */
-		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
+		me.width = parseInt(Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth);
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
 		
 		me.tbar = [{
@@ -176,8 +176,8 @@ Ext.define('App.view.d3.pie.MainPanel', {
 					canvasHeight: me.canvasHeight,
 					dataMetric: 'recovery',
 					margins: {
-						top: 40,
-						legend: 60
+						top: 30,
+						legend: 50
 					},
 					graphData: me.atfData[0]['recoveries'],
 					panelId: me.panelId,
