@@ -22,6 +22,7 @@ Ext.define('App.util.d3.LineChart', {
 	gXAxis: null,
 	gYAxis: null,
 	
+	multiLine: false,
 	margins: {
 		top: 20,
 		right: 10,
@@ -33,7 +34,10 @@ Ext.define('App.util.d3.LineChart', {
 	chartTitle: '',
  	strokeColor: '#0000FF',
 	fillColor: '#FFFFCC',
-	
+	interpolate: 'linear',
+		// linear, step-before, step-after, basis, basis-open, basis-closed,
+		// bundle, cardinal, cardinal-open, cardinal-closed, monotone
+		
 	showLabels: true,
 	labelClass: 'labelText',
 	labelSkipCount: 1,		// every 2nd, 3rd, 4th, etc.
@@ -126,6 +130,7 @@ Ext.define('App.util.d3.LineChart', {
 		//////////////////////////////////////////////////
 		me.setXScale(me.xDataMetric);
 		me.setYScale(me.yDataMetric);
+		me.setLineAreaFn();
 		
 		//////////////////////////////////////////////////
 		// bring ExtJS variables
@@ -140,38 +145,31 @@ Ext.define('App.util.d3.LineChart', {
 			xDataMetric = me.xDataMetric,
 			yDataMetric = me.yDataMetric,
 			margins = me.margins,
-			graphData = me.graphData;
-		
-		//////////////////////////////////////////////////
-		// initialize canvasLine, canvasArea functoins
-		//////////////////////////////////////////////////
-		me.canvasLine = d3.svg.line()
-			.x(function(d) { return xScale(d[xDataMetric]); })
-			.y(function(d) { return yScale(d[yDataMetric]); });
+			graphData = me.graphData,
+			canvasLine = me.canvasLine,
+			canvasArea = me.canvasArea,
+			fillColor = me.fillColor,
+			fillArea = me.fillArea;
 			
-		me.canvasArea = d3.svg.area()
-			.x(function(d) { return xScale(d[xDataMetric]); })
-			.y0(me.canvasHeight - me.margins.bottom)
-			.y1(function(d) { return yScale(d[yDataMetric]); });
-		
 		//////////////////////////////////////////////////
-		// line OR area view
+		// generate the line/area
 		//////////////////////////////////////////////////
-		if(me.fillArea) {
-			me.gCanvas.append('path')
-				.datum(me.graphData)
-				.style('fill', me.fillColor)
-				.style('stroke-width', 1)
-				.style('stroke', me.strokeColor)
-				.attr('d', me.canvasArea);
-		} else {
-			me.gCanvas.append('path')
-				.datum(me.graphData)
-				.style('fill', 'none')
-				.style('stroke-width', 1)
-				.style('stroke', me.strokeColor)
-				.attr('d', me.canvasLine);
-		}
+		me.gCanvas.append('path')
+			.datum(me.graphData)
+			.style('fill', function(d) {
+				if(fillArea) {
+					return me.fillColor;
+				}
+				return 'none'
+			})
+			.style('stroke-width', 1)
+			.style('stroke', me.strokeColor)
+			.attr('d', function(d, i) {
+				if(fillArea) {
+					return canvasArea(d, i);
+				}
+				return canvasLine(d, i);
+			});
 		
 		//////////////////////////////////////////////////
 		// handle markers, chart title
@@ -202,6 +200,7 @@ Ext.define('App.util.d3.LineChart', {
 		//////////////////////////////////////////////////
 		me.setXScale(me.xDataMetric);
 		me.setYScale(me.yDataMetric);
+		me.setLineAreaFn();		// most occur after X/Y scale setting
 		
 		//////////////////////////////////////////////////
 		// vars into local scope
@@ -213,52 +212,33 @@ Ext.define('App.util.d3.LineChart', {
 			margins = me.margins,
 			graphData = me.graphData,
 			xDataMetric = me.xDataMetric,
-			yDataMetric = me.yDataMetric;
+			yDataMetric = me.yDataMetric,
+			canvasLine = me.canvasLine,
+			canvasArea = me.canvasArea,
+			fillColor = me.fillColor,
+			fillArea = me.fillArea;
 			
 		//////////////////////////////////////////////////
-		// transition area OR line
-		// - rebuild area
-		// - join
-		// - remove
-		// - add
-		// - transition
+		// transition the line/area
 		//////////////////////////////////////////////////
-		if(me.fillArea) {
-			me.canvasArea = d3.svg.area()
-				.x(function(d) {
-					return xScale(d[xDataMetric]);
-				})
-				.y0(me.canvasHeight - me.margins.bottom)
-				.y1(function(d) {
-					return yScale(d[yDataMetric]);
-				});
-				
-			me.gCanvas.selectAll('path')
-				.datum(me.graphData)
-				.style('fill', me.fillColor)
-				.style('stroke-width', 1)
-				.style('stroke', me.strokeColor)
-				.transition()
-				.duration(250)
-				.attr('d', me.canvasArea);
-		} else {
-			me.canvasLine = d3.svg.line()
-				.x(function(d) {
-					return xScale(d[xDataMetric]);
-				})
-				.y(function(d) {
-					return yScale(d[yDataMetric]);
-				});
-				
-			me.gCanvas.selectAll('path')
-				.datum(me.graphData)
-				.style('fill', 'none')
-				.style('stroke-width', 1)
-				.style('stroke', me.strokeColor)
-				.transition()
-				.duration(250)
-				.attr('d', me.canvasLine);
-		}
+		me.gCanvas.selectAll('path')
+			.datum(me.graphData)
+			.style('fill', function(d) {
+				if(fillArea) {
+					return fillColor;
+				}
+				return 'none'
+			})
+			.style('stroke-width', 1)
+			.style('stroke', me.strokeColor)
+			.transition()
+			.duration(250)
+			.attr('d', function(d, i) {
+				if(fillArea) {
+					return canvasArea(d, i);
+				}
+				return canvasLine(d, i);
+			});
 		
 		//////////////////////////////////////////////////
 		// handle markers, chart title, axes
@@ -268,6 +248,29 @@ Ext.define('App.util.d3.LineChart', {
 		me.handleChartTitle();
 		me.callAxes();
  	},
+ 	
+ 	/**
+  	 * @function
+  	 * @description Simultaneously setting the line and area functions
+  	 */
+ 	setLineAreaFn: function() {
+	 	var me = this;
+	 	
+	 	var xScale = me.xScale,
+		 	xDataMetric = me.xDataMetric,
+	 		yDataMetric = me.yDataMetric,
+	 		yScale = me.yScale;
+
+		me.canvasLine = d3.svg.line()
+			.interpolate(me.interpolate)
+			.x(function(d) { return xScale(d[xDataMetric]); })
+			.y(function(d) { return yScale(d[yDataMetric]); });
+			
+		me.canvasArea = d3.svg.area()
+			.x(function(d) { return xScale(d[xDataMetric]); })
+			.y0(me.canvasHeight - me.margins.bottom)
+			.y1(function(d) { return yScale(d[yDataMetric]); });
+	},
  	
  	/**
   	 * @function

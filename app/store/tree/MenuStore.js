@@ -117,6 +117,11 @@ Ext.define('App.store.tree.MenuStore', {
 					iconCls: 'icon-arrow-right',
 					id: 'areaMainPanel'
 				}, {
+					text: 'Multiline Chart',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'areaMultiPanel'
+				}, {
 					text: 'Area "Ticker"',
 					leaf: true,
 					iconCls: 'icon-arrow-right',

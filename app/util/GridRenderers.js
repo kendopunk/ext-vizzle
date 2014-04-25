@@ -41,6 +41,34 @@ Ext.define('App.util.GridRenderers', {
 			}
 			
 			return ret;
-		}
+		},
+		
+		/**getHexComplement: function(hex) {
+		
+		
+		
+		
+	
+
+function getHexComplement(hex) {
+    var colorAsInt = parseInt(hex.substring(1), 16);
+    
+    var complement = 0xFFFFFFFF ^ colorAsInt;
+    
+    console.log(complement);
+    console.log(complement.toString(16));
+}
+
+getHexComplement('#FFCC33');
+
+
+var hex = '#FFCC33';
+var color = parseInt(hex.substring(1), 16);
+var complement = 0xffffff ^ color;
+
+console.log(complement);
+
+console.log(complement.toString(16));
+*/
 	}
 });

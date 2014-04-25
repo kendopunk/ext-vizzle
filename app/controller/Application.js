@@ -9,6 +9,7 @@ Ext.define('App.controller.Application', {
 	requires: [
 		'App.view.chart.misc.MainPanel',
 		'App.view.d3.area.MainPanel',
+		'App.view.d3.area.MultiPanel',
 		'App.view.d3.bar.MainPanel',
 		'App.view.d3.bargroup.MainPanel',
 		'App.view.d3.barlegend.MainPanel',
