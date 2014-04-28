@@ -172,8 +172,8 @@ Ext.define('App.view.d3.treemap.heat.MainPanel', {
 		me.getEl().mask('Loading...');
 		
 		// initialize SVG, width, height
- 		me.canvasWidth = parseInt(me.getWidth() * .95),
- 			me.canvasHeight = parseInt(me.getHeight() * .85) - 35,
+ 		me.canvasWidth = parseInt(me.body.dom.offsetWidth * .9),
+	 		me.canvasHeight = parseInt(me.body.dom.offsetHeight * .9),
  			me.panelId = '#' + me.body.id;
  			
 	 	Ext.Ajax.request({

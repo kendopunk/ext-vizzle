@@ -269,8 +269,8 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 		
 		// initialize SVG, width, height
  		me.svgInitialized = true,
- 			me.canvasWidth = parseInt(me.getWidth() * .95),
- 			me.canvasHeight = parseInt(me.getHeight() * .95),
+ 			me.canvasWidth = parseInt(me.body.dom.offsetWidth * .98),
+	 		me.canvasHeight = parseInt(me.body.dom.offsetHeight * .98),
  			me.panelId = '#' + me.body.id;
 	 	
 	 	// init svg
@@ -302,9 +302,9 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 					yScalePadding: 50,
 					radius: 8,
 					margins: {
-						top: 60,
+						top: 20,
 						right: 20,
-						bottom: 75,
+						bottom: 50,
 						left: 75
 					},
 					colorScaleFunction: function(data, index) {

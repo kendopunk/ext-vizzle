@@ -71,7 +71,12 @@ Ext.define('App.store.tree.MenuStore', {
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'pielegendMainPanel'
-				}, {
+				}, /*{
+					text: 'Multi-Level Pie',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'pieConcentric'
+				}, */{
 					text: 'Build-A-Pie',
 					leaf: true,
 					iconCls: 'icon-arrow-right',

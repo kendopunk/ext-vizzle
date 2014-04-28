@@ -230,8 +230,8 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 	 	
 	 	// initialize SVG, width, height
  		me.svgInitialized = true,
- 			me.canvasWidth = parseInt(me.getWidth() * .95),
- 			me.canvasHeight = parseInt(me.getHeight() * .95) - 35,
+ 			me.canvasWidth = parseInt(me.body.dom.offsetWidth * .98),
+	 		me.canvasHeight = parseInt(me.body.dom.offsetHeight * .98),
  			me.panelId = '#' + me.body.id;
 	 	
 	 	// init svg
@@ -249,7 +249,7 @@ Ext.define('App.view.d3.hozbarstack.MainPanel', {
 			margins: {
 				top: 40,
 				right: 10,
-				bottom: 20,
+				bottom: 50,
 				left: 100
 			},
 			tooltipFunction: me.productionTooltipFn,

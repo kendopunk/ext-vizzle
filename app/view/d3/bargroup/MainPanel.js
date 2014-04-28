@@ -163,11 +163,9 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
 	initCanvas: function() {
 	 	var me = this;
 	 	
-	 	//me.getEl().mask('Drawing...');
-	 	
 	 	// width, height
-	 	me.canvasWidth = parseInt(me.getWidth() * .95),
- 		me.canvasHeight = parseInt(me.getHeight() * .98) - 25,
+	 	me.canvasWidth = Math.floor(me.body.dom.offsetWidth * .98),
+	 	me.canvasHeight = Math.floor(me.body.dom.offsetHeight * .98),
  		me.panelId = '#' + me.body.id;
 	 	
 	 	// init svg
@@ -177,18 +175,6 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
 		 	.attr('height', me.canvasHeight);
 		 	
 		var colorScale = d3.scale.category20();
-		 	
-		/*
-		// temporary border
-		var border = me.svg.append('rect')
-			.attr('x', 0)
-			.attr('y', 0)
-			.attr('height', me.canvasHeight)
-			.attr('width', me.canvasWidth)
-			.style('fill', 'none')
-			.style('stroke', 'black')
-			.style('stroke-width', 1);
-		*/
 		 	
 		// configured the grouped bar chart
 		me.groupedBarChart = Ext.create('App.util.d3.final.GroupedBarChart', {
@@ -209,7 +195,7 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
 			margins: {
 				top: 40,
 				right: 10,
-				bottom: 80,
+				bottom: 60,
 				left: 100,
 				leftAxis: 85
 			},

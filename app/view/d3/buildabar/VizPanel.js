@@ -139,8 +139,8 @@ Ext.define('App.view.d3.buildabar.VizPanel', {
 	 	
 	 	// initialize SVG, width, height
  		me.svgInitialized = true,
- 			me.canvasWidth = parseInt(me.getWidth() * .95),
- 			me.canvasHeight = parseInt(me.getHeight() * .95) - 35,
+	 		me.canvasWidth = parseInt(me.body.dom.offsetWidth * .98),
+	 		me.canvasHeight = parseInt(me.body.dom.offsetHeight * .98),
  			me.panelId = '#' + me.body.id;
 	 	
 	 	// init svg
@@ -177,7 +177,7 @@ Ext.define('App.view.d3.buildabar.VizPanel', {
 			margins: {
 				top: 20,
 				right: 10,
-				bottom: 10,
+				bottom: 15,
 				left: 100,
 				leftAxis: 85
 			},

@@ -161,8 +161,8 @@ Ext.define('App.view.d3.buildapie.VizPanel', {
 	 	
 	 	// initialize SVG, width, height
  		me.svgInitialized = true,
- 			me.canvasWidth = parseInt(me.getWidth() * .99),
- 			me.canvasHeight = parseInt(me.getHeight() * .99) - 35,
+ 			me.canvasWidth = parseInt(me.body.dom.offsetWidth * .98),
+	 		me.canvasHeight = parseInt(me.body.dom.offsetHeight * .98),
  			me.panelId = '#' + me.body.id;
  			
 	 	// init svg

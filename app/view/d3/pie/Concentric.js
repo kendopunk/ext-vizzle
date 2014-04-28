@@ -2,12 +2,12 @@
  * @class
  * @author Mark Fehrenbacher (kendopunk@hotmail.com)
  * @memberOf App.view.d3.pie
- * @description Simple pie chart panel
+ * @description Customizable concentric pie chart panel
  */
-Ext.define('App.view.d3.pie.MainPanel', {
+Ext.define('App.view.d3.pie.Concentric', {
 	extend: 'Ext.Panel',
-	alias: 'widget.pieMainPanel',
-	title: 'Pie Chart',
+	alias: 'widget.pieConcentric',
+	title: 'Multi-Level Pie Chart',
 	closable: true,
 	
 	requires: [
@@ -144,8 +144,8 @@ Ext.define('App.view.d3.pie.MainPanel', {
 	 	
 	 	// initialize SVG, width, height
  		me.svgInitialized = true,
- 			me.canvasWidth = parseInt(me.body.dom.offsetWidth * .98),
-	 		me.canvasHeight = parseInt(me.body.dom.offsetHeight * .98),
+ 			me.canvasWidth = parseInt(me.getWidth() * .95),
+ 			me.canvasHeight = parseInt(me.getHeight() * .95) - 35,
  			me.panelId = '#' + me.body.id;
 	 	
 	 	// init svg
@@ -176,7 +176,7 @@ Ext.define('App.view.d3.pie.MainPanel', {
 					canvasHeight: me.canvasHeight,
 					dataMetric: 'recovery',
 					margins: {
-						top: 40,
+						top: 30,
 						legend: 50
 					},
 					graphData: me.atfData[0]['recoveries'],

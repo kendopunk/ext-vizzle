@@ -21,6 +21,7 @@ Ext.define('App.controller.Application', {
 		'App.view.d3.geo.basic.MainPanel',
 		'App.view.d3.hozbarstack.MainPanel',
 		'App.view.d3.pie.MainPanel',
+		'App.view.d3.pie.Concentric',
 		'App.view.d3.pielegend.MainPanel',
 		'App.view.d3.scatterbrush.MainPanel',
 		'App.view.d3.scatterplot.MainPanel',

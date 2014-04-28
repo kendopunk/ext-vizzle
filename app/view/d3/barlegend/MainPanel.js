@@ -150,8 +150,8 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 	 	
 	 	// initialize SVG, width, height
  		me.svgInitialized = true,
- 			me.canvasWidth = parseInt(me.getWidth() * .95),
- 			me.canvasHeight = parseInt(me.getHeight() * .95) - 35,
+ 			me.canvasWidth = Math.floor(me.body.dom.offsetWidth * .98),
+	 		me.canvasHeight = Math.floor(me.body.dom.offsetHeight * .98),
  			me.panelId = '#' + me.body.id;
 	 	
 	 	// init svg
@@ -181,9 +181,9 @@ Ext.define('App.view.d3.barlegend.MainPanel', {
 					chartFlex: 4,
 					legendFlex: 1,
 					margins: {
-						top: 20,
+						top: 25,
 						right: 10,
-						bottom: 10,
+						bottom: 40,
 						left: 100,
 						leftAxis: 85
 					},

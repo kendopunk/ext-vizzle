@@ -207,8 +207,8 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 	 	
 	 	// initialize SVG, width, height
  		me.svgInitialized = true,
- 			me.canvasWidth = parseInt(me.getWidth() * .95),
- 			me.canvasHeight = parseInt(me.getHeight() * .95) - 35,
+ 			me.canvasWidth = parseInt(me.body.dom.offsetWidth * .98),
+	 		me.canvasHeight = parseInt(me.body.dom.offsetHeight * .98),
  			me.panelId = '#' + me.body.id;
 	 	
 	 	// init svg
@@ -224,8 +224,8 @@ Ext.define('App.view.d3.barstacklegend.MainPanel', {
 			panelId: me.panelId,
 			margins: {
 				top: 40,
-				right: 5,
-				bottom: 20,
+				right: 10,
+				bottom: 40,
 				left: 80
 			},
 			tooltipFunction: me.salesTooltipFn,

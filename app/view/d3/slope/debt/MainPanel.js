@@ -123,8 +123,8 @@ Ext.define('App.view.d3.slope.debt.MainPanel', {
 		me.getEl().mask('Loading...');
 		
 		// initialize SVG, width, height
- 		me.canvasWidth = parseInt(me.getWidth() * .95),
- 			me.canvasHeight = parseInt(me.getHeight() * .95) - 35,
+ 		me.canvasWidth = parseInt(me.body.dom.offsetWidth * .98),
+	 		me.canvasHeight = parseInt(me.body.dom.offsetHeight * .98),
  			me.panelId = '#' + me.body.id;
  			
  		// init svg
@@ -158,7 +158,7 @@ Ext.define('App.view.d3.slope.debt.MainPanel', {
 						top: 70,
 						right: 130,
 						rightText: 120,
-						bottom: 10,
+						bottom: 30,
 						left: 160,
 						leftText: 20
 					},

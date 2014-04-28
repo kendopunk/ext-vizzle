@@ -46,14 +46,19 @@ d3.helper.tooltip = function(){
             tooltipDiv.html(function(d, i){ return text(pD, pI); });
         })
         .on('mouseout.tooltip', function(pD, pI){
-            // Remove tooltip
-            tooltipDiv.remove();
+        	if(tooltipDiv !== undefined) {
+        		tooltipDiv.remove();
+        	}
         })
         .on('click.tooltip', function() {
-	        tooltipDiv.remove();
+	        if(tooltipDiv !== undefined) {
+        		tooltipDiv.remove();
+        	}
 	    })
         .on('dblclick.tooltip', function() {
-	        tooltipDiv.remove();
+			if(tooltipDiv !== undefined) {
+        		tooltipDiv.remove();
+        	}
 	    });
     }
 
