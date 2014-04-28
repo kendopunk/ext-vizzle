@@ -123,8 +123,8 @@ Ext.define('App.view.d3.ticker.MainPanel', {
 		
 		// initialize SVG, width, height
  		me.svgInitialized = true,
- 			me.canvasWidth = parseInt(me.getWidth() * .95),
- 			me.canvasHeight = parseInt(me.getHeight() * .95),
+ 			me.canvasWidth = parseInt(me.body.dom.offsetWidth * .98),
+	 		me.canvasHeight = parseInt(me.body.dom.offsetHeight * .98),
  			me.panelId = '#' + me.body.id;
 	 	
 	 	// init svg
@@ -144,9 +144,9 @@ Ext.define('App.view.d3.ticker.MainPanel', {
 			panelId: me.panelId,
 			graphData: me.graphData,
 			margins: {
-				top: 40,
-				right: 30,
-				bottom: 60,
+				top: 30,
+				right: 10,
+				bottom: 40,
 				left: 70
 			},
 			yScalePadding: 1,
@@ -215,7 +215,7 @@ Ext.define('App.view.d3.ticker.MainPanel', {
 	 tickAdd: function() {
 	 	var me = this;
 	 	
-	 	var newData = Array.slice(Ext.clone(me.graphData), 1, me.graphData.length);
+	 	var newData = Ext.Array.slice(Ext.clone(me.graphData), 1, me.graphData.length);
 	 	
 	 	// append
 	 	var lastTs = newData[newData.length-1].timestamp;
