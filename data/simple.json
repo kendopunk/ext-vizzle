@@ -1,0 +1,9 @@
+{
+	"people": [{
+		"name": "fred",
+		"location": "dc"
+	}, {
+		"name": "marge",
+		"location": "fl"
+	}]
+}

@@ -15,7 +15,7 @@ Ext.define('App.store.tree.MenuStore', {
 			children: [{
 				text: '<b>Bar Charts</b>',
 				iconCls: 'icon-bar-chart',
-				expanded: true,
+				//expanded: true,
 				children: [{
 					text: 'Basic Bar Chart',
 					leaf: true,
@@ -71,16 +71,16 @@ Ext.define('App.store.tree.MenuStore', {
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'pielegendMainPanel'
-				}, /*{
-					text: 'Multi-Level Pie',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'pieConcentric'
-				}, */{
+				}, {
 					text: 'Build-A-Pie',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'buildapieMainPanel'
+				},  {
+					text: 'Sunburst',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'sunburstPartition'
 				}]
 			}, {
 				text: '<b>Geo</b>',
