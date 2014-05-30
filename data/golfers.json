@@ -1,115 +1,128 @@
 {
-   "name": "root",
-   "children": [
-      {
-         "name": "USA",
-         "children": [
-            {
-               "name": "Bubba Watson",
-               "wins": 6,
-               "majors": 2
-            },
-            {
-               "name": "Sam Snead",
-               "wins": 82,
-               "majors": 7
-            },
-            {
-               "name": "Phil Mickelson",
-               "wins": 42,
-               "majors": 5
-            },
-            {
-               "name": "Tom Watson",
-               "wins": 39,
-               "majors": 8
-            },
-            {
-               "name": "Arnold Palmer",
-               "wins": 82,
-               "majors": 7
-            },
-            {
-               "name": "Payne Stewart",
-               "wins": 11,
-               "majors": 3
-            },
-            {
-               "name": "Jim Furyk",
-               "wins": 16,
-               "majors": 1
-            }
-         ]
-      },
-      {
-         "name": "EUROPE",
-         "children": [
-            {
-               "name": "Nick Faldo",
-               "wins": 9,
-               "majors": 6
-            },
-            {
-               "name": "Justin Rose",
-               "wins": 5,
-               "majors": 1
-            },
-            {
-               "name": "Padraig Harrington",
-               "wins": 5,
-               "majors": 3
-            },
-            {
-               "name": "Rory McIlroy",
-               "wins": 6,
-               "majors": 2
-            },
-            {
-               "name": "Seve Ballesteros",
-               "wins": 9,
-               "majors": 5
-            },
-            {
-               "name": "Jose Maria Olazabal",
-               "wins": 6,
-               "majors": 2
-            },
-            {
-               "name": "Tommy Armour",
-               "wins": 25,
-               "majors": 3
-            }
-         ]
-      },
-      {
-         "name": "ASIA/PACIFIC",
-         "children": [
-            {
-               "name": "Greg Norman",
-               "wins": 20,
-               "majors": 2
-            },
-            {
-               "name": "Adam Scott",
-               "wins": 10,
-               "majors": 1
-            },
-            {
-               "name": "Geoff Ogilvy",
-               "wins": 7,
-               "majors": 1
-            },
-            {
-               "name": "Steve Elkington",
-               "wins": 7,
-               "majors": 1
-            },
-            {
-               "name": "Vijay Singh",
-               "wins": 34,
-               "majors": 3
-            }
-         ]
-      }
-   ]
+    "name": "root",
+    "children": [
+        {
+            "name": "USA",
+            "children": [
+                {
+                    "name": "Bubba Watson",
+                    "wins": 6,
+                    "majors": 2,
+					"money": 2327597
+                },
+                {
+                    "name": "Sam Snead",
+                    "wins": 82,
+                    "majors": 7,
+					"money": 170919
+                },
+                {
+                    "name": "Phil Mickelson",
+                    "wins": 42,
+                    "majors": 5,
+					"money": 73790053
+                },
+                {
+                    "name": "Tom Watson",
+                    "wins": 39,
+                    "majors": 8,
+					"money": 11015790
+                },
+                {
+                    "name": "Arnold Palmer",
+                    "wins": 82,
+                    "majors": 7,
+					"money": 1861857
+                },
+                {
+                    "name": "Payne Stewart",
+                    "wins": 11,
+                    "majors": 3,
+					"money": 11737008
+                },
+                {
+                    "name": "Jim Furyk",
+                    "wins": 16,
+                    "majors": 1,
+					"money": 58778936
+                }
+            ]
+        },
+        {
+            "name": "EUROPE",
+            "children": [
+                {
+                    "name": "Nick Faldo",
+                    "wins": 9,
+                    "majors": 6,
+					"money": 6953373
+                },
+                {
+                    "name": "Justin Rose",
+                    "wins": 5,
+                    "majors": 1,
+					"money": 26973944
+                },
+                {
+                    "name": "Padraig Harrington",
+                    "wins": 5,
+                    "majors": 3,
+					"money": 22506359
+                },
+                {
+                    "name": "Rory McIlroy",
+                    "wins": 6,
+                    "majors": 2,
+					"money": 16974843
+                },
+                {
+                    "name": "Seve Ballesteros",
+                    "wins": 9,
+                    "majors": 5,
+					"money": 2238460
+                },
+                {
+                    "name": "Jose Maria Olazabal",
+                    "wins": 6,
+                    "majors": 2,
+					"money": 12335310
+                }
+            ]
+        },
+        {
+            "name": "ASIA/PACIFIC",
+            "children": [
+                {
+                    "name": "Greg Norman",
+                    "wins": 20,
+                    "majors": 2,
+					"money": 14484458
+                },
+                {
+                    "name": "Adam Scott",
+                    "wins": 10,
+                    "majors": 1,
+					"money": 35447715
+                },
+                {
+                    "name": "Geoff Ogilvy",
+                    "wins": 7,
+                    "majors": 1,
+					"money": 27068534
+                },
+                {
+                    "name": "Steve Elkington",
+                    "wins": 7,
+                    "majors": 1,
+					"money": 15505418
+                },
+                {
+                    "name": "Vijay Singh",
+                    "wins": 34,
+                    "majors": 3,
+					"money": 68428730
+                }
+            ]
+        }
+    ]
 }
