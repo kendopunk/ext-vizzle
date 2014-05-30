@@ -211,10 +211,7 @@ Ext.define('App.util.d3.final.RadialTree', {
 		
 		// append
 		pathSelection.enter()
-			.append('path')
-			.on('mouseover', function(d) {
-				console.dir(d);
-			});
+			.append('path');
 			
 		// transition
 		if(initialDrawing) {
@@ -225,8 +222,9 @@ Ext.define('App.util.d3.final.RadialTree', {
 		  	  })
 		    	.attr('d', me.arc)
 		    	.style('stroke', '#FFFFFF')
-		    	.style('fill', function(d) {
-			   	 return colorScale((d.children ? d : d.parent).name);
+		    	.style('fill', function(d, i) {
+		    		var baseColor = colorScale((d.children ? d : d.parent).name);
+		    		return '#' +  App.util.Global.hexLightenDarken(baseColor, (d.depth * 5));
 				})
 				.style('fill-rule', 'evenodd')
 				.each(me.stash);
