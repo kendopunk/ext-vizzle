@@ -239,7 +239,10 @@ Ext.define('App.util.d3.final.RadialTree', {
 		 		})
 				.style('stroke', '#FFFFFF')
 				.style('fill', function(d) {
-			    	return colorScale((d.children ? d : d.parent).name);
+			    	var baseColor = colorScale((d.children ? d : d.parent).name);
+		    		return '#' +  App.util.Global.hexLightenDarken(baseColor, (d.depth * 5));
+		    		
+		    		//return colorScale((d.children ? d : d.parent).name);
 				})
 				.style('fill-rule', 'evenodd');
 		}
