@@ -75,7 +75,16 @@ Ext.define('App.view.d3.pie.Sunburst', {
 				metricName: 'money',
 				handler: me.metricHandler,
 				scope: me
-			}]
+			},
+			/*'->',
+			{
+				xtype: 'button',
+				text: 'NEW DATA SET',
+				handler: function(b, e) {
+					me.radialChart.setGraphData(me.generateData(), true);
+				},
+				scope: me
+			}*/]
 		}];
 		
 		// on activate, publish update to the "Info" panel
@@ -134,6 +143,17 @@ Ext.define('App.view.d3.pie.Sunburst', {
 		 	},
 	 		scope: me
 	 	});
+	 	
+	 	/*me.radialChart = Ext.create('App.util.d3.final.RadialTree', {
+		 	svg: me.svg,
+		 	canvasWidth: me.canvasWidth,
+		 	canvasHeight: me.canvasHeight,
+		 	graphData: me.generateData(),
+		 	panelId: me.panelId,
+		 	dataMetric: me.currentMetric
+		 }, me);
+		 
+		me.radialChart.draw();*/
 	},
 	
 	/**
@@ -154,5 +174,32 @@ Ext.define('App.view.d3.pie.Sunburst', {
 		me.radialChart.transition();
 		
 		return;
+	},
+	
+	generateData: function() {
+		var ret = [],
+			countries = ['USA', 'Canada', 'Mexico'];
+			
+		Ext.each(countries, function(c) {
+			var temp = {
+				name: c,
+				children: []
+			};
+			
+			for(i=0; i<Math.ceil(Math.random() * 10) + 1; i++) {
+				temp.children.push({
+					name: Math.random().toString(36).substring(7),
+					wins: Math.floor(Math.random() * 10) + 1,
+					majors: Math.floor(Math.random() * 10) + 1,
+					money: Math.floor(Math.random() * 50000) + 1
+				});
+		
+			}
+			
+			ret.push(temp);
+		});
+			
+	
+		return {name: 'root', children: ret};
 	}
 });

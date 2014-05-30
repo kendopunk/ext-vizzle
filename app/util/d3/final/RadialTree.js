@@ -51,19 +51,14 @@ Ext.define('App.util.d3.final.RadialTree', {
  		me.partition = d3.layout.partition()
     		.sort(null)
     		.size([2 * Math.PI, me.radius * me.radius]);
-    		/*.value(function(d) {
-	    		if(dataMetric == 'count') {
-		    		return 1;
-		    	}
-		    	return d[dataMetric];
-		    });*/
     
     	me.arc = d3.svg.arc()
     		.startAngle(function(d) { return d.x; })
     		.endAngle(function(d) { return d.x + d.dx; })
     		.innerRadius(function(d) { return Math.sqrt(d.y); })
     		.outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
-    		
+    	
+    	// local scope
     	var arcObject = me.arc;
     	
     	////////////////////////////////////////
@@ -74,72 +69,18 @@ Ext.define('App.util.d3.final.RadialTree', {
     	////////////////////////////////////////
     	// path "g"
     	////////////////////////////////////////
-    	me.gPath = me.svg.append('svg:g')
-    		.datum(me.graphData);
+    	me.gPath = me.svg.append('svg:g').datum(me.graphData);
     		
     	////////////////////////////////////////
     	// label "g"
     	////////////////////////////////////////
-    	me.gLabel = me.svg.append('svg:g')
-	    	.datum(me.graphData);
+    	me.gLabel = me.svg.append('svg:g').datum(me.graphData);
 	    	
 	    ////////////////////////////////////////
 	    // HANDLERS
 	    ////////////////////////////////////////
 	    me.handlePaths(true);
 	    me.handleLabels();
-	    
-	    ////////////////////////////////////////
-	    // INIT PATH
-	    ////////////////////////////////////////
-    	/*me.path = me.gPath.selectAll('path')
-			.data(me.partition.nodes)  // count
-	    	.enter()
-	    	.append('path')
-	    	.attr('display', function(d) {
-		    	return d.depth ? null : 'none';	// hide inner ring
-		    })
-		    .attr('d', me.arc)
-		    .style('stroke', '#FFFFFF')
-		    .style('fill', function(d) {
-			    return colorScale((d.children ? d : d.parent).name);
-			})
-			.style('fill-rule', 'evenodd')
-			.each(me.stash);*/
-		
-		////////////////////////////////////////
-	    // INIT LABEL
-	    ////////////////////////////////////////
-	    /*me.labels = me.gLabel.selectAll('text')
-			.data(me.partition.nodes)
-			.enter()
-			.append('text')
-			.style('fill', 'black')
-			.attr('display', function(d) {
-		    	return d.depth ? null : 'none';	// hide root
-		    })
-		    .attr('class', 'miniText')
-			.attr('transform', function(d) {
-				var startAngle = d.x,
-					endAngle = d.x + d.dx,
-					rot = 0;
-					
-				if(d.depth > 1) {
-					
-				var a = (startAngle + endAngle) * 90/Math.PI - 90;
-				if(a > 90) {
-					rot = a-180;
-				} else {	
-					rot = a;
-				}
-				}
-				
-				return 'translate(' + arcObject.centroid(d) + '),rotate(' + rot + ')';
-			})
-			.style('text-anchor', 'middle')
-			.text(function(d) {
-				return d.name;
-			});*/
  	},
  	
  	/**
@@ -149,48 +90,16 @@ Ext.define('App.util.d3.final.RadialTree', {
  	transition: function() {
 	 	var me = this;
 		var dataMetric = me.dataMetric;
-		
-		var arcObject = me.arc;
-		
+
 		me.handlePaths(false);
 		me.handleLabels();
-
-		/*me.path.data(me.partition.value(function(d) {
-		 	if(dataMetric == null || dataMetric == 'count') {
-			 	return 1;
-			}
-			return d[dataMetric];
-	 	}).nodes)
-	 	.transition()
-	 	.duration(500)
-	 	.attrTween('d', function(a) {
-		 	return me.arcTween(a);
-		 });*/
-		 
-		/*me.labels.data(me.partition.value(function(d) {
-		 	if(dataMetric == null || dataMetric == 'count') {
-			 	return 1;
-			}
-			return d[dataMetric];
-		}).nodes)
-		.transition()
-	 	.duration(500)
-		.attr('transform', function(d) {
-			var startAngle = d.x,
-					endAngle = d.x + d.dx,
-					rot = 0;
-					
-				var a = (startAngle + endAngle) * 90/Math.PI - 90;
-				if(a > 90) {
-					rot = a-180;
-				} else {	
-					rot = a;
-				}
-				
-				return 'translate(' + arcObject.centroid(d) + '),rotate(' + rot + ')';
-			});*/
  	},
  	
+ 	/**
+  	 * @function
+  	 * @description Handle drawing /transitioning of path elements
+  	 * @param initialDrawing Boolean
+  	 */
  	handlePaths: function(initialDrawing) {
  		var me = this;
  		
@@ -211,7 +120,14 @@ Ext.define('App.util.d3.final.RadialTree', {
 		
 		// append
 		pathSelection.enter()
-			.append('path');
+			.append('path')
+			.style('opacity', .7)
+			.on('mouseover', function(d, i) {
+				d3.select(this).style('opacity', 1);
+			})
+			.on('mouseout', function(d, i) {
+				d3.select(this).style('opacity', .7);
+			});
 			
 		// transition
 		if(initialDrawing) {
@@ -224,7 +140,7 @@ Ext.define('App.util.d3.final.RadialTree', {
 		    	.style('stroke', '#FFFFFF')
 		    	.style('fill', function(d, i) {
 		    		var baseColor = colorScale((d.children ? d : d.parent).name);
-		    		return '#' +  App.util.Global.hexLightenDarken(baseColor, (d.depth * 5));
+		    		return '#' +  App.util.Global.hexLightenDarken(baseColor, (d.depth * 7));
 				})
 				.style('fill-rule', 'evenodd')
 				.each(me.stash);
@@ -240,7 +156,7 @@ Ext.define('App.util.d3.final.RadialTree', {
 				.style('stroke', '#FFFFFF')
 				.style('fill', function(d) {
 			    	var baseColor = colorScale((d.children ? d : d.parent).name);
-		    		return '#' +  App.util.Global.hexLightenDarken(baseColor, (d.depth * 5));
+		    		return '#' +  App.util.Global.hexLightenDarken(baseColor, (d.depth * 7));
 		    		
 		    		//return colorScale((d.children ? d : d.parent).name);
 				})
@@ -248,6 +164,10 @@ Ext.define('App.util.d3.final.RadialTree', {
 		}
 	},
 	
+	/**
+ 	 * @function
+ 	 * @description Handle arc label placement and rotation
+ 	 */
 	handleLabels: function() {
 		var me = this;
 		
@@ -300,30 +220,24 @@ Ext.define('App.util.d3.final.RadialTree', {
 				return d.name;
 			});
 	},
-			
-			
+	
+	/**
+	 * @function
+	 * @description Stash values for later
+	 */
  	stash: function(d) {
 	 	d.x0 = d.x;
 	 	d.dx0 = d.dx;
 	},
 	
+	/**
+ 	 * @function
+ 	 * @description Arc transition method
+ 	 */
 	arcTween: function(a) {
 		var me = this;
 		
-		//console.debug(me.arc);
-		
 		var arc = me.arc;
-		
-		//var arc = me.arc;
-		
-		/*var arc = d3.svg.arc()
-    		.startAngle(function(d) { return d.x; })
-    		.endAngle(function(d) { return d.x + d.dx; })
-    		.innerRadius(function(d) { return Math.sqrt(d.y); })
-    		.outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });*/
-    		
-		//console.log('In arcTween()...');
-		//console.debug(arc);
 		
 		var i = d3.interpolate({x: a.x0, dx: a.dx0}, a);
 		
@@ -333,6 +247,33 @@ Ext.define('App.util.d3.final.RadialTree', {
 			a.dx0 = b.dx;
 			return arc(b);
 		};
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Wipe clean and redraw
+ 	 */
+ 	redraw: function() {
+	 	var me = this;
+		
+		me.gPath.selectAll('path').remove();
+		me.gLabel.selectAll('text').remove();
+		me.draw();
+	},
+	
+	/**
+	 *
+	 *
+	 * SETTERS
+	 *
+	 *
+	 */
+	setGraphData: function(data, redraw) {
+		var me = this;
+		
+		me.graphData = data;
+		
+		if(redraw) { me.redraw(); }
 	},
 	
 	setScales: function() {

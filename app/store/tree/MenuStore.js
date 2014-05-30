@@ -77,7 +77,7 @@ Ext.define('App.store.tree.MenuStore', {
 					iconCls: 'icon-arrow-right',
 					id: 'buildapieMainPanel'
 				},  {
-					text: 'Sunburst',
+					text: 'Radial Tree/Sunburst',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'sunburstPartition'
