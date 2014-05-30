@@ -111,6 +111,12 @@ Ext.define('App.view.d3.pie.Sunburst', {
 	 		.attr('width', me.canvasWidth)
 	 		.attr('height', me.canvasHeight)
 	 		.attr('transform', 'translate(' + Math.floor(me.canvasWidth/2) + ',' + Math.floor(me.canvasHeight/2) + ')');
+	 	
+	 	/*var radius = 100;
+		var partition = d3.layout.partition()
+    		.sort(null)
+    		.size([2 * Math.PI, radius * radius])
+    		.value(function(d) { return 1; });*/
 	 		
 	 	Ext.Ajax.request({
 		 	url: 'data/golfers.json',
@@ -118,6 +124,8 @@ Ext.define('App.view.d3.pie.Sunburst', {
 		 	success: function(response) {
 				
 				var resp = Ext.JSON.decode(response.responseText);
+				// console.debug(partition.nodes(resp)[0]);
+				
 	 			
 	 			me.radialChart = Ext.create('App.util.d3.final.RadialTree', {
 		 			svg: me.svg,
