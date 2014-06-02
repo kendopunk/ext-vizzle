@@ -33,7 +33,7 @@ Ext.define('App.util.d3.final.RadialTree', {
 	labelFunction: function(d) {
 		return 'label';
 	},
-	labelClass: 'miniText'
+	labelClass: 'miniText',
 	
 	/**
  	 * CONSTRUCTOR
