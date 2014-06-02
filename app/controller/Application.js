@@ -7,10 +7,7 @@ Ext.define('App.controller.Application', {
 	extend: 'Ext.app.Controller',
 	
 	requires: [
-		'App.view.d3.pie.MainPanel',
-		'App.view.d3.pie.Sunburst'
-		
-		/*'App.view.chart.misc.MainPanel',
+		'App.view.chart.misc.MainPanel',
 		'App.view.d3.area.MainPanel',
 		'App.view.d3.area.MultiPanel',
 		'App.view.d3.bar.MainPanel',
@@ -32,7 +29,7 @@ Ext.define('App.controller.Application', {
 		'App.view.d3.ticker.MainPanel',
 		'App.view.d3.treemap.basic.MainPanel',
 		'App.view.d3.treemap.heat.MainPanel',
-		'App.view.fabric.basic.MainPanel'*/
+		'App.view.fabric.basic.MainPanel'
 	],
 	
 	init: function() {

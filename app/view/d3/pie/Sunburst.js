@@ -38,7 +38,7 @@ Ext.define('App.view.d3.pie.Sunburst', {
  		 * @property
  		 */
 		me.chartDescription = '<b>Sunburst/Radial Tree</b><br><br>'
-			+ '<i>PGA Tour wins, majors and career earnings by geographic region.</i><br><br>'
+			+ '<i>PGA Tour wins, majors and career earnings by geographic region for select players.</i><br><br>'
 			+ 'Data from <a href="http://www.pgatour.com">pgatour.com</a> and '
 			+ '<a href="http://www.databasegolf.com">databasegolf.com</a>.';
 			
@@ -75,16 +75,7 @@ Ext.define('App.view.d3.pie.Sunburst', {
 				metricName: 'money',
 				handler: me.metricHandler,
 				scope: me
-			},
-			/*'->',
-			{
-				xtype: 'button',
-				text: 'NEW DATA SET',
-				handler: function(b, e) {
-					me.radialChart.setGraphData(me.generateData(), true);
-				},
-				scope: me
-			}*/]
+			}]
 		}];
 		
 		// on activate, publish update to the "Info" panel
@@ -133,7 +124,22 @@ Ext.define('App.view.d3.pie.Sunburst', {
 		 			canvasHeight: me.canvasHeight,
 		 			graphData: resp,
 		 			panelId: me.panelId,
-		 			dataMetric: me.currentMetric
+		 			dataMetric: me.currentMetric,
+		 			labelFunction: function(d, i) {
+			 			return d.name;
+			 		},
+			 		tooltipFunction: function(d, i) {
+				 		if(d.depth > 1) {
+					 		return '<b>' + d.name + '</b><br>'
+						 		+ 'Wins: ' + d.wins + '<br>'
+						 		+ 'Majors: ' + d.majors + '<br>'
+						 		+ 'Earnings: '
+						 		+ Ext.util.Format.currency(d.money, false, '0', false);
+					 		
+					 	} else {
+					 		return d.name;
+					 	}
+				 	}
 		 		}, me);
 	 			
 	 			me.radialChart.draw();
@@ -143,17 +149,6 @@ Ext.define('App.view.d3.pie.Sunburst', {
 		 	},
 	 		scope: me
 	 	});
-	 	
-	 	/*me.radialChart = Ext.create('App.util.d3.final.RadialTree', {
-		 	svg: me.svg,
-		 	canvasWidth: me.canvasWidth,
-		 	canvasHeight: me.canvasHeight,
-		 	graphData: me.generateData(),
-		 	panelId: me.panelId,
-		 	dataMetric: me.currentMetric
-		 }, me);
-		 
-		me.radialChart.draw();*/
 	},
 	
 	/**
@@ -162,7 +157,7 @@ Ext.define('App.view.d3.pie.Sunburst', {
 	 */
 	metricHandler: function(btn, evt) {
 		var me = this;
-	 	
+		
 	 	// remove then add the cls
 	 	Ext.each(me.getDockedItems()[0].query('button'), function(btn) {
 		 	btn.removeCls(me.btnHighlightCss);
@@ -174,32 +169,5 @@ Ext.define('App.view.d3.pie.Sunburst', {
 		me.radialChart.transition();
 		
 		return;
-	},
-	
-	generateData: function() {
-		var ret = [],
-			countries = ['USA', 'Canada', 'Mexico'];
-			
-		Ext.each(countries, function(c) {
-			var temp = {
-				name: c,
-				children: []
-			};
-			
-			for(i=0; i<Math.ceil(Math.random() * 10) + 1; i++) {
-				temp.children.push({
-					name: Math.random().toString(36).substring(7),
-					wins: Math.floor(Math.random() * 10) + 1,
-					majors: Math.floor(Math.random() * 10) + 1,
-					money: Math.floor(Math.random() * 50000) + 1
-				});
-		
-			}
-			
-			ret.push(temp);
-		});
-			
-	
-		return {name: 'root', children: ret};
 	}
 });
