@@ -204,7 +204,7 @@ Ext.define('App.util.d3.final.PieChart', {
 			.outerRadius(me.outerRadius)
 			.innerRadius(me.innerRadius);
 
-		//////////////////////////////////////////////////
+		/*//////////////////////////////////////////////////
 		// set the arc selection
 		//////////////////////////////////////////////////	
 		var segments = me.gPie.selectAll('.arc')
@@ -274,12 +274,13 @@ Ext.define('App.util.d3.final.PieChart', {
 						return 'normal';
 					});
 				}
-			});
+			});*/
 		
 		//////////////////////////////////////////////////
 		// handle labels, chart title, and legend
 		//////////////////////////////////////////////////
-		me.handleLabels(segments);
+		me.handleArcs();
+		me.handleLabels();
 		me.handleChartTitle();
 		me.handleLegend();
 	},
@@ -314,7 +315,7 @@ Ext.define('App.util.d3.final.PieChart', {
 			
 		//////////////////////////////////////////////////
 		// new value function for pie layout
-		//////////////////////////////////////////////////
+		/*//////////////////////////////////////////////////
 		me.pieLayout.value(function(d) {
 			return d[dataMetric];
 		});
@@ -409,30 +410,195 @@ Ext.define('App.util.d3.final.PieChart', {
 		// re-call the tooltip function for
 		// revised data
 		//////////////////////////////////////////////////
-		newSegments.call(d3.helper.tooltip().text(me.tooltipFunction));
+		newSegments.call(d3.helper.tooltip().text(me.tooltipFunction));*/
 		
 		//////////////////////////////////////////////////
 		// handle labels, chart title, and legend
 		//////////////////////////////////////////////////
-		me.handleLabels(segments);
+		me.handleArcs();
+		me.handleLabels();
 		me.handleChartTitle();
 		me.handleLegend();
 	},
 	
 	/**
  	 * @function
- 	 * @description Generate the arc labels for the pie chart
- 	 * @param segmentSelection Object
  	 */
- 	handleLabels: function(segmentSelection) {
+	handleArcs: function() {
+		var me = this;
+		
+		var colorScale = me.colorScale,
+			hashedColorScale = me.hashedColorScale,
+			hashedColorIndex = me.hashedColorIndex,
+			indexedColorScale = me.indexedColorScale,
+			dataMetric = me.dataMetric,
+			handleEvents = me.handleEvents,
+			eventRelay = me.eventRelay,
+			mouseEvents = me.mouseEvents,
+			gLegend = me.gLegend,
+			showLegend = me.showLegend,
+			legendLines = me.legendLines,
+			arcObject = me.arcObject,
+			gPie = me.gPie;
+			
+		//////////////////////////////////////////////////
+		// NEW METRIC FN()
+		// FOR PIE LAYOUT
+		//////////////////////////////////////////////////
+		me.pieLayout.value(function(d) {
+			return d[dataMetric];
+		});
+		
+		//////////////////////////////////////////////////
+		// join new arcs with old arcs
+		//////////////////////////////////////////////////
+		var arcSelection = me.gPie.selectAll('.arc')
+			.data(me.pieLayout(me.graphData));
+			
+		//////////////////////////////////////////////////
+		// remove old arcs
+		//////////////////////////////////////////////////
+		arcSelection.exit().remove();
+		
+		//////////////////////////////////////////////////
+		// append new arcs
+		//////////////////////////////////////////////////
+		var newArcs = arcSelection.enter()
+			.append('g')
+			.attr('class', 'arc')
+			.on('mouseover', function(d, i) {
+				d3.select(this).transition().attr('transform', 'scale(1.1)');
+			
+				if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
+					eventRelay.publish(mouseEvents.mouseover.eventName, {
+						payload: d,
+						index: i
+					});
+				}
+			})
+			.on('mouseout', function(d, i) {
+				d3.select(this).transition().attr('transform', 'scale(1)');
+			});
+		
+		//////////////////////////////////////////////////
+		// append paths to new arcs
+		//////////////////////////////////////////////////
+		newArcs.append('path')
+			.style('opacity', .6)
+			.style('fill', '#FFFFFF')
+			.attr('d', d3.svg.arc().outerRadius(0).innerRadius(0)) // overridden later
+			.on('mouseover', function(d, i) {
+				d3.select(this).style('opacity', 1);
+				
+				// mouseover wedge = highlight legend element
+				if(showLegend) {
+					gLegend.selectAll('text').filter(function(e, j) {
+					return i * legendLines == j;
+					})
+					.style('fill', '#990066')
+					.style('font-weight', 'bold');
+				}
+			})
+			.on('mouseout', function(d, i) {
+				d3.select(this).style('opacity', 0.6);
+			
+				// un-highlight legend
+				if(showLegend) {
+					gLegend.selectAll('text').filter(function(e, j) {
+						return i * legendLines == j;
+					})
+					.style('fill', 'black')
+					.style('font-weight', function(d, i) {
+						if(legendLines > 1) {
+							return 'bold';
+						}
+						return 'normal';
+					});
+				}
+			});
+		
+		//////////////////////////////////////////////////
+		// bind data and transition paths
+		//////////////////////////////////////////////////
+		me.gPie.selectAll('.arc path')
+			.data(me.pieLayout(me.graphData))
+			.transition()
+			.duration(250)
+			.style('fill', function(d, i) {
+				if(hashedColorScale != null) {
+					return hashedColorScale[d.data[hashedColorIndex]];
+				} else if(indexedColorScale.length > 0) {
+					return indexedColorScale[i];
+				} else {
+					return colorScale(i);
+				}
+			})
+			.attr('d', me.arcObject);
+		
+		//////////////////////////////////////////////////
+		// call / recall the tooltip function
+		//////////////////////////////////////////////////
+		me.gPie.selectAll('.arc').call(d3.helper.tooltip().text(me.tooltipFunction));
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Generate the arc labels for the pie chart
+ 	 */
+ 	handleLabels: function() {
 	 	var me = this;
 	 	
-	 	me.gPie.selectAll('text').remove();
+	 	if(!me.showLabels) {
+		 	me.gPie.selectAll('text').remove();
+		 	return;
+		 }
+
+		var arc = me.arcObject,
+			innerRadius = me.innerRadius,
+			outerRadius = me.outerRadius;
+	 	
+	 	var textSelection = me.gPie.selectAll('text')
+		 	.data(me.pieLayout(me.graphData));
+		
+		textSelection.exit().remove();
+		
+		textSelection.enter()
+			.append('text')
+			.attr('class', me.labelClass)
+			.attr('dy', function(d, i) {
+				return '0.35em';
+			})
+			
+		textSelection.transition().duration(250)
+			.attr('transform', function(d, i) {
+				var c = arc.centroid(d),
+					x = c[0],
+					y = c[1],
+					h = Math.sqrt(x*x + y*y),
+					xTrans = (x/h * outerRadius) + (x/h * outerRadius * .05),
+					yTrans = (y/h * outerRadius) + i;
+						
+				if(yTrans < 0) {
+					yTrans = yTrans - Math.abs(yTrans * .1);
+				}
+					
+				return 'translate(' + xTrans + ',' + yTrans + ')';
+			})
+			
+			.attr('text-anchor', function(d, i) {
+				return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';
+			})
+			.text(me.labelFunction);
+	 	
+	 	// SEE IF I CAN JOIN, REMOVE, APPEND, TRANSITION HERE
+	 	
+	 	/*me.gPie.selectAll('text').remove();
 	 	
 	 	if(!me.showLabels) { return; }
 	 	
 	 	var arc = me.arcObject,
-		 	outerRadius = me.outerRadius || 200;
+		 	outerRadius = me.outerRadius || 200,
+		 	segmentSelection = me.gPie.selectAll('.arc');
 	 	
 	 	segmentSelection.append('text')
 			.attr('transform', function(d, i) {
@@ -456,7 +622,7 @@ Ext.define('App.util.d3.final.PieChart', {
 				return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';
 			})
 			.attr('class', me.labelClass)
-			.text(me.labelFunction);
+			.text(me.labelFunction);*/
 	},
 	
 	/**

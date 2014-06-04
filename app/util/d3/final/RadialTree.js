@@ -24,7 +24,7 @@ Ext.define('App.util.d3.final.RadialTree', {
 	xScale: null,
 	yScale: null,
 	
-	colorFactor: 5,
+	colorLightenFactor: 8,
 	
 	tooltipFunction: function(d) {
 		return 'tooltip';
@@ -34,6 +34,7 @@ Ext.define('App.util.d3.final.RadialTree', {
 		return 'label';
 	},
 	labelClass: 'miniText',
+	labelVisibilityThreshold: 0.02,
 	
 	/**
  	 * CONSTRUCTOR
@@ -113,7 +114,7 @@ Ext.define('App.util.d3.final.RadialTree', {
  		
  		var dataMetric = me.dataMetric,
 	 		colorScale = me.colorScale,
-	 		colorFactor = me.colorFactor;
+	 		colorLightenFactor = me.colorLightenFactor;
 	 		
 	 	// join
 	 	var pathSelection = me.gPath.data([me.graphData])
@@ -150,9 +151,27 @@ Ext.define('App.util.d3.final.RadialTree', {
 		    .attrTween('d', function(a) {
 		 		return me.arcTween(a);
 		 	})
-			.style('fill', function(d) {
-			    var baseColor = colorScale((d.children ? d : d.parent).name);
-		    	return '#' +  App.util.Global.hexLightenDarken(baseColor, (d.depth * colorFactor));
+			.style('fill', function(d, i) {
+				var baseColor;
+				//var baseColor = colorScale((d.children ? d : d.parent).name);
+				
+				// use either "d.name" or "d.parent.name"
+				if(d.children) {
+					console.log(d.name + ' has children');
+					baseColor = colorScale(d.name);
+				} else {
+					if(d.parent.depth == 0) {
+						baseColor = colorScale(i);
+					} else {
+						baseColor = colorScale(d.parent.name);
+					}
+
+					baseColor = colorScale(d.parent.name);
+				}
+
+				
+		    	return '#' +  App.util.Global.hexLightenDarken(baseColor, (d.depth * colorLightenFactor));
+		    	
 			})
 			.each(me.stash);
 			
@@ -168,7 +187,8 @@ Ext.define('App.util.d3.final.RadialTree', {
 		var me = this;
 		
 		var dataMetric = me.dataMetric,
-			arcObject = me.arc;
+			arcObject = me.arc,
+			labelVisibilityThreshold = me.labelVisibilityThreshold;
 		
 		// join
 		var labelSelection = me.gLabel.data([me.graphData])
@@ -187,19 +207,33 @@ Ext.define('App.util.d3.final.RadialTree', {
 		labelSelection.enter()
 			.append('text')
 			.style('fill', 'black')
-			.attr('display', function(d) {
+			/*.attr('display', function(d) {
+		    	
+		    	
+		    	
 		    	return d.depth ? null : 'none';	// hide root
-		    })
+		    })*/
 		    .attr('class', me.labelClass)
 		    .style('text-anchor', 'middle');
 		    
 		// transition
 		labelSelection.transition()
 			.duration(500)
+			.attr('display', function(d, i) {
+				if(d.depth == 0) { return 'none'; }	// hide root;
+				
+				if(Math.abs(d.dx) < labelVisibilityThreshold) {
+					return 'none';
+				}
+				
+				return null;
+			})
 			.attr('transform', function(d) {
 				var startAngle = d.x,
 					endAngle = d.x + d.dx,
 					rot = 0;
+					
+				var diff = startAngle - endAngle;
 					
 				if(d.depth > 1) {
 					
@@ -209,7 +243,7 @@ Ext.define('App.util.d3.final.RadialTree', {
 					} else {	
 						rot = a;
 					}
-					}
+				}
 				
 				return 'translate(' + arcObject.centroid(d) + '),rotate(' + rot + ')';
 			})

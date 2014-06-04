@@ -15,7 +15,7 @@ Ext.define('App.store.tree.MenuStore', {
 			children: [{
 				text: '<b>Bar Charts</b>',
 				iconCls: 'icon-bar-chart',
-				//expanded: true,
+				expanded: true,
 				children: [{
 					text: 'Basic Bar Chart',
 					leaf: true,

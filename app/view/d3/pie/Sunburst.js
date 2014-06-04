@@ -117,12 +117,14 @@ Ext.define('App.view.d3.pie.Sunburst', {
 		 	method: 'GET',
 		 	success: function(response) {
 				var resp = Ext.JSON.decode(response.responseText);
+				var stub = me.generateGraphData();
 				
 	 			me.radialChart = Ext.create('App.util.d3.final.RadialTree', {
 		 			svg: me.svg,
 		 			canvasWidth: me.canvasWidth,
 		 			canvasHeight: me.canvasHeight,
 		 			graphData: resp,
+		 			//graphData: me.generateGraphData(),
 		 			panelId: me.panelId,
 		 			dataMetric: me.currentMetric,
 		 			labelFunction: function(d, i) {
@@ -169,5 +171,28 @@ Ext.define('App.view.d3.pie.Sunburst', {
 		me.radialChart.transition();
 		
 		return;
+	},
+	
+	generateGraphData: function() {
+		var ret = [],
+			regions = ['USA', 'ASIA/PACIFIC', 'EUROPE'],
+			temp;
+		
+		Ext.each(regions, function(r) {
+			temp = {
+				name: r,
+				wins: Math.floor(Math.random() * 20) + 1,
+				majors: Math.floor(Math.random() * 6) + 1,
+				money: Math.floor(Math.random() * 2000000) + 1,
+				children: []
+			};
+			
+			ret.push(temp);
+		});
+
+		return {
+			name: 'root',
+			children: ret
+		};
 	}
 });
