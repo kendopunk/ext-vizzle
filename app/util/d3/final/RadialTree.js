@@ -206,13 +206,6 @@ Ext.define('App.util.d3.final.RadialTree', {
 		// append
 		labelSelection.enter()
 			.append('text')
-			.style('fill', 'black')
-			/*.attr('display', function(d) {
-		    	
-		    	
-		    	
-		    	return d.depth ? null : 'none';	// hide root
-		    })*/
 		    .attr('class', me.labelClass)
 		    .style('text-anchor', 'middle');
 		    
