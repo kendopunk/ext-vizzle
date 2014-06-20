@@ -29,6 +29,7 @@ Ext.define('App.controller.Application', {
 		'App.view.d3.ticker.MainPanel',
 		'App.view.d3.treemap.basic.MainPanel',
 		'App.view.d3.treemap.heat.MainPanel',
+		'App.view.d3.win.WindowBar',
 		'App.view.fabric.basic.MainPanel'
 	],
 	
@@ -58,6 +59,30 @@ Ext.define('App.controller.Application', {
  		// ignore leaves
  		if(!record.data.leaf) {
 	 		return;
+	 	}
+	 	// windowed widgets
+	 	else if(record.data.id.substr(0, 4) == 'win_') {
+	 	
+	 		var win = Ext.create('Ext.window.Window', {
+		 		modal: true,
+		 		layout: 'fit',
+		 		constrain: true,
+		 		resizable: false,
+		 		title: record.data.text,
+		 		width: Math.floor(Ext.getBody().getViewSize().width * .8),
+		 		height: Math.floor(Ext.getBody().getViewSize().height * .8),
+		 		maxWidth: Math.floor(Ext.getBody().getViewSize().width * .9),
+		 		maxHeight: Math.floor(Ext.getBody().getViewSize().height * .9),
+		 		minWidth: Math.floor(Ext.getBody().getViewSize().width * .5),
+		 		minHeight: Math.floor(Ext.getBody().getViewSize().height * .5),
+		 		items: [{
+			 		xtype: record.data.id,
+			 		itemId: 'responsiveChartExample',
+			 		width: Math.floor(Ext.getBody().getViewSize().width * .75),
+			 		height: Math.floor(Ext.getBody().getViewSize().height * .75)
+			 	}]
+			 }).show();
+			 
 	 	} else {
 	 		var tabPanel = Ext.ComponentQuery.query('viewport > tabpanel');
 	 		if(tabPanel[0]) {

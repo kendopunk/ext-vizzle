@@ -132,6 +132,16 @@ Ext.define('App.store.tree.MenuStore', {
 					iconCls: 'icon-arrow-right',
 					id: 'tickerMainPanel'
 				}]
+			}, {
+				text: '<b>Responsive</b>',
+				expanded: true,
+				iconCls: 'icon-star',
+				children: [{
+					text: 'Responsive Bar Chart',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'win_responsiveBar'
+				}]
 			}]
 		}, {
 			text: 'Chart.js',
