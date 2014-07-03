@@ -8,6 +8,7 @@ Ext.define('App.util.d3.final.RadialTree', {
 	
 	svg: null,
 	
+	gCanvas: null,
 	gPath: null,
 	gLabel: null,
 	partition: null,
@@ -82,8 +83,10 @@ Ext.define('App.util.d3.final.RadialTree', {
     	// path "g"
     	// label "g"
     	////////////////////////////////////////
-    	me.gPath = me.svg.append('svg:g');
-    	me.gLabel = me.svg.append('svg:g');
+    	me.gCanvas = me.svg.append('svg:g')
+	    	.attr('transform', 'translate(' + Math.floor(me.canvasWidth/2) + ',' + Math.floor(me.canvasHeight/2) + ')');
+    	me.gPath = me.gCanvas.append('svg:g');
+    	me.gLabel = me.gCanvas.append('svg:g');
 	    	
 	    ////////////////////////////////////////
 	    // HANDLERS
@@ -157,7 +160,7 @@ Ext.define('App.util.d3.final.RadialTree', {
 				
 				// use either "d.name" or "d.parent.name"
 				if(d.children) {
-					console.log(d.name + ' has children');
+					//console.log(d.name + ' has children');
 					baseColor = colorScale(d.name);
 				} else {
 					if(d.parent.depth == 0) {

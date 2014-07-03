@@ -7,7 +7,7 @@
 Ext.define('App.view.d3.pie.Sunburst', {
 	extend: 'Ext.Panel',
 	alias: 'widget.sunburstPartition',
-	title: 'Sunburst Partitionasdfasfds',
+	title: 'Radial Tree/Sunburst',
 	closable: true,
 	
 	requires: [
@@ -109,9 +109,8 @@ Ext.define('App.view.d3.pie.Sunburst', {
  		me.svg = d3.select(me.panelId)
 	 		.append('svg')
 	 		.attr('width', me.canvasWidth)
-	 		.attr('height', me.canvasHeight)
-	 		.attr('transform', 'translate(' + Math.floor(me.canvasWidth/2) + ',' + Math.floor(me.canvasHeight/2) + ')');
-	 	
+	 		.attr('height', me.canvasHeight);
+
 	 	Ext.Ajax.request({
 		 	url: 'data/golfers.json',
 		 	method: 'GET',
@@ -124,7 +123,6 @@ Ext.define('App.view.d3.pie.Sunburst', {
 		 			canvasWidth: me.canvasWidth,
 		 			canvasHeight: me.canvasHeight,
 		 			graphData: resp,
-		 			//graphData: me.generateGraphData(),
 		 			panelId: me.panelId,
 		 			dataMetric: me.currentMetric,
 		 			labelFunction: function(d, i) {

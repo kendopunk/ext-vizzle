@@ -25,6 +25,8 @@ Ext.application({
 	launch: function() {
 		Ext.tip.QuickTipManager.init();
 		
+		var defaultXType = 'sunburstPartition';
+		
 		Ext.create('Ext.container.Viewport', {
 			layout: 'border',
 			items: [{
@@ -34,7 +36,6 @@ Ext.application({
 					padding: '5px'
 				},
 				bodyCls: 'northPanelCls',
-				//contentEl: 'header',
 				html: '<b>smarmless.com</b> - Visualizations in ExtJS',
 				region: 'north',
 				bbar: [{
@@ -97,6 +98,12 @@ Ext.application({
 				plain: true,
 				region: 'center',
 				listeners: {
+					afterrender: function(tabpanel) {
+						if(defaultXType) {
+							this.addComponentByXType(tabpanel, defaultXType);
+						}
+					
+					},
 					// If there are no more tabs, then set the "Info" panel
 					// message back to the globally-defined message
  					remove: function(tabPanel) {
@@ -107,7 +114,8 @@ Ext.application({
 								App.util.Global.defaultInfoMessage
 							);
 						}
-					}
+					},
+					scope: this
 				}
 			}]
 		});
@@ -115,5 +123,21 @@ Ext.application({
 		if(Ext.get('page-loader')) {
 			Ext.get('page-loader').remove();
 		}
+	},
+	
+	/**
+	 * @function
+	 * @description Add a component to the tab panel directly via XTYPE
+	 * @param component Object The component to which we add the xtype
+	 * @param xtype String
+	 */
+	addComponentByXType: function(component, xtype) {
+		var me = this;
+		
+		if(component === undefined || xtype == null || xtype === undefined) {
+			return;
+		}
+		
+		component.add({xtype: xtype});
 	}
 });
