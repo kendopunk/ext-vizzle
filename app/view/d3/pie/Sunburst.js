@@ -37,7 +37,7 @@ Ext.define('App.view.d3.pie.Sunburst', {
 		/**
  		 * @property
  		 */
-		me.chartDescription = '<b>Sunburst/Radial Tree</b><br><br>'
+		me.chartDescription = '<b>Radial Tree/Sunburst</b><br><br>'
 			+ '<i>PGA Tour wins, majors and career earnings by geographic region for select players.</i><br><br>'
 			+ 'Data from <a href="http://www.pgatour.com">pgatour.com</a> and '
 			+ '<a href="http://www.databasegolf.com">databasegolf.com</a>.';

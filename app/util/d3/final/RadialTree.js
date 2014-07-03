@@ -20,6 +20,7 @@ Ext.define('App.util.d3.final.RadialTree', {
 	canvasHeight: 300,
 	dataMetric: 'count',
 	radius: null,
+	radiusScaleFactor: .9,
 	colorScale: d3.scale.category20(),
 	
 	xScale: null,
@@ -58,7 +59,7 @@ Ext.define('App.util.d3.final.RadialTree', {
 	 		graphData = me.graphData;
 	 	
 	 	if(me.radius == null) {
-		 	me.radius = Math.min(me.canvasWidth, me.canvasHeight)/3;
+		 	me.radius = Ext.Array.min([me.canvasWidth, me.canvasHeight])/2 * me.radiusScaleFactor;
 		}
  	
  		me.partition = d3.layout.partition()
