@@ -63,26 +63,16 @@ Ext.define('App.controller.Application', {
 	 	// windowed widgets
 	 	else if(record.data.id.substr(0, 4) == 'win_') {
 	 	
-	 		var win = Ext.create('Ext.window.Window', {
-		 		modal: true,
-		 		layout: 'fit',
-		 		constrain: true,
-		 		resizable: false,
+	 		var win = Ext.createByAlias('widget.' + record.data.id, {
 		 		title: record.data.text,
 		 		width: Math.floor(Ext.getBody().getViewSize().width * .8),
 		 		height: Math.floor(Ext.getBody().getViewSize().height * .8),
-		 		maxWidth: Math.floor(Ext.getBody().getViewSize().width * .9),
-		 		maxHeight: Math.floor(Ext.getBody().getViewSize().height * .9),
+		 		maxWidth: Math.floor(Ext.getBody().getViewSize().width * .8),
+		 		maxHeight: Math.floor(Ext.getBody().getViewSize().height * .8),
 		 		minWidth: Math.floor(Ext.getBody().getViewSize().width * .5),
 		 		minHeight: Math.floor(Ext.getBody().getViewSize().height * .5),
-		 		items: [{
-			 		xtype: record.data.id,
-			 		itemId: 'responsiveChartExample',
-			 		width: Math.floor(Ext.getBody().getViewSize().width * .75),
-			 		height: Math.floor(Ext.getBody().getViewSize().height * .75)
-			 	}]
-			 }).show();
-			 
+		 	}).show();
+		 	
 	 	} else {
 	 		var tabPanel = Ext.ComponentQuery.query('viewport > tabpanel');
 	 		if(tabPanel[0]) {

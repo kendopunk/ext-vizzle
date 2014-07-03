@@ -102,7 +102,6 @@ Ext.application({
 						if(defaultXType) {
 							this.addComponentByXType(tabpanel, defaultXType);
 						}
-					
 					},
 					// If there are no more tabs, then set the "Info" panel
 					// message back to the globally-defined message
@@ -138,6 +137,6 @@ Ext.application({
 			return;
 		}
 		
-		component.add({xtype: xtype});
+		//component.add({xtype: xtype});
 	}
 });

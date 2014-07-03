@@ -1,12 +1,18 @@
 Ext.define('App.view.d3.win.WindowBar', {
-	extend: 'Ext.panel.Panel',
+	extend: 'Ext.window.Window',
 	alias: 'widget.win_responsiveBar',
 	
 	requires: [
 		'App.util.d3.responsive.ResponsiveBar'
 	],
 	
-	canvasScaleFactor: .98,
+	modal: true,
+	layout: 'fit',
+	constrain: true,
+	resizable: true,
+	initialResize: false,
+	
+	bodyCls: 'responsiveWin',
 	
 	initComponent: function() {
 		var me = this;
@@ -23,9 +29,10 @@ Ext.define('App.view.d3.win.WindowBar', {
  			me.panelId,
  			me.barChart = null,
  			me.defaultWidth = me.width,
- 			me.defaultHeight = me.height;
+ 			me.defaultHeight = me.height,
+ 			me.fruits = ['Apple', 'Pear', 'Peach', 'Mango', 'Papaya'];
  		
- 		Ext.each(['Apple', 'Pear', 'Peach', 'Orange', 'Melon'], function(item) {
+ 		Ext.each(me.fruits, function(item) {
 	 		me.graphData.push({
 		 		fruit: item,
 		 		count: Math.floor(Math.random() * 100) + 1
@@ -49,7 +56,7 @@ Ext.define('App.view.d3.win.WindowBar', {
 		 		handler: function() {
 					me.graphData = [];
 					
-					Ext.each(['Apple', 'Pear', 'Peach', 'Orange', 'Melon'], function(item) {
+					Ext.each(me.fruits, function(item) {
 						me.graphData.push({
 							fruit: item,
 							count: Math.floor(Math.random() * 100) + 1
@@ -60,38 +67,6 @@ Ext.define('App.view.d3.win.WindowBar', {
 					me.barChart.draw();
 			 	},
 			 	scope: me
-			},
-			'-',
-			{
-				xtype: 'tbtext',
-				text: '<b>Resize:</b>'
-			}, {
-				xtype: 'button',
-				text: '50%',
-				handler: function() {
-					me.setWidth(Math.floor(me.defaultWidth * .5));
-					me.setHeight(Math.floor(me.defaultHeight * .5));
-					me.resizeHandler();
-				},
-				scope: me
-			}, {
-				xtype: 'button',
-				text: '75%',
-				handler: function() {
-					me.setWidth(Math.floor(me.defaultWidth * .75));
-					me.setHeight(Math.floor(me.defaultHeight * .75));
-					me.resizeHandler();
-				},
-				scope: me
-			}, {
-				xtype: 'button',
-				text: '100%',
-				handler: function() {
-					me.setWidth(me.defaultWidth);
-					me.setHeight(me.defaultHeight);
-					me.resizeHandler();
-				},
-				scope: me
 			}]
 		}];
 		
@@ -99,6 +74,7 @@ Ext.define('App.view.d3.win.WindowBar', {
  		 * @listeners
  		 */
  		me.on('afterrender', me.initCanvas, me);
+ 		me.on('resize', me.resizeHandler, me);
 		
 		me.callParent(arguments);
 	},
@@ -107,8 +83,8 @@ Ext.define('App.view.d3.win.WindowBar', {
 		var me = this;
 	 	
 	 	// width, height
-	 	me.canvasWidth = Math.floor(me.body.dom.offsetWidth * me.canvasScaleFactor),
-	 	me.canvasHeight = Math.floor(me.body.dom.offsetHeight * me.canvasScaleFactor),
+	 	me.canvasWidth = Math.floor(me.body.dom.offsetWidth),
+	 	me.canvasHeight = Math.floor(me.body.dom.offsetHeight),
  		me.panelId = '#' + me.body.id;
 	 	
 	 	// init svg
@@ -143,10 +119,13 @@ Ext.define('App.view.d3.win.WindowBar', {
 			},
 			showLegend: true,
 			legendTextFunction: function(d, i) {
-				return d.fruit;
+				return d.fruit
+					+ ' ('
+					+ Ext.util.Format.number(d.count, '0,000')
+					+ ')';
 			},
-			chartFlex: 4,
-			legendFlex: 1,
+			chartFlex: 5,
+			legendFlex: 2,
 			handleEvents: false,
 			chartTitle: 'Fruits',
 			yTickFormat: App.util.Global.svg.numberTickFormat
@@ -158,12 +137,14 @@ Ext.define('App.view.d3.win.WindowBar', {
 		me.chartDrawn = true;
 	},
 	
-	resizeHandler: function() {
+	resizeHandler: function(win, w, h) {
 		var me = this;
-	
-		me.canvasWidth = Math.floor(me.body.dom.offsetWidth * me.canvasScaleFactor),
-	 	me.canvasHeight = Math.floor(me.body.dom.offsetHeight * me.canvasScaleFactor);
+		
+		me.canvasWidth = Math.floor(win.body.dom.offsetWidth),
+		me.canvasHeight = Math.floor(win.body.dom.offsetHeight);
 	 	
-	 	me.barChart.resize(me.canvasWidth, me.canvasHeight);
+	 	if(me.chartDrawn) {
+	 		me.barChart.resize(me.canvasWidth, me.canvasHeight);
+	 	}
 	}
 });

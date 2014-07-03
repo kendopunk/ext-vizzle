@@ -413,8 +413,8 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 				})
 				.style('stroke', '#000000')
 				.style('stroke-width', 2)
-				.style('opacity', 1)
-				.attr('transform', 'translate(0, -10)');
+				.style('opacity', 1);
+				/*.attr('transform', 'translate(0, -10)');*/
 			})
 			.on('mouseout', function(d, i) {
 				// unfade this rect
@@ -427,10 +427,10 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 				})
 				.style('stroke', 0)
 				.style('stroke-width', null)
-				.style('opacity', .6)
-				.transition()
+				.style('opacity', .6);
+				/*.transition()
 				.duration(500)
-				.attr('transform', 'translate(0,0)');
+				.attr('transform', 'translate(0,0)');*/
 			});
 		
 		legendSquareSelection.transition()
@@ -470,8 +470,8 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 				})
 				.style('stroke', '#000000')
 				.style('stroke-width', 2)
-				.style('opacity', 1)
-				.attr('transform', 'translate(0,' + (me.labelDistanceFromBar-3) * -1 + ')'); 
+				.style('opacity', 1);
+				/*.attr('transform', 'translate(0,' + (me.labelDistanceFromBar-3) * -1 + ')'); */
 			})
 			.on('mouseout', function(d, i) {
 				// un-highlight text
@@ -485,10 +485,10 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 				})
 				.style('stroke', 0)
 				.style('stroke-width', null)
-				.style('opacity', .6)
-				.transition()
+				.style('opacity', .6);
+				/*.transition()
 				.duration(500)
-				.attr('transform', 'translate(0,0)');
+				.attr('transform', 'translate(0,0)');*/
 			});
 		
 		legendTextSelection.transition()
