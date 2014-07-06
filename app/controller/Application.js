@@ -7,6 +7,11 @@ Ext.define('App.controller.Application', {
 	extend: 'Ext.app.Controller',
 	
 	requires: [
+		'App.view.d3.bar.GenericBar',
+		'App.view.d3.bar.BuildABar',
+		'App.view.d3.pie.GenericPie',
+		
+		'App.view.d3.bar.GenericBar',
 		'App.view.chart.misc.MainPanel',
 		'App.view.d3.area.MainPanel',
 		'App.view.d3.area.MultiPanel',

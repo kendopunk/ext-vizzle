@@ -50,6 +50,7 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
   	legendTextFunction: function(data, index) {
 	 	return 'legend item';
 	},
+	spaceBetweenChartAndLegend: 20,
 	margins: {
 		top: 10,
 		right: 10,
@@ -57,6 +58,7 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 		left: 50,
 		leftAxis: 40
 	},
+	maxBarWidth: 100,
 	mouseEvents: {
 	 	mouseover: {
 		 	enabled: false,
@@ -76,7 +78,6 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 	showChartTitle: false,
 	showLabels: false,
 	showLegend: false,
-	spaceBetweenChartAndLegend: 20,
 	tooltipFunction: function(data, index) {
 		return 'tooltip';
 	},
@@ -95,7 +96,8 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 	constructor: function(config) {
 		var me = this;
 		
-		Ext.apply(me, config);
+		//Ext.apply(me, config);
+		Ext.merge(me, config);
 		
 		// event handling
 		if(me.handleEvents) {
@@ -122,24 +124,12 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 		////////////////////////////////////////
 		// bar "g"
 		////////////////////////////////////////
-		me.gBar = me.svg.append('svg:g')
-			.attr('transform', function() {
-				if(showLegend) {
-					return 'translate(' + margins.left + ', 0)';
-				}
-				return null;
-			});
+		me.gBar = me.svg.append('svg:g');
 		
 		////////////////////////////////////////
 		// label "g"
 		////////////////////////////////////////
-		me.gText = me.svg.append('svg:g')
-			.attr('transform', function() {
-				if(showLegend) {
-					return 'translate(' + margins.left + ', 0)';
-				}
-				return null;
-			});
+		me.gText = me.svg.append('svg:g');
 		
 		////////////////////////////////////////
 		// y axis "g"
@@ -162,8 +152,8 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 		// legend "g"
 		////////////////////////////////////////
 		var legendTranslateX = me.margins.left 
-			+ (me.getFlexUnit() * me.chartFlex) 
-			+ me.spaceBetweenChartAndLegend;		
+			+ (me.getFlexUnit() * me.chartFlex)
+			+ me.spaceBetweenChartAndLegend;
 		me.gLegend = me.svg.append('svg:g')
 			.attr('transform', 'translate(' + legendTranslateX + ', ' + me.margins.top + ')');
 		
@@ -307,11 +297,15 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 				return canvasHeight - yScale(d[dataMetric]);
 			})
 			.attr('width', function(d) {
+				var w;
+				
 				if(showLegend) {
-					return ((oneFlexUnit * chartFlex)/graphData.length) - barPadding;
+					w = ((oneFlexUnit * chartFlex)/graphData.length) - barPadding;
 				} else {
-					return (canvasWidth - (margins.left + margins.right))/graphData.length - barPadding;
+					w = (canvasWidth - (margins.left + margins.right))/graphData.length - barPadding;
 				}
+				
+				return Ext.Array.min([w, me.maxBarWidth]);
 			})
 			.attr('height', function(d) {
 				return yScale(d[dataMetric]) - margins.bottom;
@@ -333,6 +327,12 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 	 	var me = this;
 	 	
 	 	if(!me.showLabels) {
+	 		me.gText.selectAll('text')
+	 			.transition()
+	 			.duration(500)
+	 			.attr('x', -400)
+	 			.remove();
+	 			
 		 	return;
 		}
 	 	
@@ -379,6 +379,18 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 		var me = this;
 		
 		if(!me.showLegend) {
+			me.gLegend.selectAll('rect')
+				.transition()
+				.duration(500)
+				.attr('y', -500)
+				.remove();
+				
+			me.gLegend.selectAll('text')
+				.transition()
+				.duration(500)
+				.attr('x', me.canvasWidth + 200)
+				.remove();
+				
 			return;
 		}
 		
@@ -532,11 +544,13 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 		var me = this;
 		
 		if(me.showLegend) {
-			var chartUnits = me.getFlexUnit() * me.chartFlex;
+			var legendUnits = me.getFlexUnit() * me.legendFlex;
+			
+			var diff = me.canvasWidth - me.margins.right - legendUnits;
 			
 			me.xScale = d3.scale.linear()
 				.domain([0, me.graphData.length])
-				.range([0, chartUnits]);
+				.range([me.margins.left, diff]);
 		} else {
 			me.xScale = d3.scale.linear()
 				.domain([0, me.graphData.length])
@@ -569,7 +583,6 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 			.domain([0, d3.max(me.graphData, function(d) { return d[metric]; })])
 			.range([me.canvasHeight-me.margins.bottom, me.canvasHeight - me.heightOffset]);
 			
-		
 		var _yTicks = me.yTicks;
 		
 		// "guess" on increments
@@ -599,8 +612,7 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 			
 		var workingWidth = me.canvasWidth
 			- me.margins.left
-			- me.margins.right
-			- me.spaceBetweenChartAndLegend;
+			- me.margins.right;
 			
 		return Math.floor(workingWidth / (me.chartFlex + me.legendFlex));
 	},
@@ -616,8 +628,9 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 		me.heightOffset = me.canvasHeight - me.margins.top - me.labelOffsetTop;
 		
 		var legendTranslateX = me.margins.left 
-			+ (me.getFlexUnit() * me.chartFlex) 
-			+ me.spaceBetweenChartAndLegend;		
+			+ (me.getFlexUnit() * me.chartFlex)
+			+ me.spaceBetweenChartAndLegend;
+				
 		me.gLegend.attr('transform', 'translate(' + legendTranslateX + ', ' + me.margins.top + ')');
 		
 		me.gTitle.attr('transform', 'translate('
@@ -664,10 +677,22 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 		me.legendTextFunction = fn;
 	},
 	
+	setMaxBarWidth: function(w) {
+		var me = this;
+		
+		me.maxBarWidth = w;
+	},
+	
 	setShowLabels: function(bool) {
 	 	var me = this;
 	 	
 	 	me.showLabels = bool;
+	},
+	
+	setShowLegend: function(bool) {
+		var me = this;
+			
+		me.showLegend = bool;
 	},
 	
 	setYTickFormat: function(fn) {

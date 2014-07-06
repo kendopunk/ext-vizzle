@@ -26,6 +26,9 @@ Ext.application({
 		Ext.tip.QuickTipManager.init();
 		
 		var defaultXType = 'sunburstPartition';
+		//var defaultXType = 'barBuild';
+		//var defaultXType = null;
+		//var defaultXType = 'pieGeneric';
 		
 		Ext.create('Ext.container.Viewport', {
 			layout: 'border',
@@ -137,6 +140,6 @@ Ext.application({
 			return;
 		}
 		
-		//component.add({xtype: xtype});
+		component.add({xtype: xtype});
 	}
 });
