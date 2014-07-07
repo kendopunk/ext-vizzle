@@ -157,7 +157,6 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 		me.gLegend = me.svg.append('svg:g')
 			.attr('transform', 'translate(' + legendTranslateX + ', ' + me.margins.top + ')');
 		
-		// bool
 		me.chartInitialized = true;
 
 		return me;
@@ -225,19 +224,19 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 			colorDefinedInData = me.colorDefinedInData,
 			colorDefinedInDataIndex = me.colorDefinedInDataIndex,
 			gLegend = me.gLegend;
-	 	
-	 	// join new with old
+			
+		////////////////////////////////////////
+		// BAR JRAT
+		////////////////////////////////////////
 	 	var rectSelection = me.gBar.selectAll('rect')
 	 		.data(me.graphData);
 	 		
-	 	// transition out old
  		rectSelection.exit()
 			.transition()
 			.duration(500)
 			.attr('width', 0)
 			.remove();
 			
-		// add new bars
 		rectSelection.enter()
 			.append('rect')
 			.attr('defaultOpacity', .6)
@@ -245,15 +244,7 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 			.style('stroke', '#333333')
 			.style('stroke-width', 1);
 			
-		// apply events
 		rectSelection.on('mouseover', function(d, i) {
-			if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
-				eventRelay.publish(mouseEvents.mouseover.eventName, {
-					payload: d,
-					index: i
-				});
-			}
-				
 			d3.select(this).style('opacity', .9);
 			
 			if(showLegend) {
@@ -263,8 +254,10 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 				.style('fill', '#990066')
 				.style('font-weight', 'bold');
 			}
+			
+			me.publishMouseEvent('mouseover', d, i);
 		})
-		.on('mouseout', function(d) {
+		.on('mouseout', function(d, i) {
 			var el = d3.select(this);
 			el.style('opacity', el.attr('defaultOpacity'));
 			
@@ -275,19 +268,14 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 				.style('fill', '#000000')
 				.style('font-weight', 'normal');
 			}
+			
+			me.publishMouseEvent('mouseout', d, i);
 		})
 		.on('dblclick', function(d) {
-			if(mouseEvents != null
-				&& mouseEvents.dblclick
-				&& mouseEvents.dblclick.eventName
-				&& eventRelay
-			) {
-				eventRelay.publish(mouseEvents.dblclick.eventName, d);
-			}
+			me.publishMouseEvent('dblclick', d, i);
 		})
 		.call(d3.helper.tooltip().text(me.tooltipFunction));
 		
-		// transition all rectangles
 		rectSelection.transition()
 			.duration(500)
 			.attr('x', function(d, i) {
@@ -345,21 +333,20 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 	 		dataMetric = me.dataMetric,
 	 		labelDistanceFromBar = me.labelDistanceFromBar,
 	 		labelFunction = me.labelFunction;
-	 		
-	 	// join new with old
+	 	
+	 	////////////////////////////////////////
+	 	// LABEL JRAT
+	 	////////////////////////////////////////
 		var labelSelection = me.gText.selectAll('text')
 			.data(me.graphData);
 			
-		// remove old
 		labelSelection.exit().remove();
 		
-		// add new labels
 		labelSelection.enter()
 			.append('text')
 			.style('font-size', me.labelFontSize)
 			.attr('text-anchor', 'start');
 		
-		// transition all
 		labelSelection.transition()
 			.duration(250)
 			.attr('x', function(d, i) {
@@ -401,11 +388,7 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 			legendSquareWidth = me.legendSquareWidth;
 			
 		////////////////////////////////////////
-		// LEGEND SQUARES
-		// join
-		// remove
-		// add
-		// transition
+		// LEGEND SQUARE JRAT
 		////////////////////////////////////////
 		var legendSquareSelection = me.gLegend.selectAll('rect')
 			.data(me.graphData);
@@ -457,11 +440,7 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 			});
 		
 		////////////////////////////////////////
-		// LEGEND TEXT
-		// join
-		// remove
-		// add
-		// transition
+		// LEGEND TEXT JRAT
 		////////////////////////////////////////
 		var legendTextSelection = me.gLegend.selectAll('text')
 			.data(me.graphData);
@@ -599,6 +578,24 @@ Ext.define('App.util.d3.responsive.ResponsiveBar', {
 			.orient('left')
 			.ticks(_yTicks)
 			.tickFormat(me.yTickFormat);
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Publish a mouse event with the event relay
+ 	 * @param evt String mouseover|mouseout|etc..
+ 	 * @param d Object Data object
+ 	 * @param i Integer index
+ 	 */
+	publishMouseEvent: function(evt, d, i) {
+		var me = this;
+				
+		if(me.handleEvents && me.eventRelay && me.mouseEvents[evt].enabled) {
+			me.eventRelay.publish(me.mouseEvents[evt].eventName, {
+				payload: d,
+				index: i
+			});
+		}
 	},
 	
 	/**

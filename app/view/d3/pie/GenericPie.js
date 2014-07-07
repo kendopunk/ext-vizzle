@@ -12,10 +12,11 @@ Ext.define('App.view.d3.pie.GenericPie', {
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.final.PieChart'
+		'App.util.d3.responsive.ResponsivePie'
 	],
 	
 	layout: 'fit',
+	autoScroll: true,
 	
 	initComponent: function() {
 		var me = this;
@@ -51,64 +52,93 @@ Ext.define('App.view.d3.pie.GenericPie', {
 		me.width = parseInt(Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth);
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
 		
-		me.tbar = [{
-			xtype: 'tbtext',
-			text: '<b>State:</b>'
-		}, {
-			xtype: 'button',
-			text: 'Texas',
-			abbrev: 'TX',
-			targetIndex: 0,
-			cls: me.btnHighlightCss,
-			handler: me.handleStateSelection,
-			scope: me
-		},
-			'-',
-		{
-			xtype: 'button',
-			text: 'New York',
-			abbrev: 'NY',
-			targetIndex: 1,
-			handler: me.handleStateSelection,
-			scope: me
-		},
-			'-',
-		{
-			xtype: 'button',
-			text: 'Arkansas',
-			abbrev: 'AR',
-			targetIndex: 2,
-			handler: me.handleStateSelection,
-			scope: me
-		},
-		'->',
-		{xtype: 'tbtext', text: '<b>InnerRadius:</b>'},
-		{
-			xtype: 'combo',
-			store: Ext.create('Ext.data.Store', {
-				fields: ['display', 'value'],
-				data: [
-					{display: '0%', value: 0},
-					{display: '25%', value: .25},
-					{display: '50%', value: .5},
-					{display: '95%', value: .95}
-				]
-			}),
-			width: 75,
-			listWidth: 75,
-			editable: false,
-			displayField: 'display',
-			valueField: 'value',
-			value: '0',
-			listeners: {
-				select: function(combo) {
-					me.innerRadiusHandler(combo.getValue());
-				},
+		me.dockedItems = [{
+			xtype: 'toolbar',
+			dock: 'top',
+			items: [{
+				xtype: 'tbtext',
+				text: '<b>State:</b>'
+			}, {
+				xtype: 'button',
+				text: 'Texas',
+				abbrev: 'TX',
+				targetIndex: 0,
+				cls: me.btnHighlightCss,
+				handler: me.handleStateSelection,
 				scope: me
-			}
-		}, {
-			xtype: 'tbspacer',
-			width: 10
+			},
+				'-',
+			{
+				xtype: 'button',
+				text: 'New York',
+				abbrev: 'NY',
+				targetIndex: 1,
+				handler: me.handleStateSelection,
+				scope: me
+			},
+				'-',
+			{
+				xtype: 'button',
+				text: 'Arkansas',
+				abbrev: 'AR',
+				targetIndex: 2,
+				handler: me.handleStateSelection,
+				scope: me
+			},
+			'->',
+			{xtype: 'tbtext', text: '<b>Inner Radius:</b>'},
+			{
+				xtype: 'combo',
+				store: Ext.create('Ext.data.Store', {
+					fields: ['display', 'value'],
+					data: [
+						{display: '0%', value: 0},
+						{display: '25%', value: .25},
+						{display: '50%', value: .5},
+						{display: '75%', value: .75},
+						{display: '95%', value: .95}
+					]
+				}),
+				width: 75,
+				listWidth: 75,
+				editable: false,
+				displayField: 'display',
+				valueField: 'value',
+				value: '0',
+				listeners: {
+					select: function(combo) {
+						me.innerRadiusHandler(combo.getValue());
+					},
+					scope: me
+				}
+			}, {
+				xtype: 'tbspacer',
+				width: 10
+			}, {
+				xtype: 'checkbox',
+				boxLabel: 'Legend',
+				listeners: {
+					change: function(cbx, nv, ov) {
+						me.pieChart.toggleLegend(nv).draw();
+					}
+				}
+			}, {
+				xtype: 'tbspacer',
+				width: 10
+			}, {
+				xtype: 'checkbox',
+				boxLabel: 'Labels',
+				checked: true,
+				listeners: {
+					change: function(cbx, nv, ov) {
+						me.pieChart.setShowLabels(nv);
+						me.pieChart.draw();
+					}
+				}
+			}, {
+				xtype: 'tbspacer',
+				width: 10
+			}]
 		}];
 		
 		// on activate, publish update to the "Info" panel
@@ -137,7 +167,7 @@ Ext.define('App.view.d3.pie.GenericPie', {
 	 	// initialize SVG, width, height
  		me.svgInitialized = true,
  			me.canvasWidth = parseInt(me.body.dom.offsetWidth * .98),
-	 		me.canvasHeight = parseInt(me.body.dom.offsetHeight * .98),
+	 		me.canvasHeight = parseInt(me.body.dom.offsetHeight * .95),
  			me.panelId = '#' + me.body.id;
 	 	
 	 	// init svg
@@ -145,7 +175,36 @@ Ext.define('App.view.d3.pie.GenericPie', {
 	 		.append('svg')
 	 		.attr('width', me.canvasWidth)
 	 		.attr('height', me.canvasHeight);
-	 		
+
+		// init pie chart
+		me.pieChart = Ext.create('App.util.d3.responsive.ResponsivePie', {
+			svg: me.svg,
+			canvasWidth: me.canvasWidth,
+			canvasHeight: me.canvasHeight,
+			panelId: me.panelId,
+			dataMetric: 'recovery',
+			chartFlex: 3,
+			legendFlex: 1,
+			margins: {
+				top: 40
+			},
+			graphData: [],
+			chartTitle: me.buildChartTitle('TX'),
+			showLabels: true,
+			labelFunction: function(d, i) {
+				return d.data.caliber;
+			},
+			tooltipFunction: function(d, i) {
+				return '<b>' + d.data.caliber + '</b><br>'
+					+ Ext.util.Format.number(d.data.recovery, '0,000')
+					+ ' recoveries';
+			},
+			showLegend: false,
+			legendTextFunction: function(d, i) {
+				return d.caliber;
+			}
+		});
+		
 	 	// get the data via Ajax call
 	 	Ext.Ajax.request({
 	 		url: 'data/atf_trace_data.json',
@@ -158,35 +217,11 @@ Ext.define('App.view.d3.pie.GenericPie', {
 		 			me.availableStates.push(rec.state);
 		 		}, me);
 		 		
-		 		// all the data 
 		 		me.atfData = resp.data;
-	 			
-	 			// init pie chart
-	 			me.pieChart = Ext.create('App.util.d3.final.PieChart', {
-					svg: me.svg,
-					canvasWidth: me.canvasWidth,
-					canvasHeight: me.canvasHeight,
-					dataMetric: 'recovery',
-					margins: {
-						top: 40,
-						legend: 50
-					},
-					graphData: me.atfData[0]['recoveries'],
-					panelId: me.panelId,
-					chartTitle: me.generateChartTitle('TX'),
-					showLabels: true,
-					labelFunction: function(data, index) {
-						return data.data.caliber;
-					},
-					tooltipFunction: function(data, index) {
-						return '<b>' + data.data.caliber + '</b><br>'
-							+ Ext.util.Format.number(data.data.recovery, '0,000')
-							+ ' recoveries';
-					}
-				}, me);
-				
-				// draw
-				me.pieChart.draw();
+		 		
+		 		me.pieChart.setGraphData(resp.data[0].recoveries);
+		 		
+		 		me.pieChart.initChart().draw();
 	 		},
 	 		callback: function() {
 	 			me.getEl().unmask();
@@ -212,11 +247,11 @@ Ext.define('App.view.d3.pie.GenericPie', {
 		button.addCls(me.btnHighlightCss);
 	 	
 	 	// set chart title
-	 	me.pieChart.setChartTitle(me.generateChartTitle(button.abbrev));
+	 	me.pieChart.setChartTitle(me.buildChartTitle(button.abbrev));
 	 	
 	 	// set data and transition
 	 	me.pieChart.setGraphData(me.atfData[button.targetIndex]['recoveries']);
-	 	me.pieChart.transition();
+	 	me.pieChart.draw();
 	 },
 
 	/**
@@ -227,16 +262,15 @@ Ext.define('App.view.d3.pie.GenericPie', {
 	 	var me = this;
 	 	
 	 	me.pieChart.setInnerRadius(parseInt(me.pieChart.outerRadius * pct));
-	 	me.pieChart.transition();
+	 	me.pieChart.draw();
 	},
-	 
 	 
 	/**
 	 * @function
 	 * @memberOf App.util.d3.pie
 	 * @description Build a new chart title
 	 */
-	generateChartTitle: function(append) {
+	buildChartTitle: function(append) {
 		var me = this;
 		
 		return me.baseTitle + ' : ' + append + ' Recoveries';

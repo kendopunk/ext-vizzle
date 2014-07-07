@@ -19,6 +19,7 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
 	canvasHeight: 200,
 	canvasWidth: 200,
 	chartFlex: 3,
+	chartInitialized: false,
 	chartTitle: null,
 	colorScale: d3.scale.category20(),
 	indexedColorScale: [],
@@ -29,11 +30,13 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
 	gLegend: null,			// "g" element to hold the legend (if applicable)
 	gPie: null,				// "g" element to hold the pie chart
 	gTitle: null,			// "g" element to hold the title
+	gSandbox: null,			// "g" element for testing
 	graphData: [],
 	handleEvents: false,
 	innerRadius: 0,
 	labelClass: 'labelText',
 	labelFunction: function(data, index) { return 'label'; },
+	labelVisibilityThreshold: 0.02,
 	legendFlex: 1,
 	legendLines: 1,		// # of line per legend text item
 	legendSquareWidth: 10,
@@ -66,6 +69,7 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
 	showLabels: false,
 	showLegend: false,
 	spaceBetweenChartAndLegend: 20,		// spacing between the chart and the legend
+	radiusScaleFactor: .75,
 	tooltipFunction: function(data, index) {
 		return 'tooltip';
 	},
@@ -76,7 +80,6 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
 	constructor: function(config) {
 		var me = this;
 		
-		//Ext.apply(me, config);
 		Ext.merge(me, config);
 		
 		if(me.handleEvents) {
@@ -88,103 +91,71 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
 	 * @function
 	 */
 	initChart: function() {
-		var me = this;
+		var me = this,
+			outerRadius,
+			innerRadius;
 		
-		
-	}
-	/**
-	 * @function
-	 * @memberOf App.util.d3.final.PieChart
-	 * @param metric String
-	 * @description Draw/initialize the pie chart
-	 */
-	draw: function() {
-		var me = this;
-		
-		//////////////////////////////////////////////////
-		// sanity check
-		//////////////////////////////////////////////////
-		if(me.graphData.length == 0) { return; }
-		
-		//////////////////////////////////////////////////
-		// bring vars into local scope
-		//////////////////////////////////////////////////
-		var canvasHeight = me.canvasHeight,
-			canvasWidth = me.canvasWidth,
-			chartFlex = me.chartFlex,
-			chartTranslateX = 0,
-			chartTranslateY = 0,
-			dataMetric = me.dataMetric,
-			legendFlex = me.legendFlex,
-			legendTranslateX = 0,
-			legendTranslateY = 0;
-			
-		//////////////////////////////////////////////////
-		// set the outer radius if not specified
-		// take into account use of the legend
-		//////////////////////////////////////////////////
+		////////////////////////////////////////
+		// set the outer radius, taking into account
+		// the use of the legend
+		////////////////////////////////////////
 		if(me.outerRadius == null) {
-			if(me.showLegend)
-			{
-				var chartWidth = parseInt(me.getFlexUnit() * me.chartFlex);
-				
-				// chart width LESS THAN height
-				if(chartWidth < (me.canvasHeight - me.margins.top)) {
-					me.outerRadius = parseInt((chartWidth/2) * .7);
-				}
-				else {
-					me.outerRadius = parseInt(((me.canvasHeight - me.margins.legend)/2) * .8);
-				}
-			}
-			else
-			{
-				if(me.canvasWidth < me.canvasHeight) {
-					me.outerRadius = parseInt((me.canvasWidth * .85)/2);
-				} else {
-					me.outerRadius = parseInt((me.canvasHeight/2) * .85) - me.margins.top;
-				}
-			}
-		}
-		var outerRadius = me.outerRadius;	// local scope
-		
-		//////////////////////////////////////////////////
-		// sanity check on inner radius
-		//////////////////////////////////////////////////
-		if(me.innerRadius >= me.outerRadius) {
-			me.innerRadius = parseInt(me.outerRadius * .75);
-		}
-		var innerRadius = me.innerRadius;	// local scope
-			
-		//////////////////////////////////////////////////
-		// chart translation X/Y...based on the use or 
-		// omission of the legend
-		//////////////////////////////////////////////////
-		if(me.showLegend) {
-			chartTranslateX = parseInt((me.getFlexUnit() * me.chartFlex)/2);
-			chartTranslateY = me.outerRadius + me.margins.legend;
+			me.outerRadius = me.calcRadius();
+			outerRadius = me.outerRadius;
 		} else {
-			chartTranslateX = parseInt(me.canvasWidth/2);
-			chartTranslateY = parseInt(me.canvasHeight/2) + me.margins.top;
+			outerRadius = me.outerRadius;
+		}
+		
+		////////////////////////////////////////
+		// sanity check on inner radius
+		////////////////////////////////////////
+		if(me.innerRadius >= me.outerRadius) {
+			me.innerRadius = Math.floor(me.outerRadius * .75);
+		}
+		innerRadius = me.innerRadius;
+		
+		////////////////////////////////////////
+		// chart translation
+		////////////////////////////////////////
+		var chartTranslateX, chartTranslateY;
+		if(me.showLegend) {
+			chartTranslateX = Math.floor((me.getFlexUnit() * me.chartFlex) / 2);
+			chartTranslateY = Math.floor(me.canvasHeight / 2);
+		} else {
+			chartTranslateX = Math.floor(me.canvasWidth / 2);
+			chartTranslateY = Math.floor(me.canvasHeight / 2);
 		}
 
 		//////////////////////////////////////////////////
-		// set the pie "g" element
+		// pie "g"
 		//////////////////////////////////////////////////
 		me.gPie = me.svg.append('svg:g')
 			.attr('transform', 'translate(' + chartTranslateX + ',' + chartTranslateY + ')');
 			
 		//////////////////////////////////////////////////
-		// the legend "g"
+		// legend "g"
 		//////////////////////////////////////////////////
-		me.gLegend = me.svg.append('svg:g');
-		if(me.showLegend) {
-			legendTranslateX = (me.getFlexUnit() * me.chartFlex) + me.spaceBetweenChartAndLegend;
-			legendTranslateY = me.margins.legend;
-			me.gLegend.attr('transform', 'translate(' + legendTranslateX + ',' + legendTranslateY + ')');
-		} else {
-			me.gLegend.attr('transform', 'translate(0,' + me.margins.top + ')');
-		}
-		
+		legendTranslateX = (me.getFlexUnit() * me.chartFlex) + me.spaceBetweenChartAndLegend;
+		legendTranslateY = (me.canvasHeight / 2) - me.outerRadius;
+		me.gLegend = me.svg.append('svg:g')
+			.attr('transform', 'translate(' + legendTranslateX + ',' + legendTranslateY + ')');
+			
+		//////////////////////////////////////////////////
+		// title "g"
+		//////////////////////////////////////////////////
+		me.gTitle = me.svg.append('svg:g')
+			.attr('transform', 'translate('
+				+ Math.floor(me.canvasWidth/2)
+				+ ','
+				+ Math.floor(me.margins.top/2)
+				+')'
+			);
+			
+		//////////////////////////////////////////////////
+		// sandbox "g"
+		//////////////////////////////////////////////////
+		me.gSandbox = me.svg.append('svg:g');
+			
 		//////////////////////////////////////////////////
 		// set the pie layout
 		//////////////////////////////////////////////////
@@ -200,40 +171,40 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
 		me.arcObject = d3.svg.arc()
 			.outerRadius(me.outerRadius)
 			.innerRadius(me.innerRadius);
+			
+		me.chartInitialized = true;
 		
-		//////////////////////////////////////////////////
-		// Handlers
-		// - arcs
-		// - labels
-		// - chart title
-		// - legend
-		//////////////////////////////////////////////////
-		me.handleArcs();
-		me.handleLabels();
-		me.handleChartTitle();
-		me.handleLegend();
+		return me;
 	},
 	
 	/**
- 	 * @function
- 	 * @memberOf App.util.d3.final.PieChart
- 	 * @description Transition the graphic
- 	 */
-	transition: function() {
-		
+	 * @function
+	 * @memberOf App.util.d3.final.PieChart
+	 * @param metric String
+	 * @description Draw/initialize the pie chart
+	 */
+	draw: function() {
 		var me = this;
 		
-		//////////////////////////////////////////////////
-		// transition handlers
-		// - arcs
-		// - labels
-		// - chart title
-		// - legend
-		//////////////////////////////////////////////////
+		if(!me.chartInitialized) {
+			return;
+		}
+		
 		me.handleArcs();
 		me.handleLabels();
 		me.handleChartTitle();
 		me.handleLegend();
+		
+		/*
+		me.gSandbox.selectAll('circle')
+			.data(['a'])
+			.enter()
+			.append('circle')
+			.attr('cx', me.canvasWidth/2)
+			.attr('cy', me.canvasHeight/2)
+			.attr('r', 5)
+			.style('fill', '#000000');
+		*/
 	},
 	
 	/**
@@ -284,64 +255,20 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
 			.append('g')
 			.attr('class', 'arc')
 			.on('mouseover', function(d, i) {
-				// scale this
+				// scale this arc
+				// scale arc's label
+				// publish mouse event
 				d3.select(this).transition().attr('transform', 'scale(1.1)');
-				
-				// transform text
-				gPie.selectAll('text').filter(function(e, j) {
-					return i === j
-				})
-				.transition()
-				.duration(250)
-				.attr('transform', function(d, i) {
-					var c = arcObject.centroid(d),
-						x = c[0],
-						y = c[1],
-						h = Math.sqrt(x*x + y*y),
-						xTrans = (x/h * outerRadius) + (x/h * outerRadius * .05),
-						yTrans = (y/h * outerRadius) + i;
-						
-					if(yTrans < 0) {
-						yTrans = yTrans - Math.abs(yTrans * .1);
-					}
-					
-					xTrans += xTrans * .1;
-					yTrans += yTrans * .1;
-					
-					return 'translate(' + xTrans + ',' + yTrans + ')';
-				})
-				
-				// mouse events
-				if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
-					eventRelay.publish(mouseEvents.mouseover.eventName, {
-						payload: d,
-						index: i
-					});
-				}
+				me.transformLabel(i);
+				me.publishMouseEvent('mouseover', d, i);
 			})
 			.on('mouseout', function(d, i) {
+				// unscale this arc
+				// unscale arc's label
+				// publish mouse event
 				d3.select(this).transition().attr('transform', 'scale(1)');
-				
-				// untransform text
-				gPie.selectAll('text').filter(function(e, j) {
-					return i === j
-				})
-				.transition()
-				.duration(250)
-				.attr('transform', function(d, i) {
-					var c = arcObject.centroid(d),
-						x = c[0],
-						y = c[1],
-						h = Math.sqrt(x*x + y*y),
-						xTrans = (x/h * outerRadius) + (x/h * outerRadius * .05),
-						yTrans = (y/h * outerRadius) + i;
-						
-					if(yTrans < 0) {
-						yTrans = yTrans - Math.abs(yTrans * .1);
-					}
-					
-					return 'translate(' + xTrans + ',' + yTrans + ')';
-				})
+				me.revertLabel(i);
+				me.publishMouseEvent('mouseout', d, i);
 			});
 		
 		//////////////////////////////////////////////////
@@ -413,29 +340,31 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
 	 	var me = this;
 	 	
 	 	if(!me.showLabels) {
-		 	me.gPie.selectAll('text').remove();
+		 	me.gPie.selectAll('text')
+			 	.remove();
 		 	return;
-		}
+	 	}
 		
 		// local scope
 		var arcObject = me.arcObject,
 			innerRadius = me.innerRadius,
-			outerRadius = me.outerRadius;
+			outerRadius = me.outerRadius,
+			labelVisibilityThreshold = me.labelVisibilityThreshold;
 			
-		// join
+		////////////////////////////////////////
+		// Join, Remove, Append, Transition
+		// JRAT
+		////////////////////////////////////////
 		var textSelection = me.gPie.selectAll('text')
 			.data(me.pieLayout(me.graphData));
 			
-		// remove
 		textSelection.exit().remove();
 		
-		// append
 		textSelection.enter()
 			.append('text')
 			.attr('class', me.labelClass)
 			.attr('dy', '0.35em');
 			
-		// transition
 		textSelection.transition().duration(250)
 			.attr('transform', function(d, i) {
 				var c = arcObject.centroid(d),
@@ -454,6 +383,12 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
 			.attr('text-anchor', function(d, i) {
 				return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';
 			})
+			.attr('display', function(d, i) {
+				if(Math.abs(d.startAngle - d.endAngle) < labelVisibilityThreshold) {
+					return 'none';
+				}
+				return null;
+			})
 			.text(me.labelFunction);
 	},
 	
@@ -465,30 +400,18 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
 	handleChartTitle: function() {
 		var me = this;
 		
-		// initialize the title "g"
-		if(me.gTitle == null) {
-			me.gTitle = me.svg.append('svg:g')
-				.attr('transform', 'translate(' 
-					+ parseInt(me.canvasWidth/2) 
-					+ ',' 
-					+ parseInt(me.margins.top/2) + ')'
-				);
-				
-			me.gTitle.selectAll('text')
-				.data([''])
-				.enter()
-				.append('text')
-				.style('fill', '#444444')
-				.style('font-weight', 'bold')
-				.style('font-family', 'sans-serif')
-				.style('text-anchor', 'middle')
-				.text(String);
-		}
+		me.gTitle.selectAll('text').remove();
 		
 		if(me.chartTitle) {
-			me.gTitle.selectAll('text').text(me.chartTitle);
-		} else {
-			me.gTitle.selectAll('text').text('');
+			me.gTitle.selectAll('text')
+			.data([me.chartTitle])
+			.enter()
+			.append('text')
+			.style('fill', '#444444')
+			.style('font-weight', 'bold')
+			.style('font-family', 'sans-serif')
+			.style('text-anchor', 'middle')
+			.text(String);
 		}
 	},
 	
@@ -500,8 +423,28 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
  	handleLegend: function() {
 	 	var me = this;
 	 	
-	 	if(!me.showLegend) { return; }
+	 	////////////////////////////////////////
+	 	// no legend / remove legend
+	 	////////////////////////////////////////
+	 	if(!me.showLegend) {
+			me.gLegend.selectAll('rect')
+				.transition()
+				.duration(500)
+				.attr('y', -500)
+				.remove();
+				
+			me.gLegend.selectAll('text')
+				.transition()
+				.duration(500)
+				.attr('x', me.canvasWidth + 200)
+				.remove();
+				
+			return;
+		}
 	 	
+	 	////////////////////////////////////////
+	 	// local scope
+		////////////////////////////////////////
 	 	var colorScale = me.colorScale,
 	 		dataMetric = me.dataMetric,
 	 		indexedColorScale = me.indexedColorScale,
@@ -515,23 +458,34 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
 	 		legendBoldClass = me.legendBoldClass;
 	 		
 	 	////////////////////////////////////////
-	 	//
-	 	// legend rectangles
-	 	//
+	 	// LEGEND SQUARES - JRAT
 	 	////////////////////////////////////////
-	 	
-	 	// join new rects with current squares
-	 	var legendSquareSelection = me.gLegend.selectAll('rect')
+		var legendSquareSelection = me.gLegend.selectAll('rect')
 		 	.data(me.graphData);
-		 	
-		// remove old rects
+		
 		legendSquareSelection.exit().remove();
 		
-		// add new rects
-		legendSquareSelection.enter().append('rect');
-		
-		// transition all...legendLines dictates the 
-		// the vertical spacing between the rects
+		legendSquareSelection.enter().append('rect')
+			.style('opacity', .6)
+			.on('mouseover', function(d, i) {
+				// square opacity -> up
+				// transform corresponding arc, label
+				// publish mouse event
+				d3.select(this).style('opacity', .9);
+				me.transformArc(i);
+				me.transformLabel(i);
+				me.publishMouseEvent('mouseover', d, i);
+			})
+			.on('mouseout', function(d, i) {
+				// square opacity -> down
+				// revert corresponding arc, label
+				// publish mouse event
+				d3.select(this).style('opacity', .6);
+				me.revertArc(i);
+				me.revertLabel(i);
+				me.publishMouseEvent('mouseout', d, i);
+			});
+
 	 	legendSquareSelection.transition()
 			.attr('x', 0)
 			.attr('y', function(d, i) {
@@ -550,28 +504,29 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
 			});
  	
  		////////////////////////////////////////
- 		//
-	 	// legend text
-	 	// special considerations for multi-line
-	 	// text elements
+	 	//
+	 	// LEGEND TEXT
+	 	// MULTIPLE LEGEND TEXT LINES OR
+	 	// SINGLE LEGEND TEXT LINES
 	 	//
 	 	////////////////////////////////////////
-	 	
-	 	// multi-line text elements for legend
-	 	// we need to bind new data to this
-	 	if(legendLines > 1) {
-		 	var useData = [];
-		 	
-		 	var ind = 0;
+		if(legendLines > 1) {
+		 	var ind = 0,
+		 		multilineData = [];
+		 		
 		 	Ext.each(me.graphData, function(d, i) {
-			 	useData = useData.concat(me.legendTextFunction(d, ind).split('|'));
-			 	ind++;
+		 		Ext.each(me.legendTextFunction(d, i).split('|'), function(str) {
+			 		multilineData.push({
+				 		textLabel: str,
+				 		copiedData: d
+				 	});
+				}, me);
 			}, me);
 			
 			// join new text with current text
 			var legendTextSelection = me.gLegend.selectAll('text')
-				.data(useData);
-				
+				.data(multilineData);
+
 			// remove old text
 			legendTextSelection.exit().remove();
 			
@@ -583,33 +538,36 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
 				})
 				.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
 				.on('mouseover', function(d, i) {
-					if(i%legendLines == 0) {
+				
+					if(i%legendLines == 0)
+					{
 						// highlight this text
-						d3.select(this).style('fill', '#990066');
-						
-						// highlight the selected arc
-						thePie.selectAll('.arc').filter(function(e, j) {
-							return i/legendLines == j;
-						})
-						.transition()
-						.attr('transform', 'scale(1.1)')
-						.selectAll('path')
-						.style('opacity', 1);
+						// transform corresponding arc and its label
+						// publish mouse event
+						d3.select(this)
+							.style('fill', '#990066')
+							.style('font-weight', 'bold');
+						me.transformArc(i/legendLines);
+						me.transformLabel(i/legendLines);
+						me.publishMouseEvent('mouseover', d.copiedData, i);
 					}
 				})
 				.on('mouseout', function(d, i) {
-					if(i%legendLines == 0) {
-						// un-highlight
-						d3.select(this).style('fill', '#000000');
-					
-						// select the arc and transition
-						thePie.selectAll('.arc').filter(function(e, j) {
-							return i/legendLines == j;
-						})
-						.transition()
-						.attr('transform', 'scale(1)')
-						.selectAll('path')
-						.style('opacity', 0.6);
+				
+					if(i%legendLines == 0)
+					{
+						// un-highlight text
+						// revert corresponding arc
+						// revert corresponding arc's label
+						// publish mouse event
+						d3.select(this)
+							.style('fill', 'black')
+							.style('font-weight', function() {
+								return legendLines > 1 ? 'bold' : 'normal';
+							});
+						me.revertArc(i/legendLines);
+						me.revertLabel(i/legendLines);
+						me.publishMouseEvent('mouseout', d.copiedData, i);
 					}
 				})
 				.attr('class', function(d, i) {
@@ -619,59 +577,53 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
 					return legendClass;
 				});
 				
-			// transition all
 			legendTextSelection.transition().text(function(d, i) {
 				if(i%legendLines != 0) {
-					return '- ' + d;
+					return '- ' + d.textLabel;
 				}
-				return d;
+				return d.textLabel;
 			});
-	 	} else {
-			// join new text with current text
+	 	}
+	 	////////////////////////////////////////
+	 	// SINGLE LINE JRAT
+	 	////////////////////////////////////////
+	 	else {
 			var legendTextSelection = me.gLegend.selectAll('text')
 				.data(me.graphData);
-				
-			// remove old text
+
 			legendTextSelection.exit().remove();
 			
-			// add new
 			legendTextSelection.enter().append('text')
 				.attr('x', legendSquareWidth * 2)
 				.attr('y', function(d, i) {
 					return i * legendSquareHeight * 1.75;
 				})
+				.attr('class', me.legendClass)
 				.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
 				.on('mouseover', function(d, i) {
 					// highlight this text
+					// transform corresponding arc and its label
+					// publish mouse event
 					d3.select(this)
+						.attr('class', legendBoldClass)
 						.style('fill', '#990066')
 						.style('font-weight', 'bold');
-						
-					// highlight the selected arc
-					thePie.selectAll('.arc').filter(function(e, j) {
-						return i == j;
-					})
-					.transition()
-					.attr('transform', 'scale(1.1)')
-					.selectAll('path')
-					.style('opacity', 1);
+					me.transformArc(i);
+					me.transformLabel(i);
+					me.publishMouseEvent('mouseover', d, i);
 				})
 				.on('mouseout', function(d, i) {
 					// un-highlight this text
-					var el = d3.select(this);
-					el.style('fill', '#000000')
+					// revert corresponding arc and its label
+					// publish mouse event
+					d3.select(this)
+						.attr('class', legendClass)
+						.style('fill', '#000000')
 						.style('font-weight', 'normal');
-					
-					// select the arc and transition
-					thePie.selectAll('.arc').filter(function(e, j) {
-						return i == j;
-					})
-					.transition()
-					.attr('transform', 'scale(1)')
-					.selectAll('path')
-					.style('opacity', 0.6);
-				})
-				.attr('class', me.legendClass);
+					me.revertArc(i);
+					me.revertLabel(i);
+					me.publishMouseEvent('mouseout', d, i);
+				});
 				
 			// transition all
 			legendTextSelection.transition().text(me.legendTextFunction);
@@ -680,17 +632,184 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.final.PieChart
- 	 * @description Get the width of 1 "flex" unit based on configurations
+ 	 * @description Runtime calculation of outer radius
  	 */
-	getFlexUnit: function() {
-		var me = this;
+ 	calcRadius: function() {
+	 	var me = this,
+	 		ret = 0;
+	 	
+	 	var chartHeight = me.canvasHeight - me.margins.top;
+	 	
+		if(me.showLegend) {
+			var chartWidth = Math.floor(me.getFlexUnit() * me.chartFlex);
+			ret = (Ext.Array.min([chartWidth, chartHeight]) * me.radiusScaleFactor) / 2;
+		} else {
+			ret = (Ext.Array.min([me.canvasWidth, chartHeight]) * me.radiusScaleFactor) / 2;
+		}
 		
-		var workingWidth = me.canvasWidth - me.spaceBetweenChartAndLegend;
-		
-		return Math.floor(workingWidth / (me.chartFlex + me.legendFlex));
+		return ret;
 	},
 	
+	/**
+	 * @function
+	 * @description Toggle legend on/off
+	 * @param onState Boolean
+	 */
+	toggleLegend: function(onState) {
+		var me = this,
+			chartTranslateX,
+			chartTranslateY;
+			
+		if(onState) {
+			chartTranslateX = Math.floor((me.getFlexUnit() * me.chartFlex) / 2);
+			chartTranslateY = Math.floor(me.canvasHeight / 2);
+			me.showLegend = true;
+		} else {
+			chartTranslateX = Math.floor(me.canvasWidth / 2);
+			chartTranslateY = Math.floor(me.canvasHeight / 2);
+			me.showLegend = false;
+		}
+		
+		me.gPie.transition()
+			.duration(500)
+			.attr('transform', 'translate(' + chartTranslateX + ',' + chartTranslateY + ')');
+			
+		me.outerRadius = me.calcRadius();
+		me.setArcObject();
+		
+		return me;
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Retrieve the width of one "flex" unit
+ 	 */
+ 	getFlexUnit: function() {
+		var me = this;
+		
+		return Math.floor(me.canvasWidth / (me.chartFlex + me.legendFlex));
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Transform a particular arc
+ 	 * @param indexToMatch Integer
+ 	 */
+	transformArc: function(indexToMatch) {
+		var me = this;
+		
+		me.gPie.selectAll('.arc').filter(function(d, i) {
+			return indexToMatch === i;
+		})
+		.transition()
+		.attr('transform', 'scale(1.1)')
+		.selectAll('path')
+		.style('opacity', 1);
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Reset/revert a particular arc
+ 	 * @param indexToMatch Integer
+ 	 */
+	revertArc: function(indexToMatch) {
+		var me = this;
+		
+		me.gPie.selectAll('.arc').filter(function(d, i) {
+			return indexToMatch === i;
+		})
+		.transition()
+		.attr('transform', 'scale(1)')
+		.selectAll('path')
+		.style('opacity', 0.6);
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Transform a particular label
+ 	 * @param indexToMatch Integer
+ 	 */
+	transformLabel: function(indexToMatch) {
+		var me = this;
+		
+		// local scope
+		var arcObject = me.arcObject,
+			outerRadius = me.outerRadius;
+		
+		me.gPie.selectAll('text').filter(function(d, i) {
+			return indexToMatch === i;
+		})
+		.transition()
+		.duration(250)
+		.attr('transform', function(d, i) {
+			var c = arcObject.centroid(d),
+				x = c[0],
+				y = c[1],
+				h = Math.sqrt(x*x + y*y),
+				xTrans = (x/h * outerRadius) + (x/h * outerRadius * .05),
+				yTrans = (y/h * outerRadius) + i;
+						
+			if(yTrans < 0) {
+				yTrans = yTrans - Math.abs(yTrans * .1);
+			}
+					
+			xTrans += xTrans * .1;
+			yTrans += yTrans * .1;
+					
+			return 'translate(' + xTrans + ',' + yTrans + ')';
+		});
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Reset/revert a particular label
+ 	 * @param indexToMatch Integer
+ 	 */
+	revertLabel: function(indexToMatch) {
+		var me = this;
+		
+		// local scope
+		var arcObject = me.arcObject,
+			outerRadius = me.outerRadius;
+		
+		me.gPie.selectAll('text').filter(function(d, i) {
+			return indexToMatch === i;
+		})
+		.transition()
+		.duration(250)
+		.attr('transform', function(d, i) {
+			var c = arcObject.centroid(d),
+				x = c[0],
+				y = c[1],
+				h = Math.sqrt(x*x + y*y),
+				xTrans = (x/h * outerRadius) + (x/h * outerRadius * .05),
+				yTrans = (y/h * outerRadius) + i;
+						
+			if(yTrans < 0) {
+				yTrans = yTrans - Math.abs(yTrans * .1);
+			}
+					
+			return 'translate(' + xTrans + ',' + yTrans + ')';
+		});
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Publish a mouse event with the event relay
+ 	 * @param evt String mouseover|mouseout|etc..
+ 	 * @param d Object Data object
+ 	 * @param i Integer index
+ 	 */
+	publishMouseEvent: function(evt, d, i) {
+		var me = this;
+				
+		if(me.handleEvents && me.eventRelay && me.mouseEvents[evt].enabled) {
+			me.eventRelay.publish(me.mouseEvents[evt].eventName, {
+				payload: d,
+				index: i
+			});
+		}
+	},
 	
 	/**
  	 *
@@ -698,10 +817,6 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
  	 * setters
  	 *
  	 *
- 	 */
- 	 
-	/**
- 	 * @description Set the arc object function
  	 */
 	setArcObject: function() {
 		var me = this;
@@ -716,10 +831,7 @@ Ext.define('App.util.d3.responsive.ResponsivePie', {
 		
 		me.chartTitle = title;
 	},
-	
-	/**
- 	 * @description Set the default data metric
- 	 */
+
  	setDataMetric: function(metric) {
 	 	var me = this;
 	 	
