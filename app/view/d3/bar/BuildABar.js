@@ -12,7 +12,7 @@ Ext.define('App.view.d3.bar.BuildABar', {
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.responsive.ResponsiveBar',
+		'App.util.d3.UniversalBar',
 		'App.util.ColumnDefinitions',
 		'App.store.stock.StockStore'
 	],
@@ -230,7 +230,7 @@ Ext.define('App.view.d3.bar.BuildABar', {
 		}, me);
 
 		// build the chart
-	 	me.barChart = Ext.create('App.util.d3.responsive.ResponsiveBar', {
+	 	me.barChart = Ext.create('App.util.d3.UniversalBar', {
 			svg: me.svg,
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,

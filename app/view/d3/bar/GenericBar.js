@@ -15,7 +15,7 @@ Ext.define('App.view.d3.bar.GenericBar', {
 		'App.store.movie.MovieStore',
 		'App.store.movie.MovieMetricStore',
 		'App.util.JsonBuilder',
-		'App.util.d3.responsive.ResponsiveBar',
+		'App.util.d3.UniversalBar',
 		'Ext.window.MessageBox',
 		'App.util.ColumnDefinitions'
 	],
@@ -116,31 +116,79 @@ Ext.define('App.view.d3.bar.GenericBar', {
 					handler: me.metricHandler,
 					scope: me
 				},
-				'->',
-				{
-					xtype: 'checkbox',
-					boxLabel: 'Legend',
-					listeners: {
-						change: function(cbx, nv, ov) {
-							me.barChart.setShowLegend(nv);
-							me.barChart.draw();
-						}
-					}
-				},
+				{xtype: 'tbspacer', width: 5},
+				'-',
 				{xtype: 'tbspacer', width: 5},
 				{
-					xtype: 'checkbox',
-					boxLabel: 'Labels',
-					checked: true,
-					listeners: {
-						change: function(cbx, nv, ov) {
-							me.barChart.setShowLabels(nv);
-							me.barChart.draw();
+					xtype: 'button',
+					iconCls: 'icon-tools',
+					text: 'Customize',
+					menu: [{
+						xtype: 'menucheckitem',
+						text: 'Labels',
+						checked: true,
+						listeners: {
+							checkchange: function(cbx, checked) {
+								me.barChart.setShowLabels(checked);
+								me.barChart.draw();
+							},
+							scope: me
 						}
-					}
-				},
-				{xtype: 'tbspacer', width: 5}
-				]
+					}, {
+						xtype: 'menucheckitem',
+						text: 'Legend',
+						listeners: {
+							checkchange: function(cbx, checked) {
+								me.barChart.setShowLegend(checked);
+								me.barChart.draw();
+							},
+							scope: me
+						}
+					}, {
+						xtype: 'menucheckitem',
+						text: 'Always Sort',
+						listeners: {
+							checkchange: function(cbx, checked) {
+								me.barChart.setMetricSort(checked);
+								me.barChart.draw();
+							},
+							scope: me
+						}
+					}, {
+						text: 'Colors',
+						iconCls: 'icon-color-wheel',
+						menu: {
+							xtype: 'menu',
+							items: [{
+								text: 'Category 20',
+								handler: function() {
+									me.barChart.setColorPalette('default');
+									me.barChart.draw();
+								},
+								scope: me
+							}, {
+								text: 'Category 20b',
+								handler: function() {
+									me.barChart.setColorPalette('20b');
+									me.barChart.draw();
+								},
+								scope: me
+							}, {
+								text: 'Paired',
+								handler: function() {
+									me.barChart.setColorPalette('paired');
+									me.barChart.draw();
+								}
+							}, {
+								text: 'Sequential',
+								handler: function() {
+									me.barChart.setColorPalette('sequential');
+									me.barChart.draw();
+								}
+							}]
+						}
+					}]	
+				}]
 			}],
 			listeners: {
 				afterrender: me.initCanvas,
@@ -154,6 +202,7 @@ Ext.define('App.view.d3.bar.GenericBar', {
 			region: 'center',
 			title: 'Movie Data (Grid)',
 			store: me.movieStore,
+			cls: 'gridRowSelection',
 			columns: [
 				App.util.ColumnDefinitions.movieTitle,
  				App.util.ColumnDefinitions.grossBO,
@@ -196,7 +245,7 @@ Ext.define('App.view.d3.bar.GenericBar', {
 	 		.attr('height', me.canvasHeight);
 	 		
 	 	// bar chart shell
-	 	me.barChart = Ext.create('App.util.d3.responsive.ResponsiveBar', {
+	 	me.barChart = Ext.create('App.util.d3.UniversalBar', {
 	 		svg: me.svg,
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,

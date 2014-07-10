@@ -21,7 +21,8 @@ Ext.define('App.util.d3.UniversalBar', {
 	chartInitialized: false,
 	chartFlex: 3,
 	chartTitle: null,
-	colorScale: d3.scale.category20(),
+	colorPalette: 'default',
+	colorScale: null,
 	colorDefinedInData: false,
 	colorDefinedInDataIndex: 'color',
 	dataMetric: null,	// default metric, i.e. data[dataMetric] to use when
@@ -59,6 +60,7 @@ Ext.define('App.util.d3.UniversalBar', {
 		leftAxis: 40
 	},
 	maxBarWidth: 100,
+	metricSort: false,
 	mouseEvents: {
 	 	mouseover: {
 		 	enabled: false,
@@ -181,6 +183,12 @@ Ext.define('App.util.d3.UniversalBar', {
 		me.setXScale();
 		me.setYScale(me.dataMetric);
 		me.setYAxisScale(me.dataMetric);
+		me.setColorScale();
+		
+		//////////////////////////////////////////////////
+		// default sorting
+		//////////////////////////////////////////////////
+		me.checkSort();
 		
 		//////////////////////////////////////////////////
 		// handlers
@@ -602,6 +610,25 @@ Ext.define('App.util.d3.UniversalBar', {
 	},
 	
 	/**
+ 	 * @function
+ 	 */
+ 	checkSort: function() {
+	 	var me = this;
+	 	
+	 	if(me.metricSort) {
+		 	me.graphData = Ext.Array.sort(me.graphData, function(a, b) {
+			 	if(a[me.dataMetric] < b[me.dataMetric]) {
+				 	return 1;
+				} else if(a[me.dataMetric] > b[me.dataMetric]) {
+					return -1;
+				} else {
+					return 0;
+				}
+		 	}, me);
+		 }
+ 	},
+	
+	/**
 	 * 
 	 * getters
 	 *
@@ -681,6 +708,44 @@ Ext.define('App.util.d3.UniversalBar', {
 		var me = this;
 		
 		me.maxBarWidth = w;
+	},
+	
+	setMetricSort: function(s) {
+		var me = this;
+		
+		me.metricSort = s;
+	},
+	
+	setColorPalette: function(p) {
+		var me = this;
+		
+		me.colorPalette = p;
+	},
+	
+	setColorScale: function() {
+		var me = this;
+		
+		if(me.colorPalette == 'sequential') {
+			me.colorScale = d3.scale.linear()
+				.domain([
+					0,
+					Math.floor((me.graphData.length-1) * .33),
+					Math.floor((me.graphData.length-1) * .66),
+					me.graphData.length-1
+				])
+				.range([
+					colorbrewer.Blues[9][8],
+				 	colorbrewer.Blues[9][6],
+				 	colorbrewer.Blues[9][4],
+				 	colorbrewer.Blues[9][2]
+				]);
+		} else if(me.colorPalette == 'paired') {
+			me.colorScale = d3.scale.ordinal().range(colorbrewer.Paired[12]);
+		} else if(me.colorPalette == '20b') {
+			me.colorScale = d3.scale.category20b();
+		} else {
+			me.colorScale = d3.scale.category20();
+		}
 	},
 	
 	setShowLabels: function(bool) {

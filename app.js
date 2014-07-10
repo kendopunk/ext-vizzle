@@ -25,8 +25,8 @@ Ext.application({
 	launch: function() {
 		Ext.tip.QuickTipManager.init();
 		
-		var defaultXType = 'sunburstPartition';
-		// var defaultXType = 'barGeneric';
+		// var defaultXType = 'sunburstPartition';
+		var defaultXType = 'barGeneric';
 		// var defaultXType = 'barBuild';
 		// var defaultXType = null;
 		// var defaultXType = 'pieGeneric';
@@ -80,7 +80,7 @@ Ext.application({
 						height: App.util.Global.treePanelHeight,
 						title: 'Viz Menu',
 						width: '100%',
-						flex: 1,
+						flex: 2,
 						autoScroll: true,
 						frame: false
 					}),

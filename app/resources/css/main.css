@@ -1,3 +1,11 @@
+.gridRowSelection .x-grid-row-selected .x-grid-cell {
+	background-color: #FF9 !important;
+	border-bottom-color: #666;
+	border-bottom-style: solid;
+	border-top-color: #666;
+	border-top-style: solid;
+}
+
 /*
  * 16 x 16 icons
  */
@@ -28,6 +36,11 @@
 
 .icon-bar-chart-hoz {
 	background-image: url(../img/icons/16x16/bar-chart-hoz.png) !important;
+	background-repeat: no-repeat;
+}
+
+.icon-color-wheel {
+	background-image: url(../img/icons/16x16/color-wheel.png) !important;
 	background-repeat: no-repeat;
 }
 
@@ -133,6 +146,11 @@
 
 .icon-tick {
 	background-image: url(../img/icons/16x16/tick.png) !important;
+	background-repeat: no-repeat;
+}
+
+.icon-tools {
+	background-image: url(../img/icons/16x16/tools.png) !important;
 	background-repeat: no-repeat;
 }
 

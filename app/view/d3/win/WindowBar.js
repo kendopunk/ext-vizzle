@@ -3,7 +3,7 @@ Ext.define('App.view.d3.win.WindowBar', {
 	alias: 'widget.win_responsiveBar',
 	
 	requires: [
-		'App.util.d3.responsive.ResponsiveBar'
+		'App.util.d3.UniversalBar'
 	],
 	
 	modal: true,
@@ -94,7 +94,7 @@ Ext.define('App.view.d3.win.WindowBar', {
 	 		.attr('height', me.canvasHeight);
 	 		
 	 	// init bar chart
-	 	me.barChart = Ext.create('App.util.d3.responsive.ResponsiveBar', {
+	 	me.barChart = Ext.create('App.util.d3.UniversalBar', {
 	 		svg: me.svg,
 	 		canvasWidth: me.canvasWidth,
 	 		canvasHeight: me.canvasHeight,
