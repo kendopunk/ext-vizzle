@@ -1,12 +1,12 @@
 /**
  * @class
  * @author Mark Fehrenbacher (kendopunk@hotmail.com)
- * @memberOf App.view.d3.bargrouplegend
+ * @memberOf App.view.d3.bar
  * @description Grouping bar chart
  */
-Ext.define('App.view.d3.bargroup.MainPanel', {
+Ext.define('App.view.d3.bar.GroupedBar', {
 	extend: 'Ext.Panel',
-	alias: 'widget.bargroupMainPanel',
+	alias: 'widget.barGroup',
 	title: 'Grouped Bar Chart',
 	closable: true,
 	
@@ -157,7 +157,7 @@ Ext.define('App.view.d3.bargroup.MainPanel', {
 	
 	/**
 	 * @function
-	 * @memberOf App.view.d3.bargroup.MainPanel
+	 * @memberOf App.view.d3.bar.GroupedBar
 	 * @description Initialize SVG drawing canvas
 	 */
 	initCanvas: function() {

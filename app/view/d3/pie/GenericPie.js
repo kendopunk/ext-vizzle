@@ -12,7 +12,7 @@ Ext.define('App.view.d3.pie.GenericPie', {
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.responsive.ResponsivePie'
+		'App.util.d3.UniversalPie'
 	],
 	
 	layout: 'fit',
@@ -177,7 +177,7 @@ Ext.define('App.view.d3.pie.GenericPie', {
 	 		.attr('height', me.canvasHeight);
 
 		// init pie chart
-		me.pieChart = Ext.create('App.util.d3.responsive.ResponsivePie', {
+		me.pieChart = Ext.create('App.util.d3.UniversalPie', {
 			svg: me.svg,
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,

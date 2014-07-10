@@ -1,18 +1,18 @@
 /**
  * @class
  * @author Mark Fehrenbacher (kendopunk@hotmail.com)
- * @memberOf App.view.d3.barlegend
- * @description Bar chart with legend
+ * @memberOf App.view.d3.bar
+ * @description Simple mouse event handling
  */
-Ext.define('App.view.d3.battle.MainPanel', {
+Ext.define('App.view.d3.bar.MouseEvents', {
 	extend: 'Ext.Panel',
-	alias: 'widget.battleMainPanel',
+	alias: 'widget.barMouse',
 	title: 'Mouse Events',
 	closable: true,
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.final.BarChart'
+		'App.util.d3.UniversalBar'
 	],
 	
 	layout: 'fit',
@@ -88,7 +88,7 @@ Ext.define('App.view.d3.battle.MainPanel', {
 	 			
 	 			var combinedData = me.dataCombiner(me.graphData);
 	 			
-	 			me.barChart = Ext.create('App.util.d3.final.BarChart', {
+	 			me.barChart = Ext.create('App.util.d3.UniversalBar', {
 					svg: me.svg,
 					canvasWidth: me.canvasWidth,
 					canvasHeight: me.canvasHeight,
@@ -121,11 +121,12 @@ Ext.define('App.view.d3.battle.MainPanel', {
 							eventName: 'battleDrilldown'
 						}
 					},
+					maxBarWidth: Math.floor(me.canvasWidth * .4),
 					eventRelay: me.eventRelay
 				}, me);
 				
 				
-				me.barChart.draw();
+				me.barChart.initChart().draw();
 	 		},
 	 		callback: function() {
 	 			me.getEl().unmask();
@@ -175,13 +176,13 @@ Ext.define('App.view.d3.battle.MainPanel', {
 			me.drilldownLevel = 2;
 			me.barChart.setGraphData(ddData);
 			me.barChart.setChartTitle(me.baseTitle + ' - ' + msg.battle);
-			me.barChart.transition();
+			me.barChart.draw();
 		
 		} else {
 			me.drilldownLevel = 1;
 			me.barChart.setGraphData(me.dataCombiner(me.graphData));
 			me.barChart.setChartTitle(me.baseTitle);
-			me.barChart.transition();
+			me.barChart.draw();
 		}
 	}
 });

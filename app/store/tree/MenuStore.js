@@ -30,27 +30,17 @@ Ext.define('App.store.tree.MenuStore', {
 					text: 'Grouped Bar Chart',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
-					id: 'bargroupMainPanel'
+					id: 'barGroup'
 				}, {
 					text: 'Stacked Bar Chart',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
-					id: 'barstackMainPanel'
+					id: 'barStack'
 				}, {
 					text: 'Mouse Events',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
-					id: 'battleMainPanel'
-				}, {
-					text: 'Stacked Bar ++',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'barstackLegendMainPanel'
-				}, {
-					text: 'Stacked Bar Orientation',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'hozBarStackMainPanel'
+					id: 'barMouse'
 				}]
 			}, {
 				text: '<b>Pie Charts</b>',
@@ -61,11 +51,6 @@ Ext.define('App.store.tree.MenuStore', {
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'pieGeneric'
-				}, {
-					text: 'Pie Chart ++',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'pielegendMainPanel'
 				}, {
 					text: 'Build-A-Pie',
 					leaf: true,
