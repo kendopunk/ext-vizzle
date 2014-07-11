@@ -302,7 +302,7 @@ Ext.define('App.view.d3.scatterplot.MainPanel', {
 					yScalePadding: 50,
 					radius: 8,
 					margins: {
-						top: 20,
+						top: 40,
 						right: 20,
 						bottom: 50,
 						left: 75
