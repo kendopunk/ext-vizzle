@@ -21,7 +21,8 @@ Ext.define('App.util.d3.UniversalPie', {
 	chartFlex: 3,
 	chartInitialized: false,
 	chartTitle: null,
-	colorScale: d3.scale.category20(),
+	colorPalette: 'default',
+	colorScale: d3.scale.category20(0),
 	indexedColorScale: [],
 	hashedColorScale: null,
 	hashedColorIndex: null,
@@ -68,6 +69,7 @@ Ext.define('App.util.d3.UniversalPie', {
 	pieLayout: null,
 	showLabels: false,
 	showLegend: false,
+	sortType: null,
 	spaceBetweenChartAndLegend: 20,		// spacing between the chart and the legend
 	radiusScaleFactor: .75,
 	tooltipFunction: function(data, index) {
@@ -190,10 +192,16 @@ Ext.define('App.util.d3.UniversalPie', {
 			return;
 		}
 		
+		// happens first
+		me.setColorScale();
+		me.checkSort();
+		
+		// handlers
 		me.handleArcs();
 		me.handleLabels();
 		me.handleChartTitle();
 		me.handleLegend();
+		
 		
 		/*
 		me.gSandbox.selectAll('circle')
@@ -795,6 +803,37 @@ Ext.define('App.util.d3.UniversalPie', {
 	
 	/**
  	 * @function
+ 	 */
+ 	checkSort: function() {
+	 	var me = this;
+	 	
+		if(me.sortType !== null) {
+		 	if(me.sortType == '_metric_') {
+		 		me.setGraphData(Ext.Array.sort(me.graphData, function(a, b) {
+				 	if(a[me.dataMetric] < b[me.dataMetric]) {
+					 	return 1;
+					} else if(a[me.dataMetric] > b[me.dataMetric]) {
+						return -1;
+					} else {
+						return 0;
+					}
+			 	}, me));
+			 } else {
+			 	me.setGraphData(Ext.Array.sort(me.graphData, function(a, b) {
+				 	if(a[me.sortType] < b[me.sortType]) {
+					 	return -1;
+					} else if(a[me.sortType] > b[me.sortType]) {
+						return 1;
+					} else {
+						return 0;
+					}
+			 	}, me));
+			 }
+		}
+ 	},
+	
+	/**
+ 	 * @function
  	 * @description Publish a mouse event with the event relay
  	 * @param evt String mouseover|mouseout|etc..
  	 * @param d Object Data object
@@ -831,6 +870,38 @@ Ext.define('App.util.d3.UniversalPie', {
 		
 		me.chartTitle = title;
 	},
+	
+	setColorPalette: function(p) {
+		var me = this;
+		
+		me.colorPalette = p;
+	},
+	
+	setColorScale: function() {
+		var me = this;
+		
+		if(me.colorPalette == 'sequential') {
+			me.colorScale = d3.scale.linear()
+				.domain([
+					0,
+					Math.floor((me.graphData.length-1) * .33),
+					Math.floor((me.graphData.length-1) * .66),
+					me.graphData.length-1
+				])
+				.range([
+					colorbrewer.Blues[9][8],
+				 	colorbrewer.Blues[9][6],
+				 	colorbrewer.Blues[9][4],
+				 	colorbrewer.Blues[9][2]
+				]);
+		} else if(me.colorPalette == 'paired') {
+			me.colorScale = d3.scale.ordinal().range(colorbrewer.Paired[12]);
+		} else if(me.colorPalette == '20b') {
+			me.colorScale = d3.scale.category20b();
+		} else {
+			me.colorScale = d3.scale.category20();
+		}
+	},
 
  	setDataMetric: function(metric) {
 	 	var me = this;
@@ -862,6 +933,7 @@ Ext.define('App.util.d3.UniversalPie', {
 		
 		me.legendTextFunction = fn;
 	},
+
 	
 	setOuterRadius: function(r) {
 		var me = this;
@@ -874,6 +946,12 @@ Ext.define('App.util.d3.UniversalPie', {
 	 	var me = this;
 	 	
 	 	me.showLabels = bool;
+	},
+	
+	setSortType: function(st) {
+		var me = this;
+		
+		me.sortType = st;
 	},
 	
 	setTooltipFunction: function(fn) {

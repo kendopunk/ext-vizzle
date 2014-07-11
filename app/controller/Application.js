@@ -7,6 +7,7 @@ Ext.define('App.controller.Application', {
 	extend: 'Ext.app.Controller',
 	
 	requires: [
+		'App.view.d3.area.GenericLine',
 		'App.view.d3.bar.GenericBar',
 		'App.view.d3.bar.BuildABar',
 		'App.view.d3.bar.StackedBar',

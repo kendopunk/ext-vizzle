@@ -60,7 +60,6 @@ Ext.define('App.util.d3.UniversalBar', {
 		leftAxis: 40
 	},
 	maxBarWidth: 100,
-	metricSort: false,
 	mouseEvents: {
 	 	mouseover: {
 		 	enabled: false,
@@ -80,6 +79,7 @@ Ext.define('App.util.d3.UniversalBar', {
 	showChartTitle: false,
 	showLabels: false,
 	showLegend: false,
+	sortType: null,		// null, _metric_, or an element property
 	tooltipFunction: function(data, index) {
 		return 'tooltip';
 	},
@@ -298,6 +298,8 @@ Ext.define('App.util.d3.UniversalBar', {
 		// transition all rectangles
 		rectSelection.transition()
 			.duration(500)
+			.attr('rx', 3)
+			.attr('ry', 3)
 			.attr('x', function(d, i) {
 				return xScale(i);
 			})
@@ -615,17 +617,29 @@ Ext.define('App.util.d3.UniversalBar', {
  	checkSort: function() {
 	 	var me = this;
 	 	
-	 	if(me.metricSort) {
-		 	me.graphData = Ext.Array.sort(me.graphData, function(a, b) {
-			 	if(a[me.dataMetric] < b[me.dataMetric]) {
-				 	return 1;
-				} else if(a[me.dataMetric] > b[me.dataMetric]) {
-					return -1;
-				} else {
-					return 0;
-				}
-		 	}, me);
-		 }
+	 	if(me.sortType !== null) {
+		 	if(me.sortType == '_metric_') {
+		 		me.setGraphData(Ext.Array.sort(me.graphData, function(a, b) {
+				 	if(a[me.dataMetric] < b[me.dataMetric]) {
+					 	return 1;
+					} else if(a[me.dataMetric] > b[me.dataMetric]) {
+						return -1;
+					} else {
+						return 0;
+					}
+			 	}, me));
+			 } else {
+			 	me.setGraphData(Ext.Array.sort(me.graphData, function(a, b) {
+				 	if(a[me.sortType] < b[me.sortType]) {
+					 	return -1;
+					} else if(a[me.sortType] > b[me.sortType]) {
+						return 1;
+					} else {
+						return 0;
+					}
+			 	}, me));
+			 }
+		}
  	},
 	
 	/**
@@ -758,6 +772,12 @@ Ext.define('App.util.d3.UniversalBar', {
 		var me = this;
 			
 		me.showLegend = bool;
+	},
+	
+	setSortType: function(st) {
+		var me = this;
+		
+		me.sortType = st;
 	},
 	
 	setYTickFormat: function(fn) {

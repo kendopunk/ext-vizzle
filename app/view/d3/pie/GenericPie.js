@@ -85,6 +85,93 @@ Ext.define('App.view.d3.pie.GenericPie', {
 				handler: me.handleStateSelection,
 				scope: me
 			},
+				'-',
+			{
+				xtype: 'button',
+				text: 'Georgia',
+				abbrev: 'GA',
+				targetIndex: 3,
+				handler: me.handleStateSelection,
+				scope: me
+			},  {
+				xtype: 'tbspacer',
+				width: 5
+			}, {
+				xtype: 'button',
+				iconCls: 'icon-tools',
+				text: 'Customize',
+				menu: [{
+					xtype: 'menucheckitem',
+					text: 'Labels',
+					checked: true,
+					listeners: {
+						checkchange: function(cbx, checked) {
+							me.pieChart.setShowLabels(checked);
+							me.pieChart.draw();
+						},
+						scope: me
+					}
+				}, {
+					xtype: 'menucheckitem',
+					text: 'Legend',
+					listeners: {
+						checkchange: function(cbx, checked) {
+							me.pieChart.toggleLegend(checked).draw();
+						},
+						scope: me
+					}
+				}, {
+					text: 'Sort',
+					menu: [{
+						text: 'Alpha',
+						handler: function() {
+							me.pieChart.setSortType('caliber');
+							me.pieChart.draw();
+						},
+						scope: me
+					}, {
+						text: 'Value',
+						handler: function() {
+							me.pieChart.setSortType('_metric_');
+							me.pieChart.draw();
+						},
+						scope: me
+					}]
+				}, {
+					text: 'Color Scheme',
+					iconCls: 'icon-color-wheel',
+					menu: {
+						xtype: 'menu',
+						items: [{
+							text: 'Default',
+							handler: function() {
+								me.pieChart.setColorPalette('default');
+								me.pieChart.draw();
+							},
+							scope: me
+						}, {
+							text: 'Muted',
+							handler: function() {
+								me.pieChart.setColorPalette('20b');
+								me.pieChart.draw();
+							},
+							scope: me
+						}, {
+							text: 'Paired',
+							handler: function() {
+								me.pieChart.setColorPalette('paired');
+								me.pieChart.draw();
+							}
+						}, {
+							text: 'Linear',
+							handler: function() {
+								me.pieChart.setColorPalette('sequential');
+								me.pieChart.draw();
+							}
+						}]
+					}
+				}]
+			},
 			'->',
 			{xtype: 'tbtext', text: '<b>Inner Radius:</b>'},
 			{
@@ -110,30 +197,6 @@ Ext.define('App.view.d3.pie.GenericPie', {
 						me.innerRadiusHandler(combo.getValue());
 					},
 					scope: me
-				}
-			}, {
-				xtype: 'tbspacer',
-				width: 10
-			}, {
-				xtype: 'checkbox',
-				boxLabel: 'Legend',
-				listeners: {
-					change: function(cbx, nv, ov) {
-						me.pieChart.toggleLegend(nv).draw();
-					}
-				}
-			}, {
-				xtype: 'tbspacer',
-				width: 10
-			}, {
-				xtype: 'checkbox',
-				boxLabel: 'Labels',
-				checked: true,
-				listeners: {
-					change: function(cbx, nv, ov) {
-						me.pieChart.setShowLabels(nv);
-						me.pieChart.draw();
-					}
 				}
 			}, {
 				xtype: 'tbspacer',

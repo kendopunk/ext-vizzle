@@ -3,20 +3,20 @@
 	"data": [{
 		"state": "TX",
 		"recoveries": [{
+			"caliber": "12ga",
+			"recovery": 1190
+		}, {
 			"caliber": "9mm",
 			"recovery": 2522
 		}, {
 			"caliber": ".22 cal",
 			"recovery": 1574
 		}, {
+			"caliber": ".357 Mag",
+			"recovery": 479
+		}, {
 			"caliber": ".40 S&W",
 			"recovery": 1415
-		}, {
-			"caliber": "12ga",
-			"recovery": 1190
-		}, {
-			"caliber": ".45 ACP",
-			"recovery": 1121
 		}, {
 			"caliber": ".380 ACP",
 			"recovery": 1048
@@ -27,29 +27,26 @@
 			"caliber": "7.62mm",
 			"recovery": 649
 		}, {
-			"caliber": ".357 Mag",
-			"recovery": 479
-		}, {
 			"caliber": ".223",
 			"recovery": 424
+		}, {
+			"caliber": ".45 ACP",
+			"recovery": 1121
 		}]
 	}, {
 		"state": "NY",
 		"recoveries": [{
+			"caliber": "12ga",
+			"recovery": 712
+		}, {
 			"caliber": "9mm",
 			"recovery": 1506
-		}, {
-			"caliber": ".22 cal",
-			"recovery": 1429
 		}, {
 			"caliber": ".38 cal",
 			"recovery": 897
 		}, {
 			"caliber": ".380 ACP",
 			"recovery": 734
-		}, {
-			"caliber": "12ga",
-			"recovery": 712
 		}, {
 			"caliber": ".45 ACP",
 			"recovery": 586
@@ -60,15 +57,21 @@
 			"caliber": ".25 cal",
 			"recovery": 4466
 		}, {
+			"caliber": ".357 Mag",
+			"recovery": 344
+		}, {
 			"caliber": ".40 S&W",
 			"recovery": 414
 		}, {
-			"caliber": ".357 Mag",
-			"recovery": 344
+			"caliber": ".22 cal",
+			"recovery": 1429
 		}]
 	}, {
 		"state": "AR",
 		"recoveries": [{
+			"caliber": "20ga",
+			"recovery": 22
+		}, {
 			"caliber": "9mm",
 			"recovery": 127
 		}, {
@@ -77,9 +80,6 @@
 		}, {
 			"caliber": ".38 cal",
 			"recovery": 69
-		}, {
-			"caliber": ".380 ACP",
-			"recovery": 62
 		}, {
 			"caliber": "12ga",
 			"recovery": 111
@@ -96,8 +96,8 @@
 			"caliber": ".40 S&W",
 			"recovery": 59
 		}, {
-			"caliber": "20ga",
-			"recovery": 22
+			"caliber": ".380 ACP",
+			"recovery": 62
 		}]
 	}, {
 		"state": "GA",
@@ -105,14 +105,14 @@
 			"caliber": "9mm",
 			"recovery": 2323
 		}, {
+			"caliber": "12ga",
+			"recovery": 796
+		}, {
 			"caliber": ".32 cal",
 			"recovery": 357
 		}, {
 			"caliber": ".40 S&W",
 			"recovery": 1246
-		}, {
-			"caliber": "12ga",
-			"recovery": 796
 		}]
 	}]
 }

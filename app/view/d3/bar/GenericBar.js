@@ -145,29 +145,36 @@ Ext.define('App.view.d3.bar.GenericBar', {
 							scope: me
 						}
 					}, {
-						xtype: 'menucheckitem',
-						text: 'Always Sort',
-						listeners: {
-							checkchange: function(cbx, checked) {
-								me.barChart.setMetricSort(checked);
+						text: 'Sort',
+						menu: [{
+							text: 'Alpha',
+							handler: function() {
+								me.barChart.setSortType('title');
 								me.barChart.draw();
 							},
 							scope: me
-						}
+						}, {
+							text: 'Value',
+							handler: function() {
+								me.barChart.setSortType('_metric_');
+								me.barChart.draw();
+							},
+							scope: me
+						}]
 					}, {
-						text: 'Colors',
+						text: 'Color Scheme',
 						iconCls: 'icon-color-wheel',
 						menu: {
 							xtype: 'menu',
 							items: [{
-								text: 'Category 20',
+								text: 'Default',
 								handler: function() {
 									me.barChart.setColorPalette('default');
 									me.barChart.draw();
 								},
 								scope: me
 							}, {
-								text: 'Category 20b',
+								text: 'Muted',
 								handler: function() {
 									me.barChart.setColorPalette('20b');
 									me.barChart.draw();
@@ -180,7 +187,7 @@ Ext.define('App.view.d3.bar.GenericBar', {
 									me.barChart.draw();
 								}
 							}, {
-								text: 'Sequential',
+								text: 'Linear',
 								handler: function() {
 									me.barChart.setColorPalette('sequential');
 									me.barChart.draw();
@@ -290,8 +297,9 @@ Ext.define('App.view.d3.bar.GenericBar', {
 	 	// load store render chart
 	 	me.movieStore.load({
 	 		callback: function(records) {
+	 			me.graphData = App.util.JsonBuilder.buildMovieDataJson(records);	// as is
 	 			
-		 		me.graphData = Ext.Array.sort(App.util.JsonBuilder.buildMovieDataJson(records), function(a, b) {
+		 		/*me.graphData = Ext.Array.sort(App.util.JsonBuilder.buildMovieDataJson(records), function(a, b) {
 			 		if(a.title > b.title) {
 			 			return 1;
 			 		} else if(a.title < b.title) {
@@ -299,7 +307,7 @@ Ext.define('App.view.d3.bar.GenericBar', {
 			 		} else {
 			 			return 0;
 			 		}
-			 	});
+			 	});*/
 		 		
 		 		
 		 		

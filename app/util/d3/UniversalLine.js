@@ -100,7 +100,7 @@ Ext.define('App.util.d3.UniversalLine', {
 	constructor: function(config) {
 		var me = this;
 		
-		Ext.Object.merge(me, config);
+		Ext.merge(me, config);
 		
 		// event handling
 		if(me.handleEvents) {
@@ -713,6 +713,12 @@ Ext.define('App.util.d3.UniversalLine', {
 		var me = this;
 		
 		me.graphData = data;
+	},
+	
+	setLabelSkipCount: function(count) {
+		var me = this;
+		
+		me.labelSkipCount = count;
 	},
 	
 	setMarkerFillColor: function(color) {
