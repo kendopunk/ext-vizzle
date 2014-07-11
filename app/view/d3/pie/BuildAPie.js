@@ -1,18 +1,18 @@
 /**
  * @class
  * @author Mark Fehrenbacher (kendopunk@hotmail.com)
- * @memberOf App.view.d3.bar
+ * @memberOf App.view.d3.pie
  * @description Drag and drop bar chart
  */
-Ext.define('App.view.d3.bar.BuildABar', {
+Ext.define('App.view.d3.pie.BuildAPie', {
 	extend: 'Ext.Panel',
-	alias: 'widget.barBuild',
-	title: 'Build-A-Bar',
+	alias: 'widget.pieBuild',
+	title: 'Build-A-Pie',
 	closable: true,
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.UniversalBar',
+		'App.util.d3.UniversalPie',
 		'App.util.ColumnDefinitions',
 		'App.store.stock.StockStore'
 	],
@@ -23,8 +23,8 @@ Ext.define('App.view.d3.bar.BuildABar', {
 		var me = this;
 		
 		// chart description for info panel
-		me.chartDescription = '<b>Build-A-Bar</b><br><br>'
-			+ 'Drag record(s) from grid to main panel to dynamically build a bar chart.<br><br>'
+		me.chartDescription = '<b>Build-A-Pie</b><br><br>'
+			+ 'Drag record(s) from grid to main panel to dynamically build a pie chart.<br><br>'
 			+ 'Use ctrl + click to select multiple records.';
 			
 		// layout vars
@@ -49,13 +49,35 @@ Ext.define('App.view.d3.bar.BuildABar', {
  			me.svg,
  			me.g,
  			me.panelId,
- 			me.barChart = null,
+ 			me.pieChart = null,
  			me.defaultMetric = 'price',
  			me.currentMetric = 'price',
  			me.defaultMetricText = 'Price',
  			me.baseTitle = 'Random Stock Data',
  			me.dropTarget,
  			me.btnHighlightCss = 'btn-highlight-khaki';
+ 			
+ 		////////////////////////////////////////
+	 	// label functions
+	 	////////////////////////////////////////
+	 	me.priceLabelFn = function(data, index) {
+		 	return data.data.ticker
+		 		+ ' ('
+		 		+ Ext.util.Format.currency(data.data.price, '$', false, false)
+		 		+ ')';
+		};
+		me.changeLabelFn = function(data, index) {
+			return data.data.ticker
+		 		+ ' ('
+		 		+ Ext.util.Format.number(data.data.change, '0,0.00')
+		 		+ ')';
+		};
+		me.pctChangeLabelFn = function(data, index) {
+			return data.data.ticker
+		 		+ ' ('
+		 		+ Ext.util.Format.number(data.data.pctChange, '0,0.00')
+		 		+ '%)';
+		};
  			
  		//////////////////////////////////////////////////
  		// TOOLBAR COMPONENTS
@@ -90,6 +112,16 @@ Ext.define('App.view.d3.bar.BuildABar', {
 			text: 'Customize',
 			disabled: true,
 			menu: [{
+				xtype: 'menucheckitem',
+				text: 'Legend',
+				checked: true,
+				listeners: {
+					checkchange: function(cbx, checked) {
+						me.pieChart.toggleLegend(checked).draw();
+					},
+					scope: me
+				}
+			}, {
 				text: 'Sort',
 				menu: [{
 					text: 'A-Z',
@@ -99,8 +131,8 @@ Ext.define('App.view.d3.bar.BuildABar', {
 						me.down('#valueSortBtn').setIconCls('');
 						
 						btn.setIconCls('icon-tick');
-						me.barChart.setSortType('az', 'ticker');
-						me.barChart.draw();
+						me.pieChart.setSortType('az', 'ticker');
+						me.pieChart.draw();
 					},
 					scope: me
 				}, {
@@ -111,8 +143,8 @@ Ext.define('App.view.d3.bar.BuildABar', {
 						me.down('#valueSortBtn').setIconCls('');
 						
 						btn.setIconCls('icon-tick');
-						me.barChart.setSortType('za', 'ticker');
-						me.barChart.draw();
+						me.pieChart.setSortType('za', 'ticker');
+						me.pieChart.draw();
 					},
 					scope: me
 				}, {
@@ -123,8 +155,8 @@ Ext.define('App.view.d3.bar.BuildABar', {
 						me.down('#zaSortBtn').setIconCls('');
 						
 						btn.setIconCls('icon-tick');
-						me.barChart.setSortType('_metric_', null);
-						me.barChart.draw();
+						me.pieChart.setSortType('_metric_', null);
+						me.pieChart.draw();
 					},
 					scope: me
 				}]
@@ -136,8 +168,8 @@ Ext.define('App.view.d3.bar.BuildABar', {
 						return {
 							text: obj.name,
 							handler: function(btn) {
-								me.barChart.setColorPalette(obj.palette);
-								me.barChart.draw();
+								me.pieChart.setColorPalette(obj.palette);
+								me.pieChart.draw();
 							},
 							scope: me
 						}
@@ -154,8 +186,8 @@ Ext.define('App.view.d3.bar.BuildABar', {
 		 		btn.disable();
 		 		
 		 		me.graphData = [];
-		 		me.barChart.setGraphData(me.graphData);
-		 		me.barChart.draw();
+		 		me.pieChart.setGraphData(me.graphData);
+		 		me.pieChart.draw();
 		 		
 	 			me.store.load();
 	 		}
@@ -293,38 +325,37 @@ Ext.define('App.view.d3.bar.BuildABar', {
 		}, me);
 
 		// build the chart
-	 	me.barChart = Ext.create('App.util.d3.UniversalBar', {
+	 	me.pieChart = Ext.create('App.util.d3.UniversalPie', {
 			svg: me.svg,
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,
-			graphData: me.graphData,
-			dataMetric: me.defaultMetric,
-			panelId: me.panelId,
-			showLabels: true,
-			labelFunction: function(data, index) {
-				return data.ticker;
-			},
 			margins: {
-				top: 20,
-				right: 10,
-				bottom: 15,
-				left: 100,
-				leftAxis: 85
+				top: 40,
+				legend: 75
 			},
-			tooltipFunction: function(data, index) {
-				return '<b>' + data.name + '</b> (' + data.ticker + ')<br><br>'
-					+ 'Close Price: ' + Ext.util.Format.currency(data.price)
-					+ '<br>'
-					+ 'Change: ' + Ext.util.Format.currency(data.change)
-					+ '<br>'
-					+ '% Change: ' + Ext.util.Format.number(data.pctChange, '0,000.0') + '%';
-			},
-			handleEvents: false,
+			graphData: me.graphData,
+			panelId: me.panelId,
 			chartTitle: me.buildChartTitle(me.defaultMetricText),
-			yTickFormat: App.util.Global.svg.currencyTickFormat
+			showLabels: true,
+			labelFunction: me.priceLabelFn,
+			tooltipFunction: function(data, index) {
+				return '<b>' + data.data.name + '</b> (' + data.data.ticker + ')<br><br>'
+					+ 'Close Price: ' + Ext.util.Format.currency(data.data.price)
+					+ '<br>'
+					+ 'Change: ' + Ext.util.Format.currency(data.data.change)
+					+ '<br>'
+					+ '% Change: ' + Ext.util.Format.number(data.data.pctChange, '0,000.0') + '%';
+			},
+			dataMetric: me.defaultMetric,
+			chartFlex: 4,
+			legendFlex: 1,
+			showLegend: true,
+			legendTextFunction: function(data, index) {
+				return data.ticker;
+			}
 		}, me);
 		
-		me.barChart.initChart().draw();
+		me.pieChart.initChart().draw();
 		
 		me.vizPanel.getEl().unmask();
 	},
@@ -337,28 +368,25 @@ Ext.define('App.view.d3.bar.BuildABar', {
 		
 		btn.addCls(me.btnHighlightCss);
 		
-		me.barChart.setChartTitle(me.buildChartTitle(btn.text));
+		me.pieChart.setChartTitle(me.buildChartTitle(btn.text));
 		
 		// adjust the buttons
 		if(btn.text == 'Change') {
 			me.priceButton.removeCls(me.btnHighlightCss);
 			me.pctChangeButton.removeCls(me.btnHighlightCss);
-			
-			me.barChart.setYTickFormat(App.util.Global.svg.currencyTickFormat);
+			me.pieChart.setLabelFunction(me.changeLabelFn);
 		} else if(btn.text == '% Change') {
 			me.priceButton.removeCls(me.btnHighlightCss);
 			me.changeButton.removeCls(me.btnHighlightCss);
-			
-			me.barChart.setYTickFormat(App.util.Global.svg.percentTickFormat);
+			me.pieChart.setLabelFunction(me.pctChangeLabelFn);
 		} else {
 			me.changeButton.removeCls(me.btnHighlightCss);
 			me.pctChangeButton.removeCls(me.btnHighlightCss);
-			
-			me.barChart.setYTickFormat(App.util.Global.svg.currencyTickFormat);
+			me.pieChart.setLabelFunction(me.priceLabelFn);
 		}
 		
-		me.barChart.setDataMetric(btn.metric);
-		me.barChart.draw();
+		me.pieChart.setDataMetric(btn.metric);
+		me.pieChart.draw();
 	},
 	
 	/**
@@ -378,8 +406,8 @@ Ext.define('App.view.d3.bar.BuildABar', {
 		me.store.remove(records);
 		
 		// update
-		me.barChart.setGraphData(me.graphData);
-		me.barChart.draw();
+		me.pieChart.setGraphData(me.graphData);
+		me.pieChart.draw();
 	},
 	
 	/**

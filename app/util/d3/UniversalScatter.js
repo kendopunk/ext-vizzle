@@ -15,18 +15,17 @@ Ext.define('App.util.d3.UniversalScatter', {
 	canvasWidth: 400,
 	canvasHeight: 400,
 	chartTitle: null,
-	colorScaleFunction:  function(data, index) {
-		return '#333333';
-	},
+	colorScale: d3.scale.category20(),
 	eventRelay: null,
 	
+	// "g" elements
 	gScatter: null,
 	gLabel: null,
-	gHorizontalMarker: null,
-	gVerticalMarker: null,
+	gGrid: null,
 	gXAxis: null,
  	gYAxis: null,
  	gTitle: null,
+ 	
  	
  	graphData: [],
  	handleEvents: false,
@@ -39,7 +38,7 @@ Ext.define('App.util.d3.UniversalScatter', {
 		bottom: 10,
 		left: 90
 	},
- 	panelId,
+ 	panelId: null,
  	labelClass: 'labelText',
  	mouseEvents: {
 	 	mouseover: {
@@ -56,9 +55,9 @@ Ext.define('App.util.d3.UniversalScatter', {
 		}
 	},
  	radius: 3,
- 	scaleToZero: true,
- 	showLabels: false,
- 	showMarkerLines: false,
+ 	scaleToZero: true, 	
+ 	showGrid: true,
+ 	showLabels: true,
  	tooltipFunction: function(data, index) {
 	 	return 'tooltip';
 	},
@@ -82,7 +81,7 @@ Ext.define('App.util.d3.UniversalScatter', {
 	constructor: function(config) {
 		var me = this;
 		
-		Ext.apply(me, config);
+		Ext.merge(me, config);
 		
 		// event handling
 		if(me.handleEvents) {
@@ -92,8 +91,7 @@ Ext.define('App.util.d3.UniversalScatter', {
 	
 	/**
 	 * @function
-	 * @memberOf App.util.d3.UniversalScatter
-	 * @description Initialize chart components
+	 * @description Initialize charting components
 	 */
 	initChart: function() {
 		var me = this;
@@ -104,15 +102,19 @@ Ext.define('App.util.d3.UniversalScatter', {
 		// "g" elements
 		////////////////////////////////////////
 		me.gScatter = me.svg.append('svg:g');
-		me.gHorizontalMarker = me.svg.append('svg:g');
-		me.gVerticalMarker = me.svg.append('svg:g');
+		
+		me.gGrid = me.svg.append('svg:g');
+		
 		me.gLabel = me.svg.append('svg:g');
+		
 		me.gXAxis = me.svg.append('svg:g')
 			.attr('class', 'axis')
-			.attr('transform', 'translate(0' + xAxTrans + ')');
+			.attr('transform', 'translate(0, ' + xAxTrans + ')');
+			
 		me.gYAxis = me.svg.append('svg:g')
 			.attr('class', 'axis')
 			.attr('transform', 'translate(' + me.margins.left + ', 0)');
+			
 		me.gTitle = me.svg.append('svg:g')
 			.attr('transform', 'translate('
 			+ parseInt(me.canvasWidth/2)
@@ -122,12 +124,10 @@ Ext.define('App.util.d3.UniversalScatter', {
 		
 		return me;
 	},
-		
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.UniversalScatter
- 	 * @description Draw the initial bar chart
+ 	 * @description Draw/redraw
  	 */
 	draw: function() {
 		var me = this;
@@ -152,9 +152,9 @@ Ext.define('App.util.d3.UniversalScatter', {
 		// HANDLERS
 		//////////////////////////////////////////////////
 		me.handleCircles();
-		me.handleMarkerLines();
 		me.handleLabels();
 		me.handleChartTitle();
+		me.handleGrid();
 		me.callAxes();
 	},
 	
@@ -170,6 +170,10 @@ Ext.define('App.util.d3.UniversalScatter', {
 	 		xDataMetric = me.xDataMetric,
 		 	yScale = me.yScale,
 		 	yDataMetric = me.yDataMetric;
+		 	
+		////////////////////////////////////////
+		// CIRCLES - JRAT
+		////////////////////////////////////////
 	 	
 	 	// join new to old
 	 	var circSelection = me.gScatter.selectAll('circle')
@@ -256,65 +260,48 @@ Ext.define('App.util.d3.UniversalScatter', {
 	 * @function
 	 * @description Handle marker lines / guidelines
 	 */
-	handleMarkerLines: function() {
+	handleGrid: function() {
 		var me = this;
 		
-		// local scope
+		// NO GRID !!
+		if(!me.showGrid) {
+			me.gGrid.selectAll('.vertGrid')
+				.transition()
+				.duration(250)
+				.attr('y1', me.canvasHeight)
+				.remove();
+				
+			me.gGrid.selectAll('.hozGrid')
+				.transition()
+				.duration(250)
+				.attr('x1', 0)
+				.remove();
+				
+			return;
+		}
+		
 		var xScale = me.xScale,
 			xDataMetric = me.xDataMetric,
 			yScale = me.yScale,
 			yDataMetric = me.yDataMetric;
+			
+		//////////////////////////////////////////////////
+		// VERTICAL JRAT
+		//////////////////////////////////////////////////
+		var verticalSelection = me.gGrid.selectAll('.vertGrid')
+			.data(me.graphData);
+			
+		verticalSelection.exit().remove();
 		
-		////////////////////////////////////////////
-		// HOZ
-		////////////////////////////////////////////
-		// join
-		var hLines = me.gHorizontalMarker.selectAll('line')
-			.data(me.graphData);
-				
-		hLines.exit()
-			.transition()
-			.attr('x2', me.margins.left)
-			.remove();
-				
-		hLines.enter()
+		verticalSelection.enter()
 			.append('svg:line')
-			.style('stroke', '#BBBBBB')
-			.style('stroke-width', 1)
-			.style('stroke-dasharray', ("7,3"));
-				
-		hLines.transition()
-			.duration(600)
-			.attr('x1', me.margins.left)
-			.attr('x2', function(d) {
-				return xScale(d[xDataMetric]);
-			})
-			.attr('y1', function(d) {
-				return yScale(d[yDataMetric]);
-			})
-			.attr('y2', function(d) {
-				return yScale(d[yDataMetric]);
-			});
-			
-		////////////////////////////////////////////
-		// VERT
-		////////////////////////////////////////////
-		var vLines = me.gVerticalMarker.selectAll('line')
-			.data(me.graphData);
-				
-		vLines.exit()
-			.transition()
-			.attr('y2', me.canvasHeight - me.margins.bottom)
-			.remove();
-				
-		vLines.enter()
-			.append('svg:line')
+			.attr('class', 'vertGrid')
 			.style('stroke', '#BBBBBB')
 			.style('stroke-width', 1)
 			.style('stroke-dasharray', ("7,3"));
 			
-		vLines.transition()
-			.duration(600)
+		verticalSelection.transition()
+			.duration(500)
 			.attr('x1', function(d) {
 				return xScale(d[xDataMetric]);
 			})
@@ -322,34 +309,43 @@ Ext.define('App.util.d3.UniversalScatter', {
 				return xScale(d[xDataMetric]);
 			})
 			.attr('y1', function(d) {
-				return yScale(d[yDataMetric]);
+				return me.margins.top;
 			})
 			.attr('y2', me.canvasHeight - me.margins.bottom);
-	},
-	
-	/**
- 	 * @function
- 	 * @description Remove the marker lines
- 	 */
- 	clearMarkerLines: function() {
-	 	var me = this;
-	 	
-		me.gHorizontalMarker.selectAll('line')
-			 .transition()
-			.duration(500)
-			.attr('x2', me.margins.left)
-			.each('end', function() {
-				d3.select(this).remove();
-			});
 			
-		me.gVerticalMarker.selectAll('line')
-			.transition()
+		//////////////////////////////////////////////////
+		// HORIZONTAL JRAT
+		// we're NOT binding graph data to this...we are 
+		// binding the tick array from the Y scale
+		//////////////////////////////////////////////////
+		var horizontalSelection = me.gGrid.selectAll('.hozGrid')
+			.data(me.yScale.ticks());
+		
+		horizontalSelection.exit().remove();
+		
+		horizontalSelection.enter()
+			.append('svg:line')
+			.attr('class', 'hozGrid')
+			.style('stroke', '#BBBBBB')
+			.style('stroke-width', 1)
+			.style('stroke-dasharray', ("7,3"));
+			
+		horizontalSelection.transition()
 			.duration(500)
-			.attr('y1', me.canvasHeight - me.margins.bottom)
-			.each('end', function() {
-				d3.select(this).remove();
+			.attr('x1', me.margins.left)
+			.attr('x2', me.canvasWidth - me.margins.right)
+			.attr('y1', function(d, i) {
+				return yScale(d);
+			})
+			.attr('y2', function(d, i) {
+				return yScale(d);
+			})
+			.attr('display', function(d, i) {
+				return i == 0 ? 'none' : null;
 			});
- 	},
+		
+		
+	},
 	
 	/**
 	 * @function
@@ -386,18 +382,17 @@ Ext.define('App.util.d3.UniversalScatter', {
 		
 		var xScalePadding = me.xScalePadding,
 			domainMin = 0;
-		
+
+			var max = d3.max(me.graphData, function(d) { return d[metric]; });
+			var domainMax = max + (max * me.xScalePadding);
+			
 		if(!me.scaleToZero) {
-			var domainMin = d3.min(me.graphData, function(d) {
-				return d[metric] - xScalePadding;
-			});
+			var min = d3.min(me.graphData, function(d) {return d[metric]; });
+			domainMin = min - (min * me.xScalePadding);
 		}
 		
 		me.xScale = d3.scale.linear()
-			.domain([
-				domainMin,
-				d3.max(me.graphData, function(d) { return d[metric] + xScalePadding; })
-			])
+			.domain([domainMin, domainMax])
 			.range([
 				me.margins.left,
 				me.canvasWidth - me.margins.right
@@ -527,9 +522,9 @@ Ext.define('App.util.d3.UniversalScatter', {
 		me.yScalePadding = num;
 	},
 	
-	setShowMarkerLines: function(bool) {
+	setshowGrid: function(bool) {
 		var me = this;
 		
-		me.showMarkerLines = bool;
+		me.showGrid = bool;
 	}
 });

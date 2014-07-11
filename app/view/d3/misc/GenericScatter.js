@@ -1,7 +1,7 @@
 /**
  * @class
  * @author Mark Fehrenbacher (kendopunk@hotmail.com)
- * @memberOf App.view.d3.scatterplot
+ * @memberOf App.view.d3.misc
  * @description Configurable, responsive scatter plot
  */
 Ext.define('App.view.d3.misc.GenericScatter', {
@@ -82,7 +82,7 @@ Ext.define('App.view.d3.misc.GenericScatter', {
 
 		 		me.scatterPlot.setScaleToZero(true);
 		 		
-		 		me.scatterPlot.transition();
+		 		me.scatterPlot.draw();
 		 	},
 		 	scope: me
 		 });
@@ -95,7 +95,7 @@ Ext.define('App.view.d3.misc.GenericScatter', {
 		 		
 		 		me.scatterPlot.setScaleToZero(false);
 		 		
-		 		me.scatterPlot.transition();
+		 		me.scatterPlot.draw();
 		 	},
 		 	scope: me
 		 });
@@ -136,113 +136,95 @@ Ext.define('App.view.d3.misc.GenericScatter', {
 			]
 		});
 		
-		/**
- 		 * tbar
- 		 */
- 		me.tbar = [{
-	 		xtype: 'tbtext',
-	 		text: '<b>Y</b>'
-	 	}, {
-		 	xtype: 'combo',
-		 	name: 'yAxis',
-		 	store: me.metricStore,
-		 	displayField: 'display',
-	 		valueField: 'value',
-	 		editable: false,
-		 	typeAhead: true,
-		 	queryMode: 'local',
-		 	triggerAction: 'all',
-		 	width: 140,
-		 	listWidth: 140,
-		 	value: 'muzzleVelocity',
-		 	listeners: {
-			 	select: function(combo) {
-				 	me.scatterPlot.setYDataMetric(combo.getValue());
-				 	me.yDataMetric = combo.getValue();
-				 	
-				 	if(combo.getValue() == 'muzzleVelocity') {
-				 		me.scatterPlot.setYTickFormat(me.velocityTickFormat);
-				 		me.scatterPlot.setYScalePadding(20);
-				 	} else if(combo.getValue() == 'energy') {
-				 		me.scatterPlot.setYTickFormat(me.energyTickFormat);
-				 		me.scatterPlot.setYScalePadding(20);
-				 	} else if(combo.getValue() == 'ppr') {
-				 		me.scatterPlot.setYTickFormat(me.pprTickFormat);
-				 		me.scatterPlot.setYScalePadding(.20);
-				 	} else {
-				 		me.scatterPlot.setYTickFormat(me.weightTickFormat);
-				 		me.scatterPlot.setYScalePadding(20);
-				 	}
-				 	
-				 	me.scatterPlot.setChartTitle(me.generateChartTitle(me.xDataMetric, me.yDataMetric));
-				 	
-				 	me.scatterPlot.transition();
-			 	},
-			 	scope: me
-			}
-		}, {
-			xtype: 'tbspacer',
-			width: 10
-		}, {
-	 		xtype: 'tbtext',
-	 		text: '<b>X</b>'
-	 	}, {
-		 	xtype: 'combo',
-		 	name: 'xAxis',
-		 	store: me.metricStore,
-		 	displayField: 'display',
-	 		valueField: 'value',
-	 		editable: false,
-		 	typeAhead: true,
-		 	queryMode: 'local',
-		 	triggerAction: 'all',
-		 	width: 140,
-		 	listWidth: 140,
-		 	value: 'bulletWeight',
-		 	listeners: {
-			 	select: function(combo) {
-				 	me.scatterPlot.setXDataMetric(combo.getValue());
-				 	me.xDataMetric = combo.getValue();
-				 	
-				 	if(combo.getValue() == 'muzzleVelocity') {
-				 		me.scatterPlot.setXTickFormat(me.velocityTickFormat);
-				 		me.scatterPlot.setXScalePadding(20);
-				 	} else if(combo.getValue() == 'energy') {
-				 		me.scatterPlot.setXTickFormat(me.energyTickFormat);
-				 		me.scatterPlot.setXScalePadding(20);
-				 	} else if(combo.getValue() == 'ppr') {
-					 	me.scatterPlot.setXTickFormat(me.pprTickFormat);
-					 	me.scatterPlot.setXScalePadding(.20);
-					} else {
-				 		me.scatterPlot.setXTickFormat(me.weightTickFormat);
-				 		me.scatterPlot.setXScalePadding(20);
-				 	}
-				 	
-				 	me.scatterPlot.setChartTitle(me.generateChartTitle(me.xDataMetric, me.yDataMetric));
-				 	
-				 	me.scatterPlot.transition();
-			 	},
-			 	scope: me
-			}
-		},
-		'->',
-		{
-			xtype: 'tbtext',
-			text: '<b>Guidelines:</b>'
-		},
-			me.markerLineToggleButton,
-		{
-			xtype: 'tbspacer',
-			width: 10
-		}, {
-			xtype: 'tbtext',
-			text: '<b>Scaling:</b>'
-		}, 
-			me.scaleZeroButton,
-			me.scaleMinMaxButton,
-			{xtype: 'tbspacer', width: 15}
-		];
-			
+		me.dockedItems = [{
+			xtype: 'toolbar',
+			dock: 'top',
+			items: [{
+				xtype: 'tbtext',
+				text: '<b>X</b>'
+			}, {
+			 	xtype: 'combo',
+			 	name: 'xAxis',
+			 	store: me.metricStore,
+			 	displayField: 'display',
+		 		valueField: 'value',
+		 		editable: false,
+			 	typeAhead: true,
+			 	queryMode: 'local',
+			 	triggerAction: 'all',
+			 	width: 140,
+			 	listWidth: 140,
+			 	value: 'bulletWeight',
+			 	listeners: {
+				 	select: function(combo) {
+					 	me.scatterPlot.setXDataMetric(combo.getValue());
+					 	me.xDataMetric = combo.getValue();
+					 	
+					 	if(combo.getValue() == 'muzzleVelocity') {
+					 		me.scatterPlot.setXTickFormat(me.velocityTickFormat);
+					 	} else if(combo.getValue() == 'energy') {
+					 		me.scatterPlot.setXTickFormat(me.energyTickFormat);
+					 	} else if(combo.getValue() == 'ppr') {
+						 	me.scatterPlot.setXTickFormat(me.pprTickFormat);
+						} else {
+					 		me.scatterPlot.setXTickFormat(me.weightTickFormat);
+					 	}
+					 	
+					 	me.scatterPlot.setChartTitle(me.generateChartTitle(me.xDataMetric, me.yDataMetric));
+					 	
+					 	me.scatterPlot.draw();
+				 	},
+				 	scope: me
+				}
+			}, {
+				xtype: 'tbspacer',
+				width: 10
+			}, {
+				xtype: 'tbtext',
+				text: '<b>Y</b>'
+			}, {
+			 	xtype: 'combo',
+			 	name: 'yAxis',
+			 	store: me.metricStore,
+			 	displayField: 'display',
+		 		valueField: 'value',
+		 		editable: false,
+			 	typeAhead: true,
+			 	queryMode: 'local',
+			 	triggerAction: 'all',
+			 	width: 140,
+			 	listWidth: 140,
+			 	value: 'muzzleVelocity',
+			 	listeners: {
+				 	select: function(combo) {
+					 	me.scatterPlot.setYDataMetric(combo.getValue());
+					 	me.yDataMetric = combo.getValue();
+					 	
+					 	if(combo.getValue() == 'muzzleVelocity') {
+					 		me.scatterPlot.setYTickFormat(me.velocityTickFormat);
+					 		me.scatterPlot.setYScalePadding(20);
+					 	} else if(combo.getValue() == 'energy') {
+					 		me.scatterPlot.setYTickFormat(me.energyTickFormat);
+					 		me.scatterPlot.setYScalePadding(20);
+					 	} else if(combo.getValue() == 'ppr') {
+					 		me.scatterPlot.setYTickFormat(me.pprTickFormat);
+					 		me.scatterPlot.setYScalePadding(.20);
+					 	} else {
+					 		me.scatterPlot.setYTickFormat(me.weightTickFormat);
+					 		me.scatterPlot.setYScalePadding(20);
+					 	}
+					 	
+					 	me.scatterPlot.setChartTitle(me.generateChartTitle(me.xDataMetric, me.yDataMetric));
+					 	
+					 	me.scatterPlot.draw();
+				 	},
+				 	scope: me
+				}
+			}]
+			// grid on/off
+			// scaling to zero or range relative
+			// mouseover circles = bounce...and add drop shadow to them
+		}];
 		
 		// on activate, publish update to the "Info" panel
 		me.on('activate', function() {
@@ -278,66 +260,65 @@ Ext.define('App.view.d3.misc.GenericScatter', {
 	 		.append('svg')
 	 		.attr('width', me.canvasWidth)
 	 		.attr('height', me.canvasHeight);
-	 		
-	 	// get the data via Ajax call
-	 	Ext.Ajax.request({
-	 		url: 'data/ballistics.json',
+	 	
+	 	// init chart
+	 	me.scatterPlot = Ext.create('App.util.d3.UniversalScatter', {
+			svg: me.svg,
+			canvasWidth: me.canvasWidth,
+			canvasHeight: me.canvasHeight,
+			graphData: me.graphData,
+			panelId: me.panelId,
+			dataMetric: 'muzzleVelocity',
+			xDataMetric: me.defaultXDataMetric,
+			yDataMetric: me.defaultYDataMetric,
+			xScalePadding: .1,
+			yScalePadding: .1,
+			radius: 8,
+			margins: {
+				top: 40,
+				right: 20,
+				bottom: 50,
+				left: 75
+			},
+			colorScaleFunction: function(data, index) {
+				if(data.cartridge == '.45 ACP') {
+					return '#CC3300';
+				} else if(data.cartridge == '.40 S&W') {
+					return '#0000FF';
+				} else {
+					return '#33CC00';
+				}
+			},
+			chartTitle: me.generateChartTitle(me.defaultXDataMetric, me.defaultYDataMetric),
+			xTickFormat: me.weightTickFormat,
+			yTickFormat: me.velocityTickFormat,
+			tooltipFunction: function(data, index) {
+				return '<b>' + data.cartridge + ' '
+					+ data.bulletType + '</b><br>'
+					+ 'Weight: ' + data.bulletWeight + 'gr<br>'
+					+ 'Velocity: '
+					+ Ext.util.Format.number(data.muzzleVelocity, '0,000')
+					+ ' fps<br>'
+					+ 'Energy: ' 
+					+ Ext.util.Format.number(data.energy, '0,000') + ' ft-lb<br>'
+					+ 'PPR: ' 
+					+ Ext.util.Format.currency(data.ppr);
+			},
+			showLabels: true,
+			labelFunction: function(data, index) {
+				return data.cartridge + ' ' + data.bulletType;
+			},
+			showMarkerLines: false
+		}, me);
+		
+		// get data
+		Ext.Ajax.request({
+			url: 'data/ballistics.json',
 	 		method: 'GET',
 	 		success: function(response) {
 	 			var resp = Ext.JSON.decode(response.responseText);
 	 			
-	 			me.graphData = resp.data;
-	 			
-	 			// init scatterplot
-	 			me.scatterPlot = Ext.create('App.util.d3.Scatterplot', {
-					svg: me.svg,
-					canvasWidth: me.canvasWidth,
-					canvasHeight: me.canvasHeight,
-					graphData: me.graphData,
-					panelId: me.panelId,
-					dataMetric: 'muzzleVelocity',
-					xDataMetric: me.defaultXDataMetric,
-					yDataMetric: me.defaultYDataMetric,
-					xScalePadding: 50,
-					yScalePadding: 50,
-					radius: 8,
-					margins: {
-						top: 20,
-						right: 20,
-						bottom: 50,
-						left: 75
-					},
-					colorScaleFunction: function(data, index) {
-						if(data.cartridge == '.45 ACP') {
-							return '#CC3300';
-						} else if(data.cartridge == '.40 S&W') {
-							return '#0000FF';
-						} else {
-							return '#33CC00';
-						}
-					},
-					chartTitle: me.generateChartTitle(me.defaultXDataMetric, me.defaultYDataMetric),
-					xTickFormat: me.weightTickFormat,
-					yTickFormat: me.velocityTickFormat,
-					tooltipFunction: function(data, index) {
-						return '<b>' + data.cartridge + ' '
-							+ data.bulletType + '</b><br>'
-							+ 'Weight: ' + data.bulletWeight + 'gr<br>'
-							+ 'Velocity: '
-							+ Ext.util.Format.number(data.muzzleVelocity, '0,000')
-							+ ' fps<br>'
-							+ 'Energy: ' 
-							+ Ext.util.Format.number(data.energy, '0,000') + ' ft-lb<br>'
-							+ 'PPR: ' 
-							+ Ext.util.Format.currency(data.ppr);
-					},
-					showLabels: true,
-					labelFunction: function(data, index) {
-						return data.cartridge + ' ' + data.bulletType;
-					},
-					showMarkerLines: false
-				}, me);
-				
+	 			me.scatterPlot.setGraphData(resp.data);
 				me.scatterPlot.initChart().draw();
 	 		},
 	 		callback: function() {

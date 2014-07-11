@@ -55,7 +55,7 @@ Ext.define('App.store.tree.MenuStore', {
 					text: 'Build-A-Pie',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
-					id: 'buildapieMainPanel'
+					id: 'pieBuild'
 				},  {
 					text: 'Radial Tree/Sunburst',
 					leaf: true,
@@ -102,15 +102,15 @@ Ext.define('App.store.tree.MenuStore', {
 					iconCls: 'icon-arrow-right',
 					id: 'areaGeneric'
 				}, {
+					text: 'Line "Ticker" Chart',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'tickerMainPanel'
+				}, {
 					text: 'Multiline Chart',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'areaMultiPanel'
-				}, {
-					text: 'Area "Ticker"',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'tickerMainPanel'
 				}]
 			}, {
 				text: '<b>Responsive</b>',

@@ -93,7 +93,7 @@ Ext.define('App.view.d3.pie.Sunburst', {
 	
 	/**
 	 * @function
-	 * @memberOf App.view.d3.pie.MainPanel
+	 * @memberOf App.view.d3.pie.Sunburst
 	 * @description Initialize SVG drawing canvas
 	 */
 	initCanvas: function() {

@@ -25,13 +25,15 @@ Ext.application({
 	launch: function() {
 		Ext.tip.QuickTipManager.init();
 		
-		var defaultXType = 'sunburstPartition';
-		// // var defaultXType = 'barGeneric';
-		// var defaultXType = 'barBuild';
 		// var defaultXType = null;
+		var defaultXType = 'sunburstPartition';
+		// var defaultXType = 'barGeneric';
+		// var defaultXType = 'barBuild';
 		// var defaultXType = 'pieGeneric';
 		// var defaultXType = 'barGroup';
 		// var defaultXType = 'areaGeneric';
+		// var defaultXType = 'pieBuild';
+		// var defaultXType = 'scatterGeneric';
 		
 		Ext.create('Ext.container.Viewport', {
 			layout: 'border',
