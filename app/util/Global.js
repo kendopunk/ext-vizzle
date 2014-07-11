@@ -27,6 +27,23 @@ Ext.define('App.util.Global', {
 			wholeDollarTickFormat: function(d) {
 				return Ext.util.Format.currency(d, false, '0', false);
 			},
+			
+			colorSchemes: [{
+				name: 'Default',
+				palette: 'default'
+			}, {
+				name: 'Earthy',
+				palette: '20b'
+			}, {
+				name: 'Paired',
+				palette: 'paired'
+			}, {
+				name: 'Gradient Blue',
+				palette: 'gradient_blue'
+			}, {
+				name: 'Gradient Red',
+				palette: 'gradient_red'
+			}]
 		},
 		
 		// lighten or darken a hex color

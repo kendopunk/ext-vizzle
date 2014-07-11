@@ -26,7 +26,7 @@ Ext.application({
 		Ext.tip.QuickTipManager.init();
 		
 		var defaultXType = 'sunburstPartition';
-		// var defaultXType = 'barGeneric';
+		// // var defaultXType = 'barGeneric';
 		// var defaultXType = 'barBuild';
 		// var defaultXType = null;
 		// var defaultXType = 'pieGeneric';

@@ -807,29 +807,53 @@ Ext.define('App.util.d3.UniversalPie', {
  	checkSort: function() {
 	 	var me = this;
 	 	
-		if(me.sortType !== null) {
-		 	if(me.sortType == '_metric_') {
-		 		me.setGraphData(Ext.Array.sort(me.graphData, function(a, b) {
-				 	if(a[me.dataMetric] < b[me.dataMetric]) {
-					 	return 1;
-					} else if(a[me.dataMetric] > b[me.dataMetric]) {
-						return -1;
-					} else {
-						return 0;
-					}
-			 	}, me));
-			 } else {
-			 	me.setGraphData(Ext.Array.sort(me.graphData, function(a, b) {
-				 	if(a[me.sortType] < b[me.sortType]) {
-					 	return -1;
-					} else if(a[me.sortType] > b[me.sortType]) {
-						return 1;
-					} else {
-						return 0;
-					}
-			 	}, me));
-			 }
-		}
+	 	if(me.sortType == '_metric_') {
+	 		me.setGraphData(Ext.Array.sort(me.graphData, function(a, b) {
+			 	if(a[me.dataMetric] < b[me.dataMetric]) {
+				 	return 1;
+				} else if(a[me.dataMetric] > b[me.dataMetric]) {
+					return -1;
+				} else {
+					return 0;
+				}
+		 	}, me));
+		 }
+		 
+		 if(me.sortType == 'az' && me.sortProperty) {
+		 	me.setGraphData(Ext.Array.sort(me.graphData, function(a, b) {
+			 	if(a[me.sortProperty] < b[me.sortProperty]) {
+				 	return -1;
+				} else if(a[me.sortProperty] > b[me.sortProperty]) {
+					return 1;
+				} else {
+					return 0;
+				}
+		 	}, me));
+		 }
+		 
+		 if(me.sortType == 'za' && me.sortProperty) {
+		 	me.setGraphData(Ext.Array.sort(me.graphData, function(a, b) {
+			 	if(a[me.sortProperty] < b[me.sortProperty]) {
+				 	return -1;
+				} else if(a[me.sortProperty] > b[me.sortProperty]) {
+					return 1;
+				} else {
+					return 0;
+				}
+		 	}, me));
+		 }
+		 
+		 if(me.sortType == 'za' && me.sortProperty) {
+			me.setGraphData(Ext.Array.sort(me.graphData, function(a, b) {
+			 	if(a[me.sortProperty] < b[me.sortProperty]) {
+				 	return 1;
+				} else if(a[me.sortProperty] > b[me.sortProperty]) {
+					return -1;
+				} else {
+					return 0;
+				}
+		 	}, me));
+		 }
  	},
 	
 	/**
@@ -880,7 +904,7 @@ Ext.define('App.util.d3.UniversalPie', {
 	setColorScale: function() {
 		var me = this;
 		
-		if(me.colorPalette == 'sequential') {
+		if(me.colorPalette == 'gradient_blue') {
 			me.colorScale = d3.scale.linear()
 				.domain([
 					0,
@@ -893,6 +917,20 @@ Ext.define('App.util.d3.UniversalPie', {
 				 	colorbrewer.Blues[9][6],
 				 	colorbrewer.Blues[9][4],
 				 	colorbrewer.Blues[9][2]
+				]);
+		} else if(me.colorPalette == 'gradient_red') {
+			me.colorScale = d3.scale.linear()
+				.domain([
+					0,
+					Math.floor((me.graphData.length-1) * .33),
+					Math.floor((me.graphData.length-1) * .66),
+					me.graphData.length-1
+				])
+				.range([
+					colorbrewer.Reds[9][8],
+				 	colorbrewer.Reds[9][6],
+				 	colorbrewer.Reds[9][4],
+				 	colorbrewer.Reds[9][2]
 				]);
 		} else if(me.colorPalette == 'paired') {
 			me.colorScale = d3.scale.ordinal().range(colorbrewer.Paired[12]);
@@ -948,10 +986,14 @@ Ext.define('App.util.d3.UniversalPie', {
 	 	me.showLabels = bool;
 	},
 	
-	setSortType: function(st) {
+	/**
+ 	 * sortType az|za|_metric_|null
+ 	 */
+	setSortType: function(sortType, sortProperty) {
 		var me = this;
 		
-		me.sortType = st;
+		me.sortType = sortType || null;
+		me.sortProperty = sortProperty || null;
 	},
 	
 	setTooltipFunction: function(fn) {

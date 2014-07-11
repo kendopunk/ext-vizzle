@@ -72,7 +72,20 @@ Ext.define('App.view.d3.bar.GenericBar', {
  			me.btnHighlightCss = 'btn-highlight-peachpuff',
  			me.btnToggleCss = 'btn-highlight-aquamarine',
  			me.eventRelay = Ext.create('App.util.MessageBus');
-		
+ 			
+ 		// color scheme menu options
+ 		var colorSchemeMenu = Ext.Array.map(App.util.Global.svg.colorSchemes, function(obj) {
+	 		return {
+		 		text: obj.name,
+		 		handler: function(btn) {
+			 		//btn.setIconCls('icon-tick');
+			 		me.barChart.setColorPalette(obj.palette);
+			 		me.barChart.draw();
+			 	},
+			 	scope: me
+			}
+		}, me);
+
 		// visualization panel (north)
 		me.vizPanel = Ext.create('Ext.Panel', {
 			region: 'north',
@@ -147,16 +160,38 @@ Ext.define('App.view.d3.bar.GenericBar', {
 					}, {
 						text: 'Sort',
 						menu: [{
-							text: 'Alpha',
-							handler: function() {
-								me.barChart.setSortType('title');
+							text: 'A-Z',
+							itemId: 'azSortBtn',
+							handler: function(btn) {
+								me.down('#zaSortBtn').setIconCls('');
+								me.down('#valueSortBtn').setIconCls('');
+								
+								btn.setIconCls('icon-tick');
+								me.barChart.setSortType('az', 'title');
+								me.barChart.draw();
+							},
+							scope: me
+						}, {
+							text: 'Z-A',
+							itemId: 'zaSortBtn',
+							handler: function(btn) {
+								me.down('#azSortBtn').setIconCls('');
+								me.down('#valueSortBtn').setIconCls('');
+								
+								btn.setIconCls('icon-tick');
+								me.barChart.setSortType('za', 'title');
 								me.barChart.draw();
 							},
 							scope: me
 						}, {
 							text: 'Value',
-							handler: function() {
-								me.barChart.setSortType('_metric_');
+							itemId: 'valueSortBtn',
+							handler: function(btn) {
+								me.down('#azSortBtn').setIconCls('');
+								me.down('#zaSortBtn').setIconCls('');
+								
+								btn.setIconCls('icon-tick');
+								me.barChart.setSortType('_metric_', null);
 								me.barChart.draw();
 							},
 							scope: me
@@ -166,33 +201,7 @@ Ext.define('App.view.d3.bar.GenericBar', {
 						iconCls: 'icon-color-wheel',
 						menu: {
 							xtype: 'menu',
-							items: [{
-								text: 'Default',
-								handler: function() {
-									me.barChart.setColorPalette('default');
-									me.barChart.draw();
-								},
-								scope: me
-							}, {
-								text: 'Muted',
-								handler: function() {
-									me.barChart.setColorPalette('20b');
-									me.barChart.draw();
-								},
-								scope: me
-							}, {
-								text: 'Paired',
-								handler: function() {
-									me.barChart.setColorPalette('paired');
-									me.barChart.draw();
-								}
-							}, {
-								text: 'Linear',
-								handler: function() {
-									me.barChart.setColorPalette('sequential');
-									me.barChart.draw();
-								}
-							}]
+							items: colorSchemeMenu
 						}
 					}]	
 				}]

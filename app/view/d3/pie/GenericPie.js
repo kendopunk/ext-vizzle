@@ -52,6 +52,18 @@ Ext.define('App.view.d3.pie.GenericPie', {
 		me.width = parseInt(Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth);
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
 		
+		// color scheme menu options
+ 		var colorSchemeMenu = Ext.Array.map(App.util.Global.svg.colorSchemes, function(obj) {
+	 		return {
+		 		text: obj.name,
+		 		handler: function(btn) {
+			 		me.pieChart.setColorPalette(obj.palette);
+			 		me.pieChart.draw();
+			 	},
+			 	scope: me
+			}
+		}, me);
+		
 		me.dockedItems = [{
 			xtype: 'toolbar',
 			dock: 'top',
@@ -93,10 +105,9 @@ Ext.define('App.view.d3.pie.GenericPie', {
 				targetIndex: 3,
 				handler: me.handleStateSelection,
 				scope: me
-			},  {
-				xtype: 'tbspacer',
-				width: 5
-			}, {
+			}, 
+			{xtype: 'tbspacer', width: 20},
+			{
 				xtype: 'button',
 				iconCls: 'icon-tools',
 				text: 'Customize',
@@ -120,19 +131,41 @@ Ext.define('App.view.d3.pie.GenericPie', {
 						},
 						scope: me
 					}
-				}, {
+				},{
 					text: 'Sort',
 					menu: [{
-						text: 'Alpha',
-						handler: function() {
-							me.pieChart.setSortType('caliber');
+						text: 'A-Z',
+						itemId: 'azSortBtn',
+						handler: function(btn) {
+							me.down('#zaSortBtn').setIconCls('');
+							me.down('#valueSortBtn').setIconCls('');
+							
+							btn.setIconCls('icon-tick');
+							me.pieChart.setSortType('az', 'caliber');
+							me.pieChart.draw();
+						},
+						scope: me
+					}, {
+						text: 'Z-A',
+						itemId: 'zaSortBtn',
+						handler: function(btn) {
+							me.down('#azSortBtn').setIconCls('');
+							me.down('#valueSortBtn').setIconCls('');
+							
+							btn.setIconCls('icon-tick');
+							me.pieChart.setSortType('za', 'caliber');
 							me.pieChart.draw();
 						},
 						scope: me
 					}, {
 						text: 'Value',
-						handler: function() {
-							me.pieChart.setSortType('_metric_');
+						itemId: 'valueSortBtn',
+						handler: function(btn) {
+							me.down('#azSortBtn').setIconCls('');
+							me.down('#zaSortBtn').setIconCls('');
+							
+							btn.setIconCls('icon-tick');
+							me.pieChart.setSortType('_metric_', null);
 							me.pieChart.draw();
 						},
 						scope: me
@@ -142,37 +175,11 @@ Ext.define('App.view.d3.pie.GenericPie', {
 					iconCls: 'icon-color-wheel',
 					menu: {
 						xtype: 'menu',
-						items: [{
-							text: 'Default',
-							handler: function() {
-								me.pieChart.setColorPalette('default');
-								me.pieChart.draw();
-							},
-							scope: me
-						}, {
-							text: 'Muted',
-							handler: function() {
-								me.pieChart.setColorPalette('20b');
-								me.pieChart.draw();
-							},
-							scope: me
-						}, {
-							text: 'Paired',
-							handler: function() {
-								me.pieChart.setColorPalette('paired');
-								me.pieChart.draw();
-							}
-						}, {
-							text: 'Linear',
-							handler: function() {
-								me.pieChart.setColorPalette('sequential');
-								me.pieChart.draw();
-							}
-						}]
+						items: colorSchemeMenu
 					}
 				}]
 			},
-			'->',
+			'-',
 			{xtype: 'tbtext', text: '<b>Inner Radius:</b>'},
 			{
 				xtype: 'combo',

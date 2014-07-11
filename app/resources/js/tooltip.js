@@ -6,11 +6,22 @@ d3.helper.tooltip = function(){
     var attrs = {};
     var text = '';
     var styles = {
+    	/*
         background: '#FFFFCC',
         padding: '3px',
         border: '1px',
         font: '9px, sans-serif',
         border: '1px solid'
+        */
+        'line-height': '120%',
+        'font-weight': 'normal',
+        font: '9px sans-serif',
+        padding: '5px',
+        background: '#222222',
+        color: '#EEEEEE',
+		'border-radius': '3px',
+       	'pointer-events': 'none',
+		'box-shadow': '1px 1px 2px #686868'
     };
 
     function tooltip(selection){

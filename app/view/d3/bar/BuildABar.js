@@ -85,6 +85,67 @@ Ext.define('App.view.d3.bar.BuildABar', {
  			scope: me
  		});
  		
+ 		me.customizeButton = Ext.create('Ext.button.Button', {
+			iconCls: 'icon-tools',
+			text: 'Customize',
+			disabled: true,
+			menu: [{
+				text: 'Sort',
+				menu: [{
+					text: 'A-Z',
+					itemId: 'azSortBtn',
+					handler: function(btn) {
+						me.down('#zaSortBtn').setIconCls('');
+						me.down('#valueSortBtn').setIconCls('');
+						
+						btn.setIconCls('icon-tick');
+						me.barChart.setSortType('az', 'ticker');
+						me.barChart.draw();
+					},
+					scope: me
+				}, {
+					text: 'Z-A',
+					itemId: 'zaSortBtn',
+					handler: function(btn) {
+						me.down('#azSortBtn').setIconCls('');
+						me.down('#valueSortBtn').setIconCls('');
+						
+						btn.setIconCls('icon-tick');
+						me.barChart.setSortType('za', 'ticker');
+						me.barChart.draw();
+					},
+					scope: me
+				}, {
+					text: 'Value',
+					itemId: 'valueSortBtn',
+					handler: function(btn) {
+						me.down('#azSortBtn').setIconCls('');
+						me.down('#zaSortBtn').setIconCls('');
+						
+						btn.setIconCls('icon-tick');
+						me.barChart.setSortType('_metric_', null);
+						me.barChart.draw();
+					},
+					scope: me
+				}]
+			}, {
+				text: 'Color Scheme',
+				iconCls: 'icon-color-wheel',
+				menu: {
+					items: Ext.Array.map(App.util.Global.svg.colorSchemes, function(obj) {
+						return {
+							text: obj.name,
+							handler: function(btn) {
+								me.barChart.setColorPalette(obj.palette);
+								me.barChart.draw();
+							},
+							scope: me
+						}
+					}, me)
+				}
+			}]
+ 		});
+ 		
  		me.revertButton = Ext.create('Ext.button.Button', {
 	 		text: 'Clear/Revert',
 	 		iconCls: 'icon-refresh',
@@ -140,6 +201,8 @@ Ext.define('App.view.d3.bar.BuildABar', {
 		  			{xtype: 'tbspacer', width: 10},
 		  			me.pctChangeButton,
 		  			'->',
+		  			me.customizeButton,
+		  			'-',
 		  			me.revertButton
 		  		]
 		  	}]
