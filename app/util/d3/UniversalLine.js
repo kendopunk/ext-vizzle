@@ -586,6 +586,7 @@ Ext.define('App.util.d3.UniversalLine', {
 			.y(function(d) { return yScale(d[yDataMetric]); });
 			
 		me.canvasArea = d3.svg.area()
+			.interpolate(me.interpolate)
 			.x(function(d) { return xScale(d[xDataMetric]); })
 			.y0(me.canvasHeight - me.margins.bottom)
 			.y1(function(d) { return yScale(d[yDataMetric]); });
@@ -713,6 +714,12 @@ Ext.define('App.util.d3.UniversalLine', {
 		var me = this;
 		
 		me.graphData = data;
+	},
+	
+	setInterpolation: function(interp) {
+		var me = this;
+		
+		me.interpolate = interp;
 	},
 	
 	setLabelSkipCount: function(count) {

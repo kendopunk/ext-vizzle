@@ -55,6 +55,38 @@ Ext.define('App.view.d3.area.GenericLine', {
 		////////////////////////////////////////
 		// TOOLBAR/COMPONENTS
 		////////////////////////////////////////
+		var interpolateSchemes = Ext.Array.map([
+			{
+				name: 'Linear',
+				id: 'linear'
+			}, {
+				name: 'Step Before',
+				id: 'step-before'
+			}, {
+				name: 'Step After',
+				id: 'step-after'
+			}, {
+				name: 'Basis',
+				id: 'basis'
+			}, {
+				name: 'Monotone',
+				id: 'monotone'
+			}], function(item) {
+				return {
+					text: item.name,
+					handler: function() {
+						me.lineChart.setInterpolation(item.id);
+						me.lineChart.draw();
+					},
+					scope: me
+				};
+			}
+		);
+		
+		
+		// linear, step-before, step-after, basis, basis-open, basis-closed,
+		// bundle, cardinal, cardinal-open, cardinal-closed, monotone		
+		
 		me.lineChartButton = Ext.create('Ext.button.Button', {
  			text: 'Line Chart',
  			cls: me.btnHighlightCss,
@@ -62,14 +94,13 @@ Ext.define('App.view.d3.area.GenericLine', {
  			handler: function(btn) {
 	 			btn.addCls(me.btnHighlightCss);
  				me.areaChartButton.removeCls(me.btnHighlightCss);
- 				
- 				me.fillMenu.setDisabled(true);
 	 			
 	 			me.lineChart.setFillArea(false);
 	 			me.lineChart.draw();
  			},
  			scope: me
  		});
+ 		
  		me.areaChartButton = Ext.create('Ext.button.Button', {
  			text: 'Area Chart',
  			iconCls: 'icon-area-chart',
@@ -77,50 +108,11 @@ Ext.define('App.view.d3.area.GenericLine', {
 	 			btn.addCls(me.btnHighlightCss);
 	 			me.lineChartButton.removeCls(me.btnHighlightCss);
 	 			
-	 			me.fillMenu.setDisabled(false);
-	 			
 	 			me.lineChart.setFillArea(true);
 	 			me.lineChart.draw();
  			},
  			scope: me
  		});
- 		me.fillMenu = Ext.create('Ext.menu.Item', {
-			text: 'Fill',
-			disabled: true,
-			menu: {
-				xtype: 'colormenu',
-				listeners: {
-			 		select: function(menu, color) {
-			 			me.lineChart.setFillColor('#' + color);
-			 			me.lineChart.draw();
-			 		},
-			 		scope: me
-			 	}
-			}
-		});
-		me.labelToggleButton = Ext.create('Ext.button.Button', {
-			text: 'ON',
-			currentValue: 'on',
-			cls: me.btnHighlightCss,
-			handler: function(btn) {
-			 	if(btn.currentValue == 'on') {
-				 	btn.currentValue = 'off';
-				 	btn.setText('OFF');
-				 	btn.removeCls(me.btnHighlightCss);
-				 	
-				 	me.lineChart.setShowLabels(false);
-			 	} else {
-				 	btn.currentValue = 'on';
-				 	btn.setText('ON');
-				 	btn.addCls(me.btnHighlightCss);
-				 	
-				 	me.lineChart.setShowLabels(true);
-			 	}
-			 	
-			 	me.lineChart.draw();
-			 },
-			 scope: me
-		});
 		
 		me.dockedItems = [{
 			xtype: 'toolbar',
@@ -144,6 +136,9 @@ Ext.define('App.view.d3.area.GenericLine', {
 				iconCls: 'icon-tools',
 				text: 'Customize',
 				menu: [{
+					text: 'Line Interpolation',
+					menu: interpolateSchemes
+				}, {
 					xtype: 'menucheckitem',
 					text: 'Grid',
 					checked: true,
@@ -295,7 +290,8 @@ Ext.define('App.view.d3.area.GenericLine', {
 				bottom: 60,
 				left: 70
 			},
-			yScalePadding: 1,
+			xScalePadding: .1,
+			yScalePadding: .1,
 			xDataMetric: me.defaultXDataMetric,
 			yDataMetric: me.defaultYDataMetric,
 			chartTitle: me.baseTitle,
