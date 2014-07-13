@@ -83,7 +83,7 @@ Ext.define('App.view.chart.misc.MainPanel', {
 	
 	/**
 	 * @function
-	 * @memberOf App.view.d3.scatterplot.MainPanel
+	 * @memberOf App.view.chart.misc.MainPanel
 	 * @description Initialize drawing canvas
 	 */
 	initCanvas: function() {

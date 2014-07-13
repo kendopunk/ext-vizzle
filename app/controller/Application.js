@@ -14,22 +14,12 @@ Ext.define('App.controller.Application', {
 		'App.view.d3.bar.StackedBar',
 		'App.view.d3.bar.GroupedBar',
 		'App.view.d3.bar.MouseEvents',
-		/*'App.view.d3.misc.GenericScatter',*/
+		'App.view.d3.misc.GenericScatter',
 		'App.view.d3.pie.BuildAPie',
 		'App.view.d3.pie.GenericPie',
 		'App.view.d3.pie.Sunburst',
-		
-		// hold
-		'App.view.d3.scatterplot.MainPanel',
-		/**/
 		'App.view.chart.misc.MainPanel',
-		'App.view.d3.area.MainPanel',
-		'App.view.d3.area.MultiPanel',
 		'App.view.d3.geo.basic.MainPanel',
-		
-		'App.view.d3.pielegend.MainPanel',
-		'App.view.d3.scatterbrush.MainPanel',
-		'App.view.d3.scatterplot.MainPanel',
 		'App.view.d3.slope.debt.MainPanel',
 		'App.view.d3.ticker.MainPanel',
 		'App.view.d3.treemap.basic.MainPanel',

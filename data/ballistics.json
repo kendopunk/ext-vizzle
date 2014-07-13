@@ -10,7 +10,7 @@
 	}, {
 		"cartridge": "9mm",
 		"bulletWeight": 124,
-		"bulletType": "FMJ",
+		"bulletType": "FMJ/124",
 		"muzzleVelocity": 1200,
 		"energy": 518,
 		"ppr": 0.29

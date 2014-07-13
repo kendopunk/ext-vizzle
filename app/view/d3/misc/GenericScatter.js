@@ -73,32 +73,6 @@ Ext.define('App.view.d3.misc.GenericScatter', {
 		/**
  		 * @property
  		 */
-	 	me.scaleZeroButton = Ext.create('Ext.button.Button', {
-	 		text: 'Absolute',
-	 		cls: me.btnHighlightCss,
-	 		handler: function(btn) {
-		 		btn.addCls(me.btnHighlightCss);
-		 		me.scaleMinMaxButton.removeCls(me.btnHighlightCss);
-
-		 		me.scatterPlot.setScaleToZero(true);
-		 		
-		 		me.scatterPlot.draw();
-		 	},
-		 	scope: me
-		 });
-		 
-		 me.scaleMinMaxButton = Ext.create('Ext.button.Button', {
-	 		text: 'Range-Relative',
-	 		handler: function(btn) {
-		 		btn.addCls(me.btnHighlightCss);
-		 		me.scaleZeroButton.removeCls(me.btnHighlightCss);
-		 		
-		 		me.scatterPlot.setScaleToZero(false);
-		 		
-		 		me.scatterPlot.draw();
-		 	},
-		 	scope: me
-		 });
 		 
 		 me.markerLineToggleButton = Ext.create('Ext.button.Button', {
 			 text: 'OFF',
@@ -170,7 +144,7 @@ Ext.define('App.view.d3.misc.GenericScatter', {
 					 		me.scatterPlot.setXTickFormat(me.weightTickFormat);
 					 	}
 					 	
-					 	me.scatterPlot.setChartTitle(me.generateChartTitle(me.xDataMetric, me.yDataMetric));
+					 	me.scatterPlot.setChartTitle(me.buildChartTitle(me.xDataMetric, me.yDataMetric));
 					 	
 					 	me.scatterPlot.draw();
 				 	},
@@ -202,28 +176,92 @@ Ext.define('App.view.d3.misc.GenericScatter', {
 					 	
 					 	if(combo.getValue() == 'muzzleVelocity') {
 					 		me.scatterPlot.setYTickFormat(me.velocityTickFormat);
-					 		me.scatterPlot.setYScalePadding(20);
 					 	} else if(combo.getValue() == 'energy') {
 					 		me.scatterPlot.setYTickFormat(me.energyTickFormat);
-					 		me.scatterPlot.setYScalePadding(20);
 					 	} else if(combo.getValue() == 'ppr') {
 					 		me.scatterPlot.setYTickFormat(me.pprTickFormat);
-					 		me.scatterPlot.setYScalePadding(.20);
 					 	} else {
 					 		me.scatterPlot.setYTickFormat(me.weightTickFormat);
-					 		me.scatterPlot.setYScalePadding(20);
 					 	}
 					 	
-					 	me.scatterPlot.setChartTitle(me.generateChartTitle(me.xDataMetric, me.yDataMetric));
+					 	me.scatterPlot.setChartTitle(me.buildChartTitle(me.xDataMetric, me.yDataMetric));
 					 	
 					 	me.scatterPlot.draw();
 				 	},
 				 	scope: me
 				}
+			}, {
+				xtype: 'tbspacer',
+				width: 10
+			}, {
+				xtype: 'tbtext',
+				text: '<b>Scale:</b>'
+			}, {
+			 	xtype: 'combo',
+			 	name: 'scaling',
+			 	store: Ext.create('Ext.data.Store', {
+			 		fields: ['display', 'value'],
+			 		data: [{
+			 			display: 'Absolute',
+			 			value: 0
+			 		}, {
+				 		display: 'Relative +/- 10%',
+				 		value: .1
+				 	}, {
+					 	display: 'Relative+/- 20%',
+					 	value: .2
+					}, {
+					 	display: 'Relative+/- 30%',
+					 	value: .3
+					}]
+				}),
+				displayField: 'display',
+		 		valueField: 'value',
+		 		editable: false,
+			 	typeAhead: true,
+			 	queryMode: 'local',
+			 	triggerAction: 'all',
+			 	width: 150,
+			 	listWidth: 150,
+			 	value: 0,
+			 	listeners: {
+				 	select: function(combo) {
+					 	me.scatterPlot.setXScalePadding(combo.getValue());
+					 	me.scatterPlot.setYScalePadding(combo.getValue());
+					 	me.scatterPlot.draw();
+					 }
+				}
+			}, {
+				xtype: 'tbspacer',
+				width: 10
+			}, {
+				xtype: 'button',
+				iconCls: 'icon-tools',
+				text: 'Customize',
+				menu: [{
+					xtype: 'menucheckitem',
+					text: 'Labels',
+					checked: true,
+					listeners: {
+						checkchange: function(cbx, checked) {
+							me.scatterPlot.setShowLabels(checked);
+							me.scatterPlot.draw();
+						},
+						scope: me
+					}
+				}, {
+					xtype: 'menucheckitem',
+					text: 'Grid',
+					checked: true,
+					listeners: {
+						checkchange: function(cbx, checked) {
+							me.scatterPlot.setShowGrid(checked);
+							me.scatterPlot.draw();
+						},
+						scope: me
+					}
+				}]
 			}]
-			// grid on/off
-			// scaling to zero or range relative
-			// mouseover circles = bounce...and add drop shadow to them
 		}];
 		
 		// on activate, publish update to the "Info" panel
@@ -241,7 +279,7 @@ Ext.define('App.view.d3.misc.GenericScatter', {
 	
 	/**
 	 * @function
-	 * @memberOf App.view.d3.scatterplot.MainPanel
+	 * @memberOf App.view.d3.misc.GenericScatter
 	 * @description Initialize SVG drawing canvas
 	 */
 	initCanvas: function() {
@@ -271,8 +309,6 @@ Ext.define('App.view.d3.misc.GenericScatter', {
 			dataMetric: 'muzzleVelocity',
 			xDataMetric: me.defaultXDataMetric,
 			yDataMetric: me.defaultYDataMetric,
-			xScalePadding: .1,
-			yScalePadding: .1,
 			radius: 8,
 			margins: {
 				top: 40,
@@ -289,7 +325,7 @@ Ext.define('App.view.d3.misc.GenericScatter', {
 					return '#33CC00';
 				}
 			},
-			chartTitle: me.generateChartTitle(me.defaultXDataMetric, me.defaultYDataMetric),
+			chartTitle: me.buildChartTitle(me.defaultXDataMetric, me.defaultYDataMetric),
 			xTickFormat: me.weightTickFormat,
 			yTickFormat: me.velocityTickFormat,
 			tooltipFunction: function(data, index) {
@@ -330,33 +366,13 @@ Ext.define('App.view.d3.misc.GenericScatter', {
 	 
 	 /**
 	 * @function
-	 * @memberOf App.view.d3.scatterplot.MainPanel
+	 * @memberOf App.view.d3.misc.GenericScatter
 	 * @description Build a new chart title
 	 */
-	generateChartTitle: function(xDataMetric, yDataMetric) {
+	buildChartTitle: function(xDataMetric, yDataMetric) {
 		var me = this;
 		
 		var ret = me.baseTitle + ' : ';
-		
-		switch(yDataMetric) {
-			case 'muzzleVelocity':
-			ret = ret + 'Muzzle Velocity';
-			break;
-			
-			case 'energy':
-			ret = ret + 'Energy';
-			break;
-			
-			case 'ppr':
-			ret = ret + 'PPR';
-			break;
-			
-			default:
-			ret = ret + 'Bullet Weight';
-			break;
-		}
-		
-		ret = ret + ' (Y) vs ';
 		
 		switch(xDataMetric) {
 			case 'muzzleVelocity':
@@ -376,7 +392,29 @@ Ext.define('App.view.d3.misc.GenericScatter', {
 			break;
 		}
 		
-		ret = ret + ' (X)';
+		ret = ret + ' (X) vs ';
+		
+		switch(yDataMetric) {
+			case 'muzzleVelocity':
+			ret = ret + 'Muzzle Velocity';
+			break;
+			
+			case 'energy':
+			ret = ret + 'Energy';
+			break;
+			
+			case 'ppr':
+			ret = ret + 'PPR';
+			break;
+			
+			default:
+			ret = ret + 'Bullet Weight';
+			break;
+		}
+		
+		ret = ret + ' (Y)';
+		
+		
 		
 		return ret;
 	}

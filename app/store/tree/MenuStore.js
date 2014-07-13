@@ -17,7 +17,7 @@ Ext.define('App.store.tree.MenuStore', {
 				iconCls: 'icon-bar-chart',
 				expanded: true,
 				children: [{
-					text: 'Basic Bar Chart',
+					text: 'Bar Chart',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'barGeneric'	// widget ID
@@ -47,7 +47,7 @@ Ext.define('App.store.tree.MenuStore', {
 				expanded: true,
 				iconCls: 'icon-pie-chart',
 				children: [{
-					text: 'Basic Pie Chart',
+					text: 'Pie Chart',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'pieGeneric'
@@ -61,6 +61,26 @@ Ext.define('App.store.tree.MenuStore', {
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'sunburstPartition'
+				}]
+			}, {
+				text: '<b>Line Charts</b>',
+				expanded: true,
+				iconCls: 'icon-line-chart',
+				children: [{
+					text: 'Line/Area Chart',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'areaGeneric'
+				}, {
+					text: 'Line "Ticker" Chart',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'tickerMainPanel'
+				}, {
+					text: 'Multiline Chart',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'areaMultiPanel'
 				}]
 			}, {
 				text: '<b>Geo</b>',
@@ -77,12 +97,12 @@ Ext.define('App.store.tree.MenuStore', {
 				expanded: true,
 				iconCls: 'icon-scatterplot',
 				children: [{
-					text: 'Basic Scatterplot',
+					text: 'Scatterplot',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
-					id: 'scatterMainPanel'
+					id: 'scatterGeneric'
 				}, {
-					text: 'Basic Treemap',
+					text: 'Treemap',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'treemapBasicMainPanel'
@@ -96,21 +116,6 @@ Ext.define('App.store.tree.MenuStore', {
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'debtSlopeMainPanel'
-				}, {
-					text: 'Line/Area Chart',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'areaGeneric'
-				}, {
-					text: 'Line "Ticker" Chart',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'tickerMainPanel'
-				}, {
-					text: 'Multiline Chart',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'areaMultiPanel'
 				}]
 			}, {
 				text: '<b>Responsive</b>',

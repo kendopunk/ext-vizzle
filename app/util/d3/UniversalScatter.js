@@ -16,7 +16,9 @@ Ext.define('App.util.d3.UniversalScatter', {
 	canvasHeight: 400,
 	chartTitle: null,
 	colorScale: d3.scale.category20(),
+	defs: null,
 	eventRelay: null,
+	filter: null,
 	
 	// "g" elements
 	gScatter: null,
@@ -55,7 +57,6 @@ Ext.define('App.util.d3.UniversalScatter', {
 		}
 	},
  	radius: 3,
- 	scaleToZero: true, 	
  	showGrid: true,
  	showLabels: true,
  	tooltipFunction: function(data, index) {
@@ -64,7 +65,7 @@ Ext.define('App.util.d3.UniversalScatter', {
  	
 	xDataMetric: null,
 	xScale: null,
-	xScalePadding: .1,
+	xScalePadding: 0,
 	xTicks: 10,
 	xTickFormat: function(d) {
 		return Ext.util.Format.number(d, '0,000');
@@ -72,7 +73,7 @@ Ext.define('App.util.d3.UniversalScatter', {
 	
  	yDataMetric: null,
  	yScale: null,
- 	yScalePadding: .1,
+ 	yScalePadding: 0,
  	yTicks: 10,
  	yTickFormat: function(d) {
 	 	return Ext.util.Format.number(d, '0,000');
@@ -121,6 +122,42 @@ Ext.define('App.util.d3.UniversalScatter', {
 			+ ','
 			+ parseInt(me.margins.top/2)
 			+ ')');
+			
+		//////////////////////////////////////////////////
+		// defs
+		//////////////////////////////////////////////////
+		me.defs = me.svg.append('defs');
+		
+		me.filter = me.defs.append('filter')
+			.attr('id', 'def_' + me.panelId)
+			.attr('x', '-40%')
+			.attr('y', '-40%')
+			.attr('height', '200%')
+			.attr('width', '200%');
+		
+		// append Gaussian blur to filter
+		me.filter.append('feGaussianBlur')
+			.attr('in', 'SourceAlpha')
+			.attr('stdDeviation', 3) // !!! important parameter - blur
+			.attr('result', 'blur');
+			
+		// append offset filter to result of Gaussian blur filter
+		me.filter.append('feOffset')
+			.attr('in', 'blur')
+			.attr('dx', 2) // !!! important parameter - x-offset
+			.attr('dy', 2) // !!! important parameter - y-offset
+			.attr('result', 'offsetBlur');
+			
+		// merge result with original image
+		var feMerge = me.filter.append('feMerge');
+		
+		// first layer result of blur and offset
+		feMerge.append('feMergeNode')
+			.attr('in", "offsetBlur');
+			
+		// original image on top
+		feMerge.append('feMergeNode')
+			.attr('in', 'SourceGraphic');
 		
 		return me;
 	},
@@ -169,7 +206,8 @@ Ext.define('App.util.d3.UniversalScatter', {
 	 	var xScale = me.xScale,
 	 		xDataMetric = me.xDataMetric,
 		 	yScale = me.yScale,
-		 	yDataMetric = me.yDataMetric;
+		 	yDataMetric = me.yDataMetric,
+		 	radius = me.radius;
 		 	
 		////////////////////////////////////////
 		// CIRCLES - JRAT
@@ -193,17 +231,25 @@ Ext.define('App.util.d3.UniversalScatter', {
 			.style('fill', me.colorScaleFunction)
 			.style('opacity', .6)
 			.style('stroke', '#333333')
-			.style('stroke-width', 1);
-			
-		// apply events
-		circSelection.on('mouseover', function(d, i) {
-				d3.select(this).style('opacity', .9);
+			.style('stroke-width', 1)
+			.attr('filter', 'url(#def_' + me.panelId + ')')
+			.on('mouseover', function(d, i) {
+				d3.select(this).style('opacity', .9)
+					.transition()
+					.duration(0)
+					.attr('r', function() {
+						return radius + (radius * .5);
+					});
 			})
-			.on('mouseout', function(d) {
-				var el = d3.select(this);
-				el.style('opacity', el.attr('defaultOpacity'));
-			})
-			.call(d3.helper.tooltip().text(me.tooltipFunction));
+			.on('mouseout', function(d, i) {
+				d3.select(this).style('opacity', .6)
+					.transition()
+					.duration(0)
+					.attr('r', function() {
+						return radius;
+					})
+					.ease('bounce');
+			});
 			
 		// transition all
 		circSelection.transition()
@@ -215,6 +261,9 @@ Ext.define('App.util.d3.UniversalScatter', {
 				return yScale(d[yDataMetric]);
 			})
 			.attr('r', me.radius);
+		
+		// tooltips
+		circSelection.call(d3.helper.tooltip().text(me.tooltipFunction));
 	},
 	
 	/**
@@ -224,27 +273,36 @@ Ext.define('App.util.d3.UniversalScatter', {
 	handleLabels: function() {
 		var me = this;
 		
+		if(!me.showLabels) {
+			me.gLabel.selectAll('text')
+				.transition()
+				.duration(500)
+				.attr('x', -100)
+				.remove();
+			
+			return;
+		}
+		
 		// local scope
 		var xScale = me.xScale,
 			xDataMetric = me.xDataMetric,
 			yScale = me.yScale,
 			yDataMetric = me.yDataMetric,
 			radius = me.radius;
-		
-		// join new with old
+			
+		////////////////////////////////////////
+		// LABEL JRAT
+		////////////////////////////////////////
 		var labelSelection = me.gLabel.selectAll('text')
 			.data(me.graphData);
 			
-		// remove
 		labelSelection.exit().remove();
 			
-		// new labels
 		labelSelection.enter()
 			.append('text')
-			.style('font-size', me.labelFontSize)
-			.attr('text-anchor', 'start');
+			.attr('class', 'labelText')
+			.attr('text-anchor', 'middle');
 				
-		// transition all
 		labelSelection.transition()
 			.duration(500)
 			.attr('x', function(d) {
@@ -285,28 +343,33 @@ Ext.define('App.util.d3.UniversalScatter', {
 			yScale = me.yScale,
 			yDataMetric = me.yDataMetric;
 			
+		// we're NOT binding graph data to the horizontal and vertical lines, we're
+		// binding the tick arrays from the X and Y scales
+			
 		//////////////////////////////////////////////////
 		// VERTICAL JRAT
 		//////////////////////////////////////////////////
 		var verticalSelection = me.gGrid.selectAll('.vertGrid')
-			.data(me.graphData);
+			.data(me.xScale.ticks());
+			
+		console.debug(me.xScale.ticks());
 			
 		verticalSelection.exit().remove();
 		
 		verticalSelection.enter()
 			.append('svg:line')
 			.attr('class', 'vertGrid')
-			.style('stroke', '#BBBBBB')
-			.style('stroke-width', 1)
+			.style('stroke', '#AAAAAA')
+			.style('stroke-width', 0.5)
 			.style('stroke-dasharray', ("7,3"));
 			
 		verticalSelection.transition()
 			.duration(500)
 			.attr('x1', function(d) {
-				return xScale(d[xDataMetric]);
+				return xScale(d);
 			})
 			.attr('x2', function(d) {
-				return xScale(d[xDataMetric]);
+				return xScale(d);
 			})
 			.attr('y1', function(d) {
 				return me.margins.top;
@@ -315,8 +378,6 @@ Ext.define('App.util.d3.UniversalScatter', {
 			
 		//////////////////////////////////////////////////
 		// HORIZONTAL JRAT
-		// we're NOT binding graph data to this...we are 
-		// binding the tick array from the Y scale
 		//////////////////////////////////////////////////
 		var horizontalSelection = me.gGrid.selectAll('.hozGrid')
 			.data(me.yScale.ticks());
@@ -326,8 +387,8 @@ Ext.define('App.util.d3.UniversalScatter', {
 		horizontalSelection.enter()
 			.append('svg:line')
 			.attr('class', 'hozGrid')
-			.style('stroke', '#BBBBBB')
-			.style('stroke-width', 1)
+			.style('stroke', '#AAAAAA')
+			.style('stroke-width', 0.5)
 			.style('stroke-dasharray', ("7,3"));
 			
 		horizontalSelection.transition()
@@ -378,17 +439,25 @@ Ext.define('App.util.d3.UniversalScatter', {
  	 * @param metric String
  	 */
 	setXScale: function(metric) {
-		var me = this;
+		var me = this,
+			min,
+			domainMin,
+			max,
+			domainMax;
+	
+		var xScalePadding = me.xScalePadding;
 		
-		var xScalePadding = me.xScalePadding,
-			domainMin = 0;
-
-			var max = d3.max(me.graphData, function(d) { return d[metric]; });
-			var domainMax = max + (max * me.xScalePadding);
+		// min/max
+		if(xScalePadding > 0) {
+			min = d3.min(me.graphData, function(d) { return d[metric]; });
+			domainMin = min - (min * xScalePadding);
 			
-		if(!me.scaleToZero) {
-			var min = d3.min(me.graphData, function(d) {return d[metric]; });
-			domainMin = min - (min * me.xScalePadding);
+			max = d3.max(me.graphData, function(d) { return d[metric]; });
+			domainMax = max + (max * xScalePadding);
+		} else {
+			domainMin = 0;
+			domainMax = d3.max(me.graphData, function(d) { return d[metric]; });
+			domainMax = domainMax + (domainMax * .05);
 		}
 		
 		me.xScale = d3.scale.linear()
@@ -412,28 +481,39 @@ Ext.define('App.util.d3.UniversalScatter', {
  	 * @param metric String
  	 */
 	setYScale: function(metric) {
-		var me = this;
+		var me = this,
+			min,
+			domainMin,
+			max,
+			domainMax;
+	
+		var yScalePadding = me.yScalePadding;
 		
-		var yScalePadding = me.yScalePadding,
-			domainMin = 0;
+		// min/max
+		if(yScalePadding > 0) {
+			min = d3.min(me.graphData, function(d) { return d[metric]; });
 			
-		if(!me.scaleToZero) {
-			var domainMin = d3.min(me.graphData, function(d) {
-				return d[metric] - yScalePadding;
-			});
+			// going into negative
+			domainMin = min - (min * yScalePadding);
+			if(domainMin < 0) {
+				domainMin = 0;
+			}
+			
+			max = d3.max(me.graphData, function(d) { return d[metric]; });
+			domainMax = max + (max * yScalePadding);
+		} else {
+			domainMin = 0;
+			domainMax = d3.max(me.graphData, function(d) { return d[metric]; });
+			domainMax = domainMax + (domainMax * .05);
 		}
 		
 		me.yScale = d3.scale.linear()
-			.domain([
-				domainMin,
-				d3.max(me.graphData, function(d) { return d[metric] + yScalePadding })
-			])
+			.domain([domainMin, domainMax])
 			.range([
 				me.canvasHeight - me.margins.bottom,
 				me.margins.top
 			]);
 			
-
 		me.yAxis = d3.svg.axis()
 			.scale(me.yScale)
 			.orient('left')
@@ -522,7 +602,7 @@ Ext.define('App.util.d3.UniversalScatter', {
 		me.yScalePadding = num;
 	},
 	
-	setshowGrid: function(bool) {
+	setShowGrid: function(bool) {
 		var me = this;
 		
 		me.showGrid = bool;

@@ -115,7 +115,7 @@ Ext.define('App.view.d3.ticker.MainPanel', {
 	
 	/**
 	 * @function
-	 * @memberOf App.view.d3.scatterplot.MainPanel
+	 * @memberOf App.view.d3.ticker.MainPanel
 	 * @description Initialize SVG drawing canvas
 	 */
 	initCanvas: function() {

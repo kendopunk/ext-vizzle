@@ -261,7 +261,7 @@ Ext.define('App.view.d3.area.GenericLine', {
 	
 	/**
 	 * @function
-	 * @memberOf App.view.d3.scatterplot.MainPanel
+	 * @memberOf App.view.d3.area.GenericLine
 	 * @description Initialize SVG drawing canvas
 	 */
 	initCanvas: function() {

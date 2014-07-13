@@ -25,7 +25,7 @@ Ext.application({
 	launch: function() {
 		Ext.tip.QuickTipManager.init();
 		
-		// var defaultXType = null;
+		//// var defaultXType = null;
 		var defaultXType = 'sunburstPartition';
 		// var defaultXType = 'barGeneric';
 		// var defaultXType = 'barBuild';

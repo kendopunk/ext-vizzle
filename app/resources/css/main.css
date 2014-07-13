@@ -231,6 +231,7 @@ svg {
 
 .labelText {
 	font: 9px/1.1 sans-serif;
+	pointer-events: none;
 }
 
 .labelTextItalic {

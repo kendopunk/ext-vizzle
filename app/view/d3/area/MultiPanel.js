@@ -96,7 +96,7 @@ Ext.define('App.view.d3.area.MultiPanel', {
 	
 	/**
 	 * @function
-	 * @memberOf App.view.d3.scatterplot.MainPanel
+	 * @memberOf App.view.d3.area.MultiPanel
 	 * @description Initialize SVG drawing canvas
 	 */
 	initCanvas: function() {
