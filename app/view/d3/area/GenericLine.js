@@ -81,11 +81,7 @@ Ext.define('App.view.d3.area.GenericLine', {
 					scope: me
 				};
 			}
-		);
-		
-		
-		// linear, step-before, step-after, basis, basis-open, basis-closed,
-		// bundle, cardinal, cardinal-open, cardinal-closed, monotone		
+		);		
 		
 		me.lineChartButton = Ext.create('Ext.button.Button', {
  			text: 'Line Chart',

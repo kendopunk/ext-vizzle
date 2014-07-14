@@ -75,7 +75,7 @@ Ext.define('App.store.tree.MenuStore', {
 					text: 'Line "Ticker" Chart',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
-					id: 'tickerMainPanel'
+					id: 'areaTicker'
 				}, {
 					text: 'Multiline Chart',
 					leaf: true,

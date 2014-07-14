@@ -9,6 +9,7 @@ Ext.define('App.controller.Application', {
 	requires: [
 		'App.view.d3.area.GenericLine',
 		'App.view.d3.area.MultiPanel',
+		'App.view.d3.area.Ticker',
 		'App.view.d3.bar.GenericBar',
 		'App.view.d3.bar.BuildABar',
 		'App.view.d3.bar.StackedBar',
@@ -21,7 +22,6 @@ Ext.define('App.controller.Application', {
 		'App.view.chart.misc.MainPanel',
 		'App.view.d3.geo.basic.MainPanel',
 		'App.view.d3.slope.debt.MainPanel',
-		'App.view.d3.ticker.MainPanel',
 		'App.view.d3.treemap.basic.MainPanel',
 		'App.view.d3.treemap.heat.MainPanel',
 		'App.view.d3.win.WindowBar',

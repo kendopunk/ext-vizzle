@@ -1,18 +1,18 @@
 /**
  * @class
  * @author Mark Fehrenbacher (kendopunk@hotmail.com)
- * @memberOf App.view.d3.pie
+ * @memberOf App.view.d3.area
  * @description Simple scatterplot panel
  */
-Ext.define('App.view.d3.ticker.MainPanel', {
+Ext.define('App.view.d3.area.Ticker', {
 	extend: 'Ext.Panel',
-	alias: 'widget.tickerMainPanel',
+	alias: 'widget.areaTicker',
 	title: 'Line/Area Chart',
 	closable: true,
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.LineChart'
+		'App.util.d3.UniversalLine'
 	],
 	
 	layout: 'fit',
@@ -89,6 +89,34 @@ Ext.define('App.view.d3.ticker.MainPanel', {
 		
 		Ext.TaskManager.start(me.chartUpdateTask);
 		
+		var interpolateSchemes = Ext.Array.map([
+			{
+				name: 'Linear',
+				id: 'linear'
+			}, {
+				name: 'Step Before',
+				id: 'step-before'
+			}, {
+				name: 'Step After',
+				id: 'step-after'
+			}, {
+				name: 'Basis',
+				id: 'basis'
+			}, {
+				name: 'Monotone',
+				id: 'monotone'
+			}], function(item) {
+				return {
+					text: item.name,
+					handler: function() {
+						me.lineChart.setInterpolation(item.id);
+						me.lineChart.draw();
+					},
+					scope: me
+				};
+			}
+		);	
+		
 		me.dockedItems = [{
 			xtype: 'toolbar',
 			dock: 'top',
@@ -96,8 +124,118 @@ Ext.define('App.view.d3.ticker.MainPanel', {
 				xtype: 'tbtext',
 				text: '<b>Ticker:</b>'
 			},
-				me.taskMgrButton
-			]
+			me.taskMgrButton,
+			{xtype: 'tbspacer', width: 5},
+			'-',
+			{xtype: 'tbspacer', width: 5},
+			{
+				xtype: 'button',
+				iconCls: 'icon-tools',
+				text: 'Customize',
+				menu: [{
+					text: 'Line Interpolation',
+					menu: interpolateSchemes
+				}, {
+					xtype: 'menucheckitem',
+					text: 'Grid',
+					checked: true,
+					listeners: {
+						checkchange: function(cbx, checked) {
+							me.lineChart.setShowGrid(checked);
+							me.lineChart.draw();
+						},
+						scope: me
+					}
+				}, {
+					xtype: 'menucheckitem',
+					text: 'Labels',
+					checked: true,
+					listeners: {
+						checkchange: function(cbx, checked) {
+							me.lineChart.setShowLabels(checked);
+							me.lineChart.draw();
+						},
+						scope: me
+					}
+				}, {
+					text: 'Label Skip',
+					menu: [{
+				 		text: 'No Skip',
+				 		handler: function() {
+					 		me.lineChart.setLabelSkipCount(1);
+					 		me.lineChart.draw();
+					 	},
+					 	scope: me
+				 	}, {
+					 	text: '2',
+				 		handler: function() {
+					 		me.lineChart.setLabelSkipCount(2);
+					 		me.lineChart.draw();
+					 	},
+					 	scope: me
+					}, {
+						text: '3',
+				 		handler: function() {
+					 		me.lineChart.setLabelSkipCount(3);
+					 		me.lineChart.draw();
+					 	},
+					 	scope: me
+					}]
+				}]
+			},
+			{xtype: 'tbspacer', width: 5},
+			'-',
+			{xtype: 'tbspacer', width: 5},
+			{
+			 	xtype: 'button',
+			 	iconCls: 'icon-color-wheel',
+			 	text: 'Colors',
+			 	menu: [{
+				 	text: 'Circles',
+				 	iconCls: 'icon-color-wheel',
+				 	menu: {
+					 	xtype: 'colormenu',
+					 	listeners: {
+						 	select: function(menu, color) {
+						 		me.lineChart.setMarkerFillColor('#' + color);
+						 		me.lineChart.draw();
+						 	},
+						 	scope: me
+						 }
+					 }
+				}, {
+				 	text: 'Line',
+				 	iconCls: 'icon-color-wheel',
+				 	menu: {
+					 	xtype: 'colormenu',
+					 	listeners: {
+						 	select: function(menu, color) {
+						 		me.lineChart.setStrokeColor('#' + color);
+						 		me.lineChart.draw();
+						 	},
+						 	scope: me
+						 }
+					 }
+				}, {
+				 	text: 'Fill',
+				 	iconCls: 'icon-color-wheel',
+				 	menu: {
+					 	xtype: 'colormenu',
+					 	listeners: {
+						 	select: function(menu, color) {
+							 	if(color === 'FFFFFF') {
+							 		me.lineChart.setFillArea(false);
+							 	} else {
+							 		me.lineChart.setFillArea(true);
+						 			me.lineChart.setFillColor('#' + color);
+						 		}
+						 		me.lineChart.draw();
+						 	},
+						 	scope: me
+						 }
+					 }
+				}]
+			}]
 		}];
 
 		// on activate, publish update to the "Info" panel
@@ -115,7 +253,7 @@ Ext.define('App.view.d3.ticker.MainPanel', {
 	
 	/**
 	 * @function
-	 * @memberOf App.view.d3.ticker.MainPanel
+	 * @memberOf App.view.d3.area.Ticker
 	 * @description Initialize SVG drawing canvas
 	 */
 	initCanvas: function() {
@@ -137,7 +275,7 @@ Ext.define('App.view.d3.ticker.MainPanel', {
 	 	me.graphData = me.generateGraphData();
 	 		
 	 	// init chart
-	 	me.lineChart = Ext.create('App.util.d3.LineChart', {
+	 	me.lineChart = Ext.create('App.util.d3.UniversalLine', {
 		 	svg: me.svg,
 		 	canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,
@@ -145,27 +283,27 @@ Ext.define('App.view.d3.ticker.MainPanel', {
 			graphData: me.graphData,
 			margins: {
 				top: 30,
-				right: 10,
+				right: 30,
 				bottom: 40,
 				left: 70
 			},
-			yScalePadding: 1,
 			xDataMetric: me.defaultXDataMetric,
 			yDataMetric: me.defaultYDataMetric,
 			chartTitle: me.baseTitle,
 			xTickFormat: function(d) {
 				return Ext.util.Format.date(new Date(d), 'H:i:s');
 			},
+			xScalePadding: .1,
 			yTickFormat: function(d) {
 				return Ext.util.Format.currency(d);
 			},
+			yScalePadding: .1,
 			strokeColor: '#0000FF',
 			fillArea: true,
 			fillColor: '#DDDDDD',
 			markerFillColor: 'red',
 			markerStrokeColor: 'black',
 			showLabels: true,
-			labelSkipCount: 5,
 			labelFunction: function(d, i) {
 				return Ext.util.Format.currency(d.price, 0, false, 0);
 			},
@@ -176,7 +314,7 @@ Ext.define('App.view.d3.ticker.MainPanel', {
 			}
 		});
 		
-		me.lineChart.draw();
+		me.lineChart.initChart().draw();
 	 },
 	 
 	 /**
@@ -235,6 +373,6 @@ Ext.define('App.view.d3.ticker.MainPanel', {
 	 	// transition
 	 	me.graphData = newData;
 	 	me.lineChart.setGraphData(newData);
-	 	me.lineChart.transition();
+	 	me.lineChart.draw();
 	},
 });
