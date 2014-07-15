@@ -102,6 +102,11 @@ Ext.define('App.store.tree.MenuStore', {
 					iconCls: 'icon-arrow-right',
 					id: 'scatterGeneric'
 				}, {
+					text: 'Timeline',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'timeline'
+				}, {
 					text: 'Treemap',
 					leaf: true,
 					iconCls: 'icon-arrow-right',

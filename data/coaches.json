@@ -34,15 +34,11 @@
 	}, {
 		"name": "Clyde King",
 		"color": "#0D254C",
-		"dates": [
-			[new Date(1982, 7, 1), new Date(1982, 11, 31)]
-		]
+		"dates": [[new Date(1982, 7, 1), new Date(1982, 11, 31)]]
 	}, {
 		"name": "Yogi Berra",
 		"color": "#0D254C",
-		"dates": [
-			[new Date(1984, 0, 1), new Date(1985, 7, 31)]
-		]
+		"dates": [[new Date(1984, 0, 1), new Date(1985, 7, 31)]]
 	}, {
 		"name": "Lou Piniella",
 		"color": "#0D254C",
@@ -53,39 +49,27 @@
 	}, {
 		"name": "Dallas Green",
 		"color": "#0D254C",
-		"dates": [
-			[new Date(1989, 0, 1), new Date(1989, 7, 31)]
-		]
+		"dates": [[new Date(1989, 0, 1), new Date(1989, 7, 31)]]
 	}, {
 		"name": "Bucky Dent",
 		"color": "#0D254C",
-		"dates": [
-			[new Date(1989, 8, 1), new Date(1990, 6, 31)]
-		]
+		"dates": [[new Date(1989, 8, 1), new Date(1990, 6, 31)]]
 	}, {
 		"name": "Stump Merrill",
 		"color": "#0D254C",
-		"dates": [
-			[new Date(1990, 7, 1), new Date(1991, 11, 31)]
-		]
+		"dates": [[new Date(1990, 7, 1), new Date(1991, 11, 31)]]
 	}, {
 		"name": "Buck Showalter",
 		"color": "#0D254C",
-		"dates": [
-			[new Date(1992, 0, 1), new Date(1995, 11, 31)]
-		]
+		"dates": [[new Date(1992, 0, 1), new Date(1995, 11, 31)]]
 	}, {
 		"name": "Joe Torre",
 		"color": "#0D254C",
-		"dates": [
-			[new Date(1996, 0, 1), new Date(2007, 11, 31)]
-		]
+		"dates": [[new Date(1996, 0, 1), new Date(2007, 11, 31)]]
 	}, {
 		"name": "Joe Girardi",
 		"color": "#0D254C",
-		"dates": [
-			[new Date(2008, 0, 1), new Date()]
-		]
+		"dates": [[new Date(2008, 0, 1), new Date()]]
 	}],
 	"bengals": [{
 		"name": "Paul Brown",
@@ -123,5 +107,86 @@
 		"name": "Marvin Lewis",
 		"color": "#FB4F14",
 		"dates": [[new Date(2003, 0, 1), new Date()]]
+	}],
+	"spurs": [{
+		"name": "Cliff Hagan",
+		"color": "#A9A9A9",
+		"dates": [[new Date(1967, 0, 1), new Date(1970, 3, 30)]]
+	}, {
+		"name": "Max Williams",
+		"color": "#A9A9A9",
+		"dates": [[new Date(1970, 4, 1), new Date(1970, 8, 1)]]
+	}, {
+		"name": "Bill Blakeley",
+		"color": "#A9A9A9",
+		"dates": [[new Date(1970, 8, 2), new Date(1971, 5, 31)]]
+	}, {
+		"name": "Tom Nissalke",
+		"color": "#A9A9A9",
+		"dates": [
+			[new Date(1971, 6, 1), new Date(1972, 3, 30)],
+			[new Date(1973, 8, 1), new Date(1974, 5, 30)]
+		]
+	}, {
+		"name": "Babe McCarthy",
+		"color": "#A9A9A9",
+		"dates": [[new Date(1972, 4,1 ), new Date(1973, 2, 31)]]
+	}, {
+		"name": "Dave Brown",
+		"color": "#A9A9A9",
+		"dates": [[new Date(1973, 3, 1), new Date(1973, 7, 31)]]
+	}, {
+		"name": "Bob Bass",
+		"color": "#A9A9A9",
+		"dates": [
+			[new Date(1974, 6, 1), new Date(1976, 9, 31)],
+			[new Date(1980, 8, 1), new Date(1980, 9, 31)],
+			[new Date(1983, 10, 1), new Date(1984, 5, 30)],
+			[new Date(1992, 5, 1), new Date(1992, 7, 1)]
+		]
+	}, {
+		"name": "Doug Moe",
+		"color": "#A9A9A9",
+		"dates": [[new Date(1976, 10, 1), new Date(1980, 7, 31)]]
+	}, {
+		"name": "Stan Albeck",
+		"color": "#A9A9A9",
+		"dates": [[new Date(1980, 10, 1), new Date(1983, 4, 31)]]
+	}, {
+		"name": "Morris McHone",
+		"color": "#A9A9A9",
+		"dates": [[new Date(1983, 5, 1), new Date(1983, 9, 31)]]
+	}, {
+		"name": "Cotton Fitzsimmons",
+		"color": "#A9A9A9",
+		"dates": [[new Date(1984, 6, 1), new Date(1986, 9, 31)]]
+	}, {
+		"name": "Bob Weiss",
+		"color": "#A9A9A9",
+		"dates": [[new Date(1986, 10, 1), new Date(1988, 6, 31)]]
+	}, {
+		"name": "Larry Brown",
+		"color": "#A9A9A9",
+		"dates": [[new Date(1988, 7, 1), new Date(1992, 4, 31)]]
+	}, {
+		"name": "Jerry Tarkanian",
+		"color": "#A9A9A9",
+		"dates": [[new Date(1992, 8, 1), new Date(1992, 9, 1)]]
+	}, {
+		"name": "Rex Hughes",
+		"color": "#A9A9A9",
+		"dates": [[new Date(1992, 9, 2), new Date(1992, 10, 2)]]
+	}, {
+		"name": "John Lucas II",
+		"color": "#A9A9A9",
+		"dates": [[new Date(1992, 10, 3), new Date(1994, 5, 31)]]
+	}, {
+		"name": "Bob Hill",
+		"color": "#A9A9A9",
+		"dates": [[new Date(1994, 6, 1), new Date(1996, 5, 1)]]
+	}, {
+		"name": "Gregg Popovich",
+		"color": "#A9A9A9",
+		"dates": [[new Date(1996, 5, 2), new Date()]]
 	}]
 }
