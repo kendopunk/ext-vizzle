@@ -1,0 +1,127 @@
+{
+	"success": true,
+	"yankees": [{
+		"name": "Billy Martin",
+		"color": "#0D254C",
+		"dates": [
+			[new Date(1975, 0, 1), new Date(1978, 2, 31)],
+			[new Date(1979, 3, 1), new Date(1980, 2, 31)],
+			[new Date(1983, 0, 1), new Date(1983, 11, 31)],
+			[new Date(1985, 8, 1), new Date(1985, 11, 31)],
+			[new Date(1988, 0, 1), new Date(1988, 6, 31)]
+		]
+	}, {
+		"name": "Dick Howser",
+		"color": "#0D254C",
+		"dates": [
+			[new Date(1978, 3, 1), new Date(1978, 7, 31)],
+			[new Date(1980, 3, 1), new Date(1980, 11, 31)]
+		]
+	}, {
+		"name": "Bob Lemon",
+		"color": "#0D254C",
+		"dates": [
+			[new Date(1978, 8, 1), new Date(1979, 2, 31)],
+			[new Date(1981, 9, 1), new Date(1982, 2, 31)]
+		]
+	}, {
+		"name": "Gene Michael",
+		"color": "#0D254C",
+		"dates": [
+			[new Date(1981, 0, 1), new Date(1981, 8, 30)],
+			[new Date(1982, 3, 1), new Date(1982, 6, 31)]
+		]
+	}, {
+		"name": "Clyde King",
+		"color": "#0D254C",
+		"dates": [
+			[new Date(1982, 7, 1), new Date(1982, 11, 31)]
+		]
+	}, {
+		"name": "Yogi Berra",
+		"color": "#0D254C",
+		"dates": [
+			[new Date(1984, 0, 1), new Date(1985, 7, 31)]
+		]
+	}, {
+		"name": "Lou Piniella",
+		"color": "#0D254C",
+		"dates": [
+			[new Date(1986, 0, 1), new Date(1987, 11, 31)],
+			[new Date(1988, 7, 1), new Date(1988, 11, 31)]
+		]
+	}, {
+		"name": "Dallas Green",
+		"color": "#0D254C",
+		"dates": [
+			[new Date(1989, 0, 1), new Date(1989, 7, 31)]
+		]
+	}, {
+		"name": "Bucky Dent",
+		"color": "#0D254C",
+		"dates": [
+			[new Date(1989, 8, 1), new Date(1990, 6, 31)]
+		]
+	}, {
+		"name": "Stump Merrill",
+		"color": "#0D254C",
+		"dates": [
+			[new Date(1990, 7, 1), new Date(1991, 11, 31)]
+		]
+	}, {
+		"name": "Buck Showalter",
+		"color": "#0D254C",
+		"dates": [
+			[new Date(1992, 0, 1), new Date(1995, 11, 31)]
+		]
+	}, {
+		"name": "Joe Torre",
+		"color": "#0D254C",
+		"dates": [
+			[new Date(1996, 0, 1), new Date(2007, 11, 31)]
+		]
+	}, {
+		"name": "Joe Girardi",
+		"color": "#0D254C",
+		"dates": [
+			[new Date(2008, 0, 1), new Date()]
+		]
+	}],
+	"bengals": [{
+		"name": "Paul Brown",
+		"color": "#FB4F14",
+		"dates": [[new Date(1968, 0, 1), new Date(1975, 11, 31)]]
+	}, {
+		"name": "Bill Johnson",
+		"color": "#FB4F14",
+		"dates": [[new Date(1976, 0, 1), new Date(1978, 8, 30)]]
+	}, {
+		"name": "Homer Rice",
+		"color": "#FB4F14",
+		"dates": [[new Date(1978, 9, 1), new Date(1979, 11, 31)]]
+	}, {
+		"name": "Forrest Gregg",
+		"color": "#FB4F14",
+		"dates": [[new Date(1980, 0, 1), new Date(1983, 11, 31)]]
+	}, {
+		"name": "Sam Wyche",
+		"color": "#FB4F14",
+		"dates": [[new Date(1984, 0, 1), new Date(1991, 11, 31)]]
+	}, {
+		"name": "Dave Shula",
+		"color": "#FB4F14",
+		"dates": [[new Date(1992, 0, 1), new Date(1996, 8, 30)]]
+	}, {
+		"name": "Bruce Coslet",
+		"color": "#FB4F14",
+		"dates": [[new Date(1996, 9, 1), new Date(2000, 7, 31)]]
+	}, {
+		"name": "Dick LeBeau",
+		"color": "#FB4F14",
+		"dates": [[new Date(2000, 8, 1), new Date(2002, 11, 31)]]
+	}, {
+		"name": "Marvin Lewis",
+		"color": "#FB4F14",
+		"dates": [[new Date(2003, 0, 1), new Date()]]
+	}]
+}

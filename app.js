@@ -32,9 +32,10 @@ Ext.application({
 		// var defaultXType = 'barBuild';
 		// var defaultXType = 'barGroup';
 		// var defaultXType = 'pieGeneric';
-		// // var defaultXType = 'pieBuild';
+		// var defaultXType = 'pieBuild';
 		var defaultXType = 'sunburstPartition';
 		// var defaultXType = 'scatterGeneric';
+		// var defaultXType = 'timeline';
 		
 		Ext.create('Ext.container.Viewport', {
 			layout: 'border',

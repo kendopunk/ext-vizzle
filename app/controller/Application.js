@@ -16,6 +16,7 @@ Ext.define('App.controller.Application', {
 		'App.view.d3.bar.GroupedBar',
 		'App.view.d3.bar.MouseEvents',
 		'App.view.d3.misc.GenericScatter',
+		'App.view.d3.misc.Timeline',
 		'App.view.d3.pie.BuildAPie',
 		'App.view.d3.pie.GenericPie',
 		'App.view.d3.pie.Sunburst',
