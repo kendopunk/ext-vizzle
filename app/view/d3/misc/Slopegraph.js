@@ -4,9 +4,9 @@
  * @memberOf App.view.d3.pie
  * @description Simple scatterplot panel
  */
-Ext.define('App.view.d3.slope.debt.MainPanel', {
+Ext.define('App.view.d3.misc.Slopegraph', {
 	extend: 'Ext.Panel',
-	alias: 'widget.debtSlopeMainPanel',
+	alias: 'widget.slopeDebt',
 	title: 'Slopegraph',
 	closable: true,
 	
@@ -15,7 +15,7 @@ Ext.define('App.view.d3.slope.debt.MainPanel', {
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.final.SlopeGraph'
+		'App.util.d3.UniversalSlope'
 	],
 	
 	layout: 'fit',
@@ -132,7 +132,34 @@ Ext.define('App.view.d3.slope.debt.MainPanel', {
 		 	.append('svg')
 		 	.attr('width', me.canvasWidth)
 		 	.attr('height', me.canvasHeight);
- 			
+		 	
+		// init chart
+		me.slopegraph = Ext.create('App.util.d3.UniversalSlope', {
+			svg: me.svg,
+			panelId: me.panelId,
+			canvasWidth: me.canvasWidth,
+			canvasHeight: me.canvasHeight,
+			graphData: [],
+			leftMetric: 'debt',
+			leftLabel: 'Debt (billions)',
+			leftLabelFn: me.debtLabelFn,
+			rightMetric: 'gdp',
+			rightLabel: 'GDP (billions)',
+			rightLabelFn: me.gdpLabelFn,
+			chartTitle: me.baseTitle + me.startYear + '-' + me.endYear,
+			margins: {
+				top: 70,
+				right: 130,
+				rightText: 120,
+				bottom: 30,
+				left: 160,
+				leftText: 20
+			},
+			thresholdScale: d3.scale.threshold().domain([0.9]),
+			tooltipFunction: me.tooltipFn
+ 		});
+ 		
+ 		// get data
 	 	Ext.Ajax.request({
 		 	url: 'data/national_debt.json',
 		 	method: 'GET',
@@ -141,32 +168,9 @@ Ext.define('App.view.d3.slope.debt.MainPanel', {
 	 		
 	 			me.graphData = resp.data;
 	 			
-	 			me.slopegraph = Ext.create('App.util.d3.final.SlopeGraph', {
-	 				svg: me.svg,
-	 				panelId: me.panelId,
-	 				canvasWidth: me.canvasWidth,
-	 				canvasHeight: me.canvasHeight,
-	 				graphData: me.graphData,
-	 				leftMetric: 'debt',
-	 				leftLabel: 'Debt (billions)',
-	 				leftLabelFn: me.debtLabelFn,
-	 				rightMetric: 'gdp',
-	 				rightLabel: 'GDP (billions)',
-	 				rightLabelFn: me.gdpLabelFn,
-	 				chartTitle: me.baseTitle + me.startYear + '-' + me.endYear,
-	 				margins: {
-						top: 70,
-						right: 130,
-						rightText: 120,
-						bottom: 30,
-						left: 160,
-						leftText: 20
-					},
-					thresholdScale: d3.scale.threshold().domain([0.9]),
-					tooltipFunction: me.tooltipFn
-	 			});
-				
-				me.slopegraph.draw();
+	 			me.slopegraph.setGraphData(resp.data);
+	 			
+	 			me.slopegraph.initChart().draw();
 	 		},
 	 		callback: function() {
 		 		me.getEl().unmask();
@@ -189,6 +193,6 @@ Ext.define('App.view.d3.slope.debt.MainPanel', {
 		
 		me.slopegraph.setGraphData(newData);
 		me.slopegraph.setChartTitle(me.baseTitle + values[0] + '-' + values[1]);
-		me.slopegraph.transition();
+		me.slopegraph.draw();
 	}
 });

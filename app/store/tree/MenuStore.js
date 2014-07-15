@@ -120,7 +120,7 @@ Ext.define('App.store.tree.MenuStore', {
 					text: 'Slopegraph',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
-					id: 'debtSlopeMainPanel'
+					id: 'slopeDebt'
 				}]
 			}, {
 				text: '<b>Responsive</b>',

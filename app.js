@@ -36,6 +36,7 @@ Ext.application({
 		var defaultXType = 'sunburstPartition';
 		// var defaultXType = 'scatterGeneric';
 		// var defaultXType = 'timeline';
+		// var defaultXType = 'slopeDebt';
 		
 		Ext.create('Ext.container.Viewport', {
 			layout: 'border',

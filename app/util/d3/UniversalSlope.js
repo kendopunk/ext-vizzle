@@ -1,10 +1,10 @@
 /**
  * @class
  * @author Mark Fehrenbacher (kendopunk@hotmail.com)
- * @memberOf App.util.d3.final
+ * @memberOf App.util.d3
  * @description Configurable slopegraph class
  */
-Ext.define('App.util.d3.final.SlopeGraph', {
+Ext.define('App.util.d3.UniversalSlope', {
 	
 	/**
 	 * The primary SVG element.  Must be set outside the class and
@@ -65,28 +65,16 @@ Ext.define('App.util.d3.final.SlopeGraph', {
 	constructor: function(config) {
 		var me = this;
 		
-		Ext.apply(me, config);
+		Ext.merge(me, config);
 	},
 	
-	draw: function() {
+	/**
+	 * @function
+	 * @description Initialize chart
+	 */
+	initChart: function() {
 	
 		var me = this;
-		
-		var margins = me.margins;
-		
-		//////////////////////////////////////////////////
-		// sanity check
-		//////////////////////////////////////////////////
-		if(me.svg == null || me.leftMetric == null || me.rightMetric == null) {
-			Ext.Msg.alert('Configuration Error', 
-				'Missing required configuration data needed<br>to render visualization.');
-			return;
-		}
-		
-		//////////////////////////////////////////////////
-		// set the min/max Y values
-		//////////////////////////////////////////////////
-		me.setMinMaxY();
 		
 		//////////////////////////////////////////////////
 		// configure "g"s
@@ -103,6 +91,24 @@ Ext.define('App.util.d3.final.SlopeGraph', {
 			+ parseInt(me.margins.top/2)
 			+ ')');
 		
+		return me;
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Draw/regenerate
+ 	 */
+	draw: function() {
+	
+		var me = this;
+		
+		var margins = me.margins;
+		
+		//////////////////////////////////////////////////
+		// set the min/max Y values
+		//////////////////////////////////////////////////
+		me.setMinMaxY();
+
 		//////////////////////////////////////////////////
 		// KEEP THIS ORDER !!
 		//////////////////////////////////////////////////
@@ -113,24 +119,6 @@ Ext.define('App.util.d3.final.SlopeGraph', {
 		me.drawLeft();
 		me.drawRight();
 		me.drawConnectors();
-	},
-	
-	/**
- 	 * @function
- 	 * @description Transition the drawing based on new data
- 	 */
-	transition: function() {
-		var me = this;
-		
-		//////////////////////////////////////////////////
-		// KEEP THIS ORDER !!
-		//////////////////////////////////////////////////
-		me.setMinMaxY();
-		me.setYScale();
-		me.drawLeft();
-		me.drawRight();
-		me.drawConnectors();
-		me.drawTitle();
 	},
 	
 	/**
