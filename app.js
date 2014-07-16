@@ -33,7 +33,7 @@ Ext.application({
 		// var defaultXType = 'barGroup';
 		// var defaultXType = 'barStack';
 		// var defaultXType = 'pieGeneric';
-		// var defaultXType = 'pieBuild';
+		// // var defaultXType = 'pieBuild';
 		var defaultXType = 'sunburstPartition';
 		// var defaultXType = 'scatterGeneric';
 		// var defaultXType = 'timeline';

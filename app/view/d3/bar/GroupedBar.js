@@ -12,7 +12,7 @@ Ext.define('App.view.d3.bar.GroupedBar', {
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.final.GroupedBarChart'
+		'App.util.d3.UniversalGroupedBar'
 	],
 	
 	layout: 'fit',
@@ -36,18 +36,11 @@ Ext.define('App.view.d3.bar.GroupedBar', {
  			me.btnHighlightCss = 'btn-highlight-peachpuff',
  			me.cbxHighlightCss = 'btn-highlight-khaki';
 		
-		/**
- 		 * @property
- 		 */
 		me.chartDescription = '<b>Grouped Bar Chart</b><br><br>'
 			+ '<i>Meat & Dairy consumption (lbs. per capita) in the US over the last 50 years...</i><br><br>'
 			+ 'Use the checkboxes to view decade-to-decade comparisons<br><br>'
 			+ 'Data from <a href="http://www.usda.gov">USDA</a>.';
 			
-		/**
- 		 * @properties
- 		 * @description layout vars
- 		 */
 		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
 		
@@ -119,40 +112,57 @@ Ext.define('App.view.d3.bar.GroupedBar', {
 		 	 	xtype: 'tbspacer',
 		 	 	width: 10
 		 	},
-		 		me.meatButton,
-		 		'-',
-		 		me.dairyButton,
+		 	me.meatButton,
+		 	'-',
+		 	me.dairyButton,
 		 	{xtype: 'tbspacer', width: 30},
-		 		checkboxData
-		 	]
+		 	{xtype: 'tbtext', text: '<b>Year(s):</b>'},
+			checkboxData/*,
+			{
+				xtype: 'tbspacer',
+				width: 20
+			}, {
+				xtype: 'button',
+				iconCls: 'icon-tools',
+				text: 'Customize',
+				menu: [{
+					xtype: 'menucheckitem',
+					text: 'Labels',
+					checked: true,
+					listeners: {
+						checkchange: function(cbx, checked) {
+							//me.barChart.setShowLabels(checked);
+							//me.barChart.draw();
+						},
+						scope: me
+					}
+				}, {
+					xtype: 'menucheckitem',
+					text: 'Legend',
+					listeners: {
+						checkchange: function(cbx, checked) {
+							me.groupedBarChart.setShowLegend(checked);
+							me.groupedBarChart.draw();
+							me.groupedBarChart.triggerGroupers(true);
+						},
+						scope: me
+					}
+				}]
+		 	}*/]
 		}];
 		
-		// on activate, publish update to the "Info" panel
+		/**
+ 		 * @listeners
+ 		 */
 		me.on('activate', function() {
 			me.eventRelay.publish('infoPanelUpdate', me.chartDescription);
 		}, me);
-		
-		// after render, initialize the canvas
+
 		me.on('afterrender', function(panel) {
 			me.initCanvas();
 		}, me);
 		
 		me.callParent(arguments);
-	},
-	
-	/**
- 	 * @function
- 	 */
-	checkboxChange: function(cbx, oldVal, newVal) {
-		var me = this;
-		
-		if(cbx.checked) {
-			cbx.addCls(me.cbxHighlightCss);
-		} else {
-			cbx.removeCls(me.cbxHighlightCss);
-		}
-		
-		me.draw();
 	},
 	
 	/**
@@ -174,10 +184,10 @@ Ext.define('App.view.d3.bar.GroupedBar', {
 		 	.attr('width', me.canvasWidth)
 		 	.attr('height', me.canvasHeight);
 		 	
-		var colorScale = d3.scale.category20();
+		var colorScale = d3.scale.ordinal().range(colorbrewer.Paired[12]);
 		 	
 		// configured the grouped bar chart
-		me.groupedBarChart = Ext.create('App.util.d3.final.GroupedBarChart', {
+		me.groupedBarChart = Ext.create('App.util.d3.UniversalGroupedBar', {
 			svg: me.svg,
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,
@@ -206,6 +216,10 @@ Ext.define('App.view.d3.bar.GroupedBar', {
 				return '<b>' + d.name + ' ' + d.grouper + ' Consumption</b><br>'
 					+ Ext.util.Format.number(d.value, '0.0')
 					+ ' lbs/person.';
+			},
+			showLegend: false,
+			legendTextFunction: function(d, i) {
+				return d.year;
 			}
 		});
 		
@@ -219,9 +233,28 @@ Ext.define('App.view.d3.bar.GroupedBar', {
 		}, me);
 	 },
 	 
-	 /**
- 	  * @function
- 	  */
+	/**
+ 	 * @function
+ 	 * @description Year checkbox change event handler
+ 	 * @param cbx Ext.form.field.Checkbox
+ 	 * @param oldVal String
+ 	 * @param newVal String
+ 	 */
+	checkboxChange: function(cbx, oldVal, newVal) {
+		var me = this;
+		
+		if(cbx.checked) {
+			cbx.addCls(me.cbxHighlightCss);
+		} else {
+			cbx.removeCls(me.cbxHighlightCss);
+		}
+		
+		me.draw();
+	},
+	 
+	/**
+	 * @function
+	 */
  	 draw: function() {
 
 	 	var me = this,
@@ -261,25 +294,28 @@ Ext.define('App.view.d3.bar.GroupedBar', {
 					
 					me.graphData = me.normalizeJsonData(resp[me.dataIndex], filterData);
 					me.groupedBarChart.setGraphData(me.graphData);
-					me.groupedBarChart.draw();
+					me.groupedBarChart.initChart().draw();
 					me.groupedBarChart.triggerGroupers(false);
+					
+					me.svgInitialized = true;
 				},
 				callback: function() {
 					me.getEl().unmask();
-					me.svgInitialized = true;
 				},
 				scope: me
 			});
 		} else {
 			me.graphData = me.normalizeJsonData(me.workingData[me.dataIndex], filterData);
 			me.groupedBarChart.setGraphData(me.graphData);
-			me.groupedBarChart.transition();
+			me.groupedBarChart.draw();
 			me.groupedBarChart.triggerGroupers(true);
 	 	}
 	 },
 	 
 	 /**
  	  * @function
+ 	  * @description Format the raw data into a format consumable
+ 	  * by the grouped bar chart
  	  */
 	 normalizeJsonData: function(data, filterData, firstT) {
 	 	var me = this,

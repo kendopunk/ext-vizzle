@@ -14,7 +14,7 @@ Ext.define('App.controller.Application', {
 		'App.view.d3.bar.GenericBar',
 		'App.view.d3.bar.BuildABar',
 		'App.view.d3.bar.StackedBar',		
-		'App.view.d3.bar.GroupedBar',		// @TODO
+		'App.view.d3.bar.GroupedBar',
 		'App.view.d3.bar.MouseEvents',
 		'App.view.d3.geo.basic.MainPanel',
 		'App.view.d3.misc.GenericScatter',
