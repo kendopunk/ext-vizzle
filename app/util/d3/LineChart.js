@@ -428,7 +428,7 @@ Ext.define('App.util.d3.LineChart', {
 	
  	/**
  	 * @function
- 	 * @memberOf App.util.d3.Scatterplot
+ 	 * @memberOf App.util.d3.LineChart
  	 * @description Set the horizontal scale
  	 * @param metric String
  	 */
@@ -454,7 +454,7 @@ Ext.define('App.util.d3.LineChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.Scatterplot
+ 	 * @memberOf App.util.d3.LineChart
  	 * @description Set the vertical (y) scale
  	 * @param metric String
  	 */

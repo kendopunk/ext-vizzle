@@ -28,9 +28,10 @@ Ext.application({
 		// var defaultXType = null;
 		// var defaultXType = 'areaGeneric';
 		// var defaultXType = 'areaTicker';
-		// var defaultXType = 'barGeneric';
 		// var defaultXType = 'barBuild';
+		// var defaultXType = 'barGeneric';
 		// var defaultXType = 'barGroup';
+		// var defaultXType = 'barStack';
 		// var defaultXType = 'pieGeneric';
 		// var defaultXType = 'pieBuild';
 		var defaultXType = 'sunburstPartition';

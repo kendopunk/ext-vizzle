@@ -229,7 +229,7 @@ Ext.define('App.util.d3.final.MultiLineChart', {
 	
  	/**
  	 * @function
- 	 * @memberOf App.util.d3.Scatterplot
+ 	 * @memberOf App.util.d3.MultiLineChart
  	 * @description Set the horizontal scale
  	 * @param metric String
  	 * @param data Object[]
@@ -271,7 +271,7 @@ Ext.define('App.util.d3.final.MultiLineChart', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.Scatterplot
+ 	 * @memberOf App.util.d3.MultiLineChart
  	 * @description Set the vertical (y) scale
  	 * @param metric String
  	 * @param data Object[]

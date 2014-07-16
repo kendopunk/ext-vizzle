@@ -7,8 +7,7 @@
 Ext.define('App.view.d3.bar.StackedBar', {
 	extend: 'Ext.Panel',
 	alias: 'widget.barStack',
-	title: 'Bar Chart',
-	title: 'Bar Chart',
+	title: 'Stacked Bar Chart',
 	closable: true,
 	
 	requires: [
@@ -26,7 +25,8 @@ Ext.define('App.view.d3.bar.StackedBar', {
  		 * @description SVG properties
  		 */
  		me.svgInitialized = false,
- 			me.workingGraphData = [],
+ 			me.rawData = [],
+ 			me.graphData = [],
  			me.canvasWidth,
  			me.canvasHeight,
  			me.svg,
@@ -34,15 +34,20 @@ Ext.define('App.view.d3.bar.StackedBar', {
  			me.panelId,
  			me.stackedBarChart = null,
  			me.currentMetric = 'total',
- 			me.baseTitle = 'German Tank Production in WWII (1939-1944)',
+ 			me.currentDataSource = 'armor',
+ 			me.dataHelpers = {
+	 			armor: {
+		 			title: 'German Tank Production in WWII (1939-1944)'
+		 		},
+		 		aircraft: {
+		 			title: 'German Aircraft Production in WWII (1939-1944)'
+		 		}
+		 	};
  			me.eventRelay = Ext.create('App.util.MessageBus'),
  			me.btnHighlightCss = 'btn-highlight-khaki';
 		
-		/**
- 		 * @property
- 		 */
-		me.chartDescription = '<b>Stacked Bar Orientation</b><br><br>'
-			+ '<i>horizontal / vertical toggling...</i><br><br>'
+		me.chartDescription = '<b>Stacked Bar Chart with Orientation Support</b><br><br>'
+			+ '<i>Horizontal / vertical toggling...use "Customize" menu.</i><br><br>'
 			+ 'Took me a while to figure this out...but you can keep the '
 			+ 'd3.layout.stack() call in place (like the vertical stacked bar chart) '
 			+ 'and just get creative with the X and Y scales/axes.<br><br>'
@@ -50,21 +55,12 @@ Ext.define('App.view.d3.bar.StackedBar', {
 			+ 'Panzer V&#039s between 1939-1942)<br><br>'
 			+ 'Data from Wikipedia.  <i>Panzer</i> is German for "tank" or "armor".';
 			
-		/**
-		 * @property
-		 * @description Message event relay
-		 */
 		me.eventRelay = Ext.create('App.util.MessageBus');
-			
-		/**
- 		 * @properties
- 		 * @description layout vars and tooltip functions
- 		 */
 		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
 		
 		////////////////////////////////////////
-		// label functions
+		// LABEL, TOOLTIP, LEGEND functions
 		////////////////////////////////////////
  		me.productionLabelFn = function(data, index) {
  			if(data.y == 0) {
@@ -79,9 +75,6 @@ Ext.define('App.view.d3.bar.StackedBar', {
 			return Ext.util.Format.number(data.y, '0.0') + '%';
 		};
 		
-		////////////////////////////////////////
-		// tooltip functions
-		////////////////////////////////////////
 		me.productionTooltipFn = function(data, index) {
 			return '<b>' + data.category + '</b><br>'
 				+ Ext.util.Format.number(data.y, '0,000') + ' ' + data.id + '&#039;s';
@@ -92,9 +85,6 @@ Ext.define('App.view.d3.bar.StackedBar', {
 				+ data.id + ' production.';
 		};
 		
-		////////////////////////////////////////
-		// tick format functions
-		////////////////////////////////////////
  		me.productionTickFormat = function(d) {
 			return Ext.util.Format.number(d, '0,000');
 		};
@@ -104,9 +94,8 @@ Ext.define('App.view.d3.bar.StackedBar', {
 		};
 		
 		/**
- 		 * @property
- 		 * @description Vertical alignment selector
- 		 */
+		 * @property
+		 */
  		me.valignCombo = Ext.create('Ext.form.field.ComboBox', {
 	 		store: Ext.create('Ext.data.SimpleStore', {
 				fields: ['value'],
@@ -128,76 +117,139 @@ Ext.define('App.view.d3.bar.StackedBar', {
 		 	listeners: {
 			 	select: function(combo) {
 				 	me.stackedBarChart.setLabelVAlign(combo.getValue());
-				 	me.stackedBarChart.transition();
+				 	me.stackedBarChart.draw();
 			 	},
 			 	scope: me
 			}
 		});
 		
-		/**
-		 * @property
-		 * @type Ext.toolbar.Toolbar
-		 */
-		me.tbar =[{
-			xtype: 'button',
-			text: 'Total Produced',
-			metric: 'sales',
-			cls: me.btnHighlightCss,
-			handler: me.metricHandler,
-			scope: me
-		},
-		'-',
-		{
-			xtype: 'button',
-			text: 'Production %',
-			metric: 'percent',
-			handler: me.metricHandler,
-			scope: me
-		}, {
-			xtype: 'tbspacer',
-			width: 25
-		}, {
-			xtype: 'tbtext',
-			text: '<b>Orientation:</b>'
-		}, {
-			xtype: 'button',
-			tooltip: 'Vertical',
-			orientationValue: 'vertical',
-			iconCls: 'icon-bar-chart',
-			handler: me.orientationHandler,
-			scope: me
-		}, 
+		////////////////////////////////////////////
+		// TOOLBAR COMPONENTS
+		////////////////////////////////////////////
+ 		var colorSchemeMenu = Ext.Array.map(App.util.Global.svg.colorSchemes, function(obj) {
+	 		return {
+		 		text: obj.name,
+		 		handler: function(btn) {
+			 		me.stackedBarChart.setColorPalette(obj.palette);
+			 		me.stackedBarChart.draw();
+			 	},
+			 	scope: me
+			}
+		}, me);
+		
+		me.dockedItems = [{
+			xtype: 'toolbar',
+			dock: 'top',
+			items: [{
+				xtype: 'tbtext',
+				text: '<b>Type:</b>'
+			}, {
+				xtype: 'combo',
+				store: Ext.create('Ext.data.SimpleStore', {
+					fields: ['display', 'value'],
+					data: [
+						['Tanks', 'armor'],
+						['Aircraft', 'aircraft']
+					]
+				}),
+				displayField: 'display',
+				valueField: 'value',
+				value: 'armor',
+				editable: false,
+				queryMode: 'local',
+				triggerAction: 'all',
+				width: 100,
+				listWidth: 100,
+				listeners: {
+					select: function(combo) {
+						me.currentDataSource = combo.getValue();
+						me.dataSourceHandler();
+					},
+					scope: me
+				}
+			}, {
+				xtype: 'tbspacer',
+				width: 20
+			}, {
+				xtype: 'tbtext',
+				text: '<b>Production:</b>'
+			}, {
+				xtype: 'button',
+				text: 'Total',
+				metric: 'total',
+				itemId: 'totalBtn',
+				cls: me.btnHighlightCss,
+				handler: function(btn) {
+					btn.addCls(me.btnHighlightCss);
+					me.down('#percentBtn').removeCls(me.btnHighlightCss);
+					me.metricHandler(btn.metric);
+				},
+				scope: me
+			},
 			'-',
-		{
-			xtype: 'button',
-			tooltip: 'Horizontal',
-			orientationValue: 'horizontal',
-			iconCls: 'icon-bar-chart-hoz',
-			handler: me.orientationHandler,
-			scope: me
-		},
-		'->',
-		{
-			xtype: 'tbtext',
-			text: '<b>Labels:</b>'
-		}, {
-			xtype: 'button',
-			text: 'ON',
-			cls: me.btnHighlightCss,
-			currentValue: 'on',
-			handler: me.labelHandler,
-			scope: me
-		}, {
-			xtype: 'tbspacer',
-			width: 10
-		}, {
-			xtype: 'tbtext',
-			text: '<b>Label V-Align</b>'
-		},
-			me.valignCombo,
-		{
-			xtype: 'tbspacer',
-			width: 10
+			{
+				xtype: 'button',
+				text: '%',
+				metric: 'percent',
+				itemId: 'percentBtn',
+				handler: function(btn) {
+					btn.addCls(me.btnHighlightCss);
+					me.down('#totalBtn').removeCls(me.btnHighlightCss);
+					me.metricHandler(btn.metric);
+				},
+				scope: me
+			}, {
+				xtype: 'tbspacer',
+				width: 20
+			}, {
+				xtype: 'button',
+				iconCls: 'icon-tools',
+				text: 'Customize',
+				menu: [{
+					xtype: 'menucheckitem',
+					text: 'Labels',
+					checked: true,
+					listeners: {
+						checkchange: function(cbx, checked) {
+							me.stackedBarChart.setShowLabels(checked);
+							me.stackedBarChart.draw();
+						},
+						scope: me
+					}
+				}, {
+					xtype: 'menucheckitem',
+					text: 'Legend',
+					checked: true,
+					listeners: {
+						checkchange: function(cbx, checked) {
+							me.stackedBarChart.setShowLegend(checked);
+							me.stackedBarChart.draw();
+						},
+						scope: me
+					}
+				}, {
+					text: 'Vertical',
+					tooltip: 'Vertical',
+					iconCls: 'icon-bar-chart',
+					orientationValue: 'vertical',
+					handler: me.orientationHandler,
+					scope: me
+				}, {
+					text: 'Horizontal',
+					tooltip: 'Horizontal',
+					iconCls: 'icon-bar-chart-hoz',
+					orientationValue: 'horizontal',
+					handler: me.orientationHandler,
+					scope: me
+				}, {
+					text: 'Color Scheme',
+					iconCls: 'icon-color-wheel',
+					menu: {
+						xtype: 'menu',
+						items: colorSchemeMenu
+					}
+				}]	
+			}]
 		}];
 		
 		/**
@@ -225,8 +277,9 @@ Ext.define('App.view.d3.bar.StackedBar', {
  	 * @description Initialize the drawing canvas
  	 */
  	initCanvas: function() {
- 	
  		var me = this;
+ 		
+ 		me.getEl().mask('Loading...');
 	 	
 	 	// initialize SVG, width, height
  		me.svgInitialized = true,
@@ -240,77 +293,63 @@ Ext.define('App.view.d3.bar.StackedBar', {
 	 		.attr('width', me.canvasWidth)
 	 		.attr('height', me.canvasHeight);
 	 		
-	 	me.stackedBarChart = Ext.create('App.util.d3.final.StackedBarChart', {
+	 	me.stackedBarChart = Ext.create('App.util.d3.UniversalStackedBar', {
 			svg: me.svg,
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,
 			colorScale: d3.scale.category20(),
 			panelId: me.panelId,
+			chartFlex: 4,
+			legendFlex: 1,
 			margins: {
 				top: 40,
-				right: 10,
+				right: 15,
 				bottom: 50,
-				left: 100
+				left: 115
 			},
 			tooltipFunction: me.productionTooltipFn,
 			xTickFormat: me.productionTickFormat,
-			chartTitle: me.generateChartTitle(),
+			chartTitle: me.dataHelpers[me.currentDataSource].title,
 			showLabels: true,
 			showLegend: true,
-			chartFlex: 6,
-			legendFlex: .75,
-			labelFunction: me.productionLabelFn
+			spaceBetweenChartAndLegend: 30,
+			labelFunction: me.productionLabelFn,
+			colorPalette: '20b'
 		});
 		
 		// retrieve the graph data via AJAX and load the visualization
 		Ext.Ajax.request({
-			url: 'data/tank_production.json',
+			url: 'data/german_ww2.json',
 	 		method: 'GET',
 	 		success: function(response) {
 	 			var resp = Ext.JSON.decode(response.responseText);
 	 			
-	 			Ext.each(resp.data, function(rec) {
-		 			me.workingGraphData.push(rec);
-		 		}, me);
-		 		
-		 		// reverse the values in each category
-		 		//Ext.each(me.workingGraphData, function(obj) {
-			 		//obj.values = obj.values.reverse();
-			 	//});
-			 	
-			 	// set graph data and draw
-		 		me.stackedBarChart.setGraphData(me.workingGraphData);
-		 		me.stackedBarChart.draw();
+	 			me.rawData = resp;
+	 			me.graphData = resp.armor.data;
+		 		me.stackedBarChart.setGraphData(me.graphData);
+		 		me.stackedBarChart.initChart().draw();
 		 	},
+		 	callback: function() {
+			 	me.getEl().unmask();
+			},
 		 	scope: me
 		 });
  	},
   	
   	/**
 	 * @function
-	 * @memberOf App.view.d3.barlegend.MainPanel
-	 * @description Toolbar button handler
+	 * @memberOf App.view.d3.bar.StackedBar
+	 * @description Changing up metrics
+	 * @param metric String
 	 */
-	metricHandler: function(btn, evt) {
+	metricHandler: function(metric) {
 		var me = this;
 		
-		// button cls
-		Ext.each(me.query('toolbar > button'), function(button) {
-			if(button.metric) {
-				if(button.metric == btn.metric) {
-					button.addCls(me.btnHighlightCss);
-				} else {
-					button.removeCls(me.btnHighlightCss);
-				}
-			}
-		}, me);
+		me.currentMetric = metric;
 		
-		me.stackedBarChart.setChartTitle(me.generateChartTitle(btn.text));
-		me.currentMetric = btn.metric;
+		var dataSet = Ext.clone(me.graphData);
 		
-		var dataSet = Ext.clone(me.workingGraphData);
-		
-		if(btn.metric == 'percent') {
+		if(metric == 'percent') {
 			dataSet = me.normalizePercent(dataSet);
 			
 			me.stackedBarChart.setLabelFunction(me.pctLabelFn);
@@ -335,7 +374,7 @@ Ext.define('App.view.d3.bar.StackedBar', {
 			}
 		}
 		
-		me.stackedBarChart.transition();
+		me.stackedBarChart.draw();
 	},
   
    	/**
@@ -379,41 +418,6 @@ Ext.define('App.view.d3.bar.StackedBar', {
 		
 		return normalizedData;
    	},
-   	
-   	/** 
-	 * @function
-	 * @description Toggle labels on/off
-	 */
-	labelHandler: function(btn) {
-	 	var me = this;
-	 	
-		if(btn.currentValue == 'on') {
-			btn.currentValue = 'off';
-			btn.setText('OFF');
-			btn.removeCls(me.btnHighlightCss);
-			me.stackedBarChart.setShowLabels(false);
-			me.valignCombo.disable();
-		} else {
-			btn.currentValue = 'on';
-			btn.setText('ON');
-			btn.addCls(me.btnHighlightCss);
-			me.stackedBarChart.setShowLabels(true);
-			me.valignCombo.enable();
-		}
-		
-		me.stackedBarChart.transition();
-	},
-   	
-   	/** 
-	 * @function
-	 * @private
-	 * @description Set a new chart title
-	 */
-	generateChartTitle: function() {
-		var me = this;
-		
-		return me.baseTitle;
-	},
 	
 	/**
  	 * @function
@@ -439,6 +443,20 @@ Ext.define('App.view.d3.bar.StackedBar', {
 			}
 		}
 		
-		me.stackedBarChart.transition();
+		me.stackedBarChart.draw();
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Changing up the data source
+ 	 */
+ 	dataSourceHandler: function() {
+	 	var me = this;
+	 	
+	 	me.graphData = me.rawData[me.currentDataSource].data;
+	 	me.stackedBarChart.setChartTitle(me.dataHelpers[me.currentDataSource].title);
+	 	me.metricHandler(me.currentMetric, null);
+	 	
+	 	return;
 	}
 });

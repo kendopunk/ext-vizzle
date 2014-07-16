@@ -1,6 +1,6 @@
 {
 	"success": true,
-	"tanks": {
+	"armor": {
 		"data": [{
 			"category": "1939",
 			"values": [
@@ -68,7 +68,7 @@
 			"category": "1939",
 			"values": [
 				{"id": "Focke-Wulf Fw 190", "category": "1939", y: 0},
-				{"id": "Messerschmitt Bf 109", "category": "1939", y: 449},
+				{"id": "Mess. Bf 109", "category": "1939", y: 449},
 				{"id": "Stuka (Ju 87)", "category": "1939", y: 134},
 				{"id": "Heinkel He 111", "category": "1939", y: 452},
 				{"id": "Junkers Ju 88", "category": "1939", y: 69},
@@ -78,7 +78,7 @@
 			"category": "1940",
 			"values": [
 				{"id": "Focke-Wulf Fw 190", "category": "1940", y: 0},
-				{"id": "Messerschmitt Bf 109", "category": "1940", y: 1667},
+				{"id": "Mess. Bf 109", "category": "1940", y: 1667},
 				{"id": "Stuka (Ju 87)", "category": "1940", y: 603},
 				{"id": "Heinkel He 111", "category": "1940", y: 756},
 				{"id": "Junkers Ju 88", "category": "1940", y: 1816},
@@ -88,7 +88,7 @@
 			"category": "1941",
 			"values": [
 				{"id": "Focke-Wulf Fw 190", "category": "1941", y: 228},
-				{"id": "Messerschmitt Bf 109", "category": "1941", y: 2764},
+				{"id": "Mess. Bf 109", "category": "1941", y: 2764},
 				{"id": "Stuka (Ju 87)", "category": "1941", y: 500},
 				{"id": "Heinkel He 111", "category": "1941", y: 950},
 				{"id": "Junkers Ju 88", "category": "1941", y: 2146},
@@ -98,7 +98,7 @@
 			"category": "1942",
 			"values": [
 				{"id": "Focke-Wulf Fw 190", "category": "1942", y: 1850},
-				{"id": "Messerschmitt Bf 109", "category": "1942", y: 2657},
+				{"id": "Mess. Bf 109", "category": "1942", y: 2657},
 				{"id": "Stuka (Ju 87)", "category": "1942", y: 960},
 				{"id": "Heinkel He 111", "category": "1942", y: 1337},
 				{"id": "Junkers Ju 88", "category": "1942", y: 2270},
@@ -108,7 +108,7 @@
 			"category": "1943",
 			"values": [
 				{"id": "Focke-Wulf Fw 190", "category": "1943", y: 2171},
-				{"id": "Messerschmitt Bf 109", "category": "1943", y: 6013},
+				{"id": "Mess. Bf 109", "category": "1943", y: 6013},
 				{"id": "Stuka (Ju 87)", "category": "1943", y: 1672},
 				{"id": "Heinkel He 111", "category": "1943", y: 1405},
 				{"id": "Junkers Ju 88", "category": "1943", y: 2160},
@@ -118,7 +118,7 @@
 			"category": "1944",
 			"values": [
 				{"id": "Focke-Wulf Fw 190", "category": "1944", y: 7448},
-				{"id": "Messerschmitt Bf 109", "category": "1944", y: 12807},
+				{"id": "Mess. Bf 109", "category": "1944", y: 12807},
 				{"id": "Stuka (Ju 87)", "category": "1944", y: 1012},
 				{"id": "Heinkel He 111", "category": "1944", y: 756},
 				{"id": "Junkers Ju 88", "category": "1944", y: 661},

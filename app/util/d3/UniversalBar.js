@@ -121,29 +121,22 @@ Ext.define('App.util.d3.UniversalBar', {
 	initChart: function() {
 		var me = this;
 		
-		var showLegend = me.showLegend,
-			margins = me.margins;
+		////////////////////////////////////////
+		// "g" elements
+		////////////////////////////////////////
 		
-		////////////////////////////////////////
-		// bar "g"
-		////////////////////////////////////////
+		// bar
 		me.gBar = me.svg.append('svg:g');
 		
-		////////////////////////////////////////
-		// label "g"
-		////////////////////////////////////////
+		// label
 		me.gText = me.svg.append('svg:g');
 		
-		////////////////////////////////////////
-		// y axis "g"
-		////////////////////////////////////////
+		// y axis
 		me.gYAxis = me.svg.append('svg:g')
 			.attr('class', 'axis')
 			.attr('transform', 'translate(' + me.margins.leftAxis + ',0)');
 		
-		////////////////////////////////////////	
-		// title "g"
-		////////////////////////////////////////
+		// title
 		me.gTitle = me.svg.append('svg:g')
 			.attr('transform', 'translate('
 			+ parseInt(me.canvasWidth/2)
@@ -151,9 +144,7 @@ Ext.define('App.util.d3.UniversalBar', {
 			+ parseInt(me.margins.top/2)
 			+ ')');
 		
-		////////////////////////////////////////
-		// legend "g"
-		////////////////////////////////////////
+		// legend
 		var legendTranslateX = me.margins.left 
 			+ (me.getFlexUnit() * me.chartFlex)
 			+ me.spaceBetweenChartAndLegend;

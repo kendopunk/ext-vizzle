@@ -9,12 +9,12 @@ Ext.define('App.controller.Application', {
 	requires: [
 		'App.view.chart.misc.MainPanel',
 		'App.view.d3.area.GenericLine',
-		'App.view.d3.area.MultiPanel',
+		'App.view.d3.area.MultiPanel',		// @TODO
 		'App.view.d3.area.Ticker',
 		'App.view.d3.bar.GenericBar',
 		'App.view.d3.bar.BuildABar',
-		'App.view.d3.bar.StackedBar',
-		'App.view.d3.bar.GroupedBar',
+		'App.view.d3.bar.StackedBar',		
+		'App.view.d3.bar.GroupedBar',		// @TODO
 		'App.view.d3.bar.MouseEvents',
 		'App.view.d3.geo.basic.MainPanel',
 		'App.view.d3.misc.GenericScatter',
@@ -23,8 +23,8 @@ Ext.define('App.controller.Application', {
 		'App.view.d3.pie.BuildAPie',
 		'App.view.d3.pie.GenericPie',
 		'App.view.d3.pie.Sunburst',
-		'App.view.d3.treemap.basic.MainPanel',
-		'App.view.d3.treemap.heat.MainPanel',
+		'App.view.d3.treemap.basic.MainPanel',	// @TODO
+		'App.view.d3.treemap.heat.MainPanel',	// @TODO
 		'App.view.d3.win.WindowBar',
 		'App.view.fabric.basic.MainPanel'
 	],

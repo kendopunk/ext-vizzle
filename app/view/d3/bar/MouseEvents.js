@@ -57,7 +57,7 @@ Ext.define('App.view.d3.bar.MouseEvents', {
 	
 	/**
 	 * @function
-	 * @memberOf App.view.d3.barlegend.MainPanel
+	 * @memberOf App.view.d3.bar.MouseEvents
 	 * @description Initialize SVG drawing canvas
 	 */
 	initCanvas: function() {
