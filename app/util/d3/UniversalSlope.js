@@ -177,6 +177,7 @@ Ext.define('App.util.d3.UniversalSlope', {
 		// add new text
 		var newText = textSelection.enter()
 			.append('text')
+			.style('cursor', 'default')
 			.style('text-anchor', 'start');
 			
 		// transition all

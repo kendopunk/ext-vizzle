@@ -471,7 +471,8 @@ Ext.define('App.util.d3.UniversalBar', {
 		legendTextSelection.exit().remove();
 			
 		legendTextSelection.enter().append('text')
-			.style('font-size', me.legendFontSize)
+			.style('cursor', 'default')
+			.attr('class', 'legendText')
 			.on('mouseover', function(d, i) {
 				// highlight text
 				d3.select(this)

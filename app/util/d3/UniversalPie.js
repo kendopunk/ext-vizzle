@@ -539,7 +539,10 @@ Ext.define('App.util.d3.UniversalPie', {
 			legendTextSelection.exit().remove();
 			
 			// add new
-			legendTextSelection.enter().append('text')
+			legendTextSelection.enter()
+				.append('text')
+				.style('cursor', 'default')
+				.attr('class', 'legendText')
 				.attr('x', legendSquareWidth * 2)
 				.attr('y', function(d, i) {
 					return i * legendSquareHeight * 1.75;
@@ -606,7 +609,8 @@ Ext.define('App.util.d3.UniversalPie', {
 				.attr('y', function(d, i) {
 					return i * legendSquareHeight * 1.75;
 				})
-				.attr('class', me.legendClass)
+				.style('cursor', 'default')
+				.attr('class', 'legendText')
 				.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
 				.on('mouseover', function(d, i) {
 					// highlight this text
