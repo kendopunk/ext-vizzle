@@ -40,12 +40,9 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 	labelFontSize: '10px',
 	labelMetric: 'name',
 	legendFlex: 1,
-	legendProperty: 'year',
+	legendProperty: 'name',
 	legendSquareWidth: 10,
   	legendSquareHeight: 10,
-  	legendTextFunction: function(data, index) {
-	 	return 'legend item';
-	},
 	margins: {
 		top: 10,
 		right: 10,
@@ -242,39 +239,49 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
   	handleBarLabels: function() {
   		var me = this;
   		
+  		if(!me.showLabels) {
+	  		me.gBarLabel.selectAll('text').remove();
+	  		return;
+	  	}
+	  	
+	  	// local scope
   		var canvasHeight = me.canvasHeight,
 	  		barPadding = me.barPadding,
 	  		labelMetric = me.labelMetric,
 	  		margins = me.margins,
 	  		_xScale = me.xScale,
 	  		xMetric = me.xMetric;
-	  		
-	  	// remove
-	  	me.gBarLabel.selectAll('text').remove();
 	  	
-	  	if(me.showLabels) {
-	  		me.gBarLabel.selectAll('text')
-		  		.data(me.graphData)
-		  		.enter()
-		  		.append('text')
-		  		.style('font-size', me.labelFontSize)
-		  		.attr('x', function(d, i) {
-			  		return _xScale(d[xMetric]) + parseInt((_xScale.rangeBand() - barPadding)/2);
-			  	})
-			  	.attr('y', function(d) {
-				  	return canvasHeight - parseInt(margins.bottom * 1.2);
-				})
-				.attr('transform', function(d) {
-					// rotation needs to happen around the text's X and Y position
-					var x = _xScale(d[xMetric]) + parseInt((_xScale.rangeBand() - barPadding)/2);
-					var y = canvasHeight - parseInt(margins.bottom * 1.2);
-					return 'rotate(-90,' + x + ',' + y + ')';
-				})	
-			  	.style('text-anchor', 'start')
-			  	.text(function(d) {
-				  	return d[labelMetric];
-				});
-		}
+	  	////////////////////////////////////////
+	  	// LABEL - JRAT
+	  	////////////////////////////////////////
+  		var labelSelection = me.gBarLabel.selectAll('text')
+	  		.data(me.graphData);
+	  	
+	  	labelSelection.exit().remove();
+	  	
+	  	labelSelection.enter()
+	  		.append('text')
+	  		.attr('class', 'labelText')
+	  		.style('text-anchor', 'start');
+	  		
+	  	labelSelection.transition()
+	  		.duration(500)
+	  		.attr('x', function(d, i) {
+		  		return _xScale(d[xMetric]) + parseInt((_xScale.rangeBand() - barPadding)/2);
+		  	})
+		  	.attr('y', function(d) {
+			  	return canvasHeight - parseInt(margins.bottom * 1.2);
+			})
+			.attr('transform', function(d) {
+				// rotation needs to happen around the text's X and Y position
+				var x = _xScale(d[xMetric]) + parseInt((_xScale.rangeBand() - barPadding)/2);
+				var y = canvasHeight - parseInt(margins.bottom * 1.2);
+				return 'rotate(-90,' + x + ',' + y + ')';
+			})
+		  	.text(function(d) {
+			  	return d[labelMetric];
+			});
   	},
   	
   	/**
@@ -319,12 +326,21 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 			fixedColorRange = me.fixedColorRange,
 			fixedColorRangeIndex = me.fixedColorRangeIndex,
 			legendProperty = me.legendProperty;
+		
+		////////////////////////////////////////
+		// create legend data from graphData
+		////////////////////////////////////////	
+		var legendData = Ext.Array.unique(
+			Ext.Array.map(me.graphData, function(item) {
+				return item[legendProperty];
+			}, me)
+		);
 			
 		////////////////////////////////////////
 		// LEGEND SQUARES - JRAT
 		////////////////////////////////////////
 		var legendSquareSelection = me.gLegend.selectAll('rect')
-			.data(['1950s', '1960s', '1970s', '1980s', '1990s', '2000']);
+			.data(legendData);
 				
 		legendSquareSelection.exit().remove();
 			
@@ -376,21 +392,21 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 		// LEGEND TEXT - JRAT
 		////////////////////////////////////////
 		var legendTextSelection = me.gLegend.selectAll('text')
-			.data(['1950s', '1960s', '1970s', '1980s', '1990s', '2000']);
+			.data(legendData);
 				
 		legendTextSelection.exit().remove();
 			
 		legendTextSelection.enter().append('text')
+			.style('cursor', 'default')
 			.attr('class', 'legendText')
 			.on('mouseover', function(d, i) {
 				// highlight text
 				d3.select(this)
 					.style('fill', '#990066')
 					.style('font-weight', 'bold');
-				
-				// outline the bars
+					
 				bars.selectAll('rect').filter(function(e, j) {
-					return i == j;
+					return e[legendProperty] == d;
 				})
 				.style('stroke', '#000000')
 				.style('stroke-width', 2)
@@ -402,9 +418,8 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 				el.style('fill', '#000000')
 					.style('font-weight', 'normal');
 					
-				// back to normal
 				bars.selectAll('rect').filter(function(e, j) {
-					return i == j;
+					return e[legendProperty] == d;
 				})
 				.style('stroke', 0)
 				.style('stroke-width', null)
@@ -417,7 +432,6 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 				return i * legendSquareHeight * 1.75;
 			})
 			.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
-			//.text(me.legendTextFunction);
 			.text(String);
 	},
 	
@@ -682,6 +696,11 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 	setGraphData: function(d) {
 	  	var me = this;
 	  	me.graphData = d;
+	},
+	
+	setShowLabels: function(bool) {
+		var me = this;
+		me.showLabels = bool;
 	},
 	
 	setShowLegend: function(bool) {

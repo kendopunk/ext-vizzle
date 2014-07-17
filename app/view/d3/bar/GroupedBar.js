@@ -117,7 +117,7 @@ Ext.define('App.view.d3.bar.GroupedBar', {
 		 	me.dairyButton,
 		 	{xtype: 'tbspacer', width: 30},
 		 	{xtype: 'tbtext', text: '<b>Year(s):</b>'},
-			checkboxData/*,
+			checkboxData,
 			{
 				xtype: 'tbspacer',
 				width: 20
@@ -131,8 +131,8 @@ Ext.define('App.view.d3.bar.GroupedBar', {
 					checked: true,
 					listeners: {
 						checkchange: function(cbx, checked) {
-							//me.barChart.setShowLabels(checked);
-							//me.barChart.draw();
+							me.groupedBarChart.setShowLabels(checked);
+							me.groupedBarChart.draw();
 						},
 						scope: me
 					}
@@ -148,7 +148,7 @@ Ext.define('App.view.d3.bar.GroupedBar', {
 						scope: me
 					}
 				}]
-		 	}*/]
+		 	}]
 		}];
 		
 		/**
@@ -201,7 +201,7 @@ Ext.define('App.view.d3.bar.GroupedBar', {
 				'1990s': colorScale(5),
 				'2000': colorScale(6),
 			},
-			fixedColorRangeIndex: 'name',
+			fixedColorRangeIndex: 'year',
 			margins: {
 				top: 40,
 				right: 10,
@@ -217,10 +217,7 @@ Ext.define('App.view.d3.bar.GroupedBar', {
 					+ Ext.util.Format.number(d.value, '0.0')
 					+ ' lbs/person.';
 			},
-			showLegend: false,
-			legendTextFunction: function(d, i) {
-				return d.year;
-			}
+			showLegend: false
 		});
 		
 		// check off the first available checkbox
