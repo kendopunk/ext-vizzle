@@ -9,7 +9,7 @@ Ext.define('App.controller.Application', {
 	requires: [
 		'App.view.chart.misc.MainPanel',
 		'App.view.d3.area.GenericLine',
-		'App.view.d3.area.MultiPanel',		// @TODO
+		'App.view.d3.area.MultiPanel',
 		'App.view.d3.area.Ticker',
 		'App.view.d3.bar.GenericBar',
 		'App.view.d3.bar.BuildABar',

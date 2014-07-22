@@ -4,108 +4,117 @@
  * @memberOf App.util.d3
  * @description Radial treemap (sunburst)
  */
-Ext.define('App.util.d3.RadialTree', {
+Ext.define('App.util.d3.UniversalRadialTree', {
 	
+	/**
+	 * The primary SVG element.  Must be set outside the class and
+	 * and passed as a configuration item
+	 */
 	svg: null,
 	
-	gCanvas: null,
-	gPath: null,
-	gLabel: null,
-	partition: null,
 	arc: null,
-	path: null,
-	labels: null,
-	
-	canvasWidth: 300,
-	canvasHeight: 300,
-	dataMetric: 'count',
-	radius: null,
-	radiusScaleFactor: .9,
-	colorScale: d3.scale.category20(),
-	
-	xScale: null,
-	yScale: null,
-	
+	canvasHeight: 400,
+	canvasWidth: 400,
+	chartInitialized: false,
 	colorLightenFactor: 8,
+	colorScale: d3.scale.category20(),
+	dataMetric: 'count',
+	eventRelay: null,
 	
-	tooltipFunction: function(d) {
-		return 'tooltip';
-	},
+	gCanvas: null,
+	gLabel: null,
+	gPath: null,
 	
+	handleEvents: false,
+	labels: null,
+	labelClass: 'miniText',
 	labelFunction: function(d) {
 		return 'label';
 	},
-	labelClass: 'miniText',
 	labelVisibilityThreshold: 0.02,
+	mouseEvents: {
+	 	mouseover: {
+		 	enabled: false,
+		 	eventName: null
+		},
+		click: {
+			enabled: false,
+			eventName: null
+		},
+		dblclick: {
+			enabled: false,
+			eventName: null
+		}
+	},
+	partition: null,
+	path: null,
+	radius: null,
+	radiusScaleFactor: .9,
+	tooltipFunction: function(d) {
+		return 'tooltip';
+	},
+	xScale: null,
+	yScale: null,
 	
-	/**
- 	 * CONSTRUCTOR
- 	 */
 	constructor: function(config) {
 		var me = this;
 		
-		Ext.apply(me, config);
+		Ext.merge(me, config);
+
+		if(me.handleEvents) {
+			me.eventRelay = Ext.create('App.util.MessageBus');
+		}
 	},
 	
 	/**
- 	 * @function
- 	 * @description Initial drawing
- 	 */
- 	draw: function() {
-	 	var me = this;
-	 	
-	 	var colorScale = me.colorScale,
-	 		dataMetric = me.dataMetric,
-	 		graphData = me.graphData;
-	 	
+	 * @function
+	 * @description Initialize chart components
+	 */
+	initChart: function() {
+		var me = this;
+		
+		// default radius
 	 	if(me.radius == null) {
-		 	me.radius = Ext.Array.min([me.canvasWidth, me.canvasHeight])/2 * me.radiusScaleFactor;
+			me.radius = Ext.Array.min([me.canvasWidth, me.canvasHeight])/2 * me.radiusScaleFactor;
 		}
- 	
- 		me.partition = d3.layout.partition()
-    		.sort(null)
-    		.size([2 * Math.PI, me.radius * me.radius]);
+		
+		me.partition = d3.layout.partition()
+			.sort(null)
+			.size([2 * Math.PI, me.radius * me.radius]);
     
     	me.arc = d3.svg.arc()
     		.startAngle(function(d) { return d.x; })
     		.endAngle(function(d) { return d.x + d.dx; })
     		.innerRadius(function(d) { return Math.sqrt(d.y); })
     		.outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
-    	
-    	// local scope
-    	var arcObject = me.arc;
-    	
-    	////////////////////////////////////////
-    	// SET x/y scales
-    	////////////////////////////////////////
-    	me.setScales();
-    	
-    	////////////////////////////////////////
-    	// path "g"
-    	// label "g"
-    	////////////////////////////////////////
+    		
     	me.gCanvas = me.svg.append('svg:g')
-	    	.attr('transform', 'translate(' + Math.floor(me.canvasWidth/2) + ',' + Math.floor(me.canvasHeight/2) + ')');
-    	me.gPath = me.gCanvas.append('svg:g');
-    	me.gLabel = me.gCanvas.append('svg:g');
-	    	
+	    	.attr('transform', 'translate(' 
+	    		+ Math.floor(me.canvasWidth/2) 
+	    		+ ',' 
+	    		+ Math.floor(me.canvasHeight/2) 
+	    		+ ')');
+	    		
+	    me.gPath = me.gCanvas.append('svg:g');
+	    
+	    me.gLabel = me.gCanvas.append('svg:g');
+	    
+	    return me;
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description 
+ 	 */
+ 	draw: function() {
+	 	var me = this;
+	 	
 	    ////////////////////////////////////////
 	    // HANDLERS
 	    ////////////////////////////////////////
-	    me.handlePaths();
-	    me.handleLabels();
- 	},
- 	
- 	/**
- 	 * @function
- 	 * @description Transition drawing
- 	 */
- 	transition: function() {
-	 	var me = this;
-		var dataMetric = me.dataMetric;
-
-		me.handlePaths();
-		me.handleLabels();
+	 	me.setScales();
+	 	me.handlePaths();
+	 	me.handleLabels();
  	},
  	
  	/**
@@ -138,10 +147,14 @@ Ext.define('App.util.d3.RadialTree', {
 			.append('path')
 			.style('opacity', .8)
 			.on('mouseover', function(d, i) {
-				d3.select(this).style('opacity', 1);
+				d3.select(this)
+					.style('opacity', 1)
+					.style('stroke', '#333333');
 			})
 			.on('mouseout', function(d, i) {
-				d3.select(this).style('opacity', .8);
+				d3.select(this)
+					.style('opacity', .8)
+					.style('stroke', '#FFFFFF');
 			})
 			.style('stroke', '#FFFFFF')
 			.style('fill-rule', 'evenodd');
@@ -295,10 +308,19 @@ Ext.define('App.util.d3.RadialTree', {
 	 *
 	 *
 	 */
+	setDataMetric: function(metric) {
+		var me = this;
+		me.dataMetric = metric || 'count';
+	},
+	
 	setGraphData: function(data) {
 		var me = this;
-		
 		me.graphData = data;
+	},
+	
+	setLabelFunction: function(fn) {
+		var me = this;
+		me.labelFunction = fn;
 	},
 	
 	setScales: function() {
@@ -310,21 +332,8 @@ Ext.define('App.util.d3.RadialTree', {
 		return;
 	},
 	
-	setDataMetric: function(metric) {
-		var me = this;
-		
-		me.dataMetric = metric || 'count';
-	},
-	
 	setTooltipFunction: function(fn) {
 		var me = this;
-		
 		me.tooltipFunction = fn;
-	},
-	
-	setLabelFunction: function(fn) {
-		var me = this;
-		
-		me.labelFunction = fn;
 	}
 });

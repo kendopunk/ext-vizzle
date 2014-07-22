@@ -12,7 +12,7 @@ Ext.define('App.view.d3.pie.Sunburst', {
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.RadialTree'
+		'App.util.d3.UniversalRadialTree'
 	],
 	
 	layout: 'fit',
@@ -118,7 +118,7 @@ Ext.define('App.view.d3.pie.Sunburst', {
 				var resp = Ext.JSON.decode(response.responseText);
 				var stub = me.generateGraphData();
 				
-	 			me.radialChart = Ext.create('App.util.d3.RadialTree', {
+	 			me.radialChart = Ext.create('App.util.d3.UniversalRadialTree', {
 		 			svg: me.svg,
 		 			canvasWidth: me.canvasWidth,
 		 			canvasHeight: me.canvasHeight,
@@ -128,6 +128,7 @@ Ext.define('App.view.d3.pie.Sunburst', {
 		 			labelFunction: function(d, i) {
 			 			return d.name;
 			 		},
+			 		radiusScaleFactor: .8,
 			 		tooltipFunction: function(d, i) {
 				 		if(d.depth > 1) {
 					 		return '<b>' + d.name + '</b><br>'
@@ -142,7 +143,7 @@ Ext.define('App.view.d3.pie.Sunburst', {
 				 	}
 		 		}, me);
 	 			
-	 			me.radialChart.draw();
+	 			me.radialChart.initChart().draw();
 	 		},
 	 		callback: function() {
 		 		me.getEl().unmask();
@@ -166,7 +167,7 @@ Ext.define('App.view.d3.pie.Sunburst', {
 		
 		me.currentMetric = btn.metricName;
 		me.radialChart.setDataMetric(btn.metricName);
-		me.radialChart.transition();
+		me.radialChart.draw();
 		
 		return;
 	},
