@@ -196,6 +196,8 @@ svg {
 
 .treecell {
 	border: solid 1px white;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
 	font: 9px sans-serif;
 	line-height: 12px;
 	overflow: hidden;
@@ -205,6 +207,8 @@ svg {
 
 .nflTreeCell {
 	border: solid 1px white;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
 	color: white;
 	font: bold 9px sans-serif;
 	line-height: 12px;

@@ -110,12 +110,12 @@ Ext.define('App.store.tree.MenuStore', {
 					text: 'Treemap',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
-					id: 'treemapBasicMainPanel'
+					id: 'treemapFootball'
 				}, {
 					text: 'Heat Treemap',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
-					id: 'treemapHeatMainPanel'
+					id: 'treemapNetflow'
 				}, {
 					text: 'Slopegraph',
 					leaf: true,

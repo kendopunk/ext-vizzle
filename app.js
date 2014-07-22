@@ -37,6 +37,8 @@ Ext.application({
 		// // var defaultXType = 'pieBuild';
 		var defaultXType = 'sunburstPartition';
 		// var defaultXType = 'scatterGeneric';
+		// var defaultXType = 'treemapFootball';
+		// var defaultXType = 'treemapNetflow';
 		// var defaultXType = 'timeline';
 		// var defaultXType = 'slopeDebt';
 		

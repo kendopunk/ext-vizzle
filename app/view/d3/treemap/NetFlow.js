@@ -4,15 +4,15 @@
  * @memberOf App.view.d3.scatterplot
  * @description Simple treemap panel with two independent metrics
  */
-Ext.define('App.view.d3.treemap.heat.MainPanel', {
+Ext.define('App.view.d3.treemap.NetFlow', {
 	extend: 'Ext.Panel',
-	alias: 'widget.treemapHeatMainPanel',
+	alias: 'widget.treemapNetflow',
 	title: 'Heat Treemap',
 	closable: true,
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.TreeMap'
+		'App.util.d3.UniversalTreeMap'
 	],
 	
 	layout: 'fit',
@@ -24,8 +24,7 @@ Ext.define('App.view.d3.treemap.heat.MainPanel', {
  		 * @properties
  		 * @description SVG properties
  		 */
- 		me.graphData = [],
-	 		me.treemap = null,
+ 		me.treemap = null,
  			me.canvasWidth,
  			me.canvasHeight,
  			me.panelId,
@@ -115,7 +114,7 @@ Ext.define('App.view.d3.treemap.heat.MainPanel', {
 			 	listeners: {
 				 	select: function(combo) {
 					 	me.treemap.setSizeMetric(combo.getValue());
-					 	me.treemap.transition();
+					 	me.treemap.draw();
 				 	},
 				 	scope: me
 				 }
@@ -141,7 +140,7 @@ Ext.define('App.view.d3.treemap.heat.MainPanel', {
 			 	listeners: {
 				 	select: function(combo) {
 					 	me.treemap.setColorMetric(combo.getValue());
-					 	me.treemap.transition();
+					 	me.treemap.draw();
 				 	},
 				 	scope: me
 				 }
@@ -163,7 +162,7 @@ Ext.define('App.view.d3.treemap.heat.MainPanel', {
 	
 	/**
 	 * @function
-	 * @memberOf App.view.d3.treemap.heat.MainPanel
+	 * @memberOf App.view.d3.treemap.NetFlow
 	 * @description Initialize SVG drawing canvas
 	 */
 	initCanvas: function() {
@@ -175,32 +174,30 @@ Ext.define('App.view.d3.treemap.heat.MainPanel', {
  		me.canvasWidth = parseInt(me.body.dom.offsetWidth * .9),
 	 		me.canvasHeight = parseInt(me.body.dom.offsetHeight * .9),
  			me.panelId = '#' + me.body.id;
- 			
+ 		
+ 		// initialize chart component
+ 		me.treemap = Ext.create('App.util.d3.UniversalTreeMap', {
+			panelId: me.panelId,
+			canvasWidth: me.canvasWidth,
+			canvasHeight: me.canvasHeight,
+			chartTitle: 'IP Traffic Heat Treemap',
+			sizeMetric: me.sizeMetric,
+			colorMetric: me.colorMetric,
+			textFunction: me.ipTextFunction,
+			sticky: true,
+			fixedColorRange: ['#90EE90', '#FF0000'],
+			mode: 'slice',
+			showTooltips: true,
+			tooltipFunction: me.tooltipFn
+		});
+ 		
+ 		// get data
 	 	Ext.Ajax.request({
 		 	url: 'data/ip_data.json',
 		 	method: 'GET',
 		 	success: function(response) {
-				var resp = Ext.JSON.decode(response.responseText);
-				
-				me.graphData = resp;
-
-	 			me.treemap = Ext.create('App.util.d3.TreeMap', {
-	 				panelId: me.panelId,
-	 				canvasWidth: me.canvasWidth,
-	 				canvasHeight: me.canvasHeight,
-	 				graphData: resp,
-	 				chartTitle: 'IP Traffic Heat Treemap',
-	 				sizeMetric: me.sizeMetric,
-	 				colorMetric: me.colorMetric,
-	 				textFunction: me.ipTextFunction,
-	 				sticky: true,
-	 				fixedColorRange: ['#90EE90', '#FF0000'],
-	 				mode: 'slice',
-	 				showTooltips: true,
-	 				tooltipFunction: me.tooltipFn
-	 			});
-				
-				me.treemap.draw();
+				me.treemap.setGraphData(Ext.JSON.decode(response.responseText));
+				me.treemap.initChart().draw();
 	 		},
 	 		callback: function() {
 		 		me.getEl().unmask();

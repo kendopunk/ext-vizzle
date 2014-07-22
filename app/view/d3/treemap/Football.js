@@ -4,15 +4,15 @@
  * @memberOf App.view.d3.scatterplot
  * @description Simple treemap panel
  */
-Ext.define('App.view.d3.treemap.basic.MainPanel', {
+Ext.define('App.view.d3.treemap.Football', {
 	extend: 'Ext.Panel',
-	alias: 'widget.treemapBasicMainPanel',
+	alias: 'widget.treemapFootball',
 	title: 'Basic Treemap',
 	closable: true,
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.TreeMap'
+		'App.util.d3.UniversalTreeMap'
 	],
 	
 	layout: 'fit',
@@ -150,7 +150,7 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 					 	
 					 	me.treemap.setSizeMetric(combo.getValue());
 					 	
-					 	me.treemap.transition();
+					 	me.treemap.draw();
 			 		},
 			 		scope: me
 			 	}
@@ -177,7 +177,7 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 	
 	/**
 	 * @function
-	 * @memberOf App.view.d3.treemap.basic.MainPanel
+	 * @memberOf App.view.d3.treemap.Football
 	 * @description Initialize SVG drawing canvas
 	 */
 	initCanvas: function() {
@@ -198,7 +198,7 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 	 		
 	 			me.graphData = resp;
 
-	 			me.treemap = Ext.create('App.util.d3.TreeMap', {
+	 			me.treemap = Ext.create('App.util.d3.UniversalTreeMap', {
 	 				panelId: me.panelId,
 	 				canvasWidth: me.canvasWidth,
 	 				canvasHeight: me.canvasHeight,
@@ -209,10 +209,15 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 	 				colorMetric: me.colorMetric,
 	 				textFunction: me.winsTextFunction,
 	 				sticky: true,
-	 				divClass: 'nflTreeCell'
+	 				divClass: 'nflTreeCell',
+	 				showTooltips: true,
+	 				tooltipFunction: function(d, i) {
+		 				return '<b>' + d.team + '</b>';
+		 			}
 	 			});
 				
-				me.treemap.draw();
+				//me.treemap.draw();
+				me.treemap.initChart().draw();
 	 		},
 	 		callback: function() {
 		 		me.getEl().unmask();
