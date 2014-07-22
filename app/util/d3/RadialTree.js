@@ -1,10 +1,10 @@
 /**
  * @class
  * @author Mark Fehrenbacher (kendopunk@hotmail.com)
- * @memberOf App.util.d3.final
+ * @memberOf App.util.d3
  * @description Radial treemap (sunburst)
  */
-Ext.define('App.util.d3.final.RadialTree', {
+Ext.define('App.util.d3.RadialTree', {
 	
 	svg: null,
 	

@@ -12,7 +12,7 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.final.TreeMap'
+		'App.util.d3.TreeMap'
 	],
 	
 	layout: 'fit',
@@ -198,7 +198,7 @@ Ext.define('App.view.d3.treemap.basic.MainPanel', {
 	 		
 	 			me.graphData = resp;
 
-	 			me.treemap = Ext.create('App.util.d3.final.TreeMap', {
+	 			me.treemap = Ext.create('App.util.d3.TreeMap', {
 	 				panelId: me.panelId,
 	 				canvasWidth: me.canvasWidth,
 	 				canvasHeight: me.canvasHeight,

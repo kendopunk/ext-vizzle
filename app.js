@@ -27,19 +27,20 @@ Ext.application({
 		
 		// var defaultXType = null;
 		// var defaultXType = 'areaGeneric';
+		// var defaultXType = 'areaMultiPanel';
 		// var defaultXType = 'areaTicker';
 		// var defaultXType = 'barBuild';
-		var defaultXType = 'barGeneric';
+		// var defaultXType = 'barGeneric';
 		// var defaultXType = 'barGroup';
-		// // var defaultXType = 'barStack';
+		// var defaultXType = 'barStack';
 		// var defaultXType = 'pieGeneric';
-		// var defaultXType = 'pieBuild';
-		// var defaultXType = 'sunburstPartition';
+		// // var defaultXType = 'pieBuild';
+		var defaultXType = 'sunburstPartition';
 		// var defaultXType = 'scatterGeneric';
 		// var defaultXType = 'timeline';
 		// var defaultXType = 'slopeDebt';
 		
-		Ext.create('Ext.container.Viewport', {
+		Ext.create('Ext.container.Viewport', {		
 			layout: 'border',
 			items: [{
 				xtype: 'panel',

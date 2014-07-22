@@ -12,7 +12,7 @@ Ext.define('App.view.d3.pie.Sunburst', {
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.final.RadialTree'
+		'App.util.d3.RadialTree'
 	],
 	
 	layout: 'fit',
@@ -118,7 +118,7 @@ Ext.define('App.view.d3.pie.Sunburst', {
 				var resp = Ext.JSON.decode(response.responseText);
 				var stub = me.generateGraphData();
 				
-	 			me.radialChart = Ext.create('App.util.d3.final.RadialTree', {
+	 			me.radialChart = Ext.create('App.util.d3.RadialTree', {
 		 			svg: me.svg,
 		 			canvasWidth: me.canvasWidth,
 		 			canvasHeight: me.canvasHeight,

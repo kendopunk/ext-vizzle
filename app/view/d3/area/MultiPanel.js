@@ -12,7 +12,7 @@ Ext.define('App.view.d3.area.MultiPanel', {
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.final.MultiLineChart'
+		'App.util.d3.UniversalMultiLine'
 	],
 	
 	layout: 'fit',
@@ -54,6 +54,32 @@ Ext.define('App.view.d3.area.MultiPanel', {
 		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .98);
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
 		
+		var interpolateSchemes = Ext.Array.map([
+			{
+				name: 'Linear',
+				id: 'linear'
+			}, {
+				name: 'Step Before',
+				id: 'step-before'
+			}, {
+				name: 'Step After',
+				id: 'step-after'
+			},{
+				name: 'Monotone',
+				id: 'monotone'
+			}], function(item) {
+				return {
+					text: item.name,
+					handler: function() {
+						me.lineChart.setInterpolation(item.id);
+						me.lineChart.setLineAreaFn();
+						me.lineChart.transitionExisting();
+					},
+					scope: me
+				};
+			}
+		);	
+		
 		////////////////////////////////////////
 		// TOOLBAR/COMPONENTS
 		////////////////////////////////////////
@@ -80,6 +106,27 @@ Ext.define('App.view.d3.area.MultiPanel', {
 					me.lineChart.clearSeries();
 				},
 				scope: me
+			},
+			'-',
+			{
+				xtype: 'button',
+				iconCls: 'icon-tools',
+				text: 'Customize',
+				menu: [{
+					text: 'Line Interpolation',
+					menu: interpolateSchemes
+				}, {
+					xtype: 'menucheckitem',
+					text: 'Grid',
+					checked: true,
+					listeners: {
+						checkchange: function(cbx, checked) {
+							me.lineChart.setShowGrid(checked);
+							me.lineChart.handleGrid();
+						},
+						scope: me
+					}
+				}]
 			}]
 		}];
 		
@@ -115,7 +162,7 @@ Ext.define('App.view.d3.area.MultiPanel', {
 	 		.attr('height', me.canvasHeight);
 	 		
 	 	// init chart
-	 	me.lineChart = Ext.create('App.util.d3.final.MultiLineChart', {
+	 	me.lineChart = Ext.create('App.util.d3.UniversalMultiLine', {
 		 	svg: me.svg,
 		 	canvasWidth: me.canvasWidth,
 		 	canvasHeight: me.canvasHeight,
@@ -138,10 +185,16 @@ Ext.define('App.view.d3.area.MultiPanel', {
 				return Ext.util.Format.currency(d, '$', false, false);
 			},
 			fillColor: '#FFCC33',
-			markerRadius: 3
+			markerRadius: 3,
+			tooltipFunction: function(d, i) {
+				var dt = new Date(0, d.month-1);
+				return Ext.util.Format.date(dt, 'M')
+					+ ' - '
+					+ Ext.util.Format.currency(d.price);
+			}
 		});
 		
-		me.lineChart.appendSeries(me.generateGraphData(me.randomizeLimit));
+		me.lineChart.initChart().appendSeries(me.generateGraphData(me.randomizeLimit));
 		me.randomizeLimit = true;
 	 },
 	 
@@ -153,7 +206,7 @@ Ext.define('App.view.d3.area.MultiPanel', {
 	 generateGraphData: function(randomizeLimit) {
 		var me = this,
 			ret = [],
-			currentPrice = Math.floor(Math.random() * 30),
+			currentPrice = Math.floor(Math.random() * 25),
 			limit = 12,
 			minMonth = 12,
 			maxMonth = 24;		// 2 years
@@ -161,18 +214,20 @@ Ext.define('App.view.d3.area.MultiPanel', {
 		if(randomizeLimit) {
 			limit = Math.floor(Math.random() * (maxMonth-minMonth + 1) + minMonth);
 		}
-			 
+		
 		for(i=1; i<=limit; i++) {
+		
 			var temp = Math.random();
-			if(temp < .5) {
-				currentPrice = currentPrice - temp;
+			
+			if(temp < .7) {
+				currentPrice -= temp;
 			} else {
-				currentPrice = currentPrice + temp;
+				currentPrice += temp;
 			}
 			
 			ret.push({
 				month: i,
-				price: currentPrice
+				price: currentPrice >= 0 ? currentPrice : 0
 			});
 		}
 		

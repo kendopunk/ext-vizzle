@@ -12,7 +12,7 @@ Ext.define('App.view.d3.bar.StackedBar', {
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.final.StackedBarChart'
+		'App.util.d3.UniversalStackedBar'
 	],
 	
 	layout: 'fit',

@@ -1,60 +1,60 @@
 /**
  * @class
  * @author Mark Fehrenbacher (kendopunk@hotmail.com)
- * @memberOf App.util.d3.final
+ * @memberOf App.util.d3
  * @description Multiple line/series chart
  */
-Ext.define('App.util.d3.final.MultiLineChart', {
+Ext.define('App.util.d3.UniversalMultiLine', {
 
 	/**
  	 * The primary SVG element.  Must be set outside the class
  	 * and passed as a configuration item
  	 */
 	svg: null,
-	svgInitialized: false,
-	dataBin: [],
-	
-	canvasWidth: 400,
+
+  	canvasArea: null,
 	canvasHeight: 400,
+	canvasLine: null,
+	canvasWidth: 400,
+	chartInitialized: false,
+	chartTitle: null,
+	currentMinX: null,
+	currentMinY: null,
+	currentMaxX: null,
+	currentMaxY: null,
+	dataBin: [],
+	fillColor: '#FFFFCC',
 	
 	gCanvas: null,
+	gGrid: null,
 	gTitle: null,
 	gXAxis: null,
 	gYAxis: null,
 	
-	currentMinX: null,
-	currentMaxX: null,
-	currentMinY: null,
-	currentMaxY: null,
-
+	interpolate: 'linear',
+		// linear, step-before, step-after, basis, basis-open, basis-closed,
+		// bundle, cardinal, cardinal-open, cardinal-closed, monotone
+	labelClass: 'labelText',
+	labelFunction: function(data, index) {
+		return 'label';
+	},
+	labelSkipCount: 1,		// every 2nd, 3rd, 4th, etc.
 	margins: {
 		top: 20,
 		right: 10,
 		bottom: 90,
 		left: 90
 	},
+	markerRadius: 6,
 	panelId: null,
-	chartTitle: '',
- 	strokeColor: '#0000FF',
-	fillColor: '#FFFFCC',
-	interpolate: 'linear',
-		// linear, step-before, step-after, basis, basis-open, basis-closed,
-		// bundle, cardinal, cardinal-open, cardinal-closed, monotone
-		
+	showGrid: true,
 	showLabels: true,
-	labelClass: 'labelText',
-	labelSkipCount: 1,		// every 2nd, 3rd, 4th, etc.
-	labelFunction: function(data, index) {
-		return 'label';
-	},
-	
 	showMarkers: true,
-	markerRadius: 4,
+ 	strokeColor: '#0000FF',
 	tooltipFunction: function(data, index) {
 		return 'tooltip';
 	},
 	
-	// x stuff
 	xAxis: null,
 	xDataMetric: null,
 	xTicks: 7,
@@ -63,7 +63,6 @@ Ext.define('App.util.d3.final.MultiLineChart', {
 	},
 	xScalePadding: 0,
 	
-	// y stuff
 	yAxis: null,
 	yDataMetric: null,
 	yTicks: 12,
@@ -72,12 +71,9 @@ Ext.define('App.util.d3.final.MultiLineChart', {
 	},
 	yScalePadding: 0,
 	
- 	/**
-  	 * line/area holders
-  	 */
-  	canvasLine: null,
-  	canvasArea: null,
-	
+	/**
+ 	 * @constructor
+ 	 */
 	constructor: function(config) {
 		var me = this;
 		
@@ -91,57 +87,71 @@ Ext.define('App.util.d3.final.MultiLineChart', {
 	
 	/**
  	 * @function
- 	 * @description Initialize chart, if applicable, and append a
- 	 * series to it
- 	 * @param data Object[]
+ 	 * @description Initialize chart components
  	 */
-	appendSeries: function(data) {
-		var me = this;
+ 	initChart: function() {
+	 	var me = this;
+	 	
+	 	var xAxTrans = me.canvasHeight - me.margins.bottom;
+
+	 	me.gCanvas = me.svg.append('svg:g');
+	 	
+	 	me.gGrid = me.svg.append('svg:g');
+	 	
+	 	me.gXAxis = me.svg.append('svg:g')
+		 	.attr('class', 'axis')
+		 	.attr('transform', 'translate(0, ' + xAxTrans + ')');
+	 	
+	 	me.gYAxis = me.svg.append('svg:g')
+	 		.attr('class', 'axis')
+	 		.attr('transform', 'translate(' + me.margins.left + ', 0)');
+	 	
+	 	me.gTitle = me.svg.append('svg:g')
+			.attr('transform', 'translate('
+				+ parseInt(me.canvasWidth/2)
+				+ ','
+				+ parseInt(me.margins.top/2)
+				+ ')');
+				
+		me.chartInitialized = true;
 		
-		////////////////////////////////////////
-		// sanity check (1)
-		////////////////////////////////////////
-		if(me.svg == null || me.xDataMetric == null || me.yDataMetric == null) {
-			Ext.Msg.alert('Configuration Error', 
+		return me;
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Append series to chart
+ 	 * @param data Object
+ 	 */
+ 	appendSeries: function(data) {
+	 	var me = this;
+	 	
+	 	me.dataBin.push(data);
+	 	
+	 	////////////////////////////////////////
+	 	// sanity check
+	 	////////////////////////////////////////
+	 	if(me.svg == null || !me.chartInitialized
+		 	|| me.xDataMetric == null || me.yDataMetric == null) {
+		 	
+		 	Ext.Msg.alert('Configuration Error', 
 				'Missing required configuration data needed<br>to render visualization.'
 			);
 			return;
 		}
 		
 		//////////////////////////////////////////////////
-		// set "g" elements
-		//////////////////////////////////////////////////
-		if(!me.svgInitialized) {
-			me.gCanvas = me.svg.append('svg:g');
-			me.gXAxis = me.svg.append('svg:g');
-			me.gYAxis = me.svg.append('svg:g');
-			me.gTitle = me.svg.append('svg:g')
-				.attr('transform', 'translate('
-					+ parseInt(me.canvasWidth/2)
-					+ ','
-					+ parseInt(me.margins.top/2)
-					+ ')');
-					
-			me.handleChartTitle();
-		}
-					
-		//////////////////////////////////////////////////
 		// set scales
 		//////////////////////////////////////////////////
 		me.setXScale(me.xDataMetric, data);
 		me.setYScale(me.yDataMetric, data);
 		me.setLineAreaFn();
-		
-		//////////////////////////////////////////////////
-		// need to transition existing "g->series" elements
-		//////////////////////////////////////////////////
+		me.callAxes();
+
+		// transition existing "g->series" elements
 		me.transitionExisting();
 		
-		//////////////////////////////////////////////////
-		//
 		// append the new series data
-		//
-		//////////////////////////////////////////////////
 		var seriesG = me.gCanvas.append('svg:g')
 			.attr('class', 'series'),
 			randomHexColor = me.generateRandomHexColor();
@@ -153,23 +163,12 @@ Ext.define('App.util.d3.final.MultiLineChart', {
 			.style('stroke', '#' + randomHexColor)
 			.attr('d', me.canvasLine);
 			
+		//////////////////////////////////////////////////
+		// remaining handlers
+		//////////////////////////////////////////////////
 		me.appendMarkers(seriesG, data);
-
-		//////////////////////////////////////////////////
-		// axis modifications
-		//////////////////////////////////////////////////
-		if(!me.svgInitialized) {
-			var xAxTrans = me.canvasHeight - me.margins.bottom;
-			me.gXAxis.attr('class', 'axis')
-				.attr('transform', 'translate(0, ' + xAxTrans + ')');
-			me.gYAxis.attr('class', 'axis')
-				.attr('transform', 'translate(' + me.margins.left + ', 0)');
-		}
-		me.callAxes();
-		
-		me.svgInitialized = true;
-		
-		me.dataBin.push(data);
+		me.handleChartTitle();
+		me.handleGrid();
  	},
  	
  	/**
@@ -184,7 +183,8 @@ Ext.define('App.util.d3.final.MultiLineChart', {
 		var xScale = me.xScale,
   			xDataMetric = me.xDataMetric,
   			yScale = me.yScale,
-  			yDataMetric = me.yDataMetric;
+  			yDataMetric = me.yDataMetric,
+  			markerRadius = me.markerRadius;
   			
   		gEl.selectAll('circle')
 	  		.data(data)
@@ -198,8 +198,25 @@ Ext.define('App.util.d3.final.MultiLineChart', {
 			 })
 			.attr('r', me.markerRadius)
 			.style('fill', me.fillColor)
+			//.style('fill', '#' + me.generateRandomHexColor())
 			.style('stroke', 'black')
-			.style('stroke-width', 1);
+			.style('stroke-width', 1)
+			.on('mouseover', function(d, i) {
+				d3.select(this)
+					.transition()
+					.duration(0)
+					.attr('r', function() {
+						return markerRadius * 3;
+					});
+			})
+			.on('mouseout', function(d, i) {
+				d3.select(this)
+					.transition()
+					.duration(250)
+					.attr('r', markerRadius)
+					.ease('bounce');
+			})
+			.call(d3.helper.tooltip().text(me.tooltipFunction));
  	},
  	
  	/**
@@ -320,7 +337,7 @@ Ext.define('App.util.d3.final.MultiLineChart', {
  	callAxes: function() {
 	 	var me = this;
 	 	me.gXAxis.call(me.xAxis);
-		me.gYAxis.call(me.yAxis);
+	 	me.gYAxis.call(me.yAxis);
 	},
 	
 	/**
@@ -380,9 +397,10 @@ Ext.define('App.util.d3.final.MultiLineChart', {
  	handleChartTitle: function() {
  		var me = this;
  		
- 		me.gTitle.selectAll('text').remove();
- 		
- 		if(me.chartTitle != null) {
+ 		if(me.chartTitle == null) {
+			me.gTitle.selectAll('text').remove();
+			return;
+		} else {
 			me.gTitle.selectAll('text')
 				.data([me.chartTitle])
 				.enter()
@@ -395,66 +413,153 @@ Ext.define('App.util.d3.final.MultiLineChart', {
 		}
 	},
 	
+	handleGrid: function() {
+		var me = this;
+		
+		// NO GRID !!
+		if(!me.showGrid) {
+			me.gGrid.selectAll('.vertGrid')
+				.transition()
+				.duration(250)
+				.attr('y1', me.canvasHeight)
+				.remove();
+				
+			me.gGrid.selectAll('.hozGrid')
+				.transition()
+				.duration(250)
+				.attr('x1', 0)
+				.remove();
+				
+			return;
+		}
+		
+		var xScale = me.xScale,
+			xDataMetric = me.xDataMetric,
+			yScale = me.yScale,
+			yDataMetric = me.yDataMetric;
+			
+		//////////////////////////////////////////////////
+		// VERTICAL JRAT
+		//////////////////////////////////////////////////
+		var verticalSelection = me.gGrid.selectAll('.vertGrid')
+			.data(me.xScale.ticks());
+			
+		verticalSelection.exit().remove();
+		
+		verticalSelection.enter()
+			.append('svg:line')
+			.attr('class', 'vertGrid')
+			.style('stroke', '#BBBBBB')
+			.style('stroke-width', 1)
+			.style('stroke-dasharray', ("7,3"));
+			
+		verticalSelection.transition()
+			.duration(500)
+			.attr('x1', function(d) {
+				return xScale(d);
+			})
+			.attr('x2', function(d) {
+				return xScale(d);
+			})
+			.attr('y1', function(d) {
+				return me.margins.top;
+			})
+			.attr('y2', me.canvasHeight - me.margins.bottom);
+			
+		//////////////////////////////////////////////////
+		// HORIZONTAL JRAT
+		// we're NOT binding graph data to this...we are 
+		// binding the tick array from the Y scale
+		//////////////////////////////////////////////////
+		var horizontalSelection = me.gGrid.selectAll('.hozGrid')
+			.data(me.yScale.ticks());
+		
+		horizontalSelection.exit().remove();
+		
+		horizontalSelection.enter()
+			.append('svg:line')
+			.attr('class', 'hozGrid')
+			.style('stroke', '#BBBBBB')
+			.style('stroke-width', 1)
+			.style('stroke-dasharray', ("7,3"));
+			
+		horizontalSelection.transition()
+			.duration(500)
+			.attr('x1', me.margins.left)
+			.attr('x2', me.canvasWidth - me.margins.right)
+			.attr('y1', function(d, i) {
+				return yScale(d);
+			})
+			.attr('y2', function(d, i) {
+				return yScale(d);
+			})
+			.attr('display', function(d, i) {
+				return i == 0 ? 'none' : null;
+			});
+	},
+	
 	/**
+	 *
  	 * SETTERS
+ 	 *
  	 */
-	setXDataMetric: function(metric) {
+ 	setChartTitle: function(title) {
 		var me = this;
-		
-		me.xDataMetric = metric;
-	},
-	
-	setYDataMetric: function(metric) {
-		var me = this;
-		
-		me.yDataMetric = metric;
-	},
-	
-	setXTickFormat: function(fn) {
-		var me = this;
-		
-		me.xTickFormat = fn;
-	},
-	
-	setYTickFormat: function(fn) {
-		var me = this;
-		
-		me.yTickFormat = fn;
-	},
-	
-	setGraphData: function(data) {
-		var me = this;
-		
-		me.graphData = data;
-	},
-	
-	setChartTitle: function(title) {
-		var me = this;
-		
 		me.chartTitle = title;
-	},
-	
-	setXScalePadding: function(num) {
-		var me = this;
-		
-		me.xScalePadding = num;
-	},
-	
-	setYScalePadding: function(num) {
-		var me = this;
-		
-		me.yScalePadding = num;
 	},
 	
 	setFillColor: function(color) {
 		var me = this;
-		
 		me.fillColor = color;
+	},
+	
+ 	setGraphData: function(data) {
+		var me = this;
+		me.graphData = data;
+	},
+	
+ 	setInterpolation: function(interp) {
+		var me = this;
+		me.interpolate = interp;
+	},
+	
+	setShowGrid: function(bool) {
+		var me = this;
+		me.showGrid = bool;
 	},
 	
 	setShowLabels: function(bool) {
 		var me = this;
-		
 		me.showLabels = bool;
+	},
+	
+	setXDataMetric: function(metric) {
+		var me = this;
+		me.xDataMetric = metric;
+	},
+	
+	setXScalePadding: function(num) {
+		var me = this;
+		me.xScalePadding = num;
+	},
+	
+	setXTickFormat: function(fn) {
+		var me = this;
+		me.xTickFormat = fn;
+	},
+	
+	setYDataMetric: function(metric) {
+		var me = this;
+		me.yDataMetric = metric;
+	},
+	
+	setYScalePadding: function(num) {
+		var me = this;
+		me.yScalePadding = num;
+	},
+	
+	setYTickFormat: function(fn) {
+		var me = this;
+		me.yTickFormat = fn;
 	}
 });

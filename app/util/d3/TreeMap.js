@@ -1,10 +1,10 @@
 /**
  * @class
  * @author Mark Fehrenbacher (kendopunk@hotmail.com)
- * @memberOf App.util.d3.final
+ * @memberOf App.util.d3
  * @description Treemap class
  */
-Ext.define('App.util.d3.final.TreeMap', {
+Ext.define('App.util.d3.TreeMap', {
 
 	panelId: null,
 	treemap: null,

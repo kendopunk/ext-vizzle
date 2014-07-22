@@ -181,7 +181,7 @@ Ext.define('App.util.d3.UniversalPie', {
 	
 	/**
 	 * @function
-	 * @memberOf App.util.d3.final.PieChart
+	 * @memberOf App.util.d3.UniversalPie
 	 * @param metric String
 	 * @description Draw/initialize the pie chart
 	 */
@@ -425,7 +425,7 @@ Ext.define('App.util.d3.UniversalPie', {
 	
 	/**
  	 * @function
- 	 * @memberOf App.util.d3.final.PieChart
+ 	 * @memberOf App.util.d3.UniversalPie
  	 * @description Handle the legend drawing / transition
  	 */
  	handleLegend: function() {
