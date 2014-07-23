@@ -146,18 +146,18 @@ Ext.define('App.util.d3.UniversalRadialTree', {
 		pathSelection.enter()
 			.append('path')
 			.style('opacity', .8)
+			.style('stroke', '#FFFFFF')
+			.style('stroke-width', 1.5)
+			.style('fill-rule', 'evenodd')
 			.on('mouseover', function(d, i) {
 				d3.select(this)
-					.style('opacity', 1)
-					.style('stroke', '#333333');
+					.style('opacity', 1);
 			})
 			.on('mouseout', function(d, i) {
 				d3.select(this)
-					.style('opacity', .8)
-					.style('stroke', '#FFFFFF');
-			})
-			.style('stroke', '#FFFFFF')
-			.style('fill-rule', 'evenodd');
+					.style('opacity', .8);
+			});
+			
 		
 		// transition
 		pathSelection.transition()
