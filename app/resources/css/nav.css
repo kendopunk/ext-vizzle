@@ -3,6 +3,12 @@
 	background-repeat: repeat-x;
 }
 
+.soccerHeader {
+	background-color: #006400;
+	font: bold 16px/1.1 sans-serif;
+	color: #FFFFFF;
+}
+
 #header p {
 	font-family: "Verdana", sans-serif;
 	font-size: 13px;

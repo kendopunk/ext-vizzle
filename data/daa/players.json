@@ -1,0 +1,30 @@
+{
+	"success": true,
+	"players": [{
+		"name": "Vince"
+	}, {
+		"name": "Karl"
+	}, {
+		"name": "Davis"
+	}, {
+		"name": "Skyler"
+	}, {
+		"name": "Jack"
+	}, {
+		"name": "Tyler"
+	}, {
+		"name": "Colton"
+	}, {
+		"name": "Chris"
+	}, {
+		"name": "Joe"
+	}, {
+		"name": "Neel"
+	}, {
+		"name": "Riley"
+	}, {
+		"name": "Finn"
+	}, {
+		"name": "Ned"
+	}]
+}
