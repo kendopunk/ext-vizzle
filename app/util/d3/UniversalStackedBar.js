@@ -260,7 +260,9 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 			.remove();
 			
 		rectSelection.enter()
-			.append('rect');
+			.append('rect')
+			.attr('rx', 3)
+			.attr('ry', 3);
 			
 		rectSelection.transition()
 			.duration(500)
@@ -651,7 +653,10 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 	setColorScale: function() {
 		var me = this;
 		
-		if(me.colorPalette == 'gradient_blue') {
+		if(me.colorPalette == 'custom') {
+			return me.colorScale;
+		}
+		else if(me.colorPalette == 'gradient_blue') {
 			me.colorScale = d3.scale.linear()
 				.domain([
 					0,

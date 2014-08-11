@@ -20,6 +20,7 @@ Ext.application({
 		'App.util.Global',
 		'App.util.MessageBus',
 		'App.util.GridRenderers',
+		'App.view.daa.TeamMatchup',
 		'App.view.daa.IndividualGoal',
 		'App.view.daa.GoalTrending'
 	],
@@ -42,15 +43,12 @@ Ext.application({
 				xtype: 'tabpanel',
 				region: 'center',
 				items: [{
+					xtype: 'daaTeamMatchup',
+				}, {
 					xtype: 'daaIndividualGoal'
 				}, {	
 					xtype: 'daaGoalTrending'
-				}],
-				activeTab: 1
-				
-				// Individual Goals/Assists
-				// Goal/Assist Trends
-				// Team Matchup
+				}]
 			}]
 		});
 
