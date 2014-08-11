@@ -9,16 +9,19 @@ Ext.application({
 	
 	enableQuickTips: true,
 	
-	/*controllers: [
+	/*
+	controllers: [
 		'Application'
-	],*/
+	],
+	*/
 	
 	requires: [
 		'Ext.container.Viewport',
 		'App.util.Global',
 		'App.util.MessageBus',
 		'App.util.GridRenderers',
-		'App.view.daa.IndividualGoal'
+		'App.view.daa.IndividualGoal',
+		'App.view.daa.GoalTrending'
 	],
 	
 	launch: function() {
@@ -40,7 +43,10 @@ Ext.application({
 				region: 'center',
 				items: [{
 					xtype: 'daaIndividualGoal'
-				}]
+				}, {	
+					xtype: 'daaGoalTrending'
+				}],
+				activeTab: 1
 				
 				// Individual Goals/Assists
 				// Goal/Assist Trends

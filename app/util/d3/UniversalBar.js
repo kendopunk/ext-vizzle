@@ -247,13 +247,6 @@ Ext.define('App.util.d3.UniversalBar', {
 			
 		// apply events
 		rectSelection.on('mouseover', function(d, i) {
-			if(handleEvents && eventRelay && mouseEvents.mouseover.enabled) {
-				eventRelay.publish(mouseEvents.mouseover.eventName, {
-					payload: d,
-					index: i
-				});
-			}
-				
 			d3.select(this).style('opacity', .9);
 			
 			if(showLegend) {
@@ -263,8 +256,10 @@ Ext.define('App.util.d3.UniversalBar', {
 				.style('fill', '#990066')
 				.style('font-weight', 'bold');
 			}
+			
+			me.publishMouseEvent('mouseover', d, i);
 		})
-		.on('mouseout', function(d) {
+		.on('mouseout', function(d, i) {
 			var el = d3.select(this);
 			el.style('opacity', el.attr('defaultOpacity'));
 			
@@ -275,15 +270,11 @@ Ext.define('App.util.d3.UniversalBar', {
 				.style('fill', '#000000')
 				.style('font-weight', 'normal');
 			}
+			
+			me.publishMouseEvent('mouseout', d, i);
 		})
-		.on('dblclick', function(d) {
-			if(mouseEvents != null
-				&& mouseEvents.dblclick
-				&& mouseEvents.dblclick.eventName
-				&& eventRelay
-			) {
-				eventRelay.publish(mouseEvents.dblclick.eventName, d);
-			}
+		.on('dblclick', function(d, i) {
+			me.publishMouseEvent('dblclick', d, i);
 		})
 		.call(d3.helper.tooltip().text(me.tooltipFunction));
 		
@@ -586,21 +577,18 @@ Ext.define('App.util.d3.UniversalBar', {
 			.domain([0, d3.max(me.graphData, function(d) { return d[metric]; })])
 			.range([me.canvasHeight-me.margins.bottom, me.canvasHeight - me.heightOffset]);
 			
-		var _yTicks = me.yTicks;
-		
-		// "guess" on increments
-		if(me.desiredYIncrements != null) {
-			var max = d3.max(me.graphData, function(d) { return d[metric]; });
+		var useYTicks = me.yTicks;
 			
-			if(me.desiredYIncrements > 0) {
-				_yTicks = parseInt(max/me.desiredYIncrements);
-			}
+		// figure out the actual y ticks
+		var gdMax = d3.max(me.graphData, function(d) { return d[metric];});
+		if(gdMax < useYTicks) {
+			useYTicks = gdMax;
 		}
 			
 		me.yAxis = d3.svg.axis()
 			.scale(me.yAxisScale)
 			.orient('left')
-			.ticks(_yTicks)
+			.ticks(useYTicks)
 			.tickFormat(me.yTickFormat);
 	},
 	
@@ -658,7 +646,25 @@ Ext.define('App.util.d3.UniversalBar', {
 		 	}, me));
 		 }
  	},
-	
+ 	
+	/**
+     * @function
+     * @description Publish a mouse event with the event relay
+     * @param evt String mouseover|mouseout|etc..
+     * @param d Object Data object
+     * @param i Integer index
+     */
+    publishMouseEvent: function(evt, d, i) {
+        var me = this;
+
+        if(me.handleEvents && me.eventRelay && me.mouseEvents[evt].enabled) {
+            me.eventRelay.publish(me.mouseEvents[evt].eventName, {
+                payload: d,
+                index: i
+            });
+        }
+    },
+
 	/**
 	 * 
 	 * getters
@@ -715,12 +721,6 @@ Ext.define('App.util.d3.UniversalBar', {
 	 	var me = this;
 	 	
 	 	me.dataMetric = metric;
-	},
-	
-	setDesiredYIncrements: function(increments) {
-	 	var me = this;
-	 	
-	 	me.desiredYIncrements = increments;
 	},
 	
 	setGraphData: function(data) {

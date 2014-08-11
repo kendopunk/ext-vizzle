@@ -694,37 +694,36 @@ Ext.define('App.util.d3.UniversalLine', {
  	 */
  	setChartTitle: function(title) {
 		var me = this;
-		
 		me.chartTitle = title;
 	},
 	
  	setFillArea: function(bool) {
 	 	var me = this;
-	 	
 	 	me.fillArea = bool;
 	},
 	
 	setFillColor: function(color) {
 		var me = this;
-		
 		me.fillColor = color;
 	},
 	
 	setGraphData: function(data) {
 		var me = this;
-		
 		me.graphData = data;
 	},
 	
 	setInterpolation: function(interp) {
 		var me = this;
-		
 		me.interpolate = interp;
+	},
+	
+	setLabelFunction: function(fn) {
+		var me = this;
+		me.labelFunction = fn;
 	},
 	
 	setLabelSkipCount: function(count) {
 		var me = this;
-		
 		me.labelSkipCount = count;
 	},
 	
@@ -736,61 +735,51 @@ Ext.define('App.util.d3.UniversalLine', {
 	
 	setShowGrid: function(bool) {
 		var me = this;
-		
 		me.showGrid = bool;
 	},
 	
 	setShowLabels: function(bool) {
 		var me = this;
-		
 		me.showLabels = bool;
 	},
 	
 	setStrokeColor: function(color) {
 		var me = this;
-		
 		me.strokeColor = color;
 	},
 	
 	setTooltipFunction: function(fn) {
 		var me = this;
-		
 		me.tooltipFunction = fn;
 	},
 	
 	setXDataMetric: function(metric) {
 		var me = this;
-		
 		me.xDataMetric = metric;
 	},
 	
 	setXScalePadding: function(num) {
 		var me = this;
-		
 		me.xScalePadding = num;
 	},
 	
 	setXTickFormat: function(fn) {
 		var me = this;
-		
 		me.xTickFormat = fn;
 	},
 	
 	setYDataMetric: function(metric) {
 		var me = this;
-		
 		me.yDataMetric = metric;
 	},
 
 	setYTickFormat: function(fn) {
 		var me = this;
-		
 		me.yTickFormat = fn;
 	},
 	
 	setYScalePadding: function(num) {
 		var me = this;
-		
 		me.yScalePadding = num;
 	}
 });

@@ -1,30 +1,56 @@
 {
 	"success": true,
-	"players": [{
-		"name": "Vince"
+	"F14": [{
+		"name": "Chris",
+		"color": "#3182bd",
+		"gamesPlayed": 3
 	}, {
-		"name": "Karl"
+		"name": "Colton",
+		"color": "#6baed6",
+		"gamesPlayed": 3
 	}, {
-		"name": "Davis"
+		"name": "Davis",
+		"color": "#9ecae1",
+		"gamesPlayed": 3
 	}, {
-		"name": "Skyler"
+		"name": "Finn",
+		"color": "#c6dbef",
+		"gamesPlayed": 3
 	}, {
-		"name": "Jack"
+		"name": "Jack",
+		"color": "#e6550d",
+		"gamesPlayed": 3
 	}, {
-		"name": "Tyler"
+		"name": "Joe",
+		"color": "#fd8d3c",
+		"gamesPlayed": 3
 	}, {
-		"name": "Colton"
+		"name": "Karl",
+		"color": "#fdae6b",
+		"gamesPlayed": 3
 	}, {
-		"name": "Chris"
+		"name": "Ned",
+		"color": "#fdd0a2",
+		"gamesPlayed": 3
 	}, {
-		"name": "Joe"
+		"name": "Neel",
+		"color": "#31a354",
+		"gamesPlayed": 3
 	}, {
-		"name": "Neel"
+		"name": "Riley",
+		"color": "#74c476",
+		"gamesPlayed": 3
 	}, {
-		"name": "Riley"
+		"name": "Skyler",
+		"color": "#a1d99b",
+		"gamesPlayed": 3
 	}, {
-		"name": "Finn"
+		"name": "Tyler",
+		"color": "#c7e9c0",
+		"gamesPlayed": 3
 	}, {
-		"name": "Ned"
+		"name": "Vince",
+		"color": "#756bb1",
+		"gamesPlayed": 3
 	}]
 }

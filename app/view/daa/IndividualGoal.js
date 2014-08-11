@@ -24,20 +24,25 @@ Ext.define('App.view.daa.IndividualGoal', {
 	initComponent: function() {
 		var me = this;
 		
+		////////////////////////////////////////
 		// layout vars
-		me.gridPanelHeight = 225,
+		////////////////////////////////////////
+		me.gridPanelHeight = 250,
 			me.vizPanelWidth = Math.floor(Ext.getBody().getViewSize().width),
 			me.vizPanelHeight = parseInt(
 				(Ext.getBody().getViewSize().height 
-					- App.util.Global.titlePanelHeight 
+					- App.util.Global.daaPanelHeight
 					- me.gridPanelHeight
 					- 15)
 			),
 			me.eventRelay = Ext.create('App.util.MessageBus'),
 			me.gridHighlightEvent = 'igGridHighlight',
+			me.gridUnhighlightEvent = 'igGridUnhighlight',
 			me.playerData = [];
-			
+		
+		////////////////////////////////////////
 		// control vars
+		////////////////////////////////////////
 		me.svgInitialized = false,
  			me.canvasWidth,
  			me.canvasHeight,
@@ -49,12 +54,9 @@ Ext.define('App.view.daa.IndividualGoal', {
  			me.defaultMetric = 'goals',
  			me.currentMetric = 'goals',
  			me.btnHighlightCss = 'btn-highlight-peachpuff',
- 			me.eventRelay = Ext.create('App.util.MessageBus');
- 			
- 		// pub/sub
-		me.eventRelay.subscribe(me.gridHighlightEvent, me.gridRowHighlight, me);
- 			
- 		// color scheme menu options
+ 			me.eventRelay = Ext.create('App.util.MessageBus'),
+ 			me.baseTitle = 'Fall 2014';
+
  		var colorSchemeMenu = Ext.Array.map(App.util.Global.svg.colorSchemes, function(obj) {
 	 		return {
 		 		text: obj.name,
@@ -89,27 +91,53 @@ Ext.define('App.view.daa.IndividualGoal', {
 			autoScroll: true,
 			listeners: {
 				afterrender: me.initCanvas,
-				//resize: me.resizeHandler,
 				scope: me
-			}
+			},
+			dockedItems: [{
+				xtype: 'toolbar',
+				dock: 'top',
+				items: [{
+					xtype: 'tbspacer',
+					width: 10
+				}, {
+					xtype: 'button',
+					iconCls: 'icon-soccer-ball',
+					text: 'Goals',
+					cls: me.btnHighlightCss,
+					metric: 'goals',
+					handler: me.metricHandler,
+					scope: me
+				},
+				'-',
+				{
+					xtype: 'button',
+					iconCls: 'icon-soccer-assist',
+					text: 'Assists',
+					metric: 'assists',
+					handler: me.metricHandler,
+					scope: me
+				}]
+			}]
 		});
-		
-		// grid panel (center)
+
 		me.gridPanel = Ext.create('Ext.grid.Panel', {
 			region: 'center',
 			title: 'Tabular Data',
 			store: me.store,
 			cls: 'gridRowSelection',
-			columns: [
-				/*
-				App.util.ColumnDefinitions.movieTitle,
- 				App.util.ColumnDefinitions.grossBO,
- 				App.util.ColumnDefinitions.numTheaters,
- 				App.util.ColumnDefinitions.openingBO,
- 				App.util.ColumnDefinitions.releaseDate,
- 				App.util.ColumnDefinitions.imdbRating
- 				*/
-			]
+			columns: [{
+				header: 'Player',
+				dataIndex: 'name',
+				width: 150
+			}, {
+				header: 'Goals',
+				dataIndex: 'goals',
+				width: 100
+			}, {
+				header: 'Assists',
+				dataIndex: 'assists',
+				width: 100
+			}]
 		});
 		
 		me.items = [
@@ -119,11 +147,15 @@ Ext.define('App.view.daa.IndividualGoal', {
 		
 		me.on('beforerender', me.initPlayerData, me);
 		
+		me.eventRelay.subscribe(me.gridHighlightEvent, me.gridRowHighlight, me);
+		me.eventRelay.subscribe(me.gridUnhighlightEvent, me.gridRowUnhighlight, me);
+
 		me.callParent(arguments);
 	},
 	
 	/**
  	 * @function
+ 	 * @description Initialize the entire array of players
  	 */
  	initPlayerData: function() {
 	 	var me = this;
@@ -134,7 +166,7 @@ Ext.define('App.view.daa.IndividualGoal', {
 			success: function(response) {
 	 			var resp = Ext.JSON.decode(response.responseText);
 	 			
-	 			me.playerData = resp.players;
+	 			me.playerData = resp.F14;
 	 			
 	 			Ext.each(me.playerData, function(item) {
 		 			item.goals = 0;
@@ -152,19 +184,18 @@ Ext.define('App.view.daa.IndividualGoal', {
 	initCanvas: function(panel) {
 		var me = this;
 		
-		// initialize SVG, width, height
+		me.getEl().mask('Loading...');
+		
  		me.svgInitialized = true,
 	 		me.canvasWidth = Math.floor(panel.body.dom.offsetWidth * .95),
 	 		me.canvasHeight = Math.floor(panel.body.dom.offsetHeight * .95),
  			me.panelId = '#' + panel.body.id;
 	 	
-	 	// init svg
 	 	me.svg = d3.select(me.panelId)
 	 		.append('svg')
 	 		.attr('width', me.canvasWidth)
 	 		.attr('height', me.canvasHeight);
 	 		
-	 	// bar chart shell
 	 	me.barChart = Ext.create('App.util.d3.UniversalBar', {
 	 		svg: me.svg,
 			canvasWidth: me.canvasWidth,
@@ -194,74 +225,95 @@ Ext.define('App.view.daa.IndividualGoal', {
 				mouseover: {
 					enabled: true,
 					eventName: me.gridHighlightEvent
+				},
+				mouseout: {
+					enabled: true,
+					eventName: me.gridUnhighlightEvent
 				}
 			},
-			//chartTitle: me.buildChartTitle(me.defaultMetricText),
-			chartTitle: 'foo',
+			chartTitle: me.buildChartTitle(),
 			yTickFormat: App.util.Global.svg.numberTickFormat,
 			chartFlex: 4,
 			legendFlex: 1,
 			legendTextFunction: function(d, i) {
 				return d.name;
-			}
+			},
+			colorDefinedInData: true
 		}, me);
 		
-		/*	// get the data
-	 	Ext.Ajax.request({
-		 	url: 'data/ww2_battle_losses.json',
+		// get data
+		Ext.Ajax.request({
+			url: 'data/daa/gamedata.json',
 			method: 'GET',
-	 		success: function(response) {
-	 			var resp = Ext.JSON.decode(response.responseText);
-	 			
-	 			me.graphData = resp.data;
-	 			
-	 			var combinedData = me.dataCombiner(me.graphData);
-	 			
-	 			me.barChart = Ext.create('App.util.d3.UniversalBar', {
-					svg: me.svg,
-					canvasWidth: me.canvasWidth,
-					canvasHeight: me.canvasHeight,
-					graphData: combinedData,
-					dataMetric: me.defaultMetric,
-					panelId: me.panelId,
-					margins: {
-						top: 20,
-						right: 10,
-						bottom: 40,
-						left: 100,
-						leftAxis: 85
-					},
-					showLabels: true,
-					labelFunction: function(data, index) {
-						return data.battle
-					},
-					tooltipFunction: function(data, index) {
-						return '<b>' + data.battle + '</b><br>'
-							+ Ext.util.Format.number(data.casualties, '0,000');
-					},
-					yTickFormat: App.util.Global.svg.numberTickFormat,
-					chartTitle: me.baseTitle,
-					colorDefinedInData: true,
-					mouseEvents: {
-						mouseover: {enabled: false, eventName: null},
-						click: {enabled: false, eventName: null},
-						dblclick: {
-							enabled: true,
-							eventName: 'battleDrilldown'
-						}
-					},
-					maxBarWidth: Math.floor(me.canvasWidth * .4),
-					eventRelay: me.eventRelay
-				}, me);
+			success: function(response) {
+				var resp = Ext.JSON.decode(response.responseText);
+				me.graphData = me.normalizeData(resp.data);
 				
+				me.store.loadData(me.graphData);
 				
+				me.barChart.setGraphData(me.sortData(me.graphData));
 				me.barChart.initChart().draw();
-	 		},
-	 		callback: function() {
-	 			me.getEl().unmask();
-	 		},
-	 		scope: me
-	 	});*/
+			},
+			callback: function() {
+				me.getEl().unmask();
+			},
+			scope: me
+		});
+	},
+	
+	/**
+	 * @function
+	 * @description Normalize JSON data into chart-consumable
+	 * format
+	 */
+ 	normalizeData: function(obj) {
+	 	var me = this,
+	 		playerName = null;
+	 	
+	 	var dat = Ext.clone(me.playerData);
+	 	
+	 	Ext.each(dat, function(player) {
+	 	
+	 		playerName = player.name;
+	 		
+	 		Ext.each(obj, function(a) {
+	 		
+	 			Ext.each(a.goalData, function(gd) {
+	 				if(gd.name == playerName) {
+		 				player.goals += gd.num;
+		 			}
+	 			});
+	 			
+	 			Ext.each(a.assistData, function(ad) {
+	 				if(ad.name == playerName) {
+		 				player.assists += ad.num;
+		 			}
+	 			});
+
+	 		});
+	 	});
+	 	
+	 	return dat;
+ 	},
+ 	
+ 	/**
+	 * @function
+	 * @description Sort graph data before consumption
+	 */
+	sortData: function(d) {
+		var me = this;
+		
+		var sortProp = 'name';
+		
+		return Ext.Array.sort(d, function(a, b) {
+			if(a[sortProp] > b[sortProp]) {
+				return 1;
+			} else if (a[sortProp] < b[sortProp]) {
+				return -1;
+			} else {
+				return 0;
+			}
+		});
 	},
 	
 	/**
@@ -284,16 +336,7 @@ Ext.define('App.view.daa.IndividualGoal', {
 		}, me);
 		
 		me.currentMetric = btn.metric;
-		if(btn.metric == 'theaters') {
-			me.barChart.setYTickFormat(App.util.Global.svg.numberTickFormat);
-		} else if(btn.metric == 'imdbRating') {
-			me.barChart.setYTickFormat(function(d) {
-				return Ext.util.Format.number(d, '0.0');
-			});
-		} else {
-			me.barChart.setYTickFormat(App.util.Global.svg.wholeDollarTickFormat);
-		}
-		me.barChart.setChartTitle(me.buildChartTitle(btn.text));
+		me.barChart.setChartTitle(me.buildChartTitle());
 		me.barChart.setDataMetric(btn.metric);
 		me.barChart.draw();
 	},
@@ -303,10 +346,13 @@ Ext.define('App.view.daa.IndividualGoal', {
 	 * @private
 	 * @description Set a new chart title
 	 */
-	buildChartTitle: function(append) {
+	buildChartTitle: function() {
 		var me = this;
 		
-		return me.baseTitle + ' : ' + append;
+		if(me.currentMetric == 'assists') {
+			return me.baseTitle  + ' - Individual Assists';
+		}
+		return me.baseTitle + ' - Individual Goals';
 	},
 	
 	/**
@@ -332,10 +378,19 @@ Ext.define('App.view.daa.IndividualGoal', {
 	gridRowHighlight: function(obj) {
 		var me = this;
 		
-		var record = me.gridPanel.getStore().findRecord('title', obj.payload.title);
+		var record = me.gridPanel.getStore().findRecord('name', obj.payload.name);
 		if(record) {
 			var rowIndex = me.gridPanel.getStore().indexOf(record);
 			me.gridPanel.getSelectionModel().select(rowIndex);
 		}
+	},
+	
+	/**
+ 	 * @function
+ 	 */
+	gridRowUnhighlight: function() {
+		var me = this;
+		
+		me.gridPanel.getSelectionModel().deselectAll();
 	}
 });
