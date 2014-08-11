@@ -129,6 +129,21 @@
 	background-repeat: no-repeat;
 }
 
+.icon-soccer-assist {
+	background-image: url(../img/icons/16x16/soccer-assist.png) !important;
+	background-repeat: no-repeat;
+}
+
+.icon-soccer-ball {
+	background-image: url(../img/icons/16x16/soccer-ball.png) !important;
+	background-repeat: no-repeat;
+}
+
+.icon-soccer-save {
+	background-image: url(../img/icons/16x16/soccer-save.png) !important;
+	background-repeat: no-repeat;
+}
+
 .icon-stacked-bar-chart {
 	background-image: url(../img/icons/16x16/stacked-bar-chart.png) !important;
 	background-repeat: no-repeat;
