@@ -7,7 +7,7 @@
 Ext.define('App.view.daa.TeamMatchup', {
 	extend: 'Ext.Panel',
 	alias: 'widget.daaTeamMatchup',
-	title: 'Matchup Results',
+	title: 'Scoring by Game',
 	closable: false,
 	
 	requires: [
@@ -93,7 +93,7 @@ Ext.define('App.view.daa.TeamMatchup', {
 				top: 40,
 				right: 10,
 				bottom: 50,
-				left: 65
+				left: 80
 			},
 			chartTitle: me.title + ' (Goals)',
 			showLabels: true,
@@ -103,7 +103,7 @@ Ext.define('App.view.daa.TeamMatchup', {
 				return d.goalLabel;
 			},
 			colorPalette: 'custom',
-			colorScale: d3.scale.ordinal().range(['#006400', '#CC3300']),
+			colorScale: d3.scale.ordinal().range(['#006400', '#FFA07A']),
 			tooltipFunction: function(d, i) {
 				var ret = '<b>vs ' + d.opponent + '</b><br><br>';
 				

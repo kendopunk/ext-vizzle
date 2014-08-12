@@ -4,10 +4,10 @@
  * @memberOf App.view.daa
  * @description
  */
-Ext.define('App.view.daa.GoalTrending', {
+Ext.define('App.view.daa.Trending', {
 	extend: 'Ext.Panel',
-	alias: 'widget.daaGoalTrending',
-	title: 'Goal/Assist Trending',
+	alias: 'widget.daaTrending',
+	title: 'Individual Trends',
 	closable: false,
 	
 	requires: [
@@ -94,6 +94,15 @@ Ext.define('App.view.daa.GoalTrending', {
 				metric: 'assists',
 				handler: me.metricHandler,
 				scope: me
+			},
+			'-',
+			{
+				xtype: 'button',
+				iconCls: 'icon-target',
+				text: 'Shots on Goal',
+				metric: 'shots',
+				handler: me.metricHandler,
+				scope: me
 			}]
 		}];
 			
@@ -155,13 +164,15 @@ Ext.define('App.view.daa.GoalTrending', {
 				left: 70
 			},
 			fillArea: true,
+			fillColor: '#F5DEB3',
 			xScalePadding: .1,
 			yScalePadding: .1,
 			xDataMetric: 'game',
 			xTickValues: true,
 			yDataMetric: 'goals',
 			chartTitle: me.buildChartTitle(),
-			markerFillColor: '#FF9900',
+			markerFillColor: '#FF9933',
+			markerStrokeColor: '#CC3300',
 			strokeColor: '#006400',
 			xTickFormat: function(d) {
 				return 'Game ' + d;
@@ -248,11 +259,12 @@ Ext.define('App.view.daa.GoalTrending', {
 	 
 		 var me = this,
 			 game = 1,
-			 ret = [], goals, assists;
+			 ret = [], goals, assists, shots;
 		 
 		 Ext.each(obj, function(entry) {
 			 goals = 0;
 			 assists = 0;
+			 shots = 0;
 			 
 			 Ext.each(entry.goalData, function(gd) {
 				if(
@@ -274,6 +286,16 @@ Ext.define('App.view.daa.GoalTrending', {
 				}
 			 });
 			 
+			 Ext.each(entry.shotData, function(sd) {
+				 if(
+					(filter && player && sd.name == player)
+					||
+					(!filter && player == null)
+				 ) {
+					shots += sd.num;
+				}
+			 });
+			 
 			 ret.push({
 				 game: game,
 				 date: entry.date,
@@ -281,7 +303,8 @@ Ext.define('App.view.daa.GoalTrending', {
 				 goalsFor: entry.goalsFor,
 				 goalsAgainst: entry.goalsAgainst,
 				 goals: goals,
-				 assists: assists
+				 assists: assists,
+				 shots: shots
 			 });
 			 
 			 game++;
@@ -330,6 +353,10 @@ Ext.define('App.view.daa.GoalTrending', {
 		if(btn.metric == 'assists') {
 			me.lineChart.setLabelFunction(function(d, i) {
 				return 'vs ' + d.opponent + ' (' + d.assists + ')';
+			});
+		} else if(btn.metric == 'shots') {
+			me.lineChart.setLabelFunction(function(d, i) {
+				return 'vs ' + d.opponent + ' (' + d.shots + ')';
 			});
 		} else {
 			me.lineChart.setLabelFunction(function(d, i) {

@@ -4,10 +4,10 @@
  * @memberOf App.view.daa
  * @description
  */
-Ext.define('App.view.daa.IndividualGoal', {
+Ext.define('App.view.daa.Individual', {
 	extend: 'Ext.Panel',
-	alias: 'widget.daaIndividualGoal',
-	title: 'Individual Goals/Assists',
+	alias: 'widget.daaIndividual',
+	title: 'Individual Stats',
 	closable: false,
 	
 	requires: [
@@ -46,6 +46,7 @@ Ext.define('App.view.daa.IndividualGoal', {
 		me.svgInitialized = false,
  			me.canvasWidth,
  			me.canvasHeight,
+ 			me.graphData = [],
  			me.svg,
  			me.g,
  			me.panelId,
@@ -53,6 +54,7 @@ Ext.define('App.view.daa.IndividualGoal', {
  			me.pieChart = null,
  			me.defaultMetric = 'goals',
  			me.currentMetric = 'goals',
+ 			me.currentView = 'total',
  			me.btnHighlightCss = 'btn-highlight-peachpuff',
  			me.eventRelay = Ext.create('App.util.MessageBus'),
  			me.baseTitle = 'Fall 2014';
@@ -91,6 +93,7 @@ Ext.define('App.view.daa.IndividualGoal', {
 			autoScroll: true,
 			listeners: {
 				afterrender: me.initCanvas,
+				//resize: me.resizeHandler,
 				scope: me
 			},
 			dockedItems: [{
@@ -116,6 +119,72 @@ Ext.define('App.view.daa.IndividualGoal', {
 					metric: 'assists',
 					handler: me.metricHandler,
 					scope: me
+				},
+				'-',
+				{
+					xtype: 'button',
+					iconCls: 'icon-target',
+					text: 'Shots on Goal',
+					metric: 'shots',
+					handler: me.metricHandler,
+					scope: me
+				}, {
+					xtype: 'tbspacer',
+					width: 25
+				}, {
+					xtype: 'tbtext',
+					text: '<b>View:</b>'
+				}, {
+					xtype: 'combo',
+					store: Ext.create('Ext.data.Store', {
+						fields: ['display', 'value'],
+						data: [{
+							display: 'Totals', value: 'total'
+						}, {
+							display: 'Average per Game', value: 'average'
+						}]
+					}),
+					displayField: 'display',
+					valueField: 'value',
+					editable: false,
+					queryMode: 'local',
+					triggerAction: 'all',
+					width: 150,
+					listWidth: 150,
+					value: 'total',
+					listeners: {
+						select: function(combo) {
+							me.currentView = combo.getValue();
+							me.barChart.setChartTitle(me.buildChartTitle());
+							
+							if(combo.getValue() == 'average') {
+								me.barChart.setYTickFormat(App.util.Global.svg.decimalTickFormat);
+								
+								if(me.currentMetric == 'shots') {
+									me.barChart.setDataMetric('avgShots');
+								} else if(me.currentMetric == 'assists') {
+									me.barChart.setDataMetric('avgAssists');
+								} else {
+									me.barChart.setDataMetric('avgGoals');
+								}
+								
+							} else {
+								me.barChart.setYTickFormat(App.util.Global.svg.numberTickFormat);
+								
+								if(me.currentMetric == 'shots') {
+									me.barChart.setDataMetric('shots');
+								} else if(me.currentMetric == 'assists') {
+									me.barChart.setDataMetric('assists');
+								} else {
+									me.barChart.setDataMetric('goals');
+								}
+								
+							}
+							
+							me.barChart.draw();
+						},
+						scope: me
+					}
 				}]
 			}]
 		});
@@ -134,10 +203,35 @@ Ext.define('App.view.daa.IndividualGoal', {
 				dataIndex: 'goals',
 				width: 100
 			}, {
+				header: 'Goals/Game',
+				dataIndex: 'avgGoals',
+				width: 100,
+				renderer: function(v) {
+					return Ext.util.Format.number(v, '0.00');
+				}
+			}, {
 				header: 'Assists',
 				dataIndex: 'assists',
 				width: 100
-			}]
+			}, {
+				header: 'Assists/Game',
+				dataIndex: 'avgAssists',
+				width: 100,
+				renderer: function(v) {
+					return Ext.util.Format.number(v, '0.00');
+				}
+			}, {
+				header: 'Shots',
+				dataIndex: 'shots',
+				width: 100
+			}, {
+				header: 'Shots/Game',
+				dataIndex: 'avgShots',
+				width: 100,
+				renderer: function(v) {
+					return Ext.util.Format.number(v, '0.00');
+				}
+			}, ]
 		});
 		
 		me.items = [
@@ -171,6 +265,7 @@ Ext.define('App.view.daa.IndividualGoal', {
 	 			Ext.each(me.playerData, function(item) {
 		 			item.goals = 0;
 		 			item.assists = 0;
+		 			item.shots = 0;
 		 		}, me);
 		 	},
 		 	scope: me
@@ -215,10 +310,15 @@ Ext.define('App.view.daa.IndividualGoal', {
 				left: 110,
 				leftAxis: 90
 			},
-			tooltipFunction: function(data, index) {
-				return '<b>' + data.name + '</b><br>'
-					+ 'Goals: ' + data.goals + '<br>'
-					+ 'Assists: ' + data.assists;
+			tooltipFunction: function(d, i) {
+				return '<b>' + d.name + '</b><br><br>'
+					+ '<b>Games Played:</b> ' + d.gamesPlayed + '<br>'
+					+ '<b>Goals:</b> ' + d.goals 
+					+ ' (' + Ext.util.Format.number(d.avgGoals, '0.00') + '/game)<br>'
+					+ '<b>Assists:</b> ' + d.assists 
+					+ ' (' + Ext.util.Format.number(d.avgAssists, '0.00') + '/game)<br>'
+					+ '<b>Shots:</b> ' + d.shots 
+					+ ' (' + Ext.util.Format.number(d.avgShots, '0.00') + '/game)'
 			},
 			handleEvents: true,
 			mouseEvents: {
@@ -289,8 +389,21 @@ Ext.define('App.view.daa.IndividualGoal', {
 		 				player.assists += ad.num;
 		 			}
 	 			});
+	 			
+	 			Ext.each(a.shotData, function(sd) {
+		 			if(sd.name == playerName) {
+			 			player.shots += sd.num;
+			 		}
+			 	});
 
 	 		});
+	 	});
+	 	
+	 	// calculate averages
+	 	Ext.each(dat, function(d) {
+	 		d.avgGoals = d.gamesPlayed == 0 ? 0 : d.goals/d.gamesPlayed;
+	 		d.avgAssists = d.gamesPlayed == 0 ? 0 : d.assists/d.gamesPlayed;
+	 		d.avgShots = d.gamesPlayed == 0 ? 0 : d.shots/d.gamesPlayed;
 	 	});
 	 	
 	 	return dat;
@@ -337,7 +450,17 @@ Ext.define('App.view.daa.IndividualGoal', {
 		
 		me.currentMetric = btn.metric;
 		me.barChart.setChartTitle(me.buildChartTitle());
-		me.barChart.setDataMetric(btn.metric);
+		if(me.currentView == 'average') {
+			if(btn.metric == 'shots') {
+				me.barChart.setDataMetric('avgShots');
+			} else if(btn.metric == 'assists') {
+				me.barChart.setDataMetric('avgAssists');
+			} else {
+				me.barChart.setDataMetric('avgGoals');
+			}
+		} else {
+			me.barChart.setDataMetric(btn.metric);
+		}
 		me.barChart.draw();
 	},
 	
@@ -347,12 +470,30 @@ Ext.define('App.view.daa.IndividualGoal', {
 	 * @description Set a new chart title
 	 */
 	buildChartTitle: function() {
-		var me = this;
-		
-		if(me.currentMetric == 'assists') {
-			return me.baseTitle  + ' - Individual Assists';
+		var me = this,
+			ret = me.baseTitle;
+			
+		console.log(me.currentView);
+			
+		if(me.currentView == 'average') {
+			if(me.currentMetric == 'assists') {
+				ret = ret + ' - Assists per Game';
+			} else if(me.currentMetric == 'shots') {
+				ret = ret +  ' - Shots per Game';
+			} else {
+				ret = ret +  ' - Goals per Game';
+			}
+		} else {
+			if(me.currentMetric == 'assists') {
+				ret = ret + ' - Assists';
+			} else if(me.currentMetric == 'shots') {
+				ret = ret +  ' - Shots';
+			} else {
+				ret = ret +  ' - Goals';
+			}
 		}
-		return me.baseTitle + ' - Individual Goals';
+
+		return ret;
 	},
 	
 	/**
@@ -361,17 +502,17 @@ Ext.define('App.view.daa.IndividualGoal', {
 	resizeHandler: function(panel, w, h) {
 		var me = this;
 		
-		//me.canvasWidth = Math.floor(panel.body.dom.offsetWidth),
-		//me.canvasHeight = Math.floor(panel.body.dom.offsetHeight);
+		/*me.canvasWidth = Math.floor(panel.body.dom.offsetWidth),
+		me.canvasHeight = Math.floor(panel.body.dom.offsetHeight);
 	 	
-	 	//if(me.barChart != null && me.barChart.chartInitialized) {
-			//me.barChart.resize(me.canvasWidth, me.canvasHeight);
-		//}
+	 	if(me.barChart != null && me.barChart.chartInitialized) {
+			me.barChart.resize(me.canvasWidth, me.canvasHeight);
+		}*/
 	},
 	
 	/**
  	 * @function
- 	 * @memberOf App.view.daa.IndividualGoal
+ 	 * @memberOf App.view.daa.Individual
  	 * @param obj Generic obj {title: ''}
  	 * @description Attempt to highlight a grid row based on a movie title value
  	 */

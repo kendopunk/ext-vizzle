@@ -649,10 +649,14 @@ Ext.define('App.util.d3.UniversalLine', {
 				me.margins.top
 			]);
 			
+		var useYTicks = me.yTicks,
+			gdMax = d3.max(me.graphData, function(d) { return d[metric];});
+		
+			
 		me.yAxis = d3.svg.axis()
 			.scale(me.yScale)
 			.orient('left')
-			.ticks(me.yTicks)
+			.ticks(Ext.Array.min([gdMax, useYTicks]))
 			.tickFormat(me.yTickFormat);	
 	},
 	

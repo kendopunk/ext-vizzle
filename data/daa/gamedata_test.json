@@ -22,12 +22,9 @@
 		}],
 		"shotData": [{
 			"name": "Chris",
-			"num": 3
+			"num": 8
 		}, {
 			"name": "Colton",
-			"num": 3
-		}, {
-			"name": "Riley",
 			"num": 3
 		}],
 		"saveData": [{

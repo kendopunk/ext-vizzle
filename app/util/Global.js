@@ -18,6 +18,10 @@ Ext.define('App.util.Global', {
 				return Ext.util.Format.currency(d);
 			},
 			
+			decimalTickFormat: function(d) {
+				return Ext.util.Format.number(d, '0,000.0');
+			},
+			
 			numberTickFormat: function(d) {
 				return Ext.util.Format.number(d, '0,000');
 			},
