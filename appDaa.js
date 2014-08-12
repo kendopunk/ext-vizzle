@@ -49,7 +49,7 @@ Ext.application({
 				}, {	
 					xtype: 'daaTrending'
 				}]
-				,activeTab: 1
+				//,activeTab: 1
 			}]
 		});
 

@@ -706,5 +706,10 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 	setShowLegend: function(bool) {
 		var me = this;
 		me.showLegend = bool;
+	},
+	
+	setTooltipFunction: function(fn) {
+		var me = this;
+		me.tooltipFunction = fn;
 	}
 });

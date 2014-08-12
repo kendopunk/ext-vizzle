@@ -12,8 +12,7 @@ Ext.define('App.view.daa.Individual', {
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.UniversalBar',
-		'App.util.d3.UniversalPie'
+		'App.util.d3.UniversalGroupedBar'
 	],
 	
 	layout: 'border',
@@ -46,36 +45,60 @@ Ext.define('App.view.daa.Individual', {
 		me.svgInitialized = false,
  			me.canvasWidth,
  			me.canvasHeight,
- 			me.graphData = [],
+ 			me.rawData = [],
  			me.svg,
  			me.g,
  			me.panelId,
- 			me.barChart = null,
- 			me.pieChart = null,
- 			me.defaultMetric = 'goals',
- 			me.currentMetric = 'goals',
- 			me.currentView = 'total',
- 			me.btnHighlightCss = 'btn-highlight-peachpuff',
+ 			me.groupedBarChart = null,
+ 			me.currentView = 'absolute',
+ 			me.cbxHighlightCss = 'btn-highlight-khaki';
  			me.eventRelay = Ext.create('App.util.MessageBus'),
  			me.baseTitle = 'Fall 2014';
-
- 		var colorSchemeMenu = Ext.Array.map(App.util.Global.svg.colorSchemes, function(obj) {
-	 		return {
-		 		text: obj.name,
-		 		handler: function(btn) {
-			 		//btn.setIconCls('icon-tick');
-			 		//me.barChart.setColorPalette(obj.palette);
-			 		//me.barChart.draw();
-			 	},
-			 	scope: me
-			}
-		}, me);
 		
+		////////////////////////////////////////
+		// runtime configuration of checkboxes
+		////////////////////////////////////////
+		var checkboxData = [];
+		var arr = [{
+			display: 'Goals',
+			value: 'goals'
+		}, {
+			display: 'Assists',
+			value: 'assists'
+		}, {
+			display: 'Shots on Goal',
+			value: 'shots'
+		}, {
+			display: 'Saves',
+			value: 'saves'
+		}];
+		Ext.each(arr, function(item) {
+			checkboxData.push({
+				xtype: 'checkboxfield',
+				boxLabel: item.display,
+				name: 'metrics',
+				inputValue: item.value,
+				cls: item.value == 'goals' ? me.cbxHighlightCss : '',
+				checked: item.value == 'goals' ? true : false,
+				listeners: {
+					change: me.checkboxChange,
+					scope: me
+				}
+			}, {xtype: 'tbspacer', width: 7});
+		}, me);
+	 	
+	 	////////////////////////////////////////
+	 	// grid store
+	 	////////////////////////////////////////
 		me.store = Ext.create('Ext.data.Store', {
 			fields: [
 				{name: 'player', type: 'string'},
 				{name: 'goals', type: 'auto'},
-				{name: 'assists', type: 'auto'}
+				{name: 'avgGoals', type: 'auto'},
+				{name: 'assists', type: 'auto'},
+				{name: 'avgAssists', type: 'auto'},
+				{name: 'shots', type: 'auto'},
+				{name: 'avgShots', type: 'auto'}
 			],
 			proxy: {
 				type: 'memory'
@@ -93,7 +116,6 @@ Ext.define('App.view.daa.Individual', {
 			autoScroll: true,
 			listeners: {
 				afterrender: me.initCanvas,
-				//resize: me.resizeHandler,
 				scope: me
 			},
 			dockedItems: [{
@@ -102,33 +124,9 @@ Ext.define('App.view.daa.Individual', {
 				items: [{
 					xtype: 'tbspacer',
 					width: 10
-				}, {
-					xtype: 'button',
-					iconCls: 'icon-soccer-ball',
-					text: 'Goals',
-					cls: me.btnHighlightCss,
-					metric: 'goals',
-					handler: me.metricHandler,
-					scope: me
 				},
-				'-',
+				checkboxData,
 				{
-					xtype: 'button',
-					iconCls: 'icon-soccer-assist',
-					text: 'Assists',
-					metric: 'assists',
-					handler: me.metricHandler,
-					scope: me
-				},
-				'-',
-				{
-					xtype: 'button',
-					iconCls: 'icon-target',
-					text: 'Shots on Goal',
-					metric: 'shots',
-					handler: me.metricHandler,
-					scope: me
-				}, {
 					xtype: 'tbspacer',
 					width: 25
 				}, {
@@ -139,9 +137,9 @@ Ext.define('App.view.daa.Individual', {
 					store: Ext.create('Ext.data.Store', {
 						fields: ['display', 'value'],
 						data: [{
-							display: 'Totals', value: 'total'
+							display: 'Totals', value: 'absolute'
 						}, {
-							display: 'Average per Game', value: 'average'
+							display: 'Averages per Game', value: 'average'
 						}]
 					}),
 					displayField: 'display',
@@ -151,37 +149,30 @@ Ext.define('App.view.daa.Individual', {
 					triggerAction: 'all',
 					width: 150,
 					listWidth: 150,
-					value: 'total',
+					value: 'absolute',
 					listeners: {
 						select: function(combo) {
 							me.currentView = combo.getValue();
-							me.barChart.setChartTitle(me.buildChartTitle());
 							
 							if(combo.getValue() == 'average') {
-								me.barChart.setYTickFormat(App.util.Global.svg.decimalTickFormat);
-								
-								if(me.currentMetric == 'shots') {
-									me.barChart.setDataMetric('avgShots');
-								} else if(me.currentMetric == 'assists') {
-									me.barChart.setDataMetric('avgAssists');
-								} else {
-									me.barChart.setDataMetric('avgGoals');
-								}
-								
+								me.groupedBarChart.setTooltipFunction(function(d, i) {
+									return '<b>' + d.grouper + '</b><br>'
+									+ Ext.util.Format.number(d.value, '0,000.00')
+									+ ' '
+									+ d.name + ' per game';
+								});
 							} else {
-								me.barChart.setYTickFormat(App.util.Global.svg.numberTickFormat);
-								
-								if(me.currentMetric == 'shots') {
-									me.barChart.setDataMetric('shots');
-								} else if(me.currentMetric == 'assists') {
-									me.barChart.setDataMetric('assists');
-								} else {
-									me.barChart.setDataMetric('goals');
-								}
-								
-							}
+								me.groupedBarChart.setTooltipFunction(function(d, i) {
+									return '<b>' + d.grouper + '</b><br>'
+									+ Ext.util.Format.number(d.value, '0,000')
+									+ ' '
+									+ d.name;
+								});
 							
-							me.barChart.draw();
+							}
+								
+							me.groupedBarChart.setGraphData(me.filterData());
+							me.groupedBarChart.draw();
 						},
 						scope: me
 					}
@@ -234,15 +225,9 @@ Ext.define('App.view.daa.Individual', {
 			}, ]
 		});
 		
-		me.items = [
-			me.vizPanel,
-			me.gridPanel
-		];
+		me.items = [ me.vizPanel, me.gridPanel ];
 		
 		me.on('beforerender', me.initPlayerData, me);
-		
-		me.eventRelay.subscribe(me.gridHighlightEvent, me.gridRowHighlight, me);
-		me.eventRelay.subscribe(me.gridUnhighlightEvent, me.gridRowUnhighlight, me);
 
 		me.callParent(arguments);
 	},
@@ -264,8 +249,13 @@ Ext.define('App.view.daa.Individual', {
 	 			
 	 			Ext.each(me.playerData, function(item) {
 		 			item.goals = 0;
+		 			item.avgGoals = 0;
 		 			item.assists = 0;
+		 			item.avgAssists = 0;
 		 			item.shots = 0;
+		 			item.avgShots = 0;
+		 			item.saves = 0;
+		 			item.avgSaves = 0;
 		 		}, me);
 		 	},
 		 	scope: me
@@ -291,55 +281,40 @@ Ext.define('App.view.daa.Individual', {
 	 		.attr('width', me.canvasWidth)
 	 		.attr('height', me.canvasHeight);
 	 		
-	 	me.barChart = Ext.create('App.util.d3.UniversalBar', {
-	 		svg: me.svg,
+	 	me.groupedBarChart = Ext.create('App.util.d3.UniversalGroupedBar', {
+			svg: me.svg,
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,
-			dataMetric: me.defaultMetric,
 			graphData: [],
-			panelId: me.panelId,
-			showLabels: true,
-			orientation: 'horizontal',
-			labelFunction: function(data, index) {
-				return data.name;
+			chartTitle: me.baseTitle + ' - Individual Statistics',
+			fixedColorRange: {
+				'goals': '#4682B4',
+				'assists': '#CD853F',
+				'shots': '#b2df8a',
+				'saves': '#808000'
 			},
+			fixedColorRangeIndex: 'name',
 			margins: {
-				top: 20,
+				top: 40,
 				right: 10,
-				bottom: 10,
-				left: 110,
-				leftAxis: 90
+				bottom: 40,
+				left: 80,
+				leftAxis: 70
+			},
+			yTickFormat: function(d) {
+				return Ext.util.Format.number(d, '0.0');
 			},
 			tooltipFunction: function(d, i) {
-				return '<b>' + d.name + '</b><br><br>'
-					+ '<b>Games Played:</b> ' + d.gamesPlayed + '<br>'
-					+ '<b>Goals:</b> ' + d.goals 
-					+ ' (' + Ext.util.Format.number(d.avgGoals, '0.00') + '/game)<br>'
-					+ '<b>Assists:</b> ' + d.assists 
-					+ ' (' + Ext.util.Format.number(d.avgAssists, '0.00') + '/game)<br>'
-					+ '<b>Shots:</b> ' + d.shots 
-					+ ' (' + Ext.util.Format.number(d.avgShots, '0.00') + '/game)'
+				return '<b>' + d.grouper + '</b><br>'
+					+ Ext.util.Format.number(d.value, '0,000')
+					+ ' '
+					+ d.name;
 			},
-			handleEvents: true,
-			mouseEvents: {
-				mouseover: {
-					enabled: true,
-					eventName: me.gridHighlightEvent
-				},
-				mouseout: {
-					enabled: true,
-					eventName: me.gridUnhighlightEvent
-				}
-			},
-			chartTitle: me.buildChartTitle(),
-			yTickFormat: App.util.Global.svg.numberTickFormat,
-			chartFlex: 4,
+			chartFlex: 5,
 			legendFlex: 1,
-			legendTextFunction: function(d, i) {
-				return d.name;
-			},
-			colorDefinedInData: true
-		}, me);
+			showLegend: true,
+			showLabels: false
+		});
 		
 		// get data
 		Ext.Ajax.request({
@@ -347,12 +322,13 @@ Ext.define('App.view.daa.Individual', {
 			method: 'GET',
 			success: function(response) {
 				var resp = Ext.JSON.decode(response.responseText);
-				me.graphData = me.normalizeData(resp.data);
+				me.rawData = me.normalizeData(resp.data);
 				
-				me.store.loadData(me.graphData);
+				me.store.loadData(me.rawData);
 				
-				me.barChart.setGraphData(me.sortData(me.graphData));
-				me.barChart.initChart().draw();
+				me.groupedBarChart.setGraphData(me.filterData());
+				me.groupedBarChart.initChart().draw();
+				me.groupedBarChart.triggerGroupers(false);
 			},
 			callback: function() {
 				me.getEl().unmask();
@@ -395,6 +371,12 @@ Ext.define('App.view.daa.Individual', {
 			 			player.shots += sd.num;
 			 		}
 			 	});
+			 	
+			 	Ext.each(a.saveData, function(vd) {
+				 	if(vd.name == playerName) {
+					 	player.saves = vd.num;
+					}
+				});
 
 	 		});
 	 	});
@@ -404,110 +386,112 @@ Ext.define('App.view.daa.Individual', {
 	 		d.avgGoals = d.gamesPlayed == 0 ? 0 : d.goals/d.gamesPlayed;
 	 		d.avgAssists = d.gamesPlayed == 0 ? 0 : d.assists/d.gamesPlayed;
 	 		d.avgShots = d.gamesPlayed == 0 ? 0 : d.shots/d.gamesPlayed;
+	 		d.avgSaves = d.gamesPlayed == 0 ? 0 : d.saves/d.gamesPlayed;
 	 	});
 	 	
 	 	return dat;
  	},
  	
  	/**
-	 * @function
-	 * @description Sort graph data before consumption
-	 */
-	sortData: function(d) {
-		var me = this;
+ 	 * @function
+ 	 * @description Filter the baseline raw data based on metrics
+ 	 */
+ 	filterData: function() {
+	 	var me = this,
+	 		filterData = [],
+		 	ret = [];
+		 	
+		var currentView = me.currentView;
+	 	
+	 	////////////////////////////////////////
+	 	// figure out the checkboxes to filter on
+	 	////////////////////////////////////////
+	 	var checkboxes = me.query('toolbar[dock=top] checkboxfield');
+		if(checkboxes.length == 0) {
+			return [];
+		}
 		
-		var sortProp = 'name';
-		
-		return Ext.Array.sort(d, function(a, b) {
-			if(a[sortProp] > b[sortProp]) {
-				return 1;
-			} else if (a[sortProp] < b[sortProp]) {
-				return -1;
-			} else {
-				return 0;
+		Ext.each(checkboxes, function(cbx) {
+			if(cbx.checked) {
+				filterData.push(cbx.inputValue);
 			}
 		});
-	},
-	
-	/**
-	 * @function
-	 * @memberOf App.view.daa.VizPanel
-	 * @description Toolbar button handler
-	 */
-	metricHandler: function(btn, evt) {
-		var me = this;
 		
-		// button cls
-		Ext.each(me.vizPanel.query('toolbar > button'), function(button) {
-			if(btn.hasOwnProperty('metric')) {
-				if(button.metric == btn.metric) {
-					button.addCls(me.btnHighlightCss);
-				} else {
-					button.removeCls(me.btnHighlightCss);
-				}
-			}
-		}, me);
+		if(filterData.length == 0) {
+			return [];
+		}
 		
-		me.currentMetric = btn.metric;
-		me.barChart.setChartTitle(me.buildChartTitle());
-		if(me.currentView == 'average') {
-			if(btn.metric == 'shots') {
-				me.barChart.setDataMetric('avgShots');
-			} else if(btn.metric == 'assists') {
-				me.barChart.setDataMetric('avgAssists');
-			} else {
-				me.barChart.setDataMetric('avgGoals');
+		var ind = 1;
+		
+		Ext.each(me.rawData, function(entry) {
+		
+			if(filterData.indexOf('goals') >= 0) {
+				ret.push({
+					id: ind,
+					name: 'goals',
+					grouper: entry.name,	// player
+					value: currentView == 'average' ? entry.avgGoals : entry.goals
+				});
+				
+				ind++;
 			}
-		} else {
-			me.barChart.setDataMetric(btn.metric);
-		}
-		me.barChart.draw();
-	},
-	
-	/** 
-	 * @function
-	 * @private
-	 * @description Set a new chart title
-	 */
-	buildChartTitle: function() {
-		var me = this,
-			ret = me.baseTitle;
 			
-		console.log(me.currentView);
+			if(filterData.indexOf('assists') >= 0) {
+				ret.push({
+					id: ind,
+					name: 'assists',
+					grouper: entry.name,
+					value: currentView == 'average' ? entry.avgAssists : entry.assists
+				});
+				
+				ind++;
+			}
 			
-		if(me.currentView == 'average') {
-			if(me.currentMetric == 'assists') {
-				ret = ret + ' - Assists per Game';
-			} else if(me.currentMetric == 'shots') {
-				ret = ret +  ' - Shots per Game';
-			} else {
-				ret = ret +  ' - Goals per Game';
+			if(filterData.indexOf('shots') >= 0) {
+				ret.push({
+					id: ind,
+					name: 'shots',
+					grouper: entry.name,
+					value: currentView == 'average' ? entry.avgShots : entry.shots
+				});
+				
+				ind++;
 			}
-		} else {
-			if(me.currentMetric == 'assists') {
-				ret = ret + ' - Assists';
-			} else if(me.currentMetric == 'shots') {
-				ret = ret +  ' - Shots';
-			} else {
-				ret = ret +  ' - Goals';
+			
+			if(filterData.indexOf('saves') >= 0) {
+				ret.push({
+					id: ind,
+					name: 'saves',
+					grouper: entry.name,
+					value: currentView == 'average' ? entry.avgSaves : entry.saves
+				});
+				
+				ind++;
 			}
-		}
+		});
 
 		return ret;
-	},
+ 	},
 	
 	/**
-	 * @function
-	 */
-	resizeHandler: function(panel, w, h) {
+ 	 * @function
+ 	 * @description Year checkbox change event handler
+ 	 * @param cbx Ext.form.field.Checkbox
+ 	 * @param oldVal String
+ 	 * @param newVal String
+ 	 */
+	checkboxChange: function(cbx, oldVal, newVal) {
 		var me = this;
 		
-		/*me.canvasWidth = Math.floor(panel.body.dom.offsetWidth),
-		me.canvasHeight = Math.floor(panel.body.dom.offsetHeight);
-	 	
-	 	if(me.barChart != null && me.barChart.chartInitialized) {
-			me.barChart.resize(me.canvasWidth, me.canvasHeight);
-		}*/
+		if(cbx.checked) {
+			cbx.addCls(me.cbxHighlightCss);
+		} else {
+			cbx.removeCls(me.cbxHighlightCss);
+		}
+		
+		me.groupedBarChart.setGraphData(me.filterData());
+		me.groupedBarChart.draw();
+		me.groupedBarChart.triggerGroupers(true);
 	},
 	
 	/**
