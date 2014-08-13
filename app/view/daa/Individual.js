@@ -159,7 +159,7 @@ Ext.define('App.view.daa.Individual', {
 								});
 								
 								me.groupedBarChart.setYTickFormat(function(d, i) {
-									Ext.util.Format.number(d, '0.0');
+									return Ext.util.Format.number(d, '0.0');
 								});
 							} else {
 								me.groupedBarChart.setTooltipFunction(function(d, i) {
@@ -170,7 +170,7 @@ Ext.define('App.view.daa.Individual', {
 								});
 							
 								me.groupedBarChart.setYTickFormat(function(d, i) {
-									Ext.util.Format.number(d, '0,000');
+									return Ext.util.Format.number(d, '0,000');
 								});
 							}
 								

@@ -758,5 +758,10 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 	setTooltipFunction: function(fn) {
 		var me = this;
 		me.tooltipFunction = fn;
+	},
+	
+	setYTickFormat: function(fn) {
+		var me = this;
+		me.yTickFormat = fn;
 	}
 });
