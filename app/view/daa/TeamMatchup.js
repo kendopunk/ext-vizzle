@@ -53,14 +53,15 @@ Ext.define('App.view.daa.TeamMatchup', {
 				scope: me
 			}, {
 				xtype: 'tbspacer',
-				width: 30
+				width: 40
 			}, {
 				xtype: 'tbtext',
-				text: '<i>* Scrimmage</i>'
+				text: '<i>* = scrimmage</i>'
 			}, {
 				xtype: 'tbspacer',
-				width: 30
-			}, {
+				width: 10
+			}, 
+			{
 				xtype: 'checkboxfield',
 				boxLabel: 'Exclude Scrimmages',
 				listeners: {
