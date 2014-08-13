@@ -51,6 +51,29 @@ Ext.define('App.view.daa.TeamMatchup', {
 				orientationValue: 'horizontal',
 				handler: me.orientationHandler,
 				scope: me
+			}, {
+				xtype: 'tbspacer',
+				width: 30
+			}, {
+				xtype: 'tbtext',
+				text: '<i>* Scrimmage</i>'
+			}, {
+				xtype: 'tbspacer',
+				width: 30
+			}, {
+				xtype: 'checkboxfield',
+				boxLabel: 'Exclude Scrimmages',
+				listeners: {
+					change: function(cbx, oldVal, newVal) {
+						if(cbx.checked) {
+							me.stackedBarChart.setGraphData(me.filterScrimmages());
+						} else {
+							me.stackedBarChart.setGraphData(me.graphData);
+						}
+						me.stackedBarChart.draw();
+					},
+					scope: me
+				}
 			}]
 		}];
  		
@@ -103,7 +126,7 @@ Ext.define('App.view.daa.TeamMatchup', {
 				return d.goalLabel;
 			},
 			colorPalette: 'custom',
-			colorScale: d3.scale.ordinal().range(['#006400', ' #B0C4DE']),
+			colorScale: d3.scale.ordinal().range(['#006400', '#B22222']),
 			tooltipFunction: function(d, i) {
 				var ret = '<b>vs ' + d.opponent + '</b><br><br>';
 				
@@ -153,12 +176,19 @@ Ext.define('App.view.daa.TeamMatchup', {
 			ret = [],
 			us = [],
 			them = [],
-			gameNum = 1;
+			gameNum = 1,
+			id;
 			
 		Ext.each(obj, function(entry) {
+			id = 'Game ' + gameNum;
+			if(entry.scrimmage) {
+				id = id + ' *';
+			}
+			
 			us.push({
-				id: 'Game ' + gameNum,
+				id: id,
 				category: 'DAA',
+				scrimmage: entry.scrimmage,
 				y: entry.goalsFor,
 				goalsFor: entry.goalsFor,
 				goalsAgainst: entry.goalsAgainst,
@@ -168,8 +198,9 @@ Ext.define('App.view.daa.TeamMatchup', {
 			});
 			
 			them.push({
-				id: 'Game ' + gameNum,
+				id: id,
 				category: 'Opponent',
+				scrimmage: entry.scrimmage,
 				y: entry.goalsAgainst,
 				goalsFor: entry.goalsFor,
 				goalsAgainst: entry.goalsAgainst,
@@ -194,28 +225,37 @@ Ext.define('App.view.daa.TeamMatchup', {
 	
 	/**
  	 * @function
+ 	 * @description Filter out scrimmage records
+ 	 */
+ 	filterScrimmages: function() {
+	 	var me = this, ret = [];
+	 	
+	 	Ext.each(me.graphData, function(d) {
+		 	var category = d.category, newValues = [];
+		 	
+		 	Ext.each(d.values, function(v) {
+			 	if(!v.scrimmage) {
+				 	newValues.push(v);
+				}
+			});
+		 	
+		 	ret.push({
+			 	category: category,
+			 	values: newValues
+			});
+		});
+		
+		return ret;
+	},
+	
+	/**
+ 	 * @function
  	 * @description Change the stacked bar orientation (horizontal | vertical)
  	 */
 	orientationHandler: function(btn) {
 		var me = this;
 	
 		me.stackedBarChart.setOrientation(btn.orientationValue);
-		
-		// tick formats
-		if(me.currentMetric == 'percent') {
-			if(btn.orientationValue == 'horizontal') {
-				me.stackedBarChart.setXTickFormat(me.percentTickFormat);
-			} else {
-				me.stackedBarChart.setYTickFormat(me.percentTickFormat);
-			}
-		} else {
-			if(btn.orientationValue == 'horizontal') {
-				me.stackedBarChart.setXTickFormat(me.productionTickFormat);
-			} else {
-				me.stackedBarChart.setYTickFormat(me.productionTickFormat);
-			}
-		}
-		
 		me.stackedBarChart.draw();
-	},
+	}
 });

@@ -45,12 +45,14 @@ Ext.define('App.view.daa.Individual', {
 		me.svgInitialized = false,
  			me.canvasWidth,
  			me.canvasHeight,
- 			me.rawData = [],
+ 			me.allData = [],
+ 			me.noScrimmageData = [],
  			me.svg,
  			me.g,
  			me.panelId,
  			me.groupedBarChart = null,
  			me.currentView = 'absolute',
+ 			me.excludeScrimmages = false,
  			me.cbxHighlightCss = 'btn-highlight-khaki';
  			me.eventRelay = Ext.create('App.util.MessageBus'),
  			me.baseTitle = 'Fall 2014';
@@ -58,23 +60,17 @@ Ext.define('App.view.daa.Individual', {
 		////////////////////////////////////////
 		// runtime configuration of checkboxes
 		////////////////////////////////////////
-		var checkboxData = [];
-		var arr = [{
-			display: 'Goals',
-			value: 'goals'
-		}, {
-			display: 'Assists',
-			value: 'assists'
-		}, {
-			display: 'Shots on Goal',
-			value: 'shots'
-		}, {
-			display: 'Saves',
-			value: 'saves'
-		}];
-		Ext.each(arr, function(item) {
+		var checkboxData = [],
+			metricArr = [
+				{display: 'Goals', value: 'goals'},
+				{display: 'Shots on Goal', value: 'shots'},
+				{display: 'Assists', value: 'assists'},
+				{display: 'Saves', value: 'saves'}
+			];
+		Ext.each(metricArr, function(item) {
 			checkboxData.push({
 				xtype: 'checkboxfield',
+				cbxType: 'metric',
 				boxLabel: item.display,
 				name: 'metrics',
 				inputValue: item.value,
@@ -161,6 +157,10 @@ Ext.define('App.view.daa.Individual', {
 									+ ' '
 									+ d.name + ' per game';
 								});
+								
+								me.groupedBarChart.setYTickFormat(function(d, i) {
+									Ext.util.Format.number(d, '0.0');
+								});
 							} else {
 								me.groupedBarChart.setTooltipFunction(function(d, i) {
 									return '<b>' + d.grouper + '</b><br>'
@@ -169,8 +169,32 @@ Ext.define('App.view.daa.Individual', {
 									+ d.name;
 								});
 							
+								me.groupedBarChart.setYTickFormat(function(d, i) {
+									Ext.util.Format.number(d, '0,000');
+								});
 							}
 								
+							me.groupedBarChart.setGraphData(me.filterData());
+							me.groupedBarChart.draw();
+						},
+						scope: me
+					}
+				}, {
+					xtype: 'tbspacer',
+					width: 20
+				}, {
+					xtype: 'checkboxfield',
+					boxLabel: 'Exclude Scrimmages',
+					cbxType: 'scrimmage',
+					listeners: {
+						change: function(cbx, oldVal, newVal) {
+							if(cbx.checked) {
+								me.excludeScrimmages = true;
+								me.store.loadData(me.noScrimmageData);
+							} else {
+								me.excludeScrimmages = false;
+								me.store.loadData(me.allData);
+							}
 							me.groupedBarChart.setGraphData(me.filterData());
 							me.groupedBarChart.draw();
 						},
@@ -222,7 +246,7 @@ Ext.define('App.view.daa.Individual', {
 				renderer: function(v) {
 					return Ext.util.Format.number(v, '0.00');
 				}
-			}, ]
+			}]
 		});
 		
 		me.items = [ me.vizPanel, me.gridPanel ];
@@ -302,7 +326,7 @@ Ext.define('App.view.daa.Individual', {
 				leftAxis: 70
 			},
 			yTickFormat: function(d) {
-				return Ext.util.Format.number(d, '0.0');
+				return Ext.util.Format.number(d, '0,000');
 			},
 			tooltipFunction: function(d, i) {
 				return '<b>' + d.grouper + '</b><br>'
@@ -322,9 +346,11 @@ Ext.define('App.view.daa.Individual', {
 			method: 'GET',
 			success: function(response) {
 				var resp = Ext.JSON.decode(response.responseText);
-				me.rawData = me.normalizeData(resp.data);
 				
-				me.store.loadData(me.rawData);
+				me.allData = me.normalizeData(resp.data);
+				me.noScrimmageData = me.normalizeNoScrimmageData(resp.data);
+				
+				me.store.loadData(me.allData);
 				
 				me.groupedBarChart.setGraphData(me.filterData());
 				me.groupedBarChart.initChart().draw();
@@ -393,6 +419,64 @@ Ext.define('App.view.daa.Individual', {
  	},
  	
  	/**
+	 * @function
+	 * @description Normalize JSON data into chart-consumable
+	 * format (exclude scrimmages)
+	 */
+ 	normalizeNoScrimmageData: function(obj) {
+	 	var me = this,
+	 		playerName = null;
+	 	
+	 	var dat = Ext.clone(me.playerData);
+	 	
+	 	Ext.each(dat, function(player) {
+	 	
+	 		playerName = player.name;
+	 		
+	 		Ext.each(obj, function(a) {
+		 		
+		 		if(!a.scrimmage) {
+	 		
+		 			Ext.each(a.goalData, function(gd) {
+		 				if(gd.name == playerName) {
+			 				player.goals += gd.num;
+			 			}
+		 			});
+		 			
+		 			Ext.each(a.assistData, function(ad) {
+		 				if(ad.name == playerName) {
+			 				player.assists += ad.num;
+			 			}
+		 			});
+		 			
+		 			Ext.each(a.shotData, function(sd) {
+			 			if(sd.name == playerName) {
+				 			player.shots += sd.num;
+				 		}
+				 	});
+				 	
+				 	Ext.each(a.saveData, function(vd) {
+					 	if(vd.name == playerName) {
+						 	player.saves = vd.num;
+						}
+					});
+				}
+
+	 		});
+	 	});
+	 	
+	 	// calculate averages
+	 	Ext.each(dat, function(d) {
+	 		d.avgGoals = d.gamesPlayed == 0 ? 0 : d.goals/d.gamesPlayed;
+	 		d.avgAssists = d.gamesPlayed == 0 ? 0 : d.assists/d.gamesPlayed;
+	 		d.avgShots = d.gamesPlayed == 0 ? 0 : d.shots/d.gamesPlayed;
+	 		d.avgSaves = d.gamesPlayed == 0 ? 0 : d.saves/d.gamesPlayed;
+	 	});
+	 	
+	 	return dat;
+ 	},
+ 	
+ 	/**
  	 * @function
  	 * @description Filter the baseline raw data based on metrics
  	 */
@@ -401,7 +485,8 @@ Ext.define('App.view.daa.Individual', {
 	 		filterData = [],
 		 	ret = [];
 		 	
-		var currentView = me.currentView;
+		var currentView = me.currentView,
+			excludeScrimmages = me.excludeScrimmages;
 	 	
 	 	////////////////////////////////////////
 	 	// figure out the checkboxes to filter on
@@ -412,7 +497,7 @@ Ext.define('App.view.daa.Individual', {
 		}
 		
 		Ext.each(checkboxes, function(cbx) {
-			if(cbx.checked) {
+			if(cbx.checked && cbx.cbxType == 'metric') {
 				filterData.push(cbx.inputValue);
 			}
 		});
@@ -423,7 +508,9 @@ Ext.define('App.view.daa.Individual', {
 		
 		var ind = 1;
 		
-		Ext.each(me.rawData, function(entry) {
+		var useData = me.excludeScrimmages ? me.noScrimmageData : me.allData;
+		
+		Ext.each(useData, function(entry) {
 		
 			if(filterData.indexOf('goals') >= 0) {
 				ret.push({

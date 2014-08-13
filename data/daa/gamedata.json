@@ -3,6 +3,7 @@
 	"data": [{
 		"season": "F14",
 		"date": "8/23/14",
+		"scrimmage": true,
 		"opponent": "Crofton",
 		"goalsFor": 4,
 		"goalsAgainst": 1,
@@ -37,6 +38,7 @@
 	}, {
 		"season": "F14",
 		"date": "8/23/14",
+		"scrimmage": false,
 		"opponent": "Glen Burnie",
 		"goalsFor": 8,
 		"goalsAgainst": 5,
@@ -98,6 +100,7 @@
 	}, {
 		"season": "F14",
 		"date": "8/23/14",
+		"scrimmage": false,
 		"opponent": "South County",
 		"goalsFor": 6,
 		"goalsAgainst": 2,
@@ -162,6 +165,7 @@
 	}, {
 		"season": "F14",
 		"date": "8/23/14",
+		"scrimmage": true,
 		"opponent": "Arundel",
 		"goalsFor": 3,
 		"goalsAgainst": 5,

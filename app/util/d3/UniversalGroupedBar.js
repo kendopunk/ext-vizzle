@@ -51,6 +51,24 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 		leftAxis: 85
 	},
 	
+	mouseEvents: {
+	 	mouseover: {
+		 	enabled: false,
+		 	eventName: null
+		},
+		click: {
+			enabled: false,
+			eventName: null
+		},
+		dblclick: {
+			enabled: false,
+			eventName: null
+		}
+	},
+	rectOpacity: .7,
+	rectStroke: '#323232',
+	rectStrokeOver: '#000000',
+	
 	showLabels: true,
 	showLegend: true,
 	spaceBetweenChartAndLegend: 20,
@@ -193,12 +211,18 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 			.attr('rx', 3)
 			.attr('ry', 3)
 			.on('mouseover', function(d, i) {
-				d3.select(this).style('opacity', 1)
-					.style('stroke-width', 2);
+				d3.select(this)
+					.style('opacity', 1)
+					.style('stroke', me.rectStrokeOver);
+					
+				me.publishMouseEvent('mouseover', d, i);
 			})
 			.on('mouseout', function(d, i) {
-				d3.select(this).style('opacity', 0.6)
-					.style('stroke-width', 1);
+				d3.select(this)
+					.style('opacity', me.rectOpacity)
+					.style('stroke', me.rectStroke);
+					
+				me.publishMouseEvent('mouseout', d, i);
 			});
 			
 		rectSelection.transition()
@@ -345,32 +369,28 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 		legendSquareSelection.exit().remove();
 			
 		legendSquareSelection.enter().append('rect')
-			.style('defaultOpacity', 1)
-			.style('opacity', 1)
+			.style('opacity', me.rectOpacity)
 			.on('mouseover', function(d, i) {
-				// fade this rectangle
-				d3.select(this).style('opacity', .4);
+				d3.select(this)
+					.style('stroke', '#000000')
+					.style('opacity', 1);
 					
-				// outline the bars
 				bars.selectAll('rect').filter(function(e, j) {
-					return i == j;
-				})
-				.style('stroke', '#000000')
-				.style('stroke-width', 2)
-				.style('opacity', 1);
+						return e[legendProperty] == d;
+					})
+					.style('stroke', me.rectStrokeOver)
+					.style('opacity', 1);
 			})
 			.on('mouseout', function(d, i) {
-				// unfade this rect
-				var el = d3.select(this);
-				el.style('opacity', el.attr('defaultOpacity'));
+				d3.select(this)
+					.style('stroke', 'none')
+					.style('opacity', me.rectOpacity);
 					
-				// back to normal
 				bars.selectAll('rect').filter(function(e, j) {
-					return i == j;
-				})
-				.style('stroke', 0)
-				.style('stroke-width', null)
-				.style('opacity', .6);
+						return e[legendProperty] == d;
+					})
+					.style('stroke', me.rectStroke)
+					.style('opacity', me.rectOpacity);
 			});
 		
 		legendSquareSelection.transition()
@@ -432,7 +452,9 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 				return i * legendSquareHeight * 1.75;
 			})
 			.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
-			.text(String);
+			.text(function(d) {
+				return d.toUpperCase();
+			});
 	},
 	
 	/**
@@ -663,12 +685,37 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 				me.canvasHeight - (me.canvasHeight - me.margins.top)
 			]);
 			
+		// figure out actual y ticks
+		var useYTicks = 10;
+		var gdMax = d3.max(me.graphData, function(d) { return d[yMetric]; });
+		if(gdMax < useYTicks) {
+			useYTicks = gdMax;
+		}
+			
 		me.yAxis = d3.svg.axis()
 			.scale(me.yAxisScale)
 			.orient('left')
-			.ticks(10)
+			.ticks(useYTicks)
 			.tickFormat(me.yTickFormat);
 	},
+	
+	/**
+     * @function
+     * @description Publish a mouse event with the event relay
+     * @param evt String mouseover|mouseout|etc..
+     * @param d Object Data object
+     * @param i Integer index
+     */
+    publishMouseEvent: function(evt, d, i) {
+        var me = this;
+
+        if(me.handleEvents && me.eventRelay && me.mouseEvents[evt].enabled) {
+            me.eventRelay.publish(me.mouseEvents[evt].eventName, {
+                payload: d,
+                index: i
+            });
+        }
+    },
 	
 	getFlexUnit: function() {
 		// calculate the width of a flex "unit"

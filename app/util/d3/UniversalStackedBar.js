@@ -71,6 +71,9 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 		}
 	},
    	panelId: null,
+   	rectOpacity: .7,
+   	rectStroke: '#FFFFFF',
+   	rectStrokeOver: '#323232',
    	showLabels: false,
    	showLegend: false,
    	spaceBetweenChartAndLegend: 20,
@@ -262,13 +265,27 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 		rectSelection.enter()
 			.append('rect')
 			.attr('rx', 3)
-			.attr('ry', 3);
+			.attr('ry', 3)
+			.style('stroke', me.rectStroke)
+			.style('stroke-width', 1)
+			.style('opacity', me.rectOpacity)
+			.on('mouseover', function(d, i) {
+				d3.select(this)
+					.style('stroke', me.rectStrokeOver)
+					.style('opacity', 1);
+				
+				me.publishMouseEvent('mouseover', d, i);
+			})
+			.on('mouseout', function(d, i) {
+				d3.select(this)
+					.style('stroke', me.rectStroke)
+					.style('opacity', me.rectOpacity);
+					
+				me.publishMouseEvent('mouseout', d, i);
+			});
 			
 		rectSelection.transition()
 			.duration(500)
-			.style('stroke', 'white')
-			.style('stroke-width', 1)
-			.style('opacity', .6)
 			.attr('x', function(d) {
 				if(chort == 'horizontal') {
 					return xScale(d.y0);
@@ -298,15 +315,6 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 				}
 			});
 			
-		rectSelection.on('mouseover', function(d, i) {
-			d3.select(this).style('stroke-width', 2)
-				.style('opacity', 1);
-		})
-		.on('mouseout', function(d, i) {
-			d3.select(this).style('stroke-width', 1)
-				.style('opacity', .6);
-		});
-
 		rectSelection.call(d3.helper.tooltip().text(me.tooltipFunction));
 		
 		return;
@@ -441,7 +449,30 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 		 	
 		legendSquareSelection.exit().remove();
 		
-		legendSquareSelection.enter().append('rect');
+		legendSquareSelection.enter().append('rect')
+			.on('mouseover', function(d, i) {
+				d3.select(this)
+					.style('stroke', '#000000');
+		
+				gCanvas.selectAll('.layer').filter(function(e, j) {
+					return i == j;
+				})
+				.selectAll('rect')
+				.style('stroke', me.rectStrokeOver)
+				.style('opacity', 1);
+			})
+			.on('mouseout', function(d, i) {
+				d3.select(this)
+					.style('stroke', 'none');
+					
+				gCanvas.selectAll('.layer').filter(function(e, j) {
+					return i == j;
+				})
+				.selectAll('rect')
+				.style('stroke', me.rectStroke)
+				.style('opacity', me.rectOpacity);
+			});
+			
 		
 		legendSquareSelection.transition()
 			.attr('x', 0)
@@ -465,8 +496,8 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 		legendTextSelection.enter()
 			.append('text')
 			.on('mouseover', function(d, i) {
-				// highlight text
-				d3.select(this).style('fill', '#990066')
+				d3.select(this)
+					.style('fill', '#990066')
 					.style('font-weight', 'bold');
 				
 				// rect opacity 1
@@ -474,13 +505,12 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 					return i == j;
 				})
 				.selectAll('rect')
-				.style('stroke', '#000000')
-				.style('stroke-width', 2)
+				.style('stroke', me.rectStrokeOver)
 				.style('opacity', 1);
 			})
 			.on('mouseout', function(d, i) {
-				// unhighlight text
-				d3.select(this).style('fill', '#000000')
+				d3.select(this)
+					.style('fill', '#000000')
 					.style('font-weight', 'normal');
 				
 				// rect opacity .6
@@ -488,9 +518,8 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 					return i == j;
 				})
 				.selectAll('rect')
-				.style('stroke', '#FFFFFF')
-				.style('stroke-width', 1)
-				.style('opacity', .6);
+				.style('stroke', me.rectStroke)
+				.style('opacity', me.rectOpacity);
 			});
 
 		legendTextSelection.transition()
@@ -499,7 +528,7 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 				return i * legendSquareHeight * 1.75;
 			})
 			.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
-			.style('font-size', me.legendFontSize)
+			.attr('class', 'legendText')
 			.text(function(d) {
 				return d.category.toUpperCase();
 			});
@@ -634,6 +663,24 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 				.orient('left');
 		}
 	},
+	
+	/**
+     * @function
+     * @description Publish a mouse event with the event relay
+     * @param evt String mouseover|mouseout|etc..
+     * @param d Object Data object
+     * @param i Integer index
+     */
+    publishMouseEvent: function(evt, d, i) {
+        var me = this;
+
+        if(me.handleEvents && me.eventRelay && me.mouseEvents[evt].enabled) {
+            me.eventRelay.publish(me.mouseEvents[evt].eventName, {
+                payload: d,
+                index: i
+            });
+        }
+    },
 
 	/**
 	 *
@@ -695,6 +742,9 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 	
 	setGraphData: function(data) {
 		var me = this;
+		
+		console.log(Ext.encode(data));
+		
 		me.graphData = data;
 	},
 	

@@ -71,7 +71,8 @@ Ext.define('App.util.d3.UniversalLine', {
 	},
 	noDataMessage: 'No data to display',
 	panelId: null,
- 	strokeColor: '#0000FF',
+	pathStroke: '#0000FF',
+	pathStrokeWidth: 1,
 	showLabels: true,
 	showGrid: true,
 	showMarkers: true,
@@ -258,8 +259,8 @@ Ext.define('App.util.d3.UniversalLine', {
 					}
 					return 'none'
 				})
-				.style('stroke-width', 1)
-				.style('stroke', me.strokeColor)
+				.style('stroke', me.pathStroke)
+				.style('stroke-width', me.pathStrokeWidth)				
 				.attr('d', function(d, i) {
 					if(fillArea) {
 						return canvasArea(d, i);
@@ -275,8 +276,8 @@ Ext.define('App.util.d3.UniversalLine', {
 					}
 					return 'none'
 				})
-				.style('stroke-width', 1)
-				.style('stroke', me.strokeColor)
+				.style('stroke', me.pathStroke)
+				.style('stroke-width', me.pathStrokeWidth)				
 				.transition()
 				.duration(250)
 				.attr('d', function(d, i) {
@@ -733,8 +734,17 @@ Ext.define('App.util.d3.UniversalLine', {
 	
 	setMarkerFillColor: function(color) {
 		var me = this;
-		
 		me.markerFillColor = color;
+	},
+	
+	setPathStroke: function(color) {
+		var me = this;
+		me.pathStroke = color;
+	},
+	
+	setPathStrokeWidth: function(w) {
+		var me = this;
+		me.pathStrokeWidth = w;
 	},
 	
 	setShowGrid: function(bool) {
@@ -746,12 +756,7 @@ Ext.define('App.util.d3.UniversalLine', {
 		var me = this;
 		me.showLabels = bool;
 	},
-	
-	setStrokeColor: function(color) {
-		var me = this;
-		me.strokeColor = color;
-	},
-	
+
 	setTooltipFunction: function(fn) {
 		var me = this;
 		me.tooltipFunction = fn;

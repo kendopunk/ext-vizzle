@@ -89,18 +89,18 @@ Ext.define('App.view.daa.Trending', {
 			'-',
 			{
 				xtype: 'button',
-				iconCls: 'icon-soccer-assist',
-				text: 'Assists',
-				metric: 'assists',
+				iconCls: 'icon-target',
+				text: 'Shots on Goal',
+				metric: 'shots',
 				handler: me.metricHandler,
 				scope: me
 			},
 			'-',
 			{
 				xtype: 'button',
-				iconCls: 'icon-target',
-				text: 'Shots on Goal',
-				metric: 'shots',
+				iconCls: 'icon-soccer-assist',
+				text: 'Assists',
+				metric: 'assists',
 				handler: me.metricHandler,
 				scope: me
 			}]
@@ -164,7 +164,7 @@ Ext.define('App.view.daa.Trending', {
 				left: 70
 			},
 			fillArea: true,
-			fillColor: '#F5DEB3',
+			fillColor: '#FFE4B5',
 			xScalePadding: .1,
 			yScalePadding: .1,
 			xDataMetric: 'game',
@@ -173,7 +173,8 @@ Ext.define('App.view.daa.Trending', {
 			chartTitle: me.buildChartTitle(),
 			markerFillColor: '#FF9933',
 			markerStrokeColor: '#CC3300',
-			strokeColor: '#006400',
+			pathStroke: '#006400',
+			pathStrokeWidth: 2,
 			xTickFormat: function(d) {
 				return 'Game ' + d;
 			},

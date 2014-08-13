@@ -210,7 +210,7 @@ Ext.define('App.view.d3.area.Ticker', {
 					 	xtype: 'colormenu',
 					 	listeners: {
 						 	select: function(menu, color) {
-						 		me.lineChart.setStrokeColor('#' + color);
+						 		me.lineChart.setPathStroke('#' + color);
 						 		me.lineChart.draw();
 						 	},
 						 	scope: me
@@ -298,7 +298,7 @@ Ext.define('App.view.d3.area.Ticker', {
 				return Ext.util.Format.currency(d);
 			},
 			yScalePadding: .1,
-			strokeColor: '#0000FF',
+			pathStroke: '#0000FF',
 			fillArea: true,
 			fillColor: '#DDDDDD',
 			markerFillColor: 'red',

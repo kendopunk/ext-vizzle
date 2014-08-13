@@ -209,7 +209,7 @@ Ext.define('App.view.d3.area.GenericLine', {
 					 	xtype: 'colormenu',
 					 	listeners: {
 						 	select: function(menu, color) {
-						 		me.lineChart.setStrokeColor('#' + color);
+						 		me.lineChart.setPathStroke('#' + color);
 						 		me.lineChart.draw();
 						 	},
 						 	scope: me
