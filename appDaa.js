@@ -52,6 +52,7 @@ Ext.application({
 				}, {	
 					xtype: 'daaTrending'
 				}]
+				//,activeTab: 2
 			}]
 		});
 

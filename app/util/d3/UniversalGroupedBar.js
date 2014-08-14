@@ -92,7 +92,12 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
  	constructor: function(config) {
 	 	var me = this;
 	 	
-	 	Ext.apply(me, config);
+	 	Ext.merge(me, config);
+		
+		// event handling
+		if(me.handleEvents) {
+			me.eventRelay = Ext.create('App.util.MessageBus');
+		}
 	},
 	
 	/**
@@ -708,7 +713,7 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
      */
     publishMouseEvent: function(evt, d, i) {
         var me = this;
-
+        
         if(me.handleEvents && me.eventRelay && me.mouseEvents[evt].enabled) {
             me.eventRelay.publish(me.mouseEvents[evt].eventName, {
                 payload: d,

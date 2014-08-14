@@ -56,6 +56,12 @@ Ext.define('App.view.daa.Individual', {
  			me.cbxHighlightCss = 'btn-highlight-khaki';
  			me.eventRelay = Ext.create('App.util.MessageBus'),
  			me.baseTitle = 'Fall 2014';
+ 			
+ 		////////////////////////////////////////
+ 		// eventing
+ 		////////////////////////////////////////
+ 		me.eventRelay.subscribe(me.gridHighlightEvent, me.gridRowHighlight, me);
+ 		me.eventRelay.subscribe(me.gridUnhighlightEvent, me.gridRowUnhighlight, me);
 		
 		////////////////////////////////////////
 		// runtime configuration of checkboxes
@@ -216,49 +222,61 @@ Ext.define('App.view.daa.Individual', {
 				dataIndex: 'name',
 				width: 150
 			}, {
-				header: 'Goals',
-				dataIndex: 'goals',
-				width: 100
+				text: '<span style="color:#990066;font-weight:bold;">Goals</span>',
+				columns: [{
+					header: 'Total',
+					dataIndex: 'goals',
+					flex: 1
+				}, {
+					header: 'Per Game Avg',
+					dataIndex: 'avgGoals',
+					flex: 1,
+					renderer: function(v) {
+						return Ext.util.Format.number(v, '0.00');
+					}
+				}]
 			}, {
-				header: 'Goals/Game',
-				dataIndex: 'avgGoals',
-				width: 100,
-				renderer: function(v) {
-					return Ext.util.Format.number(v, '0.00');
-				}
+				text: '<span style="color:#990066;font-weight:bold;">Assists</span>',
+				columns: [{
+					header: 'Total',
+					dataIndex: 'assists',
+					flex: 1
+				}, {
+					header: 'Per Game Avg',
+					dataIndex: 'avgAssists',
+					flex: 1,
+					renderer: function(v) {
+						return Ext.util.Format.number(v, '0.00');
+					}
+				}]
 			}, {
-				header: 'Assists',
-				dataIndex: 'assists',
-				width: 100
+				text: '<span style="color:#990066;font-weight:bold;">Shots on Goal</span>',
+				columns: [{
+					header: 'Total',
+					dataIndex: 'shots',
+					flex: 1
+				}, {
+					header: 'Per Game Avg',
+					dataIndex: 'avgShots',
+					flex: 1,
+					renderer: function(v) {
+						return Ext.util.Format.number(v, '0.00');
+					}
+				}]
 			}, {
-				header: 'Assists/Game',
-				dataIndex: 'avgAssists',
-				width: 100,
-				renderer: function(v) {
-					return Ext.util.Format.number(v, '0.00');
-				}
-			}, {
-				header: 'Shots',
-				dataIndex: 'shots',
-				width: 100
-			}, {
-				header: 'Shots/Game',
-				dataIndex: 'avgShots',
-				width: 100,
-				renderer: function(v) {
-					return Ext.util.Format.number(v, '0.00');
-				}
-			}, {
-				header: 'Saves',
-				dataIndex: 'saves',
-				width: 100
-			}, {
-				header: 'Saves/Game',
-				dataIndex: 'avgSaves',
-				width: 100,
-				renderer: function(v) {
-					return Ext.util.Format.number(v, '0.00');
-				}
+				text: '<span style="color:#990066;font-weight:bold;">Saves</span>',
+				columns: [{
+					header: 'Total',
+					dataIndex: 'saves',
+					flex: 1
+				}, {
+					header: 'Per Game Avg',
+					dataIndex: 'avgSaves',
+					renderer: function(v) {
+						return Ext.util.Format.number(v, '0.00');
+					},
+					flex: 1
+				}]
 			}]
 		});
 		
@@ -350,7 +368,18 @@ Ext.define('App.view.daa.Individual', {
 			chartFlex: 5,
 			legendFlex: 1,
 			showLegend: true,
-			showLabels: false
+			showLabels: false,
+			handleEvents: true,
+			mouseEvents: {
+				mouseover: {
+					enabled: true,
+					eventName: me.gridHighlightEvent
+				},
+				mouseout: {
+					enabled: true,
+					eventName: me.gridUnhighlightEvent
+				}
+			}
 		});
 		
 		// get data
@@ -603,7 +632,9 @@ Ext.define('App.view.daa.Individual', {
 	gridRowHighlight: function(obj) {
 		var me = this;
 		
-		var record = me.gridPanel.getStore().findRecord('name', obj.payload.name);
+		console.dir(obj);
+		
+		var record = me.gridPanel.getStore().findRecord('name', obj.payload.grouper);
 		if(record) {
 			var rowIndex = me.gridPanel.getStore().indexOf(record);
 			me.gridPanel.getSelectionModel().select(rowIndex);
