@@ -20,6 +20,7 @@ Ext.application({
 		'App.util.Global',
 		'App.util.MessageBus',
 		'App.util.GridRenderers',
+		'App.view.daa.Conditioning',
 		'App.view.daa.TeamMatchup',
 		'App.view.daa.Individual',
 		'App.view.daa.Trending'
@@ -43,13 +44,14 @@ Ext.application({
 				xtype: 'tabpanel',
 				region: 'center',
 				items: [{
+					xtype: 'daaConditioning'
+				}, {
 					xtype: 'daaTeamMatchup',
 				}, {
 					xtype: 'daaIndividual'
 				}, {	
 					xtype: 'daaTrending'
 				}]
-				//,activeTab: 1
 			}]
 		});
 

@@ -4,66 +4,170 @@
 		"id": 1,
 		"name": "Chris",
 		"color": "#3182bd",
-		"gamesPlayed": 3
+		"gamesPlayed": 3,
+		"conditioning": {
+			"cones": [7.1],
+			"ladders": [15.25],
+			"ws": [13.13],
+			"pushups": [18],
+			"situps": [16],
+			"run": [532]
+		}
 	}, {
 		"id": 2,
 		"name": "Colton",
 		"color": "#6baed6",
-		"gamesPlayed": 3
+		"gamesPlayed": 3,
+		"conditioning": {
+			"cones": [8.47],
+			"ladders": [14.09],
+			"ws": [9.15],
+			"pushups": [20],
+			"situps": [16],
+			"run": [467]
+		}
 	}, {
 		"id": 3,
 		"name": "Davis",
 		"color": "#9ecae1",
-		"gamesPlayed": 3
+		"gamesPlayed": 3,
+		"conditioning": {
+			"cones": [6.82, 8.32],
+			"ladders": [14.75, 13.78],
+			"ws": [11.91, 9.94],
+			"pushups": [21, 20],
+			"situps": [18, 16],
+			"run": [454, 442]
+		}
 	}, {
 		"id": 4,
 		"name": "Finn",
 		"color": "#c6dbef",
-		"gamesPlayed": 3
+		"gamesPlayed": 3,
+		"conditioning": {
+			"cones": [8.5],
+			"ladders": [14.66],
+			"ws": [10.44],
+			"pushups": [14],
+			"situps": [16],
+			"run": [523]
+		}
 	}, {
 		"id": 5,
 		"name": "Jack",
 		"color": "#e6550d",
-		"gamesPlayed": 3
+		"gamesPlayed": 3,
+		"conditioning": {
+			"cones": [7.09, 8.12],
+			"ladders": [13.56, 13.69],
+			"ws": [11.16, 9.16],
+			"pushups": [16, 24],
+			"situps": [16, 17],
+			"run": [429, 438]
+		}
 	}, {
 		"id": 6,
 		"name": "Joe",
 		"color": "#fd8d3c",
-		"gamesPlayed": 3
+		"gamesPlayed": 3,
+		"conditioning": {
+			"cones": [7.53],
+			"ladders": [13.85],
+			"ws": [10.81],
+			"pushups": [16],
+			"situps": [16],
+			"run": [470]
+		}
 	}, {
 		"id": 7,
 		"name": "Karl",
 		"color": "#fdae6b",
-		"gamesPlayed": 3
+		"gamesPlayed": 3,
+		"conditioning": {
+			"cones": [6.78, 8.10],
+			"ladders": [13.68, 13],
+			"ws": [11.5, 9.41],
+			"pushups": [22, 23],
+			"situps": [15, 17],
+			"run": [514, 550]
+		}
 	}, {
 		"id": 8,
 		"name": "Ned",
 		"color": "#fdd0a2",
-		"gamesPlayed": 3
+		"gamesPlayed": 3,
+		"conditioning": {
+			"cones": [6.94, 8.75],
+			"ladders": [15.22, 17.03],
+			"ws": [13.47, 11.66],
+			"pushups": [20, 19],
+			"situps": [15, 14],
+			"run": [458, 457]
+		}
 	}, {
 		"id": 9,
 		"name": "Neel",
 		"color": "#31a354",
-		"gamesPlayed": 3
+		"gamesPlayed": 3,
+		"conditioning": {
+			"cones": [6.84, 8.18],
+			"ladders": [12.81, 13.34],
+			"ws": [11.65, 9.06],
+			"pushups": [20, 20],
+			"situps": [15, 16],
+			"run": [592, 472]
+		}
 	}, {
 		"id": 10,
 		"name": "Riley",
 		"color": "#74c476",
-		"gamesPlayed": 3
+		"gamesPlayed": 3,
+		"conditioning": {
+			"cones": [6.66],
+			"ladders": [12.75],
+			"ws": [12],
+			"pushups": [18],
+			"situps": [18],
+			"run": [475]
+		}
 	}, {
 		"id": 11,
 		"name": "Skyler",
 		"color": "#a1d99b",
-		"gamesPlayed": 3
+		"gamesPlayed": 3,
+		"conditioning": {
+			"cones": [7.59],
+			"ladders": [14.44],
+			"ws": [11.66],
+			"pushups": [15],
+			"situps": [17],
+			"run": [549]
+		}
 	}, {
 		"id": 12,
 		"name": "Tyler",
 		"color": "#c7e9c0",
-		"gamesPlayed": 3
+		"gamesPlayed": 3,
+		"conditioning": {
+			"cones": [7.10],
+			"ladders": [15.59],
+			"ws": [12.15],
+			"pushups": [29],
+			"situps": [14],
+			"run": [589]
+		}
 	}, {
 		"id": 13,
 		"name": "Vince",
 		"color": "#756bb1",
-		"gamesPlayed": 3
+		"gamesPlayed": 3,
+		"conditioning": {
+			"cones": [7.25, 8.41],
+			"ladders": [13.75, 13.84],
+			"ws": [11.81, 10.06],
+			"pushups": [28, 26],
+			"situps": [18, 17],
+			"run": [533, 592]
+		}
 	}]
 }

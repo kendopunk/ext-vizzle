@@ -793,6 +793,11 @@ Ext.define('App.util.d3.UniversalBar', {
 		}
 	},
 	
+	setTooltipFunction: function(fn) {
+		var me = this;
+		me.tooltipFunction = fn;
+	},
+	
 	setShowLabels: function(bool) {
 	 	var me = this;
 	 	

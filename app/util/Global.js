@@ -26,6 +26,16 @@ Ext.define('App.util.Global', {
 				return Ext.util.Format.number(d, '0,000');
 			},
 			
+			secondsToRunTime: function(d, i) {
+				var min = Math.floor(parseInt(d)/60);
+				var sec = parseInt(d)%60;
+				
+				if(sec <= 9) {
+					sec = '0' + sec;
+				}
+				return min + ':' + sec;
+			},
+			
 			percentTickFormat: function(d) {
 				return Ext.util.Format.number(d, '0,000.0') + '%';
 			},
