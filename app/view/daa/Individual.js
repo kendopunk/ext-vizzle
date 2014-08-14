@@ -94,7 +94,9 @@ Ext.define('App.view.daa.Individual', {
 				{name: 'assists', type: 'auto'},
 				{name: 'avgAssists', type: 'auto'},
 				{name: 'shots', type: 'auto'},
-				{name: 'avgShots', type: 'auto'}
+				{name: 'avgShots', type: 'auto'},
+				{name: 'saves', type: 'auto'},
+				{name: 'avgSaves', type: 'auto'}
 			],
 			proxy: {
 				type: 'memory'
@@ -242,6 +244,17 @@ Ext.define('App.view.daa.Individual', {
 			}, {
 				header: 'Shots/Game',
 				dataIndex: 'avgShots',
+				width: 100,
+				renderer: function(v) {
+					return Ext.util.Format.number(v, '0.00');
+				}
+			}, {
+				header: 'Saves',
+				dataIndex: 'saves',
+				width: 100
+			}, {
+				header: 'Saves/Game',
+				dataIndex: 'avgSaves',
 				width: 100,
 				renderer: function(v) {
 					return Ext.util.Format.number(v, '0.00');
