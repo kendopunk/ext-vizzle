@@ -442,7 +442,7 @@ Ext.define('App.view.daa.Individual', {
 			 	
 			 	Ext.each(a.saveData, function(vd) {
 				 	if(vd.name == playerName) {
-					 	player.saves = vd.num;
+					 	player.saves += vd.num;
 					}
 				});
 
@@ -499,7 +499,7 @@ Ext.define('App.view.daa.Individual', {
 				 	
 				 	Ext.each(a.saveData, function(vd) {
 					 	if(vd.name == playerName) {
-						 	player.saves = vd.num;
+						 	player.saves += vd.num;
 						}
 					});
 				}
@@ -631,8 +631,6 @@ Ext.define('App.view.daa.Individual', {
  	 */
 	gridRowHighlight: function(obj) {
 		var me = this;
-		
-		console.dir(obj);
 		
 		var record = me.gridPanel.getStore().findRecord('name', obj.payload.grouper);
 		if(record) {
