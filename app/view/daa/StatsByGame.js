@@ -86,7 +86,7 @@ Ext.define('App.view.daa.StatsByGame', {
 			dock: 'top',
 			items: [{
 				xtype: 'tbtext',
-				text: '<b>Game:</b>'
+				text: '<b>Select Game:</b>'
 			},
 				me.gameCombo,
 			{
@@ -94,7 +94,7 @@ Ext.define('App.view.daa.StatsByGame', {
 				width: 10
 			}, {
 				xtype: 'tbtext',
-				text: '<b>Stat:</b>'
+				text: '<b>Select Stat:</b>'
 			},
 				me.statsCombo
 			]
