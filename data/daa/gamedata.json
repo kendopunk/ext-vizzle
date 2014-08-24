@@ -175,14 +175,14 @@
 			"name": "Tyler",
 			"num": 2
 		}],
-		"shotsScored": [{
+		"shotsAgainst": [{
 			"name": "Vince",
 			"num": 1
 		}, {
 			"name": "Tyler",
 			"num": 5
 		}],
-		"goalsAgainst": []
+		"shotsScored": []
 	}, {
 		"id": 4,
 		"season": "F14",
