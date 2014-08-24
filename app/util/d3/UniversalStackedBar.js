@@ -742,9 +742,6 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 	
 	setGraphData: function(data) {
 		var me = this;
-		
-		console.log(Ext.encode(data));
-		
 		me.graphData = data;
 	},
 	

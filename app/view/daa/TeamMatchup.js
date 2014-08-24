@@ -186,6 +186,10 @@ Ext.define('App.view.daa.TeamMatchup', {
 				id = id + ' *';
 			}
 			
+			var gf = entry.goalsFor > 0 ? entry.goalsFor : '0';
+			var ga = entry.goalsAgainst > 0 ? entry.goalsAgainst : '0';
+
+			
 			us.push({
 				id: id,
 				category: 'DAA',
@@ -193,7 +197,7 @@ Ext.define('App.view.daa.TeamMatchup', {
 				y: entry.goalsFor,
 				goalsFor: entry.goalsFor,
 				goalsAgainst: entry.goalsAgainst,
-				goalLabel: 'DAA (' + entry.goalsFor + ')',
+				goalLabel: 'DAA (' + gf + ')',
 				opponent: entry.opponent,
 				date: entry.date
 			});
@@ -205,7 +209,7 @@ Ext.define('App.view.daa.TeamMatchup', {
 				y: entry.goalsAgainst,
 				goalsFor: entry.goalsFor,
 				goalsAgainst: entry.goalsAgainst,
-				goalLabel: entry.opponent + ' (' + entry.goalsAgainst + ')',
+				goalLabel: entry.opponent + ' (' + ga + ')',
 				opponent: entry.opponent,
 				date: entry.date
 			});

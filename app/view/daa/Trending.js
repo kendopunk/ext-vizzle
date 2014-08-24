@@ -159,7 +159,7 @@ Ext.define('App.view.daa.Trending', {
 			panelId: me.panelId,
 			margins: {
 				top: 40,
-				right: 50,
+				right: 70,
 				bottom: 60,
 				left: 70
 			},

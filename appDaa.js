@@ -23,7 +23,8 @@ Ext.application({
 		'App.view.daa.Conditioning',
 		'App.view.daa.TeamMatchup',
 		'App.view.daa.Individual',
-		'App.view.daa.Trending'
+		'App.view.daa.Trending',
+		'App.view.daa.StatsByGame'
 	],
 	
 	launch: function() {
@@ -44,15 +45,17 @@ Ext.application({
 				xtype: 'tabpanel',
 				region: 'center',
 				items: [{
-					xtype: 'daaConditioning'
-				}, {
 					xtype: 'daaTeamMatchup',
+				}, {
+					xtype: 'daaStatsByGame'
 				}, {
 					xtype: 'daaIndividual'
 				}, {	
 					xtype: 'daaTrending'
+				}, {
+					xtype: 'daaConditioning'
 				}]
-				//,activeTab: 2
+				//,activeTab: 1
 			}]
 		});
 

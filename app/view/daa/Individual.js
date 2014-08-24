@@ -190,7 +190,7 @@ Ext.define('App.view.daa.Individual', {
 				}, {
 					xtype: 'tbspacer',
 					width: 20
-				}, {
+				}/*, {
 					xtype: 'checkboxfield',
 					boxLabel: 'Exclude Scrimmages',
 					cbxType: 'scrimmage',
@@ -208,7 +208,7 @@ Ext.define('App.view.daa.Individual', {
 						},
 						scope: me
 					}
-				}]
+				}*/]
 			}]
 		});
 
