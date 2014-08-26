@@ -21,6 +21,7 @@ Ext.application({
 		'App.util.MessageBus',
 		'App.util.GridRenderers',
 		'App.view.daa.Conditioning',
+		'App.view.daa.ConditioningTwo',
 		'App.view.daa.TeamMatchup',
 		'App.view.daa.Individual',
 		'App.view.daa.Trending',
@@ -53,9 +54,11 @@ Ext.application({
 				}, {	
 					xtype: 'daaTrending'
 				}, {
-					xtype: 'daaConditioning'
+					xtype: 'daaConditioningOne'
+				}, {
+					xtype: 'daaConditioningTwo'
 				}]
-				//,activeTab: 1
+				//,activeTab: 5
 			}]
 		});
 

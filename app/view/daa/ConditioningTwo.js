@@ -4,10 +4,10 @@
  * @memberOf App.view.daa
  * @description
  */
-Ext.define('App.view.daa.Conditioning', {
+Ext.define('App.view.daa.ConditioningTwo', {
 	extend: 'Ext.Panel',
-	alias: 'widget.daaConditioningOne',
-	title: 'Conditioning I',
+	alias: 'widget.daaConditioningTwo',
+	title: 'Conditioning II',
 	closable: false,
 	
 	requires: [
@@ -50,7 +50,7 @@ Ext.define('App.view.daa.Conditioning', {
  			me.g,
  			me.panelId,
  			me.barChart = null,
- 			me.currentMetric = 'cones',
+ 			me.currentMetric = 'fiveTenTens',
  			me.btnHighlightCss = 'btn-highlight-peachpuff',
  			me.eventRelay = Ext.create('App.util.MessageBus'),
  			me.baseTitle = '2014 Conditioning Results';
@@ -67,18 +67,12 @@ Ext.define('App.view.daa.Conditioning', {
 		me.store = Ext.create('Ext.data.Store', {
 			fields: [
 				{name: 'player', type: 'string'},
-				{name: 'cones', type: 'auto'},
-				{name: 'avgCones', type: 'auto'},
-				{name: 'ladders', type: 'auto'},
-				{name: 'avgLadders', type: 'auto'},
-				{name: 'ws', type: 'auto'},
-				{name: 'avgWs', type: 'auto'},
-				{name: 'pushups', type: 'auto'},
-				{name: 'avgPushups', type: 'auto'},
-				{name: 'situps', type: 'auto'},
-				{name: 'avgSitups', type: 'auto'},
-				{name: 'run', type: 'auto'},
-				{name: 'avgRun', type: 'auto'}
+				{name: 'fiveTenTens', type: 'auto'},
+				{name: 'avgFiveTenTens', type: 'auto'},
+				{name: 'quickHops', type: 'auto'},
+				{name: 'avgQuickHops', type: 'auto'},
+				{name: 'figureEights', type: 'auto'},
+				{name: 'avgFigureEights', type: 'auto'}
 			],
 			proxy: {
 				type: 'memory'
@@ -104,14 +98,14 @@ Ext.define('App.view.daa.Conditioning', {
 				items: [
 				{
 					xtype: 'tbtext',
-					text: '<span style="color:#990066;font-weight:bold;">Cones:</span>'
+					text: '<span style="color:#990066;font-weight:bold;">5-10-10s:</span>'
 				}, {
 					xtype: 'button',
 					text: 'Best',
 					cls: me.btnHighlightCss,
-					metric: 'cones',
+					metric: 'fiveTenTens',
 					metricFormat: 'decimal',
-					metricLabel: 'Cones',
+					metricLabel: '5-10-10s',
 					handler: me.metricHandler,
 					scope: me
 				}, 
@@ -119,9 +113,9 @@ Ext.define('App.view.daa.Conditioning', {
 				{
 					xtype: 'button',
 					text: 'Avg',
-					metric: 'avgCones',
+					metric: 'avgFiveTenTens',
 					metricFormat: 'decimal',
-					metricLabel: 'Cones Average',
+					metricLabel: '5-10-10 Average',
 					handler: me.metricHandler,
 					scope: me
 				}, 
@@ -130,13 +124,13 @@ Ext.define('App.view.daa.Conditioning', {
 				},
 				{
 					xtype: 'tbtext',
-					text: '<span style="color:#990066;font-weight:bold;">Ladders:</span>'
+					text: '<span style="color:#990066;font-weight:bold;">Quick Hops:</span>'
 				}, {
 					xtype: 'button',
 					text: 'Best',
-					metric: 'ladders',
+					metric: 'quickHops',
 					metricFormat: 'decimal',
-					metricLabel: 'Ladders',
+					metricLabel: 'Quick Hops',
 					handler: me.metricHandler,
 					scope: me
 				}, 
@@ -144,9 +138,9 @@ Ext.define('App.view.daa.Conditioning', {
 				{
 					xtype: 'button',
 					text: 'Avg',
-					metric: 'avgLadders',
+					metric: 'avgQuickHops',
 					metricFormat: 'decimal',
-					metricLabel: 'Ladders Average',
+					metricLabel: 'Quick Hops Average',
 					handler: me.metricHandler,
 					scope: me
 				}, 
@@ -155,13 +149,13 @@ Ext.define('App.view.daa.Conditioning', {
 				},
 				{
 					xtype: 'tbtext',
-					text: '<span style="color:#990066;font-weight:bold;">W Drill:</span>'
+					text: '<span style="color:#990066;font-weight:bold;">Figure 8s:</span>'
 				}, {
 					xtype: 'button',
 					text: 'Best',
-					metric: 'ws',
+					metric: 'figureEights',
 					metricFormat: 'decimal',
-					metricLabel: 'W Drill',
+					metricLabel: 'Figure 8s',
 					handler: me.metricHandler,
 					scope: me
 				}, 
@@ -169,84 +163,9 @@ Ext.define('App.view.daa.Conditioning', {
 				{
 					xtype: 'button',
 					text: 'Avg',
-					metric: 'avgWs',
+					metric: 'avgFigureEights',
 					metricFormat: 'decimal',
-					metricLabel: 'W Drill Average',
-					handler: me.metricHandler,
-					scope: me
-				}, 
-				{
-					xtype: 'tbspacer', width: 12
-				},
-				{
-					xtype: 'tbtext',
-					text: '<span style="color:#990066;font-weight:bold;">Pushups:</span>'
-				}, {
-					xtype: 'button',
-					text: 'Best',
-					metric: 'pushups',
-					metricFormat: 'number',
-					metricLabel: 'Pushups',
-					handler: me.metricHandler,
-					scope: me
-				}, 
-				'-',
-				{
-					xtype: 'button',
-					text: 'Avg',
-					metric: 'avgPushups',
-					metricFormat: 'number',
-					metricLabel: 'Pushups Average',
-					handler: me.metricHandler,
-					scope: me
-				}, 
-				{
-					xtype: 'tbspacer', width: 12
-				},
-				{
-					xtype: 'tbtext',
-					text: '<span style="color:#990066;font-weight:bold;">Situps:</span>'
-				}, {
-					xtype: 'button',
-					text: 'Best',
-					metric: 'situps',
-					metricFormat: 'number',
-					metricLabel: 'Situps',
-					handler: me.metricHandler,
-					scope: me
-				}, 
-				'-',
-				{
-					xtype: 'button',
-					text: 'Avg',
-					metric: 'avgSitups',
-					metricFormat: 'number',
-					metricLabel: 'Situps Average',
-					handler: me.metricHandler,
-					scope: me
-				}, 
-				{
-					xtype: 'tbspacer', width: 12
-				},
-				{
-					xtype: 'tbtext',
-					text: '<span style="color:#990066;font-weight:bold;">Run:</span>'
-				}, {
-					xtype: 'button',
-					text: 'Best',
-					metric: 'run',
-					metricFormat: 'runtime',
-					metricLabel: 'Run',
-					handler: me.metricHandler,
-					scope: me
-				}, 
-				'-',
-				{
-					xtype: 'button',
-					text: 'Avg',
-					metric: 'avgRun',
-					metricFormat: 'runtime',
-					metricLabel: 'Run Average',
+					metricLabel: 'Figure 8 Average',
 					handler: me.metricHandler,
 					scope: me
 				}]
@@ -255,119 +174,61 @@ Ext.define('App.view.daa.Conditioning', {
 
 		me.gridPanel = Ext.create('Ext.grid.Panel', {
 			region: 'center',
-			title: 'Conditioning Data Table',
+			title: 'Conditioning II Data Table',
 			store: me.store,
 			cls: 'gridRowSelection',
 			columns: [{
 				header: 'Player',
 				dataIndex: 'name',
-				flex: 1
 			}, {
-				text: '<span style="color:#990066; font-weight:bold;">Cones</span>',
+				text: '<span style="color:#990066; font-weight:bold;">5-10-10s</span>',
 				columns: [{
 					header: 'Best',
-					dataIndex: 'cones',
+					dataIndex: 'fiveTenTens',
 					sortable: true,
-					flex: 1,
 					renderer: function(v) {
 						return Ext.util.Format.number(v, '0.00') + ' sec';
 					}
 				}, {
 					header: 'Avg',
-					dataIndex: 'avgCones',
+					dataIndex: 'avgFiveTenTens',
 					sortable: true,
-					flex: 1,
 					renderer: function(v) {
 						return Ext.util.Format.number(v, '0.00') + ' sec';
 					}
 				}]
 			}, {
-				text: '<span style="color:#990066; font-weight:bold;">Ladders</span>',
+				text: '<span style="color:#990066; font-weight:bold;">Quick Hops</span>',
 				columns: [{
 					header: 'Best',
-					dataIndex: 'ladders',
+					dataIndex: 'quickHops',
 					sortable: true,
-					flex: 1,
 					renderer: function(v) {
 						return Ext.util.Format.number(v, '0.00') + ' sec';
 					}
 				}, {
 					header: 'Avg',
-					dataIndex: 'avgLadders',
+					dataIndex: 'avgQuickHops',
 					sortable: true,
-					flex: 1,
 					renderer: function(v) {
 						return Ext.util.Format.number(v, '0.00') + ' sec';
 					}
 				}]
 			}, {
-				text: '<span style="color:#990066; font-weight:bold;">W Drill</span>',
+				text: '<span style="color:#990066; font-weight:bold;">Figure 8s</span>',
 				columns: [{
 					header: 'Best',
-					dataIndex: 'ws',
+					dataIndex: 'figureEights',
 					sortable: true,
-					flex: 1,
 					renderer: function(v) {
 						return Ext.util.Format.number(v, '0.00') + ' sec';
 					}
 				}, {
 					header: 'Avg',
-					dataIndex: 'avgWs',
+					dataIndex: 'avgFigureEights',
 					sortable: true,
-					flex: 1,
 					renderer: function(v) {
 						return Ext.util.Format.number(v, '0.00') + ' sec';
-					}
-				}]
-			}, {
-				text: '<span style="color:#990066; font-weight:bold;">Pushups</span>',
-				columns: [{
-					header: 'Best',
-					dataIndex: 'pushups',
-					sortable: true,
-					flex: 1
-				}, {
-					header: 'Avg',
-					dataIndex: 'avgPushups',
-					sortable: true,
-					flex: 1,
-					renderer: function(v) {
-						return Ext.util.Format.number(v, '0.0');
-					}
-				}]
-			}, {
-				text: '<span style="color:#990066; font-weight:bold;">Situps</span>',
-				columns: [{
-					header: 'Best',
-					dataIndex: 'situps',
-					sortable: true,
-					flex: 1
-				}, {
-					header: 'Avg',
-					dataIndex: 'avgSitups',
-					sortable: true,
-					flex: 1,
-					renderer: function(v) {
-						return Ext.util.Format.number(v, '0.0');
-					}
-				}]
-			}, {
-				text: '<span style="color:#990066; font-weight:bold;">Run</span>',
-				columns: [{
-					header: 'Best',
-					dataIndex: 'run',
-					sortable: true,
-					flex: 1,
-					renderer: function(v) {
-						return App.util.Global.svg.secondsToRunTime(v);
-					}
-				}, {
-					header: 'Avg',
-					dataIndex: 'avgRun',
-					sortable: true,
-					flex: 1,
-					renderer: function(v) {
-						return App.util.Global.svg.secondsToRunTime(v);
 					}
 				}]
 			}]
@@ -402,8 +263,8 @@ Ext.define('App.view.daa.Conditioning', {
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,
 			graphData: [],
-			dataMetric: 'cones',
-			chartTitle: me.baseTitle + ' - Cones',
+			dataMetric: 'fiveTenTens',
+			chartTitle: me.baseTitle + ' - 5-10-10s',
 			colorDefinedInData: true,
 			showLabels: true,
 			labelFunction: function(d, i) {
@@ -418,7 +279,7 @@ Ext.define('App.view.daa.Conditioning', {
 			},
 			tooltipFunction: function(d, i) {
 				return '<b>' + d.name + '</b><br>'
-					+ Ext.util.Format.number(d.cones, '0.00')
+					+ Ext.util.Format.number(d.fiveTenTens, '0.00')
 					+ ' seconds';
 			},
 			yTickFormat: function(d, i) {
@@ -473,18 +334,12 @@ Ext.define('App.view.daa.Conditioning', {
 			ret.push({
 				name: player.name,
 				color: player.color,
-				cones: Ext.Array.min(player.conditioning.cones),
-				avgCones: Ext.Array.mean(player.conditioning.cones),
-				ladders: Ext.Array.min(player.conditioning.ladders),
-				avgLadders: Ext.Array.mean(player.conditioning.ladders),
-				ws: Ext.Array.min(player.conditioning.ws),
-				avgWs: Ext.Array.mean(player.conditioning.ws),
-				pushups: Ext.Array.max(player.conditioning.pushups),
-				avgPushups: Ext.Array.mean(player.conditioning.pushups),
-				situps: Ext.Array.max(player.conditioning.situps),
-				avgSitups: Ext.Array.mean(player.conditioning.situps),
-				run: Ext.Array.min(player.conditioning.run),
-				avgRun: Ext.Array.mean(player.conditioning.run)
+				fiveTenTens: Ext.Array.min(player.conditioning.fiveTenTens),
+				avgFiveTenTens: Ext.Array.mean(player.conditioning.fiveTenTens),
+				quickHops: Ext.Array.min(player.conditioning.quickHops),
+				avgQuickHops: Ext.Array.mean(player.conditioning.quickHops),
+				figureEights: Ext.Array.min(player.conditioning.figureEights),
+				avgFigureEights: Ext.Array.mean(player.conditioning.figureEights)
 			});
 
 		});
@@ -514,18 +369,7 @@ Ext.define('App.view.daa.Conditioning', {
 		
 		me.currentMetric = btn.metric;
 		
-		if(btn.metricFormat == 'runtime') {
-		
-			me.barChart.setTooltipFunction(function(d, i) {
-				return '<b>' + d.name + '</b><br>'
-					+ App.util.Global.svg.secondsToRunTime(d[btn.metric]);
-			});
-			
-			me.barChart.setYTickFormat(function(d, i) {
-				return App.util.Global.svg.secondsToRunTime(d);
-			});
-		
-		} else if(btn.metricFormat == 'number') {
+		if(btn.metricFormat == 'number') {
 			
 			me.barChart.setTooltipFunction(function(d, i) {
 				return '<b>' + d.name + '</b><br>'
