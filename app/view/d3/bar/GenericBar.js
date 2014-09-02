@@ -138,17 +138,6 @@ Ext.define('App.view.d3.bar.GenericBar', {
 					text: 'Customize',
 					menu: [{
 						xtype: 'menucheckitem',
-						text: 'Labels',
-						checked: true,
-						listeners: {
-							checkchange: function(cbx, checked) {
-								me.barChart.setShowLabels(checked);
-								me.barChart.draw();
-							},
-							scope: me
-						}
-					}, {
-						xtype: 'menucheckitem',
 						text: 'Legend',
 						listeners: {
 							checkchange: function(cbx, checked) {
@@ -157,6 +146,48 @@ Ext.define('App.view.d3.bar.GenericBar', {
 							},
 							scope: me
 						}
+					}, {
+						text: 'Labels',
+						menu: [{
+							text: 'Horizontal',
+							itemId: 'labelHoz',
+							iconCls: 'icon-tick',
+							handler: function(btn) {
+								me.down('#labelVert').setIconCls('');
+								me.down('#labelNone').setIconCls('');
+								btn.setIconCls('icon-tick');
+								
+								me.barChart.setShowLabels(true);
+								me.barChart.setLabelOrientation('horizontal');
+								me.barChart.draw();
+							},
+							scope: me
+						}, {
+							text: 'Vertical',
+							itemId: 'labelVert',
+							handler: function(btn) {
+								me.down('#labelHoz').setIconCls('');
+								me.down('#labelNone').setIconCls('');
+								btn.setIconCls('icon-tick');
+								
+								me.barChart.setShowLabels(true);
+								me.barChart.setLabelOrientation('vertical');
+								me.barChart.draw();
+							},
+							scope: me
+						}, {
+							text: 'OFF',
+							itemId: 'labelNone',
+							handler: function(btn) {
+								me.down('#labelVert').setIconCls('');
+								me.down('#labelHoz').setIconCls('');
+								btn.setIconCls('icon-tick');
+								
+								me.barChart.setShowLabels(false);
+								me.barChart.draw();
+							},
+							scope: me
+						}]
 					}, {
 						text: 'Sort',
 						menu: [{
@@ -308,21 +339,9 @@ Ext.define('App.view.d3.bar.GenericBar', {
 	 		callback: function(records) {
 	 			me.graphData = App.util.JsonBuilder.buildMovieDataJson(records);	// as is
 	 			
-		 		/*me.graphData = Ext.Array.sort(App.util.JsonBuilder.buildMovieDataJson(records), function(a, b) {
-			 		if(a.title > b.title) {
-			 			return 1;
-			 		} else if(a.title < b.title) {
-			 			return -1;
-			 		} else {
-			 			return 0;
-			 		}
-			 	});*/
-		 		
-		 		
-		 		
 		 		me.barChart.setGraphData(me.graphData);
 		 		me.barChart.initChart().draw();
-
+		 		
 				panel.getEl().unmask();
 			},
 			scope: me
@@ -379,13 +398,6 @@ Ext.define('App.view.d3.bar.GenericBar', {
 	 */
 	resizeHandler: function(panel, w, h) {
 		var me = this;
-		
-		//me.canvasWidth = Math.floor(panel.body.dom.offsetWidth),
-		//me.canvasHeight = Math.floor(panel.body.dom.offsetHeight);
-	 	
-	 	//if(me.barChart != null && me.barChart.chartInitialized) {
-			//me.barChart.resize(me.canvasWidth, me.canvasHeight);
-		//}
 	},
 	
 	/**

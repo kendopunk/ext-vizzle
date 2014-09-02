@@ -38,16 +38,19 @@ Ext.define('App.util.d3.UniversalBar', {
 	graphData: [],	// array of objects for the graph
 	handleEvents: false,
 	heightOffset: 5,	// offset of bars from top
+	labelClass: 'labelText',
 	labelDistanceFromBar: 10,	// needs to be less than labelOffsetTop
-	labelFontSize: '9px',
 	labelFunction: function(data, index) {
 		return 'label';
 	},
 	labelOffsetTop: 15,	// height (in pix) to lower graph to show top labels
+	labelOrientation: 'horizontal',
+	legendClass: 'legendText',
+	legendBoldClass: 'legendTextBold',
+	legendOverClass: 'legendTextBoldOver',
 	legendFlex: 1,
 	legendSquareWidth: 10,
   	legendSquareHeight: 10,
-  	legendFontSize: '9px',
   	legendTextFunction: function(data, index) {
 	 	return 'legend item';
 	},
@@ -65,6 +68,10 @@ Ext.define('App.util.d3.UniversalBar', {
 		 	enabled: false,
 		 	eventName: null
 		},
+		mouseout: {
+		 	enabled: false,
+		 	eventName: null
+		},
 		click: {
 			enabled: false,
 			eventName: null
@@ -72,6 +79,12 @@ Ext.define('App.util.d3.UniversalBar', {
 		dblclick: {
 			enabled: false,
 			eventName: null
+		}
+	},
+	opacities: {
+		rect: {
+			default: .65,
+			over: 1
 		}
 	},
 	orientation: 'vertical',	// vertical | horizontal
@@ -124,19 +137,14 @@ Ext.define('App.util.d3.UniversalBar', {
 		////////////////////////////////////////
 		// "g" elements
 		////////////////////////////////////////
-		
-		// bar
 		me.gBar = me.svg.append('svg:g');
 		
-		// label
 		me.gText = me.svg.append('svg:g');
 		
-		// y axis
 		me.gYAxis = me.svg.append('svg:g')
 			.attr('class', 'axis')
 			.attr('transform', 'translate(' + me.margins.leftAxis + ',0)');
 		
-		// title
 		me.gTitle = me.svg.append('svg:g')
 			.attr('transform', 'translate('
 			+ parseInt(me.canvasWidth/2)
@@ -144,14 +152,12 @@ Ext.define('App.util.d3.UniversalBar', {
 			+ parseInt(me.margins.top/2)
 			+ ')');
 		
-		// legend
 		var legendTranslateX = me.margins.left 
 			+ (me.getFlexUnit() * me.chartFlex)
 			+ me.spaceBetweenChartAndLegend;
 		me.gLegend = me.svg.append('svg:g')
 			.attr('transform', 'translate(' + legendTranslateX + ', ' + me.margins.top + ')');
 		
-		// bool
 		me.chartInitialized = true;
 
 		return me;
@@ -240,43 +246,19 @@ Ext.define('App.util.d3.UniversalBar', {
 		// add new bars
 		rectSelection.enter()
 			.append('rect')
-			.attr('defaultOpacity', .6)
-			.style('opacity', .6)
+			.style('opacity', me.opacities.rect.default)
 			.style('stroke', '#333333')
-			.style('stroke-width', 1);
-			
-		// apply events
-		rectSelection.on('mouseover', function(d, i) {
-			d3.select(this).style('opacity', .9);
-			
-			if(showLegend) {
-				gLegend.selectAll('text').filter(function(e, j) {
-					return e[dataMetric] == d[dataMetric];
-				})
-				.style('fill', '#990066')
-				.style('font-weight', 'bold');
-			}
-			
-			me.publishMouseEvent('mouseover', d, i);
-		})
-		.on('mouseout', function(d, i) {
-			var el = d3.select(this);
-			el.style('opacity', el.attr('defaultOpacity'));
-			
-			if(showLegend) {
-				gLegend.selectAll('text').filter(function(e, j) {
-					return e[dataMetric] == d[dataMetric];
-				})
-				.style('fill', '#000000')
-				.style('font-weight', 'normal');
-			}
-			
-			me.publishMouseEvent('mouseout', d, i);
-		})
-		.on('dblclick', function(d, i) {
-			me.publishMouseEvent('dblclick', d, i);
-		})
-		.call(d3.helper.tooltip().text(me.tooltipFunction));
+			.style('stroke-width', 1)
+			.on('mouseover', function(d, i) {
+				me.handleMouseEvent(this, 'rect', 'mouseover', d, i);
+			})
+			.on('mouseout', function(d, i) {
+				me.handleMouseEvent(this, 'rect', 'mouseout', d, i);
+			})
+			.on('dblclick', function(d, i) {
+				me.handleMouseEvent(this, 'rect', 'dblclick', d, i);
+			})
+			.call(d3.helper.tooltip().text(me.tooltipFunction));
 		
 		// transition all rectangles
 		rectSelection.transition()
@@ -303,7 +285,7 @@ Ext.define('App.util.d3.UniversalBar', {
 			.attr('height', function(d) {
 				return yScale(d[dataMetric]) - margins.bottom;
 			})
-			.attr('fill', function(d, i) {
+			.style('fill', function(d, i) {
 				if(colorDefinedInData && colorDefinedInDataIndex) {
 					return d[colorDefinedInDataIndex];
 				} else {
@@ -328,40 +310,86 @@ Ext.define('App.util.d3.UniversalBar', {
 	 			
 		 	return;
 		}
-	 	
-	 	// local scope
-	 	var labelFontSize = me.labelFontSize,
-	 		canvasHeight = me.canvasHeight,
-	 		canvasWidth = me.canvasWidth,
-	 		xScale = me.xScale,
-	 		yScale = me.yScale,
-	 		dataMetric = me.dataMetric,
-	 		labelDistanceFromBar = me.labelDistanceFromBar,
-	 		labelFunction = me.labelFunction;
-	 		
-	 	// join new with old
+		
+		// local scope
+		var barPadding = me.barPadding,
+			canvasHeight = me.canvasHeight,
+			canvasWidth = me.canvasWidth,
+			chartFlex = me.chartFlex,
+			dataMetric = me.dataMetric,
+			graphData = me.graphData,
+			labelDistanceFromBar = me.labelDistanceFromBar,
+			margins = me.margins,
+			maxBarWidth = me.maxBarWidth,
+			oneFlexUnit = me.getFlexUnit(),
+			showLegend = me.showLegend,
+			xScale = me.xScale,
+			yScale = me.yScale;
+			
+		// J-R
 		var labelSelection = me.gText.selectAll('text')
 			.data(me.graphData);
+		
+		labelSelection.exit().remove();	
+		
+		if(me.labelOrientation == 'vertical') {
 			
-		// remove old
-		labelSelection.exit().remove();
+			labelSelection.enter()
+				.append('text')
+				.attr('class', me.labelClass)
+				.attr('text-anchor', 'start');
 		
-		// add new labels
-		labelSelection.enter()
-			.append('text')
-			.style('font-size', me.labelFontSize)
-			.attr('text-anchor', 'start');
+			labelSelection.transition()
+				.duration(300)
+				.attr('x', function(d, i) {
+					if(showLegend) {
+						var calculatedWidth = 
+							((oneFlexUnit * chartFlex)/graphData.length) - barPadding;
+					} else {
+						var calculatedWidth = 
+							(canvasWidth - (margins.left + margins.right))/graphData.length - barPadding;
+					}
+					
+					// lesser of 2 widths
+					return xScale(i) + parseInt(Ext.Array.min([maxBarWidth, calculatedWidth])/2);
+				})
+				.attr('y', function(d) {
+					return canvasHeight - parseInt(margins.bottom * 1.5);
+				})
+				.attr('transform', function(d, i) {
+					if(showLegend) {
+						var calculatedWidth = 
+							((oneFlexUnit * chartFlex)/graphData.length) - barPadding;
+					} else {
+						var calculatedWidth = 
+							(canvasWidth - (me.margins.left + me.margins.right))/me.graphData.length - me.barPadding;
+					}
+				
+					// lesser of 2 widths
+					var x = xScale(i) + parseInt(Ext.Array.min([maxBarWidth, calculatedWidth])/2);
+					var y = canvasHeight - parseInt(margins.bottom * 1.5);
+				
+					return 'rotate(-90,' + x + ',' + y + ')';
+				})
+				.text(me.labelFunction);
+		} else {
+			
+			labelSelection.enter()
+				.append('text')
+				.attr('class', me.labelClass)
+				.attr('text-anchor', 'start');
 		
-		// transition all
-		labelSelection.transition()
-			.duration(250)
-			.attr('x', function(d, i) {
-				return xScale(i);
-			})
-			.attr('y', function(d) {
-				return canvasHeight - yScale(d[dataMetric]) - labelDistanceFromBar;
-			})
-			.text(me.labelFunction);
+			labelSelection.transition()
+				.duration(250)
+				.attr('x', function(d, i) {
+					return xScale(i);
+				})
+				.attr('y', function(d) {
+					return canvasHeight - yScale(d[dataMetric]) - labelDistanceFromBar;
+				})
+				.attr('transform', 'rotate(0)')
+				.text(me.labelFunction);
+		}
 	},
  	
 	/**
@@ -388,10 +416,11 @@ Ext.define('App.util.d3.UniversalBar', {
 		}
 		
 		// local scope
-		var bars = me.gBar,
-			colorScale = me.colorScale,
+		var colorScale = me.colorScale,
 			legendSquareHeight = me.legendSquareHeight,
-			legendSquareWidth = me.legendSquareWidth;
+			legendSquareWidth = me.legendSquareWidth,
+			colorDefinedInData = me.colorDefinedInData,
+			colorDefinedInDataIndex = me.colorDefinedInDataIndex;
 			
 		////////////////////////////////////////
 		// LEGEND SQUARES
@@ -406,36 +435,12 @@ Ext.define('App.util.d3.UniversalBar', {
 		legendSquareSelection.exit().remove();
 			
 		legendSquareSelection.enter().append('rect')
-			.style('defaultOpacity', 1)
-			.style('opacity', 1)
+			.style('opacity', me.opacities.rect.default)
 			.on('mouseover', function(d, i) {
-				// fade this rectangle
-				d3.select(this).style('opacity', .4);
-					
-				// outline the bars
-				bars.selectAll('rect').filter(function(e, j) {
-					return i == j;
-				})
-				.style('stroke', '#000000')
-				.style('stroke-width', 2)
-				.style('opacity', 1);
-				/*.attr('transform', 'translate(0, -10)');*/
+				me.handleMouseEvent(this, 'legendRect', 'mouseover', d, i);
 			})
 			.on('mouseout', function(d, i) {
-				// unfade this rect
-				var el = d3.select(this);
-				el.style('opacity', el.attr('defaultOpacity'));
-					
-				// back to normal
-				bars.selectAll('rect').filter(function(e, j) {
-					return i == j;
-				})
-				.style('stroke', 0)
-				.style('stroke-width', null)
-				.style('opacity', .6);
-				/*.transition()
-				.duration(500)
-				.attr('transform', 'translate(0,0)');*/
+				me.handleMouseEvent(this, 'legendRect', 'mouseout', d, i);
 			});
 		
 		legendSquareSelection.transition()
@@ -445,16 +450,16 @@ Ext.define('App.util.d3.UniversalBar', {
 			})
 			.attr('width', me.legendSquareWidth)
 			.attr('height', me.legendSquareHeight)
-			.attr('fill', function(d, i) {
-				return colorScale(i);
+			.style('fill', function(d, i) {
+				if(colorDefinedInData && colorDefinedInDataIndex) {
+					return d[colorDefinedInDataIndex];
+				} else {
+					return colorScale(i);
+				}
 			});
 		
 		////////////////////////////////////////
-		// LEGEND TEXT
-		// join
-		// remove
-		// add
-		// transition
+		// LEGEND TEXT - JRAT
 		////////////////////////////////////////
 		var legendTextSelection = me.gLegend.selectAll('text')
 			.data(me.graphData);
@@ -465,36 +470,10 @@ Ext.define('App.util.d3.UniversalBar', {
 			.style('cursor', 'default')
 			.attr('class', 'legendText')
 			.on('mouseover', function(d, i) {
-				// highlight text
-				d3.select(this)
-					.style('fill', '#990066')
-					.style('font-weight', 'bold');
-				
-				// outline the bars
-				bars.selectAll('rect').filter(function(e, j) {
-					return i == j;
-				})
-				.style('stroke', '#000000')
-				.style('stroke-width', 2)
-				.style('opacity', 1);
-				/*.attr('transform', 'translate(0,' + (me.labelDistanceFromBar-3) * -1 + ')'); */
+				me.handleMouseEvent(this, 'legendText', 'mouseover', d, i);
 			})
 			.on('mouseout', function(d, i) {
-				// un-highlight text
-				var el = d3.select(this);
-				el.style('fill', '#000000')
-					.style('font-weight', 'normal');
-					
-				// back to normal
-				bars.selectAll('rect').filter(function(e, j) {
-					return i == j;
-				})
-				.style('stroke', 0)
-				.style('stroke-width', null)
-				.style('opacity', .6);
-				/*.transition()
-				.duration(500)
-				.attr('transform', 'translate(0,0)');*/
+				me.handleMouseEvent(this, 'legendText', 'mouseout', d, i);
 			});
 		
 		legendTextSelection.transition()
@@ -650,13 +629,153 @@ Ext.define('App.util.d3.UniversalBar', {
 	/**
      * @function
      * @description Publish a mouse event with the event relay
+     * @param el
+     * @param elType String
      * @param evt String mouseover|mouseout|etc..
      * @param d Object Data object
      * @param i Integer index
      */
-    publishMouseEvent: function(evt, d, i) {
+  	handleMouseEvent: function(el, elType, evt, d, i) {
         var me = this;
 
+		////////////////////////////////////////
+		// RECTANGLES
+		////////////////////////////////////////
+		if(elType == 'rect') {
+		
+			if(evt == 'mouseover') {
+				d3.select(el).style('opacity', me.opacities.rect.over)
+					.style('stroke', '#000000');
+					
+				me.gLegend.selectAll('rect')
+					.filter(function(e, j, z) {
+						return i === j;
+					})
+					.style('opacity', me.opacities.rect.over)
+					.style('stroke', '#000000');
+					
+				me.gLegend.selectAll('text')
+					.filter(function(e, j, z) {
+						return i === j;
+					})
+					.attr('class', me.legendBoldClass)
+					.style('font-weight', 'bold')
+					.style('fill', '#990066');
+			}
+			
+			if(evt == 'mouseout') {
+				d3.select(el).style('opacity', me.opacities.rect.default)
+					.style('stroke', '#333333');
+					
+				me.gLegend.selectAll('rect')
+					.filter(function(e, j, z) {
+						return i === j;
+					})
+					.style('opacity', me.opacities.rect.default)
+					.style('stroke', '#333333');
+					
+				me.gLegend.selectAll('text')
+					.filter(function(e, j, z) {
+						return i === j;
+					})
+					.attr('class', me.legendClass)
+					.style('font-weight', 'normal')
+					.style('fill', '#000000');
+			}
+		}
+		
+		////////////////////////////////////////
+		// LEGEND RECTANGLES
+		////////////////////////////////////////
+		if(elType == 'legendRect') {
+		
+			if(evt == 'mouseover') {
+				d3.select(el).style('opacity', me.opacities.rect.over)
+					.style('stroke', '#000000');
+					
+				me.gBar.selectAll('rect')
+					.filter(function(e, j, z) {
+						return i === j;
+					})
+					.style('opacity', me.opacities.rect.over)
+					.style('stroke', '#000000');
+					
+				me.gLegend.selectAll('text')
+					.filter(function(e, j, z) {
+						return i === j;
+					})
+					.attr('class', me.legendBoldClass)
+					.style('font-weight', 'bold')
+					.style('fill', '#990066');
+			}
+			
+			if(evt == 'mouseout') {
+				d3.select(el).style('opacity', me.opacities.rect.default)
+					.style('stroke', '#333333');
+					
+				me.gBar.selectAll('rect')
+					.filter(function(e, j, z) {
+						return i === j;
+					})
+					.style('opacity', me.opacities.rect.default)
+					.style('stroke', '#333333');
+					
+				me.gLegend.selectAll('text')
+					.filter(function(e, j, z) {
+						return i === j;
+					})
+					.attr('class', me.legendClass)
+					.style('font-weight', 'normal')
+					.style('fill', '#000000');
+			}
+		}
+		
+		////////////////////////////////////////
+		// LEGEND TEXT
+		////////////////////////////////////////
+		if(elType == 'legendText') {
+		
+			if(evt == 'mouseover') {
+				d3.select(el).attr('class', me.legendBoldClass)
+					.style('fill', '#990066')
+					.style('font-weight', 'bold');
+					
+				me.gBar.selectAll('rect')
+					.filter(function(e, j, z) {
+						return i === j;
+					})
+					.style('opacity', me.opacities.rect.over)
+					.style('stroke', '#000000');
+					
+				me.gLegend.selectAll('rect')
+					.filter(function(e, j, z) {
+						return i === j;
+					})
+					.style('opacity', me.opacities.rect.over)
+					.style('stroke', '#000000');
+			}
+			
+			if(evt == 'mouseout') {
+				d3.select(el).attr('class', me.legendClass)
+					.style('fill', '#000000')
+					.style('font-weight', 'normal');
+					
+				me.gBar.selectAll('rect')
+					.filter(function(e, j, z) {
+						return i === j;
+					})
+					.style('opacity', me.opacities.rect.default)
+					.style('stroke', '#333333');
+					
+				me.gLegend.selectAll('rect')
+					.filter(function(e, j, z) {
+						return i === j;
+					})
+					.style('opacity', me.opacities.rect.default)
+					.style('stroke', '#333333');
+			}
+		}
+		
         if(me.handleEvents && me.eventRelay && me.mouseEvents[evt].enabled) {
             me.eventRelay.publish(me.mouseEvents[evt].eventName, {
                 payload: d,
@@ -713,43 +832,41 @@ Ext.define('App.util.d3.UniversalBar', {
  	 */
  	setChartTitle: function(title) {
 		var me = this;
-		
 		me.chartTitle = title;
 	},
 	
 	setDataMetric: function(metric) {
 	 	var me = this;
-	 	
 	 	me.dataMetric = metric;
 	},
 	
 	setGraphData: function(data) {
 	 	var me = this;
-
 	 	me.graphData = data;
+	},
+	
+	setLabelOrientation: function(o) {
+		var me = this;
+		me.labelOrientation = o;
 	},
 	
 	setLegendTextFunction: function(fn) {
 		var me = this;
-		
 		me.legendTextFunction = fn;
 	},
 	
 	setMaxBarWidth: function(w) {
 		var me = this;
-		
 		me.maxBarWidth = w;
 	},
 	
 	setMetricSort: function(s) {
 		var me = this;
-		
 		me.metricSort = s;
 	},
 	
 	setColorPalette: function(p) {
 		var me = this;
-		
 		me.colorPalette = p;
 	},
 	
@@ -800,26 +917,22 @@ Ext.define('App.util.d3.UniversalBar', {
 	
 	setShowLabels: function(bool) {
 	 	var me = this;
-	 	
 	 	me.showLabels = bool;
 	},
 	
 	setShowLegend: function(bool) {
 		var me = this;
-			
 		me.showLegend = bool;
 	},
 	
 	setSortType: function(sortType, sortProperty) {
 		var me = this;
-		
 		me.sortType = sortType || null;
 		me.sortProperty = sortProperty || null;
 	},
 	
 	setYTickFormat: function(fn) {
 		var me = this;
-		
 		me.yTickFormat = fn;
 	}
 });

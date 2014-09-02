@@ -44,6 +44,8 @@ Ext.define('App.util.d3.UniversalPie', {
   	legendSquareHeight: 10,
   	legendTextFunction: function(data, index) { return 'legend item'; },
   	legendClass: 'legendText',
+	legendBoldClass: 'legendTextBold',
+	legendOverClass: 'legendTextBoldOver',
   	legendYOffset: 20,		// close to the top....adjust to move pie/legend down
   	legendBoldClass: 'legendTextBold',
 	margins: {				// IMPORTANT: legend must be >= top
@@ -62,6 +64,16 @@ Ext.define('App.util.d3.UniversalPie', {
 		dblclick: {
 			enabled: false,
 			eventName: null
+		}
+	},
+	opacities: {
+		arc: {
+			default: .65,
+			over: 1
+		},
+		legendRect: {
+			default: .65,
+			over: 1
 		}
 	},
 	outerRadius: null,
@@ -199,20 +211,8 @@ Ext.define('App.util.d3.UniversalPie', {
 		// handlers
 		me.handleArcs();
 		me.handleLabels();
-		me.handleChartTitle();
 		me.handleLegend();
-		
-		
-		/*
-		me.gSandbox.selectAll('circle')
-			.data(['a'])
-			.enter()
-			.append('circle')
-			.attr('cx', me.canvasWidth/2)
-			.attr('cy', me.canvasHeight/2)
-			.attr('r', 5)
-			.style('fill', '#000000');
-		*/
+		me.handleChartTitle();
 	},
 	
 	/**
@@ -263,58 +263,19 @@ Ext.define('App.util.d3.UniversalPie', {
 			.append('g')
 			.attr('class', 'arc')
 			.on('mouseover', function(d, i) {
-				// scale this arc
-				// scale arc's label
-				// publish mouse event
-				d3.select(this).transition().attr('transform', 'scale(1.1)');
-				me.transformLabel(i);
-				me.publishMouseEvent('mouseover', d, i);
+				me.handleMouseEvent(this, 'arc', 'mouseover', d, i);
 			})
 			.on('mouseout', function(d, i) {
-				// unscale this arc
-				// unscale arc's label
-				// publish mouse event
-				d3.select(this).transition().attr('transform', 'scale(1)');
-				me.revertLabel(i);
-				me.publishMouseEvent('mouseout', d, i);
+				me.handleMouseEvent(this, 'arc', 'mouseout', d, i);
 			});
 		
 		//////////////////////////////////////////////////
 		// append paths to new arcs
 		//////////////////////////////////////////////////
 		newArcs.append('path')
-			.style('opacity', .6)
+			.style('opacity', me.opacities.arc.default)
 			.style('fill', '#FFFFFF')
-			.attr('d', d3.svg.arc().outerRadius(0).innerRadius(0)) // overridden later
-			.on('mouseover', function(d, i) {
-				d3.select(this).style('opacity', 1);
-				
-				// mouseover wedge = highlight legend element
-				if(showLegend) {
-					gLegend.selectAll('text').filter(function(e, j) {
-					return i * legendLines == j;
-					})
-					.style('fill', '#990066')
-					.style('font-weight', 'bold');
-				}
-			})
-			.on('mouseout', function(d, i) {
-				d3.select(this).style('opacity', 0.6);
-			
-				// un-highlight legend
-				if(showLegend) {
-					gLegend.selectAll('text').filter(function(e, j) {
-						return i * legendLines == j;
-					})
-					.style('fill', 'black')
-					.style('font-weight', function(d, i) {
-						if(legendLines > 1) {
-							return 'bold';
-						}
-						return 'normal';
-					});
-				}
-			});
+			.attr('d', d3.svg.arc().outerRadius(0).innerRadius(0)); // overidden later
 		
 		//////////////////////////////////////////////////
 		// bind data and transition paths
@@ -375,18 +336,7 @@ Ext.define('App.util.d3.UniversalPie', {
 			
 		textSelection.transition().duration(250)
 			.attr('transform', function(d, i) {
-				var c = arcObject.centroid(d),
-					x = c[0],
-					y = c[1],
-					h = Math.sqrt(x*x + y*y),
-					xTrans = (x/h * outerRadius) + (x/h * outerRadius * .05),
-					yTrans = (y/h * outerRadius) + i;
-						
-				if(yTrans < 0) {
-					yTrans = yTrans - Math.abs(yTrans * .1);
-				}
-					
-				return 'translate(' + xTrans + ',' + yTrans + ')';
+				return 'translate(' + me.calcLabelPosition(d, i, 1.07) + ')';
 			})
 			.attr('text-anchor', function(d, i) {
 				return (d.endAngle + d.startAngle)/2 > Math.PI ? 'end' : 'start';
@@ -474,24 +424,12 @@ Ext.define('App.util.d3.UniversalPie', {
 		legendSquareSelection.exit().remove();
 		
 		legendSquareSelection.enter().append('rect')
-			.style('opacity', .6)
+			.style('opacity', me.opacities.legendRect.default)
 			.on('mouseover', function(d, i) {
-				// square opacity -> up
-				// transform corresponding arc, label
-				// publish mouse event
-				d3.select(this).style('opacity', .9);
-				me.transformArc(i);
-				me.transformLabel(i);
-				me.publishMouseEvent('mouseover', d, i);
+				me.handleMouseEvent(this, 'legendRect', 'mouseover', d, i);
 			})
 			.on('mouseout', function(d, i) {
-				// square opacity -> down
-				// revert corresponding arc, label
-				// publish mouse event
-				d3.select(this).style('opacity', .6);
-				me.revertArc(i);
-				me.revertLabel(i);
-				me.publishMouseEvent('mouseout', d, i);
+				me.handleMouseEvent(this, 'legendRect', 'mouseout', d, i);
 			});
 
 	 	legendSquareSelection.transition()
@@ -501,7 +439,7 @@ Ext.define('App.util.d3.UniversalPie', {
 			})
 			.attr('width', me.legendSquareWidth)
 			.attr('height', me.legendSquareHeight)
-			.attr('fill', function(d, i) {
+			.style('fill', function(d, i) {
 				if(hashedColorScale != null) {
 					return hashedColorScale[d[hashedColorIndex]];
 				} else if(indexedColorScale.length > 0) {
@@ -549,36 +487,13 @@ Ext.define('App.util.d3.UniversalPie', {
 				})
 				.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
 				.on('mouseover', function(d, i) {
-				
-					if(i%legendLines == 0)
-					{
-						// highlight this text
-						// transform corresponding arc and its label
-						// publish mouse event
-						d3.select(this)
-							.style('fill', '#990066')
-							.style('font-weight', 'bold');
-						me.transformArc(i/legendLines);
-						me.transformLabel(i/legendLines);
-						me.publishMouseEvent('mouseover', d.copiedData, i);
+					if(i%legendLines == 0) {
+						me.handleMouseEvent(this, 'legendText', 'mouseover', d, i);
 					}
 				})
 				.on('mouseout', function(d, i) {
-				
-					if(i%legendLines == 0)
-					{
-						// un-highlight text
-						// revert corresponding arc
-						// revert corresponding arc's label
-						// publish mouse event
-						d3.select(this)
-							.style('fill', 'black')
-							.style('font-weight', function() {
-								return legendLines > 1 ? 'bold' : 'normal';
-							});
-						me.revertArc(i/legendLines);
-						me.revertLabel(i/legendLines);
-						me.publishMouseEvent('mouseout', d.copiedData, i);
+					if(i%legendLines == 0) {
+						me.handleMouseEvent(this, 'legendText', 'mouseout', d, i);
 					}
 				})
 				.attr('class', function(d, i) {
@@ -590,7 +505,7 @@ Ext.define('App.util.d3.UniversalPie', {
 				
 			legendTextSelection.transition().text(function(d, i) {
 				if(i%legendLines != 0) {
-					return '- ' + d.textLabel;
+					return '  ' + d.textLabel;
 				}
 				return d.textLabel;
 			});
@@ -613,28 +528,10 @@ Ext.define('App.util.d3.UniversalPie', {
 				.attr('class', 'legendText')
 				.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
 				.on('mouseover', function(d, i) {
-					// highlight this text
-					// transform corresponding arc and its label
-					// publish mouse event
-					d3.select(this)
-						.attr('class', legendBoldClass)
-						.style('fill', '#990066')
-						.style('font-weight', 'bold');
-					me.transformArc(i);
-					me.transformLabel(i);
-					me.publishMouseEvent('mouseover', d, i);
+					me.handleMouseEvent(this, 'legendText', 'mouseover', d, i);
 				})
 				.on('mouseout', function(d, i) {
-					// un-highlight this text
-					// revert corresponding arc and its label
-					// publish mouse event
-					d3.select(this)
-						.attr('class', legendClass)
-						.style('fill', '#000000')
-						.style('font-weight', 'normal');
-					me.revertArc(i);
-					me.revertLabel(i);
-					me.publishMouseEvent('mouseout', d, i);
+					me.handleMouseEvent(this, 'legendText', 'mouseout', d, i);
 				});
 				
 			// transition all
@@ -714,7 +611,7 @@ Ext.define('App.util.d3.UniversalPie', {
 			return indexToMatch === i;
 		})
 		.transition()
-		.attr('transform', 'scale(1.1)')
+		.attr('transform', 'scale(1.05)')
 		.selectAll('path')
 		.style('opacity', 1);
 	},
@@ -754,21 +651,7 @@ Ext.define('App.util.d3.UniversalPie', {
 		.transition()
 		.duration(250)
 		.attr('transform', function(d, i) {
-			var c = arcObject.centroid(d),
-				x = c[0],
-				y = c[1],
-				h = Math.sqrt(x*x + y*y),
-				xTrans = (x/h * outerRadius) + (x/h * outerRadius * .05),
-				yTrans = (y/h * outerRadius) + i;
-						
-			if(yTrans < 0) {
-				yTrans = yTrans - Math.abs(yTrans * .1);
-			}
-					
-			xTrans += xTrans * .1;
-			yTrans += yTrans * .1;
-					
-			return 'translate(' + xTrans + ',' + yTrans + ')';
+			return 'translate(' + me.calcLabelPosition(d, i, 1.09) + ')';
 		});
 	},
 	
@@ -790,20 +673,25 @@ Ext.define('App.util.d3.UniversalPie', {
 		.transition()
 		.duration(250)
 		.attr('transform', function(d, i) {
-			var c = arcObject.centroid(d),
-				x = c[0],
-				y = c[1],
-				h = Math.sqrt(x*x + y*y),
-				xTrans = (x/h * outerRadius) + (x/h * outerRadius * .05),
-				yTrans = (y/h * outerRadius) + i;
-						
-			if(yTrans < 0) {
-				yTrans = yTrans - Math.abs(yTrans * .1);
-			}
-					
-			return 'translate(' + xTrans + ',' + yTrans + ')';
+			return 'translate(' + me.calcLabelPosition(d, i, 1.07) + ')';
 		});
 	},
+	
+	/**
+ 	 * @function
+ 	 * @description Calculate label position
+ 	 */
+ 	calcLabelPosition: function(d, i, factor) {
+	 	var me = this;
+
+ 		var r = (d.startAngle + d.endAngle)/2;
+ 		r = r  - Math.PI/2;
+ 		
+ 		return [
+			Math.cos(r) * (me.outerRadius) * factor,
+			Math.sin(r) * (me.outerRadius) * factor
+		];
+ 	},
 	
 	/**
  	 * @function
@@ -859,6 +747,189 @@ Ext.define('App.util.d3.UniversalPie', {
 		 	}, me));
 		 }
  	},
+ 	
+ 	/**
+ 	 * @function
+ 	 * @description Publish a mouse event with the event relay
+ 	 * @param el
+ 	 * @param elType String
+ 	 * @param evt String mouseover|mouseout|etc..
+ 	 * @param d Object Data object
+ 	 * @param i Integer index
+ 	 */
+	handleMouseEvent: function(el, elType, evt, d, i) {
+		var me = this;
+		
+		// local scope
+		var legendLines = me.legendLines;
+		
+		////////////////////////////////////////
+		// ARC
+		////////////////////////////////////////
+		if(elType == 'arc') {
+			var arc = d3.select(el);
+			if(evt == 'mouseover') {
+				arc.transition().attr('transform', 'scale(1.05)');
+				arc.selectAll('path').style('opacity', me.opacities.arc.over);
+				
+				me.transformLabel(i);
+				
+				me.gLegend.selectAll('rect')
+					.filter(function(e, j) {
+						return i == j;
+					})
+					.style('opacity', me.opacities.legendRect.over)
+					.style('stroke', '#333333')
+					.style('stroke-width', 1);
+				
+				me.gLegend.selectAll('text')
+					.filter(function(e, j) {
+						if(legendLines > 1) {
+							return (i * legendLines) == j;
+						} else {
+							return i == j;
+						}
+					})
+					.attr('class', me.legendBoldClass)
+					.style('font-weight', 'bold')
+					.style('fill', '#990066');
+			
+			}
+			
+			if(evt == 'mouseout') {
+				arc.transition().attr('transform', 'scale(1)');
+				arc.selectAll('path').style('opacity', me.opacities.arc.default);
+				
+				me.revertLabel(i);
+				
+				me.gLegend.selectAll('rect')
+					.filter(function(e, j) {
+						return i == j;
+					})
+					.style('opacity', me.opacities.legendRect.default)
+					.style('stroke', 'none');
+				
+				me.gLegend.selectAll('text')
+					.filter(function(e, j) {
+						if(legendLines > 1) {
+							return (i * legendLines) == j;
+						} else {
+							return i == j;
+						}
+					})
+					.attr('class', me.legendClass)
+					.style('font-weight', legendLines > 1 ? 'bold' : 'normal')
+					.style('fill', '#000000');
+			}
+		}
+		
+		////////////////////////////////////////
+		// LEGEND RECT
+		////////////////////////////////////////
+		if(elType == 'legendRect') {
+			if(evt == 'mouseover') {
+				d3.select(el).style('opacity', me.opacities.legendRect.over)
+					.style('stroke', '#333333')
+					.style('stroke-width', 1);
+					
+				me.gLegend.selectAll('text')
+					.filter(function(e, j) {
+						if(legendLines > 1) {
+							return (i * legendLines) == j;
+						} else {
+							return i == j;
+						}
+					})
+					.attr('class', me.legendBoldClass)
+					.style('font-weight', 'bold')
+					.style('fill', '#990066');
+					
+				me.transformArc(i);
+				me.transformLabel(i);
+			
+			}
+			if(evt == 'mouseout') {
+				d3.select(el).style('opacity', me.opacities.legendRect.default)
+					.style('stroke', 'none');
+					
+				me.gLegend.selectAll('text')
+					.filter(function(e, j) {
+						if(legendLines > 1) {
+							return (i * legendLines) == j;
+						} else {
+							return i == j;
+						}
+					})
+					.attr('class', me.legendClass)
+					.style('font-weight', legendLines > 1 ? 'bold' : 'normal')
+					.style('fill', '#000000');
+					
+				me.revertArc(i);
+				me.revertLabel(i);
+			}
+		}
+		
+		////////////////////////////////////////
+		// LEGEND TEXT
+		////////////////////////////////////////
+		if(elType == 'legendText') {
+			var checkInd;
+			if(legendLines > 1) {
+				checkInd = i/legendLines;
+			} else {
+				checkInd = i;
+			}
+			
+			if(evt == 'mouseover') {
+				d3.select(el).attr('class', me.legendBoldClass)
+					.style('font-weight', 'bold')
+					.style('fill', '#990066');
+					
+				me.gLegend.selectAll('rect')
+					.filter(function(e, j) {
+						if(legendLines > 1) {
+							return (i/legendLines) == j;
+						} else {
+							return i == j;
+						}
+					})
+					.style('opacity', me.opacities.legendRect.over)
+					.style('stroke', '#333333')
+					.style('stroke-width', 1);
+
+				me.transformArc(checkInd);
+				me.transformLabel(checkInd);
+			}
+			
+			if(evt == 'mouseout') {
+				d3.select(el).attr('class', me.legendClass)
+					.style('font-weight', legendLines > 1 ? 'bold' : 'normal')
+					.style('fill', '#000000');
+					
+				me.gLegend.selectAll('rect')
+					.filter(function(e, j) {
+						if(legendLines > 1) {
+							return (i/legendLines) == j;
+						} else {
+							return i == j;
+						}
+					})
+					.style('opacity', me.opacities.legendRect.default)
+					.style('stroke', 'none');
+				
+				me.revertArc(checkInd);
+				me.revertLabel(checkInd);
+			}
+		}
+		
+		// event relay
+		if(me.handleEvents && me.eventRelay && me.mouseEvents[evt].enabled) {
+			me.eventRelay.publish(me.mouseEvents[evt].eventName, {
+				payload: d,
+				index: i
+			});
+		}
+	},
 	
 	/**
  	 * @function
@@ -868,14 +939,15 @@ Ext.define('App.util.d3.UniversalPie', {
  	 * @param i Integer index
  	 */
 	publishMouseEvent: function(evt, d, i) {
-		var me = this;
+		return;
+		/*var me = this;
 				
 		if(me.handleEvents && me.eventRelay && me.mouseEvents[evt].enabled) {
 			me.eventRelay.publish(me.mouseEvents[evt].eventName, {
 				payload: d,
 				index: i
 			});
-		}
+		}*/
 	},
 	
 	/**

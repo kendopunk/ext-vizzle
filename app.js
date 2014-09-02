@@ -33,13 +33,14 @@ Ext.application({
 		// var defaultXType = 'barGeneric';
 		// var defaultXType = 'barGroup';
 		// var defaultXType = 'barStack';
+		// var defaultXType = 'barMouse';
 		// var defaultXType = 'pieGeneric';
-		// // var defaultXType = 'pieBuild';
-		var defaultXType = 'sunburstPartition';
+		// var defaultXType = 'pieBuild';
+		// var defaultXType = 'sunburstPartition';
 		// var defaultXType = 'scatterGeneric';
 		// var defaultXType = 'treemapFootball';
 		// var defaultXType = 'treemapNetflow';
-		// var defaultXType = 'timeline';
+		var defaultXType = 'timeline';
 		// var defaultXType = 'slopeDebt';
 		
 		Ext.create('Ext.container.Viewport', {		

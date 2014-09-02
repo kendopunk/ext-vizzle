@@ -90,6 +90,48 @@ Ext.define('App.view.d3.bar.BuildABar', {
 			text: 'Customize',
 			disabled: true,
 			menu: [{
+				text: 'Labels',
+				menu: [{
+					text: 'Horizontal',
+					itemId: 'babLabelHoz',
+					iconCls: 'icon-tick',
+					handler: function(btn) {
+						me.down('#babLabelVert').setIconCls('');
+						me.down('#babLabelNone').setIconCls('');
+						btn.setIconCls('icon-tick');
+						
+						me.barChart.setShowLabels(true);
+						me.barChart.setLabelOrientation('horizontal');
+						me.barChart.draw();
+					},
+					scope: me
+				}, {
+					text: 'Vertical',
+					itemId: 'babLabelVert',
+					handler: function(btn) {
+						me.down('#babLabelHoz').setIconCls('');
+						me.down('#babLabelNone').setIconCls('');
+						btn.setIconCls('icon-tick');
+						
+						me.barChart.setShowLabels(true);
+						me.barChart.setLabelOrientation('vertical');
+						me.barChart.draw();
+					},
+					scope: me
+				}, {
+					text: 'OFF',
+					itemId: 'babLabelNone',
+					handler: function(btn) {
+						me.down('#babLabelVert').setIconCls('');
+						me.down('#babLabelHoz').setIconCls('');
+						btn.setIconCls('icon-tick');
+						
+						me.barChart.setShowLabels(false);
+						me.barChart.draw();
+					},
+					scope: me
+				}]
+			}, {
 				text: 'Sort',
 				menu: [{
 					text: 'A-Z',

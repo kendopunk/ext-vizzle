@@ -347,8 +347,8 @@ Ext.define('App.view.d3.pie.BuildAPie', {
 					+ '% Change: ' + Ext.util.Format.number(data.data.pctChange, '0,000.0') + '%';
 			},
 			dataMetric: me.defaultMetric,
-			chartFlex: 4,
-			legendFlex: 1,
+			chartFlex: 5,
+			legendFlex: .8,
 			showLegend: true,
 			legendTextFunction: function(data, index) {
 				return data.ticker;

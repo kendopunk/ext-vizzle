@@ -253,9 +253,18 @@ svg {
 	font: bold 9px/1.1 sans-serif;
 }
 
+.legendTextBoldOver {
+	font: bold 9px/1.1 sans-serif;
+	color; #990066;
+}
+
 .labelText {
 	font: 9px/1.1 sans-serif;
 	pointer-events: none;
+}
+
+.labelText-pe {
+	font: 9px/1.1 sans-serif;
 }
 
 .labelTextItalic {

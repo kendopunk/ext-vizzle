@@ -106,8 +106,36 @@ Ext.define('App.view.d3.pie.GenericPie', {
 				handler: me.handleStateSelection,
 				scope: me
 			}, 
-			{xtype: 'tbspacer', width: 20},
+			{xtype: 'tbspacer', width: 30},
+			{xtype: 'tbtext', text: '<b>Inner Radius:</b>'},
 			{
+				xtype: 'combo',
+				store: Ext.create('Ext.data.Store', {
+					fields: ['display', 'value'],
+					data: [
+						{display: '0%', value: 0},
+						{display: '25%', value: .25},
+						{display: '50%', value: .5},
+						{display: '75%', value: .75},
+						{display: '95%', value: .95}
+					]
+				}),
+				width: 75,
+				listWidth: 75,
+				editable: false,
+				displayField: 'display',
+				valueField: 'value',
+				value: '0',
+				listeners: {
+					select: function(combo) {
+						me.innerRadiusHandler(combo.getValue());
+					},
+					scope: me
+				}
+			}, {
+				xtype: 'tbspacer',
+				width: 30
+			}, {
 				xtype: 'button',
 				iconCls: 'icon-tools',
 				text: 'Customize',
@@ -178,36 +206,6 @@ Ext.define('App.view.d3.pie.GenericPie', {
 						items: colorSchemeMenu
 					}
 				}]
-			},
-			'-',
-			{xtype: 'tbtext', text: '<b>Inner Radius:</b>'},
-			{
-				xtype: 'combo',
-				store: Ext.create('Ext.data.Store', {
-					fields: ['display', 'value'],
-					data: [
-						{display: '0%', value: 0},
-						{display: '25%', value: .25},
-						{display: '50%', value: .5},
-						{display: '75%', value: .75},
-						{display: '95%', value: .95}
-					]
-				}),
-				width: 75,
-				listWidth: 75,
-				editable: false,
-				displayField: 'display',
-				valueField: 'value',
-				value: '0',
-				listeners: {
-					select: function(combo) {
-						me.innerRadiusHandler(combo.getValue());
-					},
-					scope: me
-				}
-			}, {
-				xtype: 'tbspacer',
-				width: 10
 			}]
 		}];
 		

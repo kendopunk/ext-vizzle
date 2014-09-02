@@ -113,9 +113,8 @@ Ext.define('App.view.d3.bar.MouseEvents', {
 					yTickFormat: App.util.Global.svg.numberTickFormat,
 					chartTitle: me.baseTitle,
 					colorDefinedInData: true,
+					handleEvents: true,
 					mouseEvents: {
-						mouseover: {enabled: false, eventName: null},
-						click: {enabled: false, eventName: null},
 						dblclick: {
 							enabled: true,
 							eventName: 'battleDrilldown'
@@ -156,11 +155,13 @@ Ext.define('App.view.d3.bar.MouseEvents', {
 	drillUpDown: function(msg) {
 		var me = this;
 		
+		console.dir(msg);
+		
 		if(me.drilldownLevel == 1) {
 			
 			var ddData = [];
 			Ext.each(me.graphData, function(d) {
-				if(d.battle == msg.battle) {
+				if(d.battle == msg.payload.battle) {
 					ddData.push({
 						battle: 'Axis',
 						color: '#FF0000',
