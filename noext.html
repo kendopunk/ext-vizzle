@@ -1,0 +1,38 @@
+<html>
+<head>
+    <title>D3 w/out ExtJS</title>
+    
+    <link rel="stylesheet" type="text/css" href="app/resources/css/nav.css" />
+    <link rel="stylesheet" type="text/css" href="app/resources/css/main.css" />
+    <script src="app/resources/js/d3.v3.min.js" charset="utf-8"></script>
+    <script src="app/resources/js/colorbrewer.js"></script>
+    <script src="app/resources/js/noext/NoExtBarChart.js"></script>
+</head>
+<body>
+<div id="container" style="width:700px; height:500px; border:solid 1px;" />
+</body>
+<script type="text/javascript">
+	var dat = [];
+	
+	['Hudson', 'Hicks', 'Frost', 'Ferro', 'Ripley'].forEach(function(item, index, array) {
+		dat.push({
+			name: item,
+			value: Math.floor(Math.random() * 10) + 1
+		});
+	});
+	
+	var chart = new NoExtBarChart('#container');
+	chart.colorScale = d3.scale.category20b();
+	chart.graphData = dat;
+	chart.chartTitle = 'Test Bar Chart';
+	
+	chart.showLabels = true;
+	chart.labelFunction = function(d, i) { return d.name; };
+	//chart.labelOrientation = 'vertical';
+	
+	chart.showLegend = true;
+	chart.legendTextFunction = function(d, i) { return d.name; };
+	
+	chart.initChart().draw();
+</script>
+</html>
