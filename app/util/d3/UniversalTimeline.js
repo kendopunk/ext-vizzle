@@ -268,7 +268,7 @@ Ext.define('App.util.d3.UniversalTimeline', {
 		verticalSelection.enter()
 			.append('svg:line')
 			.attr('class', 'vertGrid')
-			.style('stroke', '#AAAAAA')
+			.style('stroke', '#878787')
 			.style('stroke-width', 0.5)
 			.style('stroke-dasharray', ("7,3"));
 			
@@ -296,7 +296,7 @@ Ext.define('App.util.d3.UniversalTimeline', {
 		horizontalSelection.enter()
 			.append('svg:line')
 			.attr('class', 'hozGrid')
-			.style('stroke', '#AAAAAA')
+			.style('stroke', '#878787')
 			.style('stroke-width', 0.5)
 			.style('stroke-dasharray', ("7,3"));
 			
@@ -355,7 +355,7 @@ Ext.define('App.util.d3.UniversalTimeline', {
 				.data([me.chartTitle])
 				.enter()
 				.append('text')
-				.style('fill', '#333333')
+				.style('fill', '#878787')
 				.style('font-weight', 'bold')
 				.style('font-family', 'sans-serif')
 				.style('text-anchor', 'middle')
