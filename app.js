@@ -30,7 +30,7 @@ Ext.application({
 		// var defaultXType = 'areaMultiPanel';
 		// var defaultXType = 'areaTicker';
 		// var defaultXType = 'barBuild';
-		// var defaultXType = 'barGeneric';
+		var defaultXType = 'barGeneric';
 		// var defaultXType = 'barGroup';
 		// var defaultXType = 'barStack';
 		// var defaultXType = 'barMouse';
@@ -40,7 +40,7 @@ Ext.application({
 		// var defaultXType = 'scatterGeneric';
 		// var defaultXType = 'treemapFootball';
 		// var defaultXType = 'treemapNetflow';
-		var defaultXType = 'timeline';
+		// var defaultXType = 'timeline';
 		// var defaultXType = 'slopeDebt';
 		
 		Ext.create('Ext.container.Viewport', {		

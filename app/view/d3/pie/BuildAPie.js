@@ -113,6 +113,17 @@ Ext.define('App.view.d3.pie.BuildAPie', {
 			disabled: true,
 			menu: [{
 				xtype: 'menucheckitem',
+				text: 'Labels',
+				checked: true,
+				listeners: {
+					checkchange: function(cbx, checked) {
+						me.pieChart.setShowLabels(checked);
+						me.pieChart.draw();
+					},
+					scope: me
+				}
+			}, {
+				xtype: 'menucheckitem',
 				text: 'Legend',
 				checked: true,
 				listeners: {

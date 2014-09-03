@@ -71,8 +71,8 @@
 				{"id": "Mess. Bf 109", "category": "1939", y: 449},
 				{"id": "Stuka (Ju 87)", "category": "1939", y: 134},
 				{"id": "Heinkel He 111", "category": "1939", y: 452},
-				{"id": "Junkers Ju 88", "category": "1939", y: 69},
-				{"id": "Focke-Wulf Fw 189", "category": "1939", y: 6},
+				{"id": "Junkers Ju 88", "category": "1939", y: 69}/*,
+				{"id": "Focke-Wulf Fw 189", "category": "1939", y: 6}*/,
 			]
 		}, {
 			"category": "1940",
@@ -81,8 +81,8 @@
 				{"id": "Mess. Bf 109", "category": "1940", y: 1667},
 				{"id": "Stuka (Ju 87)", "category": "1940", y: 603},
 				{"id": "Heinkel He 111", "category": "1940", y: 756},
-				{"id": "Junkers Ju 88", "category": "1940", y: 1816},
-				{"id": "Focke-Wulf Fw 189", "category": "1940", y: 38},
+				{"id": "Junkers Ju 88", "category": "1940", y: 1816}/*,
+				{"id": "Focke-Wulf Fw 189", "category": "1940", y: 38},*/
 			]
 		}, {
 			"category": "1941",
@@ -91,8 +91,8 @@
 				{"id": "Mess. Bf 109", "category": "1941", y: 2764},
 				{"id": "Stuka (Ju 87)", "category": "1941", y: 500},
 				{"id": "Heinkel He 111", "category": "1941", y: 950},
-				{"id": "Junkers Ju 88", "category": "1941", y: 2146},
-				{"id": "Focke-Wulf Fw 189", "category": "1941", y: 250},
+				{"id": "Junkers Ju 88", "category": "1941", y: 2146}/*,
+				{"id": "Focke-Wulf Fw 189", "category": "1941", y: 250},*/
 			]
 		}, {
 			"category": "1942",
@@ -101,8 +101,8 @@
 				{"id": "Mess. Bf 109", "category": "1942", y: 2657},
 				{"id": "Stuka (Ju 87)", "category": "1942", y: 960},
 				{"id": "Heinkel He 111", "category": "1942", y: 1337},
-				{"id": "Junkers Ju 88", "category": "1942", y: 2270},
-				{"id": "Focke-Wulf Fw 189", "category": "1942", y: 327},
+				{"id": "Junkers Ju 88", "category": "1942", y: 2270}/*,
+				{"id": "Focke-Wulf Fw 189", "category": "1942", y: 327},*/
 			]
 		}, {
 			"category": "1943",
@@ -111,8 +111,8 @@
 				{"id": "Mess. Bf 109", "category": "1943", y: 6013},
 				{"id": "Stuka (Ju 87)", "category": "1943", y: 1672},
 				{"id": "Heinkel He 111", "category": "1943", y: 1405},
-				{"id": "Junkers Ju 88", "category": "1943", y: 2160},
-				{"id": "Focke-Wulf Fw 189", "category": "1943", y: 208},
+				{"id": "Junkers Ju 88", "category": "1943", y: 2160}/*,
+				{"id": "Focke-Wulf Fw 189", "category": "1943", y: 208}*/,
 			]
 		}, {
 			"category": "1944",
@@ -121,8 +121,8 @@
 				{"id": "Mess. Bf 109", "category": "1944", y: 12807},
 				{"id": "Stuka (Ju 87)", "category": "1944", y: 1012},
 				{"id": "Heinkel He 111", "category": "1944", y: 756},
-				{"id": "Junkers Ju 88", "category": "1944", y: 661},
-				{"id": "Focke-Wulf Fw 189", "category": "1944", y: 17},
+				{"id": "Junkers Ju 88", "category": "1944", y: 661}/*,
+				{"id": "Focke-Wulf Fw 189", "category": "1944", y: 17},*/
 			]
 		}]
 	}

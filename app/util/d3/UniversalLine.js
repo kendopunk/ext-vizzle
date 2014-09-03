@@ -324,17 +324,35 @@ Ext.define('App.util.d3.UniversalLine', {
 		labelSelection.enter()
 			.append('text')
 			.attr('class', me.labelClass)
-			.attr('text-anchor', 'start');
+			.attr('text-anchor', function(d, i) {
+                if(i == 0) {
+                    return 'start';
+                } else if(i == me.graphData.length -1) {
+                    return 'end';
+                } else {
+                    return 'middle';
+                }
+            });
 			
 		// transition all
 		labelSelection.transition()
 			.duration(250)
 			.attr('x', function(d, i) {
-				return xScale(d[xDataMetric]) - (markerRadius * 4);
-			})
-			.attr('y', function(d) {
-				return yScale(d[yDataMetric]) - (markerRadius * 3);
-			})
+                if(i == 0) {
+                    return xScale(d[xDataMetric]) + (markerRadius * 4);
+                } else if(i == me.graphData.length - 1) {
+                    return xScale(d[xDataMetric]) - (markerRadius * 4);
+                } else {
+                    return xScale(d[xDataMetric]);
+                }
+            })
+            .attr('y', function(d, i) {
+                if(i == 0 || i == me.graphData.length - 1) {
+                    return yScale(d[yDataMetric]);
+                } else {
+                    return yScale(d[yDataMetric]) - (markerRadius * 3);
+                }
+            })
 			.text(function(d, i) {
 				if(labelSkipCount > 1) {
 					if(i> 0 && i % labelSkipCount == 0) {
@@ -386,6 +404,12 @@ Ext.define('App.util.d3.UniversalLine', {
 					return markerRadius * 3;
 				});
 				
+				/*me.gLabel.selectAll('text')
+					.filter(function(e, j) {
+						return i === j;
+					})
+					.style('visibility', 'hidden');*/
+				
 				me.publishMouseEvent('mouseover', d, i);
 			})
 			.on('mouseout', function(d, i) {
@@ -394,6 +418,12 @@ Ext.define('App.util.d3.UniversalLine', {
 					.duration(250)
 					.attr('r', markerRadius)
 					.ease('bounce');
+					
+				/*me.gLabel.selectAll('text')
+					.filter(function(e, j) {
+						return i === j;
+					})
+					.style('visibility', 'visible');*/
 					
 				me.publishMouseEvent('mouseout', d, i);
 			});

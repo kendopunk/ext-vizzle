@@ -43,7 +43,9 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 	labelValign: 'middle',
    	layers: null,
    	legendFlex: 1,
-   	legendFontSize: '9px',
+   	legendClass: 'legendText',
+	legendBoldClass: 'legendTextBold',
+	legendOverClass: 'legendTextBoldOver',
    	legendSquareHeight: 10,
    	legendSquareWidth: 10,
    	legendTextFunction: function(data, index) {
@@ -61,6 +63,10 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 		 	enabled: false,
 		 	eventName: null
 		},
+		mouseout: {
+			enabled: false,
+			eventName: null,
+		},
 		click: {
 			enabled: false,
 			eventName: null
@@ -70,10 +76,13 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 			eventName: null
 		}
 	},
+	opacities: {
+		rect: {
+			default: .65,
+			over: 1
+		}
+	},
    	panelId: null,
-   	rectOpacity: .7,
-   	rectStroke: '#FFFFFF',
-   	rectStrokeOver: '#323232',
    	showLabels: false,
    	showLegend: false,
    	spaceBetweenChartAndLegend: 20,
@@ -266,22 +275,14 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 			.append('rect')
 			.attr('rx', 3)
 			.attr('ry', 3)
-			.style('stroke', me.rectStroke)
+			.style('stroke', 'black')
 			.style('stroke-width', 1)
-			.style('opacity', me.rectOpacity)
+			.style('opacity', me.opacities.rect.default)
 			.on('mouseover', function(d, i) {
-				d3.select(this)
-					.style('stroke', me.rectStrokeOver)
-					.style('opacity', 1);
-				
-				me.publishMouseEvent('mouseover', d, i);
+				me.handleMouseEvent(this, 'rect', 'mouseover', d, i);
 			})
 			.on('mouseout', function(d, i) {
-				d3.select(this)
-					.style('stroke', me.rectStroke)
-					.style('opacity', me.rectOpacity);
-					
-				me.publishMouseEvent('mouseout', d, i);
+				me.handleMouseEvent(this, 'rect', 'mouseout', d, i);
 			});
 			
 		rectSelection.transition()
@@ -450,30 +451,16 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 		legendSquareSelection.exit().remove();
 		
 		legendSquareSelection.enter().append('rect')
+			.style('opacity', me.opacities.rect.default)
+			.style('stroke', 'none')
+			.style('stroke-width', 1)
 			.on('mouseover', function(d, i) {
-				d3.select(this)
-					.style('stroke', '#000000');
-		
-				gCanvas.selectAll('.layer').filter(function(e, j) {
-					return i == j;
-				})
-				.selectAll('rect')
-				.style('stroke', me.rectStrokeOver)
-				.style('opacity', 1);
+				me.handleMouseEvent(this, 'legendRect', 'mouseover', d, i);
 			})
 			.on('mouseout', function(d, i) {
-				d3.select(this)
-					.style('stroke', 'none');
-					
-				gCanvas.selectAll('.layer').filter(function(e, j) {
-					return i == j;
-				})
-				.selectAll('rect')
-				.style('stroke', me.rectStroke)
-				.style('opacity', me.rectOpacity);
+				me.handleMouseEvent(this, 'legendRect', 'mouseout', d, i);
 			});
 			
-		
 		legendSquareSelection.transition()
 			.attr('x', 0)
 			.attr('y', function(d, i) {
@@ -496,30 +483,10 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 		legendTextSelection.enter()
 			.append('text')
 			.on('mouseover', function(d, i) {
-				d3.select(this)
-					.style('fill', '#990066')
-					.style('font-weight', 'bold');
-				
-				// rect opacity 1
-				gCanvas.selectAll('.layer').filter(function(e, j) {
-					return i == j;
-				})
-				.selectAll('rect')
-				.style('stroke', me.rectStrokeOver)
-				.style('opacity', 1);
+				me.handleMouseEvent(this, 'legendText', 'mouseover', d, i);
 			})
 			.on('mouseout', function(d, i) {
-				d3.select(this)
-					.style('fill', '#000000')
-					.style('font-weight', 'normal');
-				
-				// rect opacity .6
-				gCanvas.selectAll('.layer').filter(function(e, j) {
-					return i == j;
-				})
-				.selectAll('rect')
-				.style('stroke', me.rectStroke)
-				.style('opacity', me.rectOpacity);
+				me.handleMouseEvent(this, 'legendText', 'mouseout', d, i);
 			});
 
 		legendTextSelection.transition()
@@ -528,7 +495,7 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 				return i * legendSquareHeight * 1.75;
 			})
 			.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
-			.attr('class', 'legendText')
+			.attr('class', me.legendClass)
 			.text(function(d) {
 				return d.category.toUpperCase();
 			});
@@ -667,13 +634,78 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 	/**
      * @function
      * @description Publish a mouse event with the event relay
+     * @param el Element
+     * @param elType String
      * @param evt String mouseover|mouseout|etc..
      * @param d Object Data object
      * @param i Integer index
      */
-    publishMouseEvent: function(evt, d, i) {
+    handleMouseEvent: function(el, elType, evt, d, i) {
         var me = this;
-
+        
+        /////////////////////////////////
+        // RECT
+        /////////////////////////////////
+        if(elType == 'rect') {
+	        var rectSel = d3.select(el);
+	        me.mouseEventRect(rectSel, evt);
+	        
+	        var legendRectSel = me.gLegend.selectAll('rect')
+	        	.filter(function(e, j) {
+		        	return d.category == e.category;
+		        });
+		    me.mouseEventLegendRect(legendRectSel, evt);
+		        
+		    var legendTextSel = me.gLegend.selectAll('text')
+		    	.filter(function(e, j) {
+			    	return d.category == e.category;
+			    });
+			me.mouseEventLegendText(legendTextSel, evt);
+        }
+        
+        /////////////////////////////////
+        // LEGEND RECT
+        /////////////////////////////////
+        if(elType == 'legendRect') {
+	        var rectSel = me.gCanvas.selectAll('.layer')
+		        .filter(function(e, j) {
+			        return i == j;
+			    })
+			    .selectAll('rect');
+	        me.mouseEventRect(rectSel, evt);
+	        
+	        var legendRectSel = d3.select(el);
+		    me.mouseEventLegendRect(legendRectSel, evt);
+		        
+		    var legendTextSel = me.gLegend.selectAll('text')
+		    	.filter(function(e, j) {
+			    	return d.category == e.category;
+			    });
+			me.mouseEventLegendText(legendTextSel, evt);
+        }
+        
+        /////////////////////////////////
+        // LEGEND TEXT
+        /////////////////////////////////
+        if(elType == 'legendText') {
+	        var rectSel = me.gCanvas.selectAll('.layer')
+		        .filter(function(e, j) {
+			        return i == j;
+			    })
+			    .selectAll('rect');
+	        me.mouseEventRect(rectSel, evt);
+	        
+	        var legendRectSel = me.gLegend.selectAll('rect')
+		    	.filter(function(e, j) {
+			    	return d.category == e.category;
+			    });
+			me.mouseEventLegendRect(legendRectSel, evt);
+			
+			var legendTextSel = d3.select(el);
+			me.mouseEventLegendText(legendTextSel, evt);
+        }
+        
+        // message bus
         if(me.handleEvents && me.eventRelay && me.mouseEvents[evt].enabled) {
             me.eventRelay.publish(me.mouseEvents[evt].eventName, {
                 payload: d,
@@ -681,6 +713,47 @@ Ext.define('App.util.d3.UniversalStackedBar', {
             });
         }
     },
+    
+    mouseEventRect: function(selection, evt) {
+	    var me = this;
+	    
+	    if(evt == 'mouseover') {
+		    selection.style('opacity', me.opacities.rect.over);
+		}
+		if(evt == 'mouseout') {
+			selection.style('opacity', me.opacities.rect.default);
+		}
+    },
+    
+    mouseEventLegendRect: function(selection, evt) {
+    	var me = this;
+    	
+    	if(evt == 'mouseover') {
+	    	selection.style('opacity', me.opacities.rect.over)
+		    	.style('stroke', 'black')
+		    	.style('stroke-width', 1);
+    	}
+    	if(evt == 'mouseout') {
+    		selection.style('opacity', me.opacities.rect.default)
+		    	.style('stroke', 'none')
+		    	.style('stroke-width', 1);
+    	}
+    },
+    
+    mouseEventLegendText: function(selection, evt) {
+	    var me = this;
+	    
+	 	if(evt == 'mouseover') {
+	    	selection.attr('class', me.legendBoldClass)
+		    	.style('font-weight', 'bold')
+		    	.style('fill', '#990066');
+    	}
+    	if(evt == 'mouseout') {
+    		selection.attr('class', me.legendClass)
+		    	.style('font-weight', 'normal')
+		    	.style('fill', 'black');
+    	}
+	},
 
 	/**
 	 *

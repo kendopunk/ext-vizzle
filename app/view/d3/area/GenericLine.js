@@ -299,7 +299,7 @@ Ext.define('App.view.d3.area.GenericLine', {
 				return Ext.util.Format.currency(d);
 			},
 			showLabels: true,
-			labelSkipCount: 2,
+			//labelSkipCount: 2,
 			labelFunction: function(d, i) {
 				return Ext.util.Format.currency(d.price, 0, false, 0);
 			},
@@ -330,7 +330,7 @@ Ext.define('App.view.d3.area.GenericLine', {
 	 	var baseTimestamp = d.getTime(),
 	 		currentPrice = 4,
 	 		minEl = 10,
-	 		maxEl = 25,
+	 		maxEl = 18,
 	 		loopLimit = Math.floor(Math.random() * (maxEl - minEl + 1)) + minEl;
 		
 		for(i=0; i<loopLimit; i++) {

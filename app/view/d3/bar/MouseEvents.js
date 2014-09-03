@@ -176,7 +176,7 @@ Ext.define('App.view.d3.bar.MouseEvents', {
 		
 			me.drilldownLevel = 2;
 			me.barChart.setGraphData(ddData);
-			me.barChart.setChartTitle(me.baseTitle + ' - ' + msg.battle);
+			me.barChart.setChartTitle(me.baseTitle + ' - ' + msg.payload.battle);
 			me.barChart.draw();
 		
 		} else {
