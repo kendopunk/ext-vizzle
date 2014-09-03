@@ -37,8 +37,11 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 	
 	graphData: [],
 	grouperField: 'grouper',
-	labelFontSize: '10px',
+	labelClass: 'labelText',
 	labelMetric: 'name',
+	legendClass: 'legendText',
+	legendBoldClass: 'legendTextBold',
+	legendOverClass: 'legendTextBoldOver',
 	legendFlex: 1,
 	legendProperty: 'name',
 	legendSquareWidth: 10,
@@ -50,7 +53,6 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 		left: 100,
 		leftAxis: 85
 	},
-	
 	mouseEvents: {
 	 	mouseover: {
 		 	enabled: false,
@@ -65,12 +67,14 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 			eventName: null
 		}
 	},
-	rectOpacity: .7,
-	rectStroke: '#323232',
-	rectStrokeOver: '#000000',
-	
+	opacities: {
+		rect: {
+			default: .65,
+			over: 1
+		}
+	},
 	showLabels: true,
-	showLegend: true,
+	showLegend: false,
 	spaceBetweenChartAndLegend: 20,
 	
 	tooltipFunction: function(d, i) {
@@ -213,21 +217,16 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 
 		rectSelection.enter()
 			.append('rect')
+			.style('opacity', me.opacities.rect.default)
+			.style('stroke', 'black')
+			.style('stroke-width', 1)
 			.attr('rx', 3)
 			.attr('ry', 3)
 			.on('mouseover', function(d, i) {
-				d3.select(this)
-					.style('opacity', 1)
-					.style('stroke', me.rectStrokeOver);
-					
-				me.publishMouseEvent('mouseover', d, i);
+				me.handleMouseEvent(this, 'rect', 'mouseover', d, i);
 			})
 			.on('mouseout', function(d, i) {
-				d3.select(this)
-					.style('opacity', me.rectOpacity)
-					.style('stroke', me.rectStroke);
-					
-				me.publishMouseEvent('mouseout', d, i);
+				me.handleMouseEvent(this, 'rect', 'mouseout', d, i);
 			});
 			
 		rectSelection.transition()
@@ -253,10 +252,7 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 				} else {
 					return colorScale(i);
 				}
-			})
-			.style('opacity', 0.6)
-			.style('stroke', 'black')
-			.style('stroke-width', 1);
+			});
 			
 		rectSelection.call(d3.helper.tooltip().text(me.tooltipFunction));
 	},
@@ -374,28 +370,12 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 		legendSquareSelection.exit().remove();
 			
 		legendSquareSelection.enter().append('rect')
-			.style('opacity', me.rectOpacity)
+			.style('opacity', me.opacities.rect.default)
 			.on('mouseover', function(d, i) {
-				d3.select(this)
-					.style('stroke', '#000000')
-					.style('opacity', 1);
-					
-				bars.selectAll('rect').filter(function(e, j) {
-						return e[legendProperty] == d;
-					})
-					.style('stroke', me.rectStrokeOver)
-					.style('opacity', 1);
+				me.handleMouseEvent(this, 'legendRect', 'mouseover', d, i);
 			})
 			.on('mouseout', function(d, i) {
-				d3.select(this)
-					.style('stroke', 'none')
-					.style('opacity', me.rectOpacity);
-					
-				bars.selectAll('rect').filter(function(e, j) {
-						return e[legendProperty] == d;
-					})
-					.style('stroke', me.rectStroke)
-					.style('opacity', me.rectOpacity);
+				me.handleMouseEvent(this, 'legendRect', 'mouseout', d, i);
 			});
 		
 		legendSquareSelection.transition()
@@ -423,32 +403,12 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 			
 		legendTextSelection.enter().append('text')
 			.style('cursor', 'default')
-			.attr('class', 'legendText')
+			.attr('class', me.legendClass)
 			.on('mouseover', function(d, i) {
-				// highlight text
-				d3.select(this)
-					.style('fill', '#990066')
-					.style('font-weight', 'bold');
-					
-				bars.selectAll('rect').filter(function(e, j) {
-					return e[legendProperty] == d;
-				})
-				.style('stroke', '#000000')
-				.style('stroke-width', 2)
-				.style('opacity', 1);
+				me.handleMouseEvent(this, 'legendText', 'mouseover', d, i);
 			})
 			.on('mouseout', function(d, i) {
-				// un-highlight text
-				var el = d3.select(this);
-				el.style('fill', '#000000')
-					.style('font-weight', 'normal');
-					
-				bars.selectAll('rect').filter(function(e, j) {
-					return e[legendProperty] == d;
-				})
-				.style('stroke', 0)
-				.style('stroke-width', null)
-				.style('opacity', .6);
+				me.handleMouseEvent(this, 'legendText', 'mouseout', d, i);
 			});
 		
 		legendTextSelection.transition()
@@ -457,9 +417,7 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 				return i * legendSquareHeight * 1.75;
 			})
 			.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
-			.text(function(d) {
-				return d.toUpperCase();
-			});
+			.text(String);
 	},
 	
 	/**
@@ -554,10 +512,10 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 				 	y: me.canvasHeight - me.margins.bottom + 10
 			 	}, {
 			 		x: xScale(d.data[0]),
-				 	y: me.canvasHeight - me.margins.bottom + 18
+				 	y: me.canvasHeight - me.margins.bottom + 20
 			 	}, {
 			 		x: xScale(d.data[d.data.length-1]) + xScale.rangeBand() - barPadding,
-			 		y: me.canvasHeight - me.margins.bottom + 18
+			 		y: me.canvasHeight - me.margins.bottom + 20
 			 	}, {
 			 		x: xScale(d.data[d.data.length-1]) + xScale.rangeBand() - barPadding,
 			 		y: me.canvasHeight - me.margins.bottom + 10
@@ -601,9 +559,8 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 				
 				return parseInt((xMin + xMax)/2);
 			})
-			.attr('y', me.canvasHeight - me.margins.bottom + 30)
-			.style('font-family', 'sans-serif')
-			.style('font-size', '9px')
+			.attr('y', me.canvasHeight - me.margins.bottom + 15)
+			.attr('class', me.labelClass)
 			.style('text-anchor', 'middle')
 			.text(function(d) {
 				return d.group;
@@ -707,13 +664,79 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 	/**
      * @function
      * @description Publish a mouse event with the event relay
+     * @param el Element
+     * @param elType String
      * @param evt String mouseover|mouseout|etc..
      * @param d Object Data object
      * @param i Integer index
      */
-    publishMouseEvent: function(evt, d, i) {
+    handleMouseEvent: function(el, elType, evt, d, i) {
         var me = this;
         
+        // local scope
+        var legendProperty = me.legendProperty;
+        
+        ////////////////////////////////////////
+        // RECT
+        ////////////////////////////////////////
+        if(elType == 'rect') {
+	        var rectSel = d3.select(el);
+	        me.mouseEventRect(rectSel, evt);
+	        
+	        var legendRectSel = me.gLegend.selectAll('rect')
+		        .filter(function(e, j) {
+			        return d[legendProperty] == e;
+			    });
+			me.mouseEventLegendRect(legendRectSel, evt);
+			
+			var legendTextSel = me.gLegend.selectAll('text')
+				.filter(function(e, j) {
+					return d[legendProperty] == e;
+				});
+			me.mouseEventLegendText(legendTextSel, evt);
+        }
+        
+		////////////////////////////////////////
+        // LEGEND RECT
+        ////////////////////////////////////////
+        if(elType == 'legendRect') {
+	        var rectSel = me.gBar.selectAll('rect')
+		        .filter(function(e, j) {
+			        return d == e[legendProperty];
+			    });
+			me.mouseEventRect(rectSel, evt);
+	        
+	        var legendRectSel = d3.select(el);
+			me.mouseEventLegendRect(legendRectSel, evt);
+			
+			var legendTextSel = me.gLegend.selectAll('text')
+				.filter(function(e, j) {
+					return d == e;
+				});
+			me.mouseEventLegendText(legendTextSel, evt);
+        }
+        
+        ////////////////////////////////////////
+        // LEGEND TEXT
+        ////////////////////////////////////////
+        if(elType == 'legendText') {
+	        var rectSel = me.gBar.selectAll('rect')
+		        .filter(function(e, j) {
+			        return d == e[legendProperty];
+			    });
+			me.mouseEventRect(rectSel, evt);
+	        
+	        var legendRectSel = me.gLegend.selectAll('rect')
+		        .filter(function(e, j) {
+			        return d == e;
+			    });
+			me.mouseEventLegendRect(legendRectSel, evt);
+			
+			var legendTextSel = d3.select(el);
+			me.mouseEventLegendText(legendTextSel, evt);
+        }
+        
+        // message bus
         if(me.handleEvents && me.eventRelay && me.mouseEvents[evt].enabled) {
             me.eventRelay.publish(me.mouseEvents[evt].eventName, {
                 payload: d,
@@ -721,7 +744,51 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
             });
         }
     },
+    
+    mouseEventRect: function(selection, evt) {
+    	var me = this;
+    	
+    	if(evt == 'mouseover') {
+	    	selection.style('opacity', me.opacities.rect.over);
+	    }
+	    if(evt == 'mouseout') {
+		    selection.style('opacity', me.opacities.rect.default);
+		}
+    },
+    
+    mouseEventLegendRect: function(selection, evt) {
+	    var me = this;
+	    
+	    if(evt == 'mouseover') {
+		    selection.style('opacity', me.opacities.rect.over)
+			    .style('stroke', '#555555')
+			    .style('stroke-width', 1);
+	    }
+	    if(evt == 'mouseout') {
+	    	selection.style('opacity', me.opacities.rect.default)
+			    .style('stroke', 'none');
+	    }
+	},
 	
+	mouseEventLegendText: function(selection, evt) {
+	    var me = this;
+	    
+	    if(evt == 'mouseover') {
+		    selection.attr('class', me.legendBoldClass)
+			    .style('font-weight', 'bold')
+			    .style('fill', '#990066');
+	    }
+	    if(evt == 'mouseout') {
+	    	selection.attr('class', me.legendClass)
+			    .style('font-weight', 'normal')
+			    .style('fill', 'black');
+	    }
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Calculate the width of a flex "unit"
+ 	 */
 	getFlexUnit: function() {
 		// calculate the width of a flex "unit"
 		var me = this;

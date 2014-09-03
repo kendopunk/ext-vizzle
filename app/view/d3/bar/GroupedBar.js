@@ -205,7 +205,7 @@ Ext.define('App.view.d3.bar.GroupedBar', {
 			margins: {
 				top: 40,
 				right: 10,
-				bottom: 60,
+				bottom: 50,
 				left: 100,
 				leftAxis: 85
 			},
@@ -216,8 +216,7 @@ Ext.define('App.view.d3.bar.GroupedBar', {
 				return '<b>' + d.name + ' ' + d.grouper + ' Consumption</b><br>'
 					+ Ext.util.Format.number(d.value, '0.0')
 					+ ' lbs/person.';
-			},
-			showLegend: false
+			}
 		});
 		
 		// check off the first available checkbox
