@@ -232,18 +232,18 @@ Ext.define('App.util.d3.UniversalBar', {
 			colorDefinedInDataIndex = me.colorDefinedInDataIndex,
 			gLegend = me.gLegend;
 	 	
-	 	// join new with old
+	 	////////////////////////////////////////
+	 	// BARS - JRACT
+	 	////////////////////////////////////////
 	 	var rectSelection = me.gBar.selectAll('rect')
 	 		.data(me.graphData);
 	 		
-	 	// transition out old
  		rectSelection.exit()
 			.transition()
 			.duration(500)
 			.attr('width', 0)
 			.remove();
 			
-		// add new bars
 		rectSelection.enter()
 			.append('rect')
 			.style('opacity', me.opacities.rect.default)
@@ -257,10 +257,11 @@ Ext.define('App.util.d3.UniversalBar', {
 			})
 			.on('dblclick', function(d, i) {
 				me.handleMouseEvent(this, 'rect', 'dblclick', d, i);
-			})
-			.call(d3.helper.tooltip().text(me.tooltipFunction));
+			});
+			
+		// call tooltips
+		rectSelection.call(d3.helper.tooltip().text(me.tooltipFunction));
 		
-		// transition all rectangles
 		rectSelection.transition()
 			.duration(500)
 			.attr('rx', 3)

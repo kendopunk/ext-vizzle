@@ -280,7 +280,7 @@ Ext.define('App.view.daa.ConditioningTwo', {
 			tooltipFunction: function(d, i) {
 				return '<b>' + d.name + '</b><br>'
 					+ Ext.util.Format.number(d.fiveTenTens, '0.00')
-					+ ' seconds';
+					+ ' sec.';
 			},
 			yTickFormat: function(d, i) {
 				return Ext.util.Format.number(d, '0.00') + ' sec';
@@ -385,7 +385,7 @@ Ext.define('App.view.daa.ConditioningTwo', {
 		
 			me.barChart.setTooltipFunction(function(d, i) {
 				return '<b>' + d.name + '</b><br>'
-					+ Ext.util.Format.number(d[btn.metric], '0.00') + ' seconds';
+					+ Ext.util.Format.number(d[btn.metric], '0.00') + ' sec.';
 			});
 			
 			me.barChart.setYTickFormat(function(d, i) {

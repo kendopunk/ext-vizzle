@@ -46,6 +46,9 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 	legendProperty: 'name',
 	legendSquareWidth: 10,
   	legendSquareHeight: 10,
+  	legendTextFunction: function(d, i) {
+	  	return 'legend item';
+	},
 	margins: {
 		top: 10,
 		right: 10,
@@ -417,7 +420,7 @@ Ext.define('App.util.d3.UniversalGroupedBar', {
 				return i * legendSquareHeight * 1.75;
 			})
 			.attr('transform', 'translate(0, ' + legendSquareHeight + ')')
-			.text(String);
+			.text(me.legendTextFunction);
 	},
 	
 	/**

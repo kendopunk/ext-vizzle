@@ -368,6 +368,9 @@ Ext.define('App.view.daa.Individual', {
 			chartFlex: 5,
 			legendFlex: 1,
 			showLegend: true,
+			legendTextFunction: function(d, i) {
+				return d.toUpperCase();
+			},
 			showLabels: false,
 			handleEvents: true,
 			mouseEvents: {
