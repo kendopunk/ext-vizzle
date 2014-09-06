@@ -37,7 +37,9 @@ Ext.define('App.view.daa.Individual', {
 			me.eventRelay = Ext.create('App.util.MessageBus'),
 			me.gridHighlightEvent = 'igGridHighlight',
 			me.gridUnhighlightEvent = 'igGridUnhighlight',
-			me.playerData = [];
+			me.playerData = [],
+			me.numGames = 0,
+			me.numScrimmages = 0;
 		
 		////////////////////////////////////////
 		// control vars
@@ -392,6 +394,14 @@ Ext.define('App.view.daa.Individual', {
 			success: function(response) {
 				var resp = Ext.JSON.decode(response.responseText);
 				
+				Ext.each(resp.data, function(item) {
+					if(item.scrimmage) {
+						me.numScrimmages++;
+					} else {
+						me.numGames++;
+					}
+				}, me);
+				
 				me.allData = me.normalizeData(resp.data);
 				me.noScrimmageData = me.normalizeNoScrimmageData(resp.data);
 				
@@ -454,10 +464,10 @@ Ext.define('App.view.daa.Individual', {
 	 	
 	 	// calculate averages
 	 	Ext.each(dat, function(d) {
-	 		d.avgGoals = d.gamesPlayed == 0 ? 0 : d.goals/d.gamesPlayed;
-	 		d.avgAssists = d.gamesPlayed == 0 ? 0 : d.assists/d.gamesPlayed;
-	 		d.avgShots = d.gamesPlayed == 0 ? 0 : d.shots/d.gamesPlayed;
-	 		d.avgSaves = d.gamesPlayed == 0 ? 0 : d.saves/d.gamesPlayed;
+	 		d.avgGoals = d.goals/(me.numScrimmages + me.numGames),
+	 		d.avgAssists = d.assists/(me.numScrimmages + me.numGames),
+	 		d.avgShots = d.shots/(me.numScrimmages + me.numGames),
+	 		d.avgSaves = d.saves/(me.numScrimmages + me.numGames)
 	 	});
 	 	
 	 	return dat;
@@ -512,11 +522,13 @@ Ext.define('App.view.daa.Individual', {
 	 	
 	 	// calculate averages
 	 	Ext.each(dat, function(d) {
-	 		d.avgGoals = d.gamesPlayed == 0 ? 0 : d.goals/d.gamesPlayed;
-	 		d.avgAssists = d.gamesPlayed == 0 ? 0 : d.assists/d.gamesPlayed;
-	 		d.avgShots = d.gamesPlayed == 0 ? 0 : d.shots/d.gamesPlayed;
-	 		d.avgSaves = d.gamesPlayed == 0 ? 0 : d.saves/d.gamesPlayed;
+	 		d.avgGoals = d.goals/me.numGames,
+	 		d.avgAssists = d.assists/me.numGames,
+	 		d.avgShots = d.shots/me.numGames,
+	 		d.avgSaves = d.saves/me.numGames
 	 	});
+	 	
+	 	console.debug(dat);
 	 	
 	 	return dat;
  	},
