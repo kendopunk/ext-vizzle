@@ -101,6 +101,7 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 	// y
     yAxis: null,
     yScale: null,
+    yTicks: 10,
     yTickFormat: function(d) {
  		return Ext.util.Format.number(d, '0,000');
 	},
@@ -578,9 +579,9 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 			
 			me.xAxis = d3.svg.axis()
 				.scale(me.xScale)
-				.tickSize(0)
 				.tickPadding(6)
 				.tickFormat(me.xTickFormat)
+				.ticks(Ext.Array.min([me.yTicks, me.maxValue]))
 				.orient('bottom');
 		} else {
 			if(me.showLegend) {
@@ -595,7 +596,6 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 			
 			me.xAxis = d3.svg.axis()
 				.scale(me.xScale)
-				.tickSize(0)
 				.tickPadding(6)
 				.orient('bottom');
 		}
@@ -614,7 +614,6 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 
 			me.yAxis = d3.svg.axis()
 				.scale(me.yScale)
-				.tickSize(0)
 				.tickPadding(20)
 				.orient('left');	
 		} else {
@@ -624,8 +623,8 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 				
 			me.yAxis = d3.svg.axis()
 				.scale(me.yScale)
-				.tickSize(0)
 				.tickPadding(6)
+				.ticks(Ext.Array.min([me.yTicks, me.maxValue]))
 				.tickFormat(me.yTickFormat)
 				.orient('left');
 		}

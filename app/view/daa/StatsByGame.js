@@ -39,8 +39,8 @@ Ext.define('App.view.daa.StatsByGame', {
 			valueField: 'id',
 			queryMode: 'local',
 			triggerAction: 'all',
-			width: 150,
-			listWidth: 150,
+			width: 175,
+			listWidth: 175,
 			listeners: {
 				select: function(combo) {
 					me.statsCombo.enable();

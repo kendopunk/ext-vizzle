@@ -103,6 +103,12 @@ Ext.define('App.view.daa.Trending', {
 				metric: 'assists',
 				handler: me.metricHandler,
 				scope: me
+			}, {
+				xtype: 'tbspacer',
+				width: 20
+			}, {
+				xtype: 'tbtext',
+				text: '* scrimmage'
 			}]
 		}];
 			
@@ -183,7 +189,7 @@ Ext.define('App.view.daa.Trending', {
 			},
 			showLabels: true,
 			labelFunction: function(d, i) {
-				return 'vs ' + d.opponent + ' (' + d.goals + ')';
+				return d.opponent + ' (' + d.goals + ')';
 			},
 			tooltipFunction: function(d, i) {
 				var ret = '<b>vs ' + d.opponent + '</b><br><br>';
@@ -301,6 +307,7 @@ Ext.define('App.view.daa.Trending', {
 				 game: game,
 				 date: entry.date,
 				 opponent: entry.opponent,
+				 scrimmage: entry.scrimmage,
 				 goalsFor: entry.goalsFor,
 				 goalsAgainst: entry.goalsAgainst,
 				 goals: goals,
@@ -353,15 +360,15 @@ Ext.define('App.view.daa.Trending', {
 		me.currentYDataMetric = btn.metric;
 		if(btn.metric == 'assists') {
 			me.lineChart.setLabelFunction(function(d, i) {
-				return 'vs ' + d.opponent + ' (' + d.assists + ')';
+				return d.opponent + ' (' + d.assists + ')' + (d.scrimmage ? ' *' : '');
 			});
 		} else if(btn.metric == 'shots') {
 			me.lineChart.setLabelFunction(function(d, i) {
-				return 'vs ' + d.opponent + ' (' + d.shots + ')';
+				return d.opponent + ' (' + d.shots + ')' + (d.scrimmage ? ' *' : '');
 			});
 		} else {
 			me.lineChart.setLabelFunction(function(d, i) {
-				return 'vs ' + d.opponent + ' (' + d.goals + ')';
+				return d.opponent + ' (' + d.goals + ')' + (d.scrimmage ? ' *' : '');
 			});
 		}
 		
