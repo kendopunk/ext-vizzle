@@ -8,6 +8,7 @@
 		"opponent": "A-3 Ice",
 		"goalsFor": 2,
 		"goalsAgainst": 2,
+		"scoreString": "2-2 Tie",
 		"goalData": [{
 			"name": "Joe",
 			"num": 1
@@ -55,6 +56,7 @@
 		"opponent": "SCYA Storm",
 		"goalsFor": 3,
 		"goalsAgainst": 1,
+		"scoreString": "3-1 Win",
 		"goalData": [{
 			"name": "Tyler",
 			"num": 1
@@ -117,6 +119,7 @@
 		"opponent": "Sev. Park",
 		"goalsFor": 5,
 		"goalsAgainst": 0,
+		"scoreString": "5-0 Win",
 		"goalData": [{
 			"name": "Finn",
 			"num": 1
@@ -191,6 +194,7 @@
 		"opponent": "Annapolis",
 		"goalsFor": 3,
 		"goalsAgainst": 1,
+		"scoreString": "3-1 Win",
 		"goalData": [{
 			"name": "Joe",
 			"num": 1
@@ -253,6 +257,7 @@
 		"opponent": "SP Hurricanes",
 		"goalsFor": 2,
 		"goalsAgainst": 1,
+		"scoreString": "2-1 Win",
 		"goalData": [{
 			"name": "Karl",
 			"num": 1

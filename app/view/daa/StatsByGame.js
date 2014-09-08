@@ -20,7 +20,12 @@ Ext.define('App.view.daa.StatsByGame', {
 		me.gameData = [],
 			me.gameId = null,
 			me.currentOpponent = '',
-			me.dataProperty = 'goalData',
+			me.goalChart = null,
+			me.assistChart = null,
+			me.shotChart = null,
+			me.saveChart = null,
+			me.shotsAgainstChart = null,
+			me.shotsScoredChart = null,
  			me.canvasWidth,
  			me.canvasHeight,
  			me.svg,
@@ -43,42 +48,15 @@ Ext.define('App.view.daa.StatsByGame', {
 			listWidth: 175,
 			listeners: {
 				select: function(combo) {
-					me.statsCombo.enable();
 					me.gameId = combo.getValue();
-					me.genChart();
+					me.buildChart();
 				},
 				scope: me
 			}
 		});
 		
-		// metric selector
-		me.statsCombo = Ext.create('Ext.form.field.ComboBox', {
-			disabled: true,
-			store: Ext.create('Ext.data.Store', {
-				fields: ['display', 'value'],
-				data: [
-					{display: 'Goals', value: 'goalData'},
-					{display: 'Assists', value: 'assistData'},
-					{display: 'Shots on Goal', value: 'shotData'},
-					{display: 'Goalkeeper - Saves', value: 'saveData'},
-					{display: 'Goalkeeper - Shots Against', value: 'shotsAgainst'},
-					{display: 'Goalkeeper - Goals Against', value: 'shotsScored'}
-				]
-			}),
-			displayField: 'display',
-			valueField: 'value',
-			queryMode: 'local',
-			triggerAction: 'all',
-			width: 200,
-			listWidth: 200,
-			value: 'goalData',
-			listeners: {
-				select: function(combo) {
-					me.dataProperty = combo.getValue();
-					me.genChart();
-				},
-				scope: me
-			}
+		me.scoreTextItem = Ext.create('Ext.toolbar.TextItem', {
+			text: ''
 		});
 		
 		me.dockedItems = [{
@@ -91,12 +69,15 @@ Ext.define('App.view.daa.StatsByGame', {
 				me.gameCombo,
 			{
 				xtype: 'tbspacer',
-				width: 10
+				width: 15
 			}, {
 				xtype: 'tbtext',
-				text: '<b>Select Stat:</b>'
+				text: '* = scrimmage'
+			}, {
+				xtype: 'tbspacer',
+				width: 20
 			},
-				me.statsCombo
+			me.scoreTextItem
 			]
 		}];
 		
@@ -109,46 +90,134 @@ Ext.define('App.view.daa.StatsByGame', {
 		var me = this;
 		
 		// initialize SVG, width, height
- 		me.canvasWidth = parseInt(me.body.dom.offsetWidth * .98),
-	 		me.canvasHeight = parseInt(me.body.dom.offsetHeight * .98),
- 			me.panelId = '#' + me.body.id;
-	 	
-	 	// init svg
-	 	me.svg = d3.select(me.panelId)
-	 		.append('svg')
-	 		.attr('width', me.canvasWidth)
-	 		.attr('height', me.canvasHeight);
-
-		// init pie chart
-		me.pieChart = Ext.create('App.util.d3.UniversalPie', {
-			svg: me.svg,
-			canvasWidth: me.canvasWidth,
-			canvasHeight: me.canvasHeight,
-			graphData: [],
-			panelId: me.panelId,
-			dataMetric: 'value',
-			chartFlex: 4,
-			legendFlex: 1,
-			colorPalette: 'gradient_blue',
+		me.offsetWidth = Math.floor(me.body.dom.offsetWidth * .95),
+			me.offsetHeight = Math.floor(me.body.dom.offsetHeight),
+			me.panelId = '#' + me.body.id;
+		
+		// primary SVG component
+		me.svg = d3.select(me.panelId)
+			.append('svg')
+			.attr('width', me.offsetWidth)
+	 		.attr('height', me.offsetHeight);
+	 		
+		var oneWidthUnit = me.offsetWidth / 3,
+			oneHeightUnit = me.offsetHeight / 2,
+			theLabelFunction = function(d) {
+				return d.data.name + ' (' + d.data.num + ')';
+			},
+			theTooltipFunction = function(d) {
+				return '<b>' + d.data.name + '</b><br>' + d.data.num;
+			};
+	 		
+	 	//////////////////////////////
+	 	// GOALS
+	 	//////////////////////////////
+	 	me.goalChart = Ext.create('App.util.d3.UniversalPie', {
+		 	svg: me.svg.append('svg:g'),
+		 	canvasWidth: me.offsetWidth/3,
+		 	canvasHeight: me.offsetHeight/2,
+			colorPalette: 'default',
 			margins: {
-				top: 40
+				top: 30
 			},
-			chartTitle: 'foo',
+			chartTitle: 'Goals',
+			dataMetric: 'num',
 			showLabels: true,
-			labelFunction: function(d, i) {
-				return d.data.name;
-			},
-			showLegend: true,
-			legendTextFunction: function(d, i) {
-				return d.name + ' (' + d.value + ')';
-			},
-			tooltipFunction: function(d, i) {
-				return '<b>' + d.data.name + '</b><br>'
-					+ d.data.value;
-			}
+			labelFunction: theLabelFunction,
+			tooltipFunction: theTooltipFunction
 		});
 		
-		// get data
+		//////////////////////////////
+	 	// ASSISTS
+	 	//////////////////////////////
+	 	me.assistChart = Ext.create('App.util.d3.UniversalPie', {
+		 	svg: me.svg.append('svg:g').attr('transform', 'translate(' + oneWidthUnit + ',0)'),
+		 	canvasWidth: me.offsetWidth/3,
+		 	canvasHeight: me.offsetHeight/2,
+			colorPalette: 'default',
+			margins: {
+				top: 30
+			},
+			chartTitle: 'Assists',
+			dataMetric: 'num',
+			showLabels: true,
+			labelFunction: theLabelFunction,
+			tooltipFunction: theTooltipFunction
+		});
+		
+		//////////////////////////////
+	 	// SHOTS
+	 	//////////////////////////////
+	 	me.shotChart = Ext.create('App.util.d3.UniversalPie', {
+		 	svg: me.svg.append('svg:g').attr('transform', 'translate(' + (oneWidthUnit * 2) + ',0)'),
+		 	canvasWidth: me.offsetWidth/3,
+		 	canvasHeight: me.offsetHeight/2,
+			colorPalette: 'default',
+			margins: {
+				top: 30
+			},
+			chartTitle: 'Shots On Goal',
+			dataMetric: 'num',
+			showLabels: true,
+			labelFunction: theLabelFunction,
+			tooltipFunction: theTooltipFunction
+		});
+		
+	 	//////////////////////////////
+	 	// saves
+	 	//////////////////////////////
+	 	me.saveChart = Ext.create('App.util.d3.UniversalPie', {
+		 	svg: me.svg.append('svg:g').attr('transform', 'translate(0,' + oneHeightUnit + ')'),
+		 	canvasWidth: me.offsetWidth/3,
+		 	canvasHeight: me.offsetHeight/2,
+			colorPalette: 'gradient_red',
+			margins: {
+				top: 30
+			},
+			chartTitle: 'Saves',
+			dataMetric: 'num',
+			showLabels: true,
+			labelFunction: theLabelFunction,
+			tooltipFunction: theTooltipFunction
+		});
+	 	
+	 	//////////////////////////////
+	 	// shots against
+	 	//////////////////////////////
+	 	me.shotsAgainstChart = Ext.create('App.util.d3.UniversalPie', {
+		 	svg: me.svg.append('svg:g').attr('transform', 'translate(' + oneWidthUnit + ',' + oneHeightUnit + ')'),
+		 	canvasWidth: me.offsetWidth/3,
+		 	canvasHeight: me.offsetHeight/2,
+			colorPalette: 'gradient_red',
+			margins: {
+				top: 30
+			},
+			chartTitle: 'Shots Taken Against',
+			dataMetric: 'num',
+			showLabels: true,
+			labelFunction: theLabelFunction,
+			tooltipFunction: theTooltipFunction
+		});
+		
+		//////////////////////////////
+	 	// shots scored
+	 	//////////////////////////////
+	 	me.shotsScoredChart = Ext.create('App.util.d3.UniversalPie', {
+		 	svg: me.svg.append('svg:g').attr('transform', 'translate(' + (oneWidthUnit * 2) + ',' + oneHeightUnit + ')'),
+		 	canvasWidth: me.offsetWidth/3,
+		 	canvasHeight: me.offsetHeight/2,
+			colorPalette: 'gradient_red',
+			margins: {
+				top: 30
+			},
+			chartTitle: 'Shots Scored Against',
+			dataMetric: 'num',
+			showLabels: true,
+			labelFunction: theLabelFunction,
+			tooltipFunction: theTooltipFunction
+		});
+		
+		// get game data
 		Ext.Ajax.request({
 			url: 'data/daa/gamedata.json',
 			method: 'GET',
@@ -177,62 +246,78 @@ Ext.define('App.view.daa.StatsByGame', {
 		});
 	},
 	
-	genChart: function() {
+	/**
+ 	 * @function
+ 	 * @description Normalize data and build the charts
+ 	 */
+	buildChart: function() {
+		var me = this,
+			proceed = false;
 		
-		var me = this, 
-			dat = [];
-		
+		var goalData = [], assistData = [], shotData = [],
+			saveData = [], shotsAgainstData = [], shotsScoreData = [];
+			
 		Ext.each(me.gameData, function(gd) {
 			if(gd.id == me.gameId) {
-				me.currentOpponent = gd.opponent;
-				var slice = gd[me.dataProperty];
 				
-				Ext.each(slice, function(s) {
-					dat.push({
-						name: s.name,
-						value: s.num
-					});
-				});
+				me.scoreTextItem.setText('<b>' + gd.scoreString + '</b>');
+			
+				me.goalChart.setGraphData(Ext.Array.sort(gd.goalData, function(a, b) {
+					if(a.num > b.num) { return -1; }
+					else if(a.num < b.num) { return 1; }
+					return 0
+				}));
+			
+				me.assistChart.setGraphData(Ext.Array.sort(gd.assistData, function(a, b) {
+					if(a.num > b.num) { return -1; }
+					else if(a.num < b.num) { return 1; }
+					return 0
+				}));
+				
+				me.shotChart.setGraphData(Ext.Array.sort(gd.shotData, function(a, b) {
+					if(a.num > b.num) { return -1; }
+					else if(a.num < b.num) { return 1; }
+					return 0
+				}));
+				
+				me.saveChart.setGraphData(Ext.Array.sort(gd.saveData, function(a, b) {
+					if(a.num > b.num) { return -1; }
+					else if(a.num < b.num) { return 1; }
+					return 0
+				}));
+				
+				me.shotsAgainstChart.setGraphData(Ext.Array.sort(gd.shotsAgainst, function(a, b) {
+					if(a.num > b.num) { return -1; }
+					else if(a.num < b.num) { return 1; }
+					return 0
+				}));
+				
+				me.shotsScoredChart.setGraphData(Ext.Array.sort(gd.shotsScored, function(a, b) {
+					if(a.num > b.num) { return -1; }
+					else if(a.num < b.num) { return 1; }
+					return 0
+				}));
+				
+				proceed = true;
 			}
 		}, me);
-		
-		me.pieChart.setGraphData(Ext.Array.sort(dat, function(a, b) {
-			if(a.value > b.value) { return -1; }
-			else if(a.value < b.value) { return 1; }
-			return 0
-		}));
-		
-		switch(me.dataProperty) {
-			
-			case 'assistData':
-			me.pieChart.setChartTitle(me.currentOpponent + ' : Assists');
-			break;
-			
-			case 'shotData':
-			me.pieChart.setChartTitle(me.currentOpponent + ' : Shots on Goal');
-			break;
-			
-			case 'saveData':
-			me.pieChart.setChartTitle(me.currentOpponent + ' : Goalkeeper - Saves');
-			break;
-			
-			case 'shotsAgainst':
-			me.pieChart.setChartTitle(me.currentOpponent + ' : Goalkeeper - Shots Against');
-			break;
-			
-			case 'shotsScored':
-			me.pieChart.setChartTitle(me.currentOpponent + ' : Goalkeeper - Goals Against');
-			break;
-					
-			default:
-			me.pieChart.setChartTitle(me.currentOpponent + ' : Goals');
-			break;
-		}
-		
-		if(!me.pieChart.chartInitialized) {
-			me.pieChart.initChart().draw();
-		} else {
-			me.pieChart.draw();
+
+		if(proceed) {
+			if(!me.goalChart.chartInitialized) {
+				me.goalChart.initChart().draw();
+				me.assistChart.initChart().draw();
+				me.shotChart.initChart().draw();
+				me.saveChart.initChart().draw();
+				me.shotsAgainstChart.initChart().draw();
+				me.shotsScoredChart.initChart().draw();
+			} else {
+				me.goalChart.draw();
+				me.assistChart.draw();
+				me.shotChart.draw();
+				me.saveChart.draw();
+				me.shotsAgainstChart.draw();
+				me.shotsScoredChart.draw();
+			}
 		}
 	}
 });
