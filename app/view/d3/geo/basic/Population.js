@@ -21,6 +21,7 @@ Ext.define('App.view.d3.geo.basic.Population', {
 		me.worldMapRendered = false,
 		me.rawData = null,
 		me.currentMetric = 'population',
+		me.currentColor = '#CC3300',
 		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95),
 		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
 		
@@ -35,13 +36,13 @@ Ext.define('App.view.d3.geo.basic.Population', {
 			disabled: true,
 			emptyText: 'Select metric...',
 			store: Ext.create('Ext.data.Store', {
-				fields: ['display', 'value'],
+				fields: ['display', 'value', 'color'],
 				data: [
-					{display: 'Population', value: 'population'},
-					{display: 'Population Growth Rate (%)', value: 'populationGrowth'},
-					{display: 'Infant Mortality Rate (per 1,000 births)', value: 'infantMortality'},
-					{display: 'Death Rate (per 1,000)', value: 'deathRate'},
-					{display: 'Obesity Rate (per 1,000 adult)', value: 'obesityRate'}
+					{display: 'Population', value: 'population', color: '#CC3300'},
+					{display: 'Population Growth Rate (%)', value: 'populationGrowth', color: '#990000'},
+					{display: 'Infant Mortality Rate (per 1,000 births)', value: 'infantMortality', color: '#990066'},
+					{display: 'Death Rate (per 1,000)', value: 'deathRate', color: '#663300'},
+					{display: 'Obesity Rate (per 1,000 adult)', value: 'obesityRate', color: '#009900'},
 				]
 			}),
 			displayField: 'display',
@@ -52,8 +53,9 @@ Ext.define('App.view.d3.geo.basic.Population', {
 			width: 250,
 			listWidth: 250,
 			listeners: {
-				select: function(combo) {
+				select: function(combo, record) {
 					me.currentMetric = combo.getValue();
+					me.currentColor = record[0].data.color;
 					me.renderMetricOverlay();
 				},
 				scope: me
@@ -65,7 +67,7 @@ Ext.define('App.view.d3.geo.basic.Population', {
 			dock: 'top',
 			items: [{
 				xtype: 'tbtext',
-				text: '<b>Top Countries By:</b>'
+				text: '<b>Selected Countries By:</b>'
 			},
 				me.metricCombo
 			]
@@ -156,7 +158,7 @@ Ext.define('App.view.d3.geo.basic.Population', {
 		})
 		.transition()
 		.duration(250)
-		.style('fill', '#CC3300')
+		.style('fill', me.currentColor)
 		.style('opacity', function(d, i) {
 			var op;
 			
