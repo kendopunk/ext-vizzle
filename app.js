@@ -29,7 +29,7 @@ Ext.application({
 		// var defaultXType = 'areaGeneric';
 		// var defaultXType = 'areaMultiPanel';
 		// var defaultXType = 'areaTicker';
-		// var defaultXType = 'barBuild';
+		// // var defaultXType = 'barBuild';
 		var defaultXType = 'barGeneric';
 		// var defaultXType = 'barGroup';
 		// var defaultXType = 'barStack';

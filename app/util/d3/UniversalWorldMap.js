@@ -24,6 +24,7 @@ Ext.define('App.util.d3.UniversalWorldMap', {
 	},
 	gPath: null,
 	graticule: d3.geo.graticule(),
+	panel: null,
 	path: null,
 	projection: null,
 	tooltipFunction: function(d, i) { return 'country'; },
@@ -39,6 +40,11 @@ Ext.define('App.util.d3.UniversalWorldMap', {
 		Ext.merge(me, config);
 	},
 	
+	/**
+	 * @function
+	 * @memberOf App.util.d3.UniversalWorldMap
+	 * @description Initialize chart components
+	 */
 	initChart: function() {
 		var me = this;
 		
@@ -52,10 +58,34 @@ Ext.define('App.util.d3.UniversalWorldMap', {
 		
 		me.zoom = d3.behavior.zoom()
 			.scaleExtent([1, 9])
-			.on('zoom', me.zoomHandler);
-			
-			me.svg.call(me.zoom);
+			.on('zoom', function() {
+				var t = d3.event.translate,
+					s = d3.event.scale,
+					zscale = s,
+					h = Math.floor(me.canvasHeight/4),
+					width = me.canvasWidth,
+					height = me.canvasHeight;
 		
+				t[0] = Math.min(
+					(width/height) * (s - 1), 
+					Math.max(width * (1-s), t[0])
+				);
+				t[1] = Math.min(
+					h * (s-1) + h * s,
+					Math.max(height  * (1-s) - h * s, t[1])
+				);
+				
+				me.zoom.translate(t);
+				
+				me.gPath.attr('transform', 'translate(' + t  + ')scale(' + s + ')');
+				
+			}, me);
+			
+		me.svg.call(me.zoom);
+			
+		me.panelMask(true);
+		
+		// query topo data
 		Ext.Ajax.request({
 			url: me.topoUrl,
 			method: 'GET',
@@ -63,22 +93,20 @@ Ext.define('App.util.d3.UniversalWorldMap', {
 				var resp = Ext.decode(response.responseText);
 				
 				me.topo = topojson.feature(resp, resp.objects.countries).features;
-				
-				
-				
 			},
 			callback: function() {
 				me.renderMap();
+				me.panelMask(false);
 			},
 			scope: me
 		});
-				
-		
-		
-			
-		
 	},
 	
+	/**
+	 * @function
+	 * @memberOf App.util.d3.UniversalWorldMap
+	 * @description Draw the map
+	 */
 	renderMap: function() {
 		var me = this;
 		
@@ -116,35 +144,50 @@ Ext.define('App.util.d3.UniversalWorldMap', {
 				d3.select(this)
 					.style('stroke', me.countryDefaults.stroke);
 			});
-			//.on('dblclick', me.dblClickHandler);
 		
 		countrySelection.call(d3.helper.tooltip().text(me.tooltipFunction));
-	
-	
+		
+		me.panelReady();
 	},
 	
-	zoomHandler: function() {
+	/**
+	 * @function
+	 * @memberOf App.util.d3.UniversalWorldMap
+	 * @description Control the parent container mask/unmask
+	 */
+	panelMask: function(bool) {
 		var me = this;
 		
-		var t = d3.event.translate,
-			s = d3.event.scale,
-			zscale = s,
-			h = Math.floor(me.canvasHeight/4),
-			width = me.canvasWidth,
-			height = me.canvasHeight;
+		if(me.panel) {
+			if(bool) { me.panel.getEl().mask('Loading...'); return; }
+			me.panel.getEl().unmask();
+		}
+	},
+	
+	/**
+	 * @function
+	 * @memberOf App.util.d3.UniversalWorldMap
+	 * @description Notify the parent panel that the map has been rendered
+	 */
+	panelReady: function() {
+		var me = this;
 		
-		t[0] = Math.min(
-			(width/height) * (s - 1), 
-			Math.max(width * (1-s), t[0])
-		);
-		t[1] = Math.min(
-			h * (s-1) + h * s,
-			Math.max(height  * (1-s) - h * s, t[1])
-		);
-		
-		// these are out of scope
-		//me.zoom.translate(t);
-		
-		//me.gPath.attr('transform', 'translate(' + t  + ')scale(' + s + ')');
+		if(me.panel) {
+			try {
+				me.panel.panelReady();
+			} catch (err) {
+				; // pass
+			}
+		}
+	},
+	
+	/**
+	 * 
+	 * SETTERS
+	 *
+	 */
+	setTooltipFunction: function(fn) {
+		var me = this;
+		me.tooltipFunction = fn;
 	}
 });

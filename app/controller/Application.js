@@ -17,7 +17,7 @@ Ext.define('App.controller.Application', {
 		'App.view.d3.bar.GroupedBar',
 		'App.view.d3.bar.MouseEvents',
 		'App.view.d3.geo.basic.MainPanel',
-		//'App.view.d3.geo.basic.Population',
+		'App.view.d3.geo.basic.Population',
 		'App.view.d3.misc.GenericScatter',
 		'App.view.d3.misc.Slopegraph',
 		'App.view.d3.misc.Timeline',		
