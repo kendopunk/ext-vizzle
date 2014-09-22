@@ -18,6 +18,7 @@ Ext.define('App.util.d3.UniversalWorldMap', {
 	chartInitialized: false,
 	countryDefaults: {
 		fill: '#BBB',
+		fillOver: '#999',
 		stroke: 'none',
 		strokeWidth: 1,
 		strokeOver: 'white'
@@ -27,7 +28,7 @@ Ext.define('App.util.d3.UniversalWorldMap', {
 	panel: null,
 	path: null,
 	projection: null,
-	tooltipFunction: function(d, i) { return 'country'; },
+	tooltipFunction: function(d, i) { return d.country;},
 	topo: null,
 	topoUrl: 'data/geo/world-topo-min.json',
 	zoom: null,
@@ -137,12 +138,20 @@ Ext.define('App.util.d3.UniversalWorldMap', {
 			.style('stroke', me.countryDefaults.stroke)
 			.style('stroke-width', me.countryDefaults.strokeWidth)
 			.on('mouseover', function(d, i) {
-				d3.select(this)
-					.style('stroke', me.countryDefaults.strokeOver);
+				var el = d3.select(this);
+				
+				if(el.attr('class') == 'country') {
+					el.style('stroke', me.countryDefaults.strokeOver)
+						.style('fill', me.countryDefaults.fillOver);
+				}
 			})
 			.on('mouseout', function(d, i) {
-				d3.select(this)
-					.style('stroke', me.countryDefaults.stroke);
+				var el = d3.select(this);
+				
+				if(el.attr('class') == 'country') {
+					el.style('stroke', me.countryDefaults.stroke)
+						.style('fill', me.countryDefaults.fill);
+				}
 			});
 		
 		countrySelection.call(d3.helper.tooltip().text(me.tooltipFunction));
@@ -179,6 +188,16 @@ Ext.define('App.util.d3.UniversalWorldMap', {
 				; // pass
 			}
 		}
+	},
+	
+	/**
+	 * 
+	 * GETTERS
+	 *
+	 */
+	getTooltipFunction: function() {
+		var me = this;
+		return me.tooltipFunction;
 	},
 	
 	/**

@@ -561,7 +561,7 @@ Ext.define('App.util.d3.UniversalBar', {
 			
 		// figure out the actual y ticks
 		var gdMax = d3.max(me.graphData, function(d) { return d[metric];});
-		if(gdMax < useYTicks) {
+		if(gdMax < useYTicks && gdMax > 1) {
 			useYTicks = gdMax;
 		}
 			

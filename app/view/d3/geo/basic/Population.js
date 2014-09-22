@@ -19,27 +19,31 @@ Ext.define('App.view.d3.geo.basic.Population', {
 		var me = this;
 		
 		me.worldMapRendered = false,
-		me.rawData = null,
-		me.currentMetric = 'population',
-		me.currentColor = '#CC3300',
-		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95),
-		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
+			me.rawData = null,
+			me.currentMetric = 'population',
+			me.currentColor = '#CC3300',
+			me.eventRelay = Ext.create('App.util.MessageBus'),
+			me.width = 
+				Math.floor((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95),
+			me.height = 
+				Math.floor(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
 		
 		/**
  		 * @property
  		 * @description Chart description
  		 */
 		me.chartDescription = '<b>World Population Data</b><br><br>'
-			+ '<i>Data from CIA World Fact Book</i>';
-			
+			+ '<i>Data from 2013 CIA World Fact Book.</i><br><br>'
+			+ 'Use mouse wheel to zoom in/out, drag to pan...';
+
 		me.metricCombo = Ext.create('Ext.form.field.ComboBox', {
 			disabled: true,
 			emptyText: 'Select metric...',
 			store: Ext.create('Ext.data.Store', {
 				fields: ['display', 'value', 'color'],
 				data: [
-					{display: 'Population', value: 'population', color: '#CC3300'},
-					{display: 'Population Growth Rate (%)', value: 'populationGrowth', color: '#990000'},
+					{display: 'Population', value: 'population', color: '#FF0066'},
+					{display: 'Population Growth Rate (%)', value: 'populationGrowth', color: '#FF9900'},
 					{display: 'Infant Mortality Rate (per 1,000 births)', value: 'infantMortality', color: '#990066'},
 					{display: 'Death Rate (per 1,000)', value: 'deathRate', color: '#663300'},
 					{display: 'Obesity Rate (per 1,000 adult)', value: 'obesityRate', color: '#009900'},
@@ -57,6 +61,10 @@ Ext.define('App.view.d3.geo.basic.Population', {
 					me.currentMetric = combo.getValue();
 					me.currentColor = record[0].data.color;
 					me.renderMetricOverlay();
+					me.getEl().unmask();
+				},
+				expand: function() {
+					me.getEl().mask();
 				},
 				scope: me
 			}
@@ -73,6 +81,12 @@ Ext.define('App.view.d3.geo.basic.Population', {
 			]
 		}];
 		
+		/**
+ 		 * @listeners
+ 		 */
+		me.on('activate', function() {
+			me.eventRelay.publish('infoPanelUpdate', me.chartDescription);
+		}, me);
 		me.on('afterrender', me.initCanvas, me);
 		
 		me.callParent(arguments);
@@ -119,11 +133,6 @@ Ext.define('App.view.d3.geo.basic.Population', {
 			success: function(response, options) {
 				var resp = Ext.decode(response.responseText);
 				me.rawData = resp;
-				me.worldMap.setTooltipFunction(function(d, i) {
-					return d.country
-						+ '<br>'
-						+ Ext.util.Format.number(d.value, '0,000');
-				});
 				me.renderMetricOverlay();
 			},
 			callback: function() {
@@ -135,47 +144,83 @@ Ext.define('App.view.d3.geo.basic.Population', {
 	
 	/**
 	 * @function
+	 * @description Colorize/revert relevant paths.
 	 */
 	renderMetricOverlay: function() {
 		var me = this;
 		
-		var dat = me.rawData.data[me.currentMetric];
+		var currentMetric = me.currentMetric,
+			dat = me.rawData.data[currentMetric],
+			map = dat.map(function(d) { return d.country; });
 		
 		var opacityScale = d3.scale.linear()
 			.domain([
 				d3.min(dat, function(d) { return d.value;}),
 				d3.max(dat, function(d) { return d.value;})
 			])
-			.range([.2, 1]);
+			.range([.3, 1]);
 			
-		var map = dat.map(function(d) { return d.country; });
-		
 		var countrySelection = me.worldMap.gPath.selectAll('.country');
 		
-		// countries to highlight
-		countrySelection.filter(function(e, j) {
+		////////////////////////////////////////
+		// "go" countries (color on)
+		////////////////////////////////////////
+		var go = countrySelection.filter(function(e, j) {
 			return map.indexOf(e.properties.name) >= 0;
-		})
-		.transition()
-		.duration(250)
-		.style('fill', me.currentColor)
-		.style('opacity', function(d, i) {
-			var op;
-			
-			var rating = dat.forEach(function(item) {
-				if(item.country == d.properties.name) {
-					op = opacityScale(item.value);
-				}
-			});
-			
-			return op || .2;
 		});
 		
-		// countries to reset
-		countrySelection.filter(function(e, j) {
+		// add "active" class
+		go.classed('active', true);
+		
+		go.transition()
+			.duration(250)
+			.style('fill', me.currentColor)
+			.style('opacity', function(d, i) {
+				var op;
+				
+				var rating = dat.forEach(function(item) {
+					if(item.country == d.properties.name) {
+						op = opacityScale(item.value);
+					}
+				});
+				
+				return op || .2;
+			});
+			
+		go.call(d3.helper.tooltip().text(function(d, i) {
+			var match = dat.filter(function(e, j) {
+				return e.country == d.properties.name;
+			});
+			if(match.length > 0) {
+				if(currentMetric == 'population') {
+					return '<b>' + match[0].country + '</b><br>'
+						+ Ext.util.Format.number(match[0].value, '0,000');
+				} else if(currentMetric == 'populationGrowth') {
+					return '<b>' + match[0].country + '</b><br>'
+						+ Ext.util.Format.number(match[0].value, '0,000.00')
+						+ '%';
+				} else {
+					return '<b>' + match[0].country + '</b><br>'
+						+ Ext.util.Format.number(match[0].value, '0,000.00');
+				}
+			}
+			return d.properties.name;
+		}));
+		
+		////////////////////////////////////////
+		// "no go" countries" (color off)
+		////////////////////////////////////////
+		var nogo = countrySelection.filter(function(e, j) {
 			return map.indexOf(e.properties.name) < 0;
-		})
-		.style('fill', me.worldMap.countryDefaults.fill)
-		.style('opacity', 1);
+		});
+		
+		// remove "active" class
+		//nogo.classed('active', false);
+		
+		nogo.style('fill', me.worldMap.countryDefaults.fill)
+			.classed('active', false)
+			.style('opacity', 1);
+		
+		nogo.call(d3.helper.tooltip().text(me.worldMap.tooltipFunction));
 	}
 });
