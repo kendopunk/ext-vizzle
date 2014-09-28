@@ -91,6 +91,11 @@ Ext.define('App.store.tree.MenuStore', {
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'geoBasicMainPanel'
+				}, {
+					text: 'World Population Stats',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'geoPopulation'
 				}]
 			}, {
 				text: '<b>Misc</b>',

@@ -202,6 +202,9 @@ Ext.define('App.view.d3.bar.GroupedBar', {
 				'2000': colorScale(6),
 			},
 			fixedColorRangeIndex: 'year',
+			legendTextFunction: function(d, i) {
+				return d;
+			},
 			margins: {
 				top: 40,
 				right: 10,

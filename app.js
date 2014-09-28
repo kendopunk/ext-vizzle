@@ -36,6 +36,7 @@ Ext.application({
 		// var defaultXType = 'barMouse';
 		// var defaultXType = 'pieGeneric';
 		// var defaultXType = 'pieBuild';
+		// var defaultXType = 'geoPopulation';
 		// var defaultXType = 'sunburstPartition';
 		// var defaultXType = 'scatterGeneric';
 		// var defaultXType = 'treemapFootball';
