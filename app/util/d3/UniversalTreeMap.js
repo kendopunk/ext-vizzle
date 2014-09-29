@@ -15,43 +15,40 @@ Ext.define('App.util.d3.UniversalTreeMap', {
 	canvasHeight: 400,
 	canvasWidth: 400,
 	cellTranslationFunction: function() {
-		
 		this.style('visibility', function(d) {
-			if(d.value <= 0) {
-				return 'hidden';
-			}
-			return 'visible';
+			return d.value <= 0 ? 'hidden' : 'visible';
 		})
 		.style('left', function(d) {
 			if(d.parent !== undefined) {
-				return d.x + d.parent.margins.left + 'px';
+				if(d.parent.margins !== undefined) {
+					return d.x + d.parent.margins.left + 'px';
+				}
+				return d.x + d.parent.parent.margins.left + 'px';
 			}
 			return d.x + d.margins.left + 'px';
 		})
 		.style('top', function(d) {
 			if(d.parent !== undefined) {
-				return d.y + Math.floor(d.parent.margins.top/2) + 'px';
+				if(d.parent.margins !== undefined) {
+					return d.y + Math.floor(d.parent.margins.top/2) + 'px';
+				}
+				return d.y + Math.floor(d.parent.parent.margins.top/2) + 'px';
 			}
 			return d.y + d.margins.top + 'px';
 		})
 		.style('width', function(d) {
-			if(d.value <= 0) {
-				return '0px';
-			}
-			return d.dx - 1 + 'px';
+			return d.value <= 0 ? '0px' : d.dx - 1 + 'px';
 		})
 		.style('height', function(d) {
-			if(d.value <= 0) {
-				return '0px';
-			}
-			return d.dy - 1 + 'px';
+			return d.value <=0 ? '0px' : d.dy -1 + 'px';
 		})
 	},
 	chartInitialized: false,
 	colorDefinedInData: false,
 	colorDefinedInDataIndex: 'color',
-	colorMetric: 'value',	// only necessary if fixeColorRange is defined
+	colorMetric: 'value',	// only necessary if fixedColorRange is defined
 	colorScale: d3.scale.category20c(),
+	dataRebind: false,
 	divClass: 'treecell',
 	
 	fixedColorRange: [],
@@ -95,8 +92,7 @@ Ext.define('App.util.d3.UniversalTreeMap', {
 	initChart: function() {
 		var me =this;
 		
-		var sizeMetric = me.sizeMetric,
-			colorMetric = me.colorMetric;
+		var sizeMetric = me.sizeMetric;
 		
 		// init svg
 		me.svg = d3.select(me.panelId)
@@ -118,9 +114,6 @@ Ext.define('App.util.d3.UniversalTreeMap', {
 			 .style('position', 'relative')
 			 .style('width', me.canvasWidth)
 			 .style('height', me.canvasHeight);
-			 
-		// for adding margins to each element
-		me.graphData.margins = me.margins;
 		
 		me.gTitle = me.svg.append('svg:g')
 				.attr('transform', 'translate('
@@ -148,6 +141,9 @@ Ext.define('App.util.d3.UniversalTreeMap', {
 			sizeMetric = me.sizeMetric,
 			colorMetric = me.colorMetric;
 			
+		// for adding margins to each element
+		me.graphData.margins = me.margins;
+			
 		// ordinal color scale
 		if(me.fixedColorRange.length > 0) {
 			me.fixedColorScale = d3.scale.linear()
@@ -172,6 +168,7 @@ Ext.define('App.util.d3.UniversalTreeMap', {
 	/**
 	 * @function
 	 * @description Handle root <div>...JRAT
+	 * Handles binding/rebinding or sticky translation
 	 */
 	handleRootDiv: function() {
 		var me = this;
@@ -185,10 +182,12 @@ Ext.define('App.util.d3.UniversalTreeMap', {
 			
 		var divCount = me.rootDiv.selectAll('div')[0].length;
 		
-		if(divCount == 0) {
+		if(divCount == 0 || me.dataRebind) {
 			var rdSelector = me.rootDiv.data([me.graphData])
 			.selectAll('div')
 			.data(me.treemap.nodes);
+			
+			me.dataRebind = false;
 		} else {
 			var rdSelector = me.rootDiv.selectAll('div')
 				.data(me.treemap.value(function(d) {
@@ -227,6 +226,7 @@ Ext.define('App.util.d3.UniversalTreeMap', {
 				.call(d3.helper.tooltip().text(me.tooltipFunction));
 		}
 	},
+	
 	
 	/**
  	 * @function
@@ -268,6 +268,7 @@ Ext.define('App.util.d3.UniversalTreeMap', {
 	setGraphData: function(d) {
 		var me = this;
 		me.graphData = d;
+		me.dataRebind = true;
 	},
 	
 	setSizeMetric: function(metric) {

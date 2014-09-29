@@ -1,7 +1,7 @@
 /**
  * @class
  * @author Mark Fehrenbacher (kendopunk@hotmail.com)
- * @memberOf App.view.d3.scatterplot
+ * @memberOf App.view.d3.treemap
  * @description Simple treemap panel with two independent metrics
  */
 Ext.define('App.view.d3.treemap.NetFlow', {
@@ -171,8 +171,8 @@ Ext.define('App.view.d3.treemap.NetFlow', {
 		me.getEl().mask('Loading...');
 		
 		// initialize SVG, width, height
- 		me.canvasWidth = parseInt(me.body.dom.offsetWidth * .9),
-	 		me.canvasHeight = parseInt(me.body.dom.offsetHeight * .9),
+ 		me.canvasWidth = me.body.dom.offsetWidth,
+	 		me.canvasHeight = parseInt(me.body.dom.offsetHeight * .93),
  			me.panelId = '#' + me.body.id;
  		
  		// initialize chart component

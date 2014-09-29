@@ -1,7 +1,7 @@
 /**
  * @class
  * @author Mark Fehrenbacher (kendopunk@hotmail.com)
- * @memberOf App.view.d3.scatterplot
+ * @memberOf App.view.d3.treemap
  * @description Simple treemap panel
  */
 Ext.define('App.view.d3.treemap.Football', {
@@ -39,7 +39,7 @@ Ext.define('App.view.d3.treemap.Football', {
  		 * @property
  		 */
 		me.chartDescription = '<b>Basic Treemap</b><br><br>'
-		 + '<i>Some random NFL team statistics...</i><br><br>'
+		 + '<i>Some random NFL team statistics through 2013...</i><br><br>'
 		 + 'Win/loss data from <a href="http://www.pro-football-reference.com/teams/">pro-football-reference.com</a>.<br><br>'
 		 + 'Franchise value data from Forbes.<br><br>'
 		 + 'Team hex colors from <a href="http://teamcolors.arc90.com/">teamcolors.arc90.com</a>.';
@@ -216,7 +216,6 @@ Ext.define('App.view.d3.treemap.Football', {
 		 			}
 	 			});
 				
-				//me.treemap.draw();
 				me.treemap.initChart().draw();
 	 		},
 	 		callback: function() {

@@ -26,6 +26,7 @@ Ext.define('App.controller.Application', {
 		'App.view.d3.pie.Sunburst',
 		'App.view.d3.treemap.Football',
 		'App.view.d3.treemap.NetFlow',
+		'App.view.d3.treemap.Unsec',
 		'App.view.d3.win.WindowBar',
 		'App.view.fabric.basic.MainPanel'
 	],

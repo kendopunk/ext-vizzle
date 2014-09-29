@@ -1,0 +1,94 @@
+{
+	"name": "root",
+	"children": [{
+		"name": "Budget Expenditures",
+		"children": [{
+			"name": "China",
+			"value": 2031000000000
+		}, {
+			"name": "France",
+			"value": 1458000000000
+		}, {
+			"name": "Russia",
+			"value": 414000000000
+		}, {
+			"name": "UK",
+			"value": 1183000000000
+		}, {
+			"name": "US",
+			"value": 3649000000000
+		}]
+	}, {
+		"name": "Budget Revenues",
+		"children": [{
+			"name": "China",
+			"value": 1838000000000
+		}, {
+			"name": "France",
+			"value": 1341000000000
+		}, {
+			"name": "Russia",
+			"value": 413000000000
+		}, {
+			"name": "UK",
+			"value": 995900000000
+		}, {
+			"name": "US",
+			"value": 2465000000000
+		}]
+	}, {
+		"name": "Exports",
+		"children": [{
+			"name": "China",
+			"value": 2021000000000
+		}, {
+			"name": "France",
+			"value": 567500000000
+		}, {
+			"name": "Russia",
+			"value": 542500000000
+		}, {
+			"name": "UK",
+			"value": 481000000000
+		}, {
+			"name": "US",
+			"value": 1612000000000
+		}]
+	}, {
+		"name": "Imports",
+		"children": [{
+			"name": "China",
+			"value": 1780000000000
+		}, {
+			"name": "France",
+			"value": 658900000000
+		}, {
+			"name": "Russia",
+			"value": 358100000000
+		}, {
+			"name": "UK",
+			"value": 646000000000
+		}, {
+			"name": "US",
+			"value": 2357000000000
+		}]
+	}, {
+		"name": "Gold/Foreign Exchange Reserves",
+		"children": [{
+			"name": "China",
+			"value": 3549000000000
+		}, {
+			"name": "France",
+			"value": 171900000000
+		}, {
+			"name": "Russia",
+			"value": 561100000000
+		}, {
+			"name": "UK",
+			"value": 94540000000
+		}, {
+			"name": "US",
+			"value": 148000000000
+		}]
+	}]	
+}
