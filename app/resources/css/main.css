@@ -225,6 +225,20 @@ svg {
 	padding: 2px;
 }
 
+.unsecTreeCell {
+	border: solid 1px white;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	color: black;
+	/*text-shadow: 1px 1px #333;*/
+	/*font: bold 9px sans-serif;*/
+	font: 9px sans-serif;
+	line-height: 12px;
+	overflow: hidden;
+	position: absolute;
+	padding: 4px;
+}
+
 .nflTreeCell {
 	border: solid 1px white;
 	-moz-border-radius: 4px;
@@ -234,7 +248,7 @@ svg {
 	line-height: 12px;
 	overflow: hidden;
 	position: absolute;
-	padding: 2px;
+	padding: 4px;
 }
 
 .tinyText {

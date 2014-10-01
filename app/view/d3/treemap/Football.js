@@ -65,28 +65,6 @@ Ext.define('App.view.d3.treemap.Football', {
 			]
 		});
 		
-		me.stickyButton = Ext.create('Ext.button.Button', {
-			 text: 'ON',
-			 currentValue: 'on',
-			 cls: me.btnHighlightCss,
-			 handler: function(btn) {
-			 	if(btn.currentValue == 'on') {
-				 	btn.currentValue = 'off';
-				 	btn.setText('OFF');
-				 	btn.removeCls(me.btnHighlightCss);
-				 	
-				 	me.treemap.setSticky(false);
-			 	} else {
-				 	btn.currentValue = 'on';
-				 	btn.setText('ON');
-				 	btn.addCls(me.btnHighlightCss);
-				 	
-				 	me.treemap.setSticky(true);
-			 	}
-			 },
-			 scope: me
-		});
-		
 		////////////////////////////////////////
 		// text functions
 		////////////////////////////////////////
@@ -154,12 +132,7 @@ Ext.define('App.view.d3.treemap.Football', {
 			 		},
 			 		scope: me
 			 	}
-			}/*, 
-			{xtype: 'tbspacer', width: 10},
-			{xtype: 'tbtext', text: '<b>Sticky:</b>'},
-				me.stickyButton
-			*/
-			]
+			}]
 	 	};
 		
 		// on activate, publish update to the "Info" panel

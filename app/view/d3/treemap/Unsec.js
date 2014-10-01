@@ -7,12 +7,12 @@
 Ext.define('App.view.d3.treemap.Unsec', {
 	extend: 'Ext.Panel',
 	alias: 'widget.treemapUnsec',
-	title: 'Basic Treemap',
+	title: 'Zoomable Treemap',
 	closable: true,
 	
 	requires: [
 		'App.util.MessageBus',
-		'App.util.d3.UniversalTreeMap'
+		'App.util.d3.UniversalZoomableTreeMap'
 	],
 	
 	layout: 'fit',
@@ -24,8 +24,8 @@ Ext.define('App.view.d3.treemap.Unsec', {
  		 * @properties
  		 * @description SVG properties
  		 */
- 		me.graphData = [],
-	 		me.treemap = null,
+		me.zTree = null,
+			me.rawData,
  			me.canvasWidth,
  			me.canvasHeight,
  			me.panelId,
@@ -44,51 +44,57 @@ Ext.define('App.view.d3.treemap.Unsec', {
  			me.eventRelay = Ext.create('App.util.MessageBus'),
  			me.btnHighlightCss = 'btn-highlight-peachpuff';
 		
-		me.chartDescription = '<b>Treemap 2</b><br><br>'
-			+ 'Economic data for UN Security Council permanent members.  Magnitude-based color scale applied to subdivisions in each category.<br><br>'
-			+ '- Budget Expenditures<br>'
-			+ '- Budget Revenues<br>'
-			+ '- Exports<br>'
-			+ '- Imports<br>'
-			+ '- Gold/Foreign Exchange Reserves<br><br>'
-			+ '<i>All values in dollars.  Source: 2013 CIA World Fact Book</i>';
+		me.chartDescription = '<b>Zoomable Treemap</b><br><br>'
+			+ 'Some random economic data for UN Security Council members.<br><br>'
+			+ 'Features:<br>'
+			+ ' - Data rebinding<br>'
+			+ ' - Click to zoom in<br>'
+			+ ' - Double click to zoom out<br><br>'
+			+ '<i>All values in dollars.  Source: 2013 CIA World Fact Book</i><br><br>'
+			+ 'Ideas from <a href="http://bost.ocks.org/mike/treemap/" target="_blank">bost.ocks.org/mike/treemap/</a>';
 			
-			
-		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
-		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
+		me.width = Math.floor(
+			(Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95
+		);
+		me.height = Math.floor(
+			(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight) * .95
+		);
 		
+		me.permanentButton = Ext.create('Ext.button.Button', {
+			text: 'Permanent Members',
+			cls: me.btnHighlightCss,
+			disabled: true,
+			jsonIndex: 'permanent',
+			handler: me.memberHandler,
+			scope: me
+		});
 		
-		// checkboxes for toolbar
-		var checkboxConfig = [];
-		Ext.each(me.availableMetrics, function(met) {
-			checkboxConfig.push({
-				xtype: 'tbspacer',
-				width: 7
-			}, {
-				xtype: 'checkboxfield',
-				boxLabel: met,
-				inputValue: met,
-				checked: me.currentMetrics.indexOf(met) >= 0,
-				cls: me.currentMetrics.indexOf(met) >= 0 ? me.btnHighlightCss : null,
-				listeners: {
-					change: me.checkboxChange,
-					scope: me
-				}
-			});
-		}, me);
+		me.thirteenFourteenButton = Ext.create('Ext.button.Button', {
+			text: '2013-14 Members',
+			disabled: true,
+			jsonIndex: 'thirteenFourteen',
+			handler: me.memberHandler,
+			scope: me
+		});
 		
 		me.dockedItems = [{
 			xtype: 'toolbar',
 			dock: 'top',
-			items: checkboxConfig
+			items: [
+				{xtype: 'tbspacer', width: 5},
+				me.permanentButton,
+				{xtype: 'tbspacer', width: 10},
+				me.thirteenFourteenButton
+			]
 		}];
-
-		// on activate, publish update to the "Info" panel
+		
+		/**
+ 		 * @listeners
+ 		 */
 		me.on('activate', function() {
 			me.eventRelay.publish('infoPanelUpdate', me.chartDescription);
 		}, me);
 		
-		// after render, initialize the canvas
 		me.on('afterrender', function(panel) {
 			me.initCanvas();
 		}, me);
@@ -107,28 +113,27 @@ Ext.define('App.view.d3.treemap.Unsec', {
 		me.getEl().mask('Loading...');
 		
 		// initialize SVG, width, height
- 		me.canvasWidth = parseInt(me.body.dom.offsetWidth * .9),
-	 		me.canvasHeight = parseInt(me.body.dom.offsetHeight * .9),
+		me.canvasWidth = me.body.dom.offsetWidth,
+			me.canvasHeight = me.body.dom.offsetHeight,
  			me.panelId = '#' + me.body.id;
  			
 	 	Ext.Ajax.request({
 		 	url: 'data/unsec_data.json',
 		 	method: 'GET',
 		 	success: function(response) {
-				var resp = Ext.JSON.decode(response.responseText);
-				
-				me.graphData = me.colorizeGraphData(resp);
-	 		
-	 			me.treemap = Ext.create('App.util.d3.UniversalTreeMap', {
+			 	me.rawData = Ext.JSON.decode(response.responseText);
+			 	
+			 	me.zTree = Ext.create('App.util.d3.UniversalZoomableTreeMap', {
 	 				panelId: me.panelId,
 	 				canvasWidth: me.canvasWidth,
 	 				canvasHeight: me.canvasHeight,
-	 				graphData: me.pareData(),
-	 				chartTitle: 'Economic Data : UN Security Council Permanent Members',
+	 				graphData: me.colorizeGraphData(me.rawData.permanent),
+	 				chartTitle: 'Economic Data : UN Security Council Members',
 	 				sizeMetric: 'value',
 	 				sticky: false,
 	 				showTooltips: true,
 	 				colorDefinedInData: true,
+	 				valueMetric: 'value',
 	 				tooltipFunction: function(d, i) {
 		 				if(d.children) { return null; }
 		 				
@@ -141,9 +146,11 @@ Ext.define('App.view.d3.treemap.Unsec', {
 			 		}
 	 			});
 				
-				me.treemap.initChart().draw();
+				me.zTree.initChart().draw();
 	 		},
 	 		callback: function() {
+	 			me.permanentButton.setDisabled(false);
+		 		me.thirteenFourteenButton.setDisabled(false);
 		 		me.getEl().unmask();
 		 	},
 	 		scope: me
@@ -181,49 +188,17 @@ Ext.define('App.view.d3.treemap.Unsec', {
 		return obj;
 	},
 	
-	/**
- 	 * @function
- 	 * @memberOf App.view.d3.treemap.Unsec
- 	 * @description Pare down original data to only those selected
- 	 */
-	pareData: function() {
-		var me = this,
-			dat = {name: 'root', children: []};
-		
-		Ext.each(me.graphData.children, function(gd) {
-			if(me.currentMetrics.indexOf(gd.name) >= 0) {
-				dat.children.push(gd);
-			}
-		}, me);
-		
-		return dat;
-	},
-	
-	checkboxChange: function(cbx) {
+	memberHandler: function(btn) {
 		var me = this;
 		
-		if(cbx.checked) {
-			cbx.addCls(me.btnHighlightCss);
+		if(btn.jsonIndex == 'thirteenFourteen') {
+			btn.addCls(me.btnHighlightCss);
+			me.permanentButton.removeCls(me.btnHighlightCss);
 		} else {
-			cbx.removeCls(me.btnHighlightCss);
+			btn.addCls(me.btnHighlightCss);
+			me.thirteenFourteenButton.removeCls(me.btnHighlightCss);
 		}
 		
-		////////////////////////////////////////
-	 	// figure out the checkboxes to filter on
-	 	////////////////////////////////////////
-	 	var checkboxes = me.query('toolbar[dock=top] checkboxfield');
-	 	if(checkboxes.length == 0) { return; }	// no checkboxes ??
-	 	
-		me.currentMetrics = [];
-		Ext.each(checkboxes, function(cbx) {
-			if(cbx.checked) {
-				me.currentMetrics.push(cbx.inputValue);
-			}
-		}, me);
-		
-		var pared = me.pareData();
-
-		me.treemap.setGraphData(pared);
-		me.treemap.draw();
+		me.zTree.setGraphData(me.colorizeGraphData(me.rawData[btn.jsonIndex])).draw();
 	}
 });

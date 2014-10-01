@@ -117,16 +117,16 @@ Ext.define('App.store.tree.MenuStore', {
 					iconCls: 'icon-arrow-right',
 					id: 'treemapFootball'
 				}, {
-					text: 'Treemap, Advanced',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'treemapUnsec'
-				}, {
-					text: 'Heat Treemap',
+					text: 'Treemap, Heat',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'treemapNetflow'
-				}, {
+				}, /*{
+					text: 'Treemap, Zoomable',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'treemapUnsec'
+				}, */{
 					text: 'Slopegraph',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
