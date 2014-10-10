@@ -164,6 +164,11 @@
 	background-repeat: no-repeat;
 }
 
+.icon-tree {
+	background-image: url(../img/icons/16x16/tree.png) !important;
+	background-repeat: no-repeat;
+}
+
 .icon-tick {
 	background-image: url(../img/icons/16x16/tick.png) !important;
 	background-repeat: no-repeat;
@@ -178,10 +183,10 @@
  * SVG
  */
  
-/****/ easily recognize the bounding box 
+/** easily recognize the bounding box 
 svg {
-	border: solid 1px black;
-}
+	border: solid 2px black;
+}**/
 
 .arc path {
 	stroke: #FFFFFF;
@@ -287,6 +292,14 @@ svg {
 	fill: #333333;
 }
 
+.treemapCategory {
+	font: bold 11px/1.1 "Verdana", sans-serif;
+	fill: #FFF;
+	stroke: black;
+	stroke-width: .2;
+	opacity: 1,
+	pointer-events: none;
+}
 /**
  * ExtJS overrides and additions
  */

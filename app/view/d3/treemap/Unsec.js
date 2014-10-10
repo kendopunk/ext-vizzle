@@ -48,17 +48,13 @@ Ext.define('App.view.d3.treemap.Unsec', {
 			+ 'Some random economic data for UN Security Council members.<br><br>'
 			+ 'Features:<br>'
 			+ ' - Data rebinding<br>'
-			+ ' - Click to zoom in<br>'
-			+ ' - Double click to zoom out<br><br>'
+			+ ' - <b>Click</b> to zoom in<br>'
+			+ ' - <b>Double click</b> to zoom out<br><br>'
 			+ '<i>All values in dollars.  Source: 2013 CIA World Fact Book</i><br><br>'
 			+ 'Ideas from <a href="http://bost.ocks.org/mike/treemap/" target="_blank">bost.ocks.org/mike/treemap/</a>';
 			
-		me.width = Math.floor(
-			(Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95
-		);
-		me.height = Math.floor(
-			(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight) * .95
-		);
+		me.width = Math.floor(Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth);
+		me.height = Math.floor(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
 		
 		me.permanentButton = Ext.create('Ext.button.Button', {
 			text: 'Permanent Members',
@@ -84,7 +80,26 @@ Ext.define('App.view.d3.treemap.Unsec', {
 				{xtype: 'tbspacer', width: 5},
 				me.permanentButton,
 				{xtype: 'tbspacer', width: 10},
-				me.thirteenFourteenButton
+				me.thirteenFourteenButton,
+				'->',
+				{
+					xtype: 'button',
+					iconCls: 'icon-tools',
+					text: 'Customize',
+					menu: [{
+						xtype: 'menucheckitem',
+						text: 'Labels',
+						checked: true,
+						listeners: {
+							checkchange: function(cbx, checked) {
+								me.zTree.setShowLabels(checked);
+								me.zTree.handleRectLabels();
+							},
+							scope: me
+						}
+					}]
+				},
+				{xtype: 'tbspacer', width: 20}
 			]
 		}];
 		
@@ -113,8 +128,8 @@ Ext.define('App.view.d3.treemap.Unsec', {
 		me.getEl().mask('Loading...');
 		
 		// initialize SVG, width, height
-		me.canvasWidth = me.body.dom.offsetWidth,
-			me.canvasHeight = me.body.dom.offsetHeight,
+		me.canvasWidth = Math.floor(me.body.dom.offsetWidth * .98),
+			me.canvasHeight = Math.floor(me.body.dom.offsetHeight * .94),
  			me.panelId = '#' + me.body.id;
  			
 	 	Ext.Ajax.request({
@@ -128,7 +143,7 @@ Ext.define('App.view.d3.treemap.Unsec', {
 	 				canvasWidth: me.canvasWidth,
 	 				canvasHeight: me.canvasHeight,
 	 				graphData: me.colorizeGraphData(me.rawData.permanent),
-	 				chartTitle: 'Economic Data : UN Security Council Members',
+	 				chartTitle: 'Economic Data: UN Security Council Permanent Members',
 	 				sizeMetric: 'value',
 	 				sticky: false,
 	 				showTooltips: true,
@@ -188,15 +203,26 @@ Ext.define('App.view.d3.treemap.Unsec', {
 		return obj;
 	},
 	
+	/**
+ 	 * @function
+ 	 * @description Handle toggling / rebinding of data
+ 	 */
 	memberHandler: function(btn) {
 		var me = this;
+		
+		if(me.zTree.isZoomed()) {
+			Ext.Msg.alert('Error', 'Double click to zoom out before rebinding data.');
+			return;
+		}	
 		
 		if(btn.jsonIndex == 'thirteenFourteen') {
 			btn.addCls(me.btnHighlightCss);
 			me.permanentButton.removeCls(me.btnHighlightCss);
+			me.zTree.setChartTitle('Economic Data: UN Security Council 2013-14 Members');
 		} else {
 			btn.addCls(me.btnHighlightCss);
 			me.thirteenFourteenButton.removeCls(me.btnHighlightCss);
+			me.zTree.setChartTitle('Economic Data: UN Security Council Permanent Members');
 		}
 		
 		me.zTree.setGraphData(me.colorizeGraphData(me.rawData[btn.jsonIndex])).draw();

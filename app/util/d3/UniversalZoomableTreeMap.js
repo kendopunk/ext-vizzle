@@ -11,6 +11,7 @@ Ext.define('App.util.d3.UniversalZoomableTreeMap', {
 	canvasHeight: 400,
 	canvasWidth: 400,
 	chartInitialized: false,
+	chartTitle: null,
 	cellSelection: null,
 	colorScale: null,
 	defaults: {
@@ -19,6 +20,11 @@ Ext.define('App.util.d3.UniversalZoomableTreeMap', {
 			out: .8
 		}
 	},
+	defs: null,
+	dyTextThreshold: 15,
+	filter: null,
+	gPrimary: null,
+	gTitle: null,
 	labelClass: 'labelText',
 	margins: {
 		top: 30,
@@ -42,6 +48,7 @@ Ext.define('App.util.d3.UniversalZoomableTreeMap', {
 	xScaleFactor: 1,
 	yScale: d3.scale.linear().range([0, 400]),
 	yScaleFactor: 1,
+	zoomed: false,	// flag
 	
 	// constructor
 	constructor: function(config) {
@@ -76,29 +83,35 @@ Ext.define('App.util.d3.UniversalZoomableTreeMap', {
 		
 		me.treemap = d3.layout.treemap()
 			.round(false)
-			.size([me.canvasWidth, me.canvasHeight])
+			.size([
+				me.canvasWidth - me.margins.left,
+				me.canvasHeight - me.margins.top
+			])
 			.sticky(false)
 			.value(function(d) {
 				return d[valueMetric];
 			});
 			
 		me.svg = d3.select(me.panelId)
-			/*.append('div')
-			.style('width', me.canvasWidth + 'px')
-			.style('height', me.canvasHeight + 'px')*/
-				.append('svg:svg')
-				.attr('width', me.canvasWidth)
-				.attr('height', me.canvasHeight)
-					.append('svg:g')
-					.attr('transform', 'translate(' + me.margins.left + ',' + me.margins.top + ')');
-		/*
-		// selection in window zooms out (interference by button clicks in toolbars)
-		d3.select(window).on('click', function() {
-			me.zoom(null);
-		}, me);
-		*/
+			.append('svg:svg')
+			.attr('width', me.canvasWidth)
+			.attr('height', me.canvasHeight);
+			
+		me.gPrimary = me.svg.append('svg:g')
+			.attr('transform', 'translate(' + me.margins.left + ',' + me.margins.top + ')');
 		
+		me.gTitle = me.svg.append('svg:g')
+			.attr('transform', 'translate('
+				+ parseInt(me.canvasWidth/2)
+				+ ','
+				+ parseInt(me.margins.top/2)
+				+ ')'
+			);
+			
+		me.initDefs();
+			
 		me.chartInitialized = true;
+		
 		return me;
 	},
 	
@@ -124,21 +137,7 @@ Ext.define('App.util.d3.UniversalZoomableTreeMap', {
 		me.handleRects();
 		me.handleRectLabels();
 		me.handleSectionLabels();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		me.handleChartTitle();
 	},
 	
 	/**
@@ -151,7 +150,7 @@ Ext.define('App.util.d3.UniversalZoomableTreeMap', {
 		////////////////////////////////////////
 		// <g> element - JRAT
 		////////////////////////////////////////
-		me.cellSelection = me.svg.selectAll('g.cell')
+		me.cellSelection = me.gPrimary.selectAll('g.cell')
 			.data(me.nodes);
 			
 		me.cellSelection.exit().remove();
@@ -181,6 +180,7 @@ Ext.define('App.util.d3.UniversalZoomableTreeMap', {
 		rectSelection.enter()
 			.append('rect')
 			.style('opacity', me.defaults.opacity.out)
+			//.attr('filter', 'url(#def_' + me.panelId + ')')
 			.on('mouseover', function(d) {
 				d3.select(this)
 					.style('opacity', me.defaults.opacity.over)
@@ -239,7 +239,9 @@ Ext.define('App.util.d3.UniversalZoomableTreeMap', {
 				.append('text')
 				.attr('dy', '.35em')
 				.attr('class', me.labelClass)
-				.attr('text-anchor', 'middle');
+				.attr('text-anchor', 'middle')
+				.attr('ctl', 0)
+				.style('opacity', 0);
 				
 			textSelection.transition()
 				.duration(me.transitionDuration)
@@ -250,13 +252,20 @@ Ext.define('App.util.d3.UniversalZoomableTreeMap', {
 					return d.dy/2;
 				})
 				.text(me.textFunction)
-				.style('opacity', function(d) {		
-					// hide text in small rects
-					d.w = this.getComputedTextLength();
-					if(d.dx > d.w) {
-						return d.dy < 10 ? 0 : 1;
-					}
-					return 0;
+				.transition()
+				.each('end', function() {
+					// get computed text length
+					var ctl = d3.select(this).node().getComputedTextLength();
+					
+					// hide in small rects
+					d3.select(this)
+						.transition()
+						.style('opacity', function(d) {
+							if(d.dx > ctl) {
+								return d.dy > me.dyTextThreshold ? 1 : 0;
+							}
+							return 0;
+						});
 				});
 		}
 	},
@@ -276,7 +285,7 @@ Ext.define('App.util.d3.UniversalZoomableTreeMap', {
 		////////////////////////////////////////
 		// section title - JRAT
 		////////////////////////////////////////
-		var catSelection = me.svg.selectAll('text.' + me.sectionLabelClass)
+		var catSelection = me.gPrimary.selectAll('text.' + me.sectionLabelClass)
 			.data(uniqueParents);
 			
 		catSelection.exit().remove();
@@ -293,13 +302,11 @@ Ext.define('App.util.d3.UniversalZoomableTreeMap', {
 				return d.name;
 			})
 			.attr('x', function(d) {
-				return d.dx/2;
+				return d.x + (d.dx/2);
 			})
 			.attr('y', function(d) {
-				return d.dy/2;
-			})
-			.attr('transform', function(d) {
-				return 'translate(' + d.x + ',' + d.y + ')';
+				// yPos + (yExtent - 20)
+				return d.y + (d.dy - 20);
 			});
 	},
 	
@@ -314,8 +321,10 @@ Ext.define('App.util.d3.UniversalZoomableTreeMap', {
 		 	
 	 	if(dataObject == null) {
 		 	d = me.graphData;
+		 	me.zoomed = false;
 		} else {
 			d = dataObject.parent;
+			me.zoomed = true;
 		}
 		
 		////////////////////////////////////////
@@ -336,13 +345,14 @@ Ext.define('App.util.d3.UniversalZoomableTreeMap', {
 		var kx = me.canvasWidth / d.dx,
 			ky = me.canvasHeight / d.dy;
 		
-		var t = me.svg.selectAll('g.cell')
+		var t = me.gPrimary.selectAll('g.cell')
 			.transition()
 			.duration(me.transitionDuration)
 			.attr('transform', function(d) {
 				return 'translate(' + xScale(d.x) + ',' + yScale(d.y) + ')';
 			});
-			
+		
+		// rect zoom
 		t.select('rect')
 			.attr('width', function(d) {
 				return kx * d.dx - 1; 
@@ -350,7 +360,9 @@ Ext.define('App.util.d3.UniversalZoomableTreeMap', {
 			.attr('height', function(d) {
 				return ky * d.dy - 1;
 			});
-		
+			
+		// text zoom
+		// old opacity function = //return kx * d.dx > d.w ? 1 : 0;
 		t.select('text')
 			.attr('x', function(d) {
 				return kx * d.dx / 2;
@@ -358,14 +370,107 @@ Ext.define('App.util.d3.UniversalZoomableTreeMap', {
 			.attr('y', function(d) {
 				return ky * d.dy / 2;
 			})
-			.style('opacity', function(d) {
-				if(kx * d.dx > d.w) {
-					return ky * d.dy < 10 ? 0 : 1;
-				} else {
-					return 0;
-				}
-				//return kx * d.dx > d.w ? 1 : 0;
+			.each('end', function() {
+				// get computed text length
+				var ctl = d3.select(this).node().getComputedTextLength();
+				
+				// hide in small rects
+				d3.select(this)
+					.style('opacity', function(d) {
+						if((kx * d.dx) > ctl) {
+							return d.dy > me.dyTextThreshold ? 1 : 0;
+						}
+						return 0;
+					});
 			});
+			
+		// category label zoom or reset
+		if(dataObject !== null) {
+			var c = me.gPrimary.selectAll('text.' + me.sectionLabelClass)
+				.transition()
+				.duration(me.transitionDuration)
+				.attr('x', function(d) {
+					return d.parent.x + (d.parent.dx/2);
+				})
+				.attr('y', function(d) {
+					// yPos + (yExtent - 20)
+					return d.parent.y + (d.parent.dy - 20);
+				})
+				.style('opacity', function(d) {
+					return d.name == dataObject.parent.name ? 1 : 0;
+				});
+		} else {
+			var c = me.gPrimary.selectAll('text.' + me.sectionLabelClass)
+				.transition()
+				.duration(me.transitionDuration)
+				.attr('x', function(d) {
+					return d.x + (d.dx/2);
+				})
+				.attr('y', function(d) {
+					// yPos + (yExtent - 20)
+					return d.y + (d.dy - 20);
+				})
+				.style('opacity', 1);
+		}
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Draw/transition the chart title
+ 	 */
+	handleChartTitle: function() {
+		var me = this;
+		
+		me.gTitle.selectAll('text').remove();
+		
+		if(me.chartTitle != null) {
+			me.gTitle.selectAll('text')
+				.data([me.chartTitle])
+				.enter()
+				.append('text')
+				.style('fill', '#333333')
+				.style('font-weight', 'bold')
+				.style('font-family', 'sans-serif')
+				.style('text-anchor', 'middle')
+				.text(String);
+		}
+	},
+	
+	initDefs: function() {
+		var me = this;
+		
+		me.defs = me.svg.append('defs');
+		
+		me.filter = me.defs.append('filter')
+			.attr('id', 'def_' + me.panelId)
+			.attr('x', '-30%')
+			.attr('y', '-30%')
+			.attr('height', '200%')
+			.attr('width', '200%');
+		
+		// append Gaussian blur to filter
+		me.filter.append('feGaussianBlur')
+			.attr('in', 'SourceAlpha')
+			.attr('stdDeviation', 2) // !!! important parameter - blur
+			.attr('result', 'blur');
+			
+		// append offset filter to result of Gaussian blur filter
+		me.filter.append('feOffset')
+			.attr('in', 'blur')
+			.attr('dx', 1) // !!! important parameter - x-offset
+			.attr('dy', 1) // !!! important parameter - y-offset
+			.attr('result', 'offsetBlur');
+			
+		// merge result with original image
+		var feMerge = me.filter.append('feMerge');
+		
+		// first layer result of blur and offset
+		feMerge.append('feMergeNode')
+			.attr('in", "offsetBlur');
+			
+		// original image on top
+		feMerge.append('feMergeNode')
+			.attr('in', 'SourceGraphic');
 	},
 	
 	/**
@@ -373,6 +478,15 @@ Ext.define('App.util.d3.UniversalZoomableTreeMap', {
 	 * SETTERS
 	 *
 	 */
+	isZoomed: function() {
+		return this.zoomed;
+	},
+	
+	setChartTitle: function(t) {
+		var me = this;
+		me.chartTitle = t;
+	},
+		
 	setGraphData: function(dat) {
 		var me = this;
 		me.graphData = dat;
@@ -382,7 +496,6 @@ Ext.define('App.util.d3.UniversalZoomableTreeMap', {
 	
 	setShowLabels: function(bool) {
 		var me = this;
-		
 		me.showLabels = bool;
 	}
 });

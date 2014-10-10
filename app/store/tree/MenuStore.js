@@ -98,6 +98,26 @@ Ext.define('App.store.tree.MenuStore', {
 					id: 'geoPopulation'
 				}]
 			}, {
+				text: 'Treemaps',
+				expanded: true,
+				iconCls: 'icon-tree',
+				children: [{
+					text: 'Basic',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'treemapFootball'
+				}, {
+					text: 'Zoomable',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'treemapUnsec'
+				}, {
+					text: 'Heat',
+					leaf: true,
+					iconCls: 'icon-arrow-right',
+					id: 'treemapNetflow'
+				}]
+			}, {
 				text: '<b>Misc</b>',
 				expanded: true,
 				iconCls: 'icon-scatterplot',
@@ -112,21 +132,6 @@ Ext.define('App.store.tree.MenuStore', {
 					iconCls: 'icon-arrow-right',
 					id: 'timeline'
 				}, {
-					text: 'Treemap, Basic',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'treemapFootball'
-				}, {
-					text: 'Treemap, Heat',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'treemapNetflow'
-				}, /*{
-					text: 'Treemap, Zoomable',
-					leaf: true,
-					iconCls: 'icon-arrow-right',
-					id: 'treemapUnsec'
-				}, */{
 					text: 'Slopegraph',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
