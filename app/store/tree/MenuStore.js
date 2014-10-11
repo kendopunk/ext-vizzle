@@ -102,17 +102,17 @@ Ext.define('App.store.tree.MenuStore', {
 				expanded: true,
 				iconCls: 'icon-tree',
 				children: [{
-					text: 'Basic',
+					text: 'Basic Tree',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'treemapFootball'
 				}, {
-					text: 'Zoomable',
+					text: 'Zoomable Tree',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'treemapUnsec'
 				}, {
-					text: 'Heat',
+					text: 'Heat Tree',
 					leaf: true,
 					iconCls: 'icon-arrow-right',
 					id: 'treemapNetflow'
