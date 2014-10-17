@@ -155,8 +155,6 @@ Ext.define('App.view.d3.bar.MouseEvents', {
 	drillUpDown: function(msg) {
 		var me = this;
 		
-		console.dir(msg);
-		
 		if(me.drilldownLevel == 1) {
 			
 			var ddData = [];

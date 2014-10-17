@@ -528,8 +528,6 @@ Ext.define('App.view.daa.Individual', {
 	 		d.avgSaves = d.saves/me.numGames
 	 	});
 	 	
-	 	console.debug(dat);
-	 	
 	 	return dat;
  	},
  	

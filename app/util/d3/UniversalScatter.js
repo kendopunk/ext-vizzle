@@ -352,8 +352,6 @@ Ext.define('App.util.d3.UniversalScatter', {
 		var verticalSelection = me.gGrid.selectAll('.vertGrid')
 			.data(me.xScale.ticks());
 			
-		console.debug(me.xScale.ticks());
-			
 		verticalSelection.exit().remove();
 		
 		verticalSelection.enter()

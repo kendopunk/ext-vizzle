@@ -174,7 +174,6 @@ Ext.define('App.util.d3.UniversalRadialTree', {
 				
 				// use either "d.name" or "d.parent.name"
 				if(d.children) {
-					//console.log(d.name + ' has children');
 					baseColor = colorScale(d.name);
 				} else {
 					if(d.parent.depth == 0) {

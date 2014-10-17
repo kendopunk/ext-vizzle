@@ -218,7 +218,6 @@ Ext.define('App.view.d3.bar.BuildABar', {
 					panel.dropTarget = Ext.create('Ext.dd.DropTarget', panel.body.dom, {
 		 				ddGroup: 'vizPanelDDGroup',
 		 				notifyEnter: function(ddSource, e, data) {
-			 				//console.log('entered panel...');
 			 			},
 			 			notifyDrop: function(ddSource, e, data) {
 			 				if(!me.svgInitialized) {
