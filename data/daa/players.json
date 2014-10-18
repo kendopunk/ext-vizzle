@@ -4,7 +4,7 @@
 		"id": 1,
 		"name": "Chris",
 		"color": "#3182bd",
-		"gamesPlayed": 8,
+		"gamesPlayed": 9,
 		"conditioning": {
 			"cones": [7.1],
 			"ladders": [15.25],
@@ -20,7 +20,7 @@
 		"id": 2,
 		"name": "Colton",
 		"color": "#6baed6",
-		"gamesPlayed": 8,
+		"gamesPlayed": 9,
 		"conditioning": {
 			"cones": [8.47],
 			"ladders": [14.09],
@@ -36,7 +36,7 @@
 		"id": 3,
 		"name": "Davis",
 		"color": "#9ecae1",
-		"gamesPlayed": 7,
+		"gamesPlayed": 8,
 		"conditioning": {
 			"cones": [6.82, 8.32],
 			"ladders": [14.75, 13.78],
@@ -52,7 +52,7 @@
 		"id": 4,
 		"name": "Finn",
 		"color": "#c6dbef",
-		"gamesPlayed": 8,
+		"gamesPlayed": 9,
 		"conditioning": {
 			"cones": [8.5],
 			"ladders": [14.66],
@@ -68,7 +68,7 @@
 		"id": 5,
 		"name": "Jack",
 		"color": "#e6550d",
-		"gamesPlayed": 8,
+		"gamesPlayed": 9,
 		"conditioning": {
 			"cones": [7.09, 8.12],
 			"ladders": [13.56, 13.69],
@@ -84,7 +84,7 @@
 		"id": 6,
 		"name": "Joe",
 		"color": "#fd8d3c",
-		"gamesPlayed": 8,
+		"gamesPlayed": 9,
 		"conditioning": {
 			"cones": [7.53],
 			"ladders": [13.85],
@@ -100,7 +100,7 @@
 		"id": 7,
 		"name": "Karl",
 		"color": "#fdae6b",
-		"gamesPlayed": 8,
+		"gamesPlayed": 9,
 		"conditioning": {
 			"cones": [6.78, 8.10],
 			"ladders": [13.68, 13],
@@ -116,7 +116,7 @@
 		"id": 8,
 		"name": "Ned",
 		"color": "#fdd0a2",
-		"gamesPlayed": 8,
+		"gamesPlayed": 9,
 		"conditioning": {
 			"cones": [6.94, 8.75],
 			"ladders": [15.22, 17.03],
@@ -148,7 +148,7 @@
 		"id": 10,
 		"name": "Riley",
 		"color": "#74c476",
-		"gamesPlayed": 8,
+		"gamesPlayed": 9,
 		"conditioning": {
 			"cones": [6.66],
 			"ladders": [12.75],
@@ -164,7 +164,7 @@
 		"id": 11,
 		"name": "Skyler",
 		"color": "#a1d99b",
-		"gamesPlayed": 8,
+		"gamesPlayed": 9,
 		"conditioning": {
 			"cones": [7.59],
 			"ladders": [14.44],
@@ -180,7 +180,7 @@
 		"id": 12,
 		"name": "Tyler",
 		"color": "#c7e9c0",
-		"gamesPlayed": 8,
+		"gamesPlayed": 9,
 		"conditioning": {
 			"cones": [7.10],
 			"ladders": [15.59],
@@ -196,7 +196,7 @@
 		"id": 13,
 		"name": "Vince",
 		"color": "#756bb1",
-		"gamesPlayed": 8,
+		"gamesPlayed": 9,
 		"conditioning": {
 			"cones": [7.25, 8.41],
 			"ladders": [13.75, 13.84],
