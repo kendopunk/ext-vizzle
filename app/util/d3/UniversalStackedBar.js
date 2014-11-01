@@ -376,7 +376,8 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 			.remove();
 				
 		textSelection.enter()
-			.append('text');
+			.append('text')
+			.style('opacity', 0);
 			
 		// transition all
 		textSelection.transition()
@@ -411,7 +412,27 @@ Ext.define('App.util.d3.UniversalStackedBar', {
 			})
 			.attr('class', 'labelText')
 			.style('text-anchor', 'middle')
-			.text(me.labelFunction);
+			.text(me.labelFunction)
+			.each('end', function(d, i) {
+				if(chort == 'horizontal') {
+					var calculatedRectWidth = xScale(d.y0 + d.y) - xScale(d.y0);
+					var computedTextLength = d3.select(this).node().getComputedTextLength();
+					
+					d3.select(this)
+						.transition()
+						.style('opacity', function(dd) {
+						 	return computedTextLength >= calculatedRectWidth ? 0 : 1;
+						});
+				} else {
+					var calculatedRectHeight = yScale(d.y0) - yScale(d.y0 + d.y);
+					
+					d3.select(this)
+						.transition()
+						.style('opacity', function(dd) {
+							return calculatedRectHeight < 20 ? 0 : 1;
+						});
+				}
+			});
 	},
 	
 	/**
