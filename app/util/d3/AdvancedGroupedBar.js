@@ -25,7 +25,11 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	gXAxis: null,
 	gYAxis: null,
 	labelClass: 'labelText',
+	legendClass: 'legendText',
+	legendBoldClass: 'legendTextBold',
 	legendFlex: 1,
+	legendSquareWidth: 10,
+	legendSquareHeight: 10,
 	margins: {
 		top: 30,
 		right: 10,
@@ -42,17 +46,21 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	},
 	primaryGrouper: null,
 	primaryTickPadding: 10,
-	rangePadding: .08,
-	rangeOuterPadding: .08,
+	rangePadding: 0.2,
+	rangeOuterPadding: .1,
 	secondaryGrouper: null,
 	showLegend: true,
 	spaceBetweenChartAndLegend: 20,
+	tooltipFunction: function(d, i) {
+		return 'tooltip';
+	},
 	
 	xAxis: null,
 	xScale: null,
 	
 	yDataMetric: 'value',
 	yScale: null,
+	yTickFormat: function(d) { return d; },
 	
 	constructor: function(config) {
 		var me = this;
@@ -85,12 +93,13 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	 		
 	 	// X axis "g"
 		me.gXAxis = me.svg.append('svg:g')
+			.attr('id', 'pugga')
 			.attr('class', 'axisMajor')
 			.attr('transform', function() {
 				var yt = me.canvasHeight - me.margins.bottom;
 				return 'translate(' + me.margins.leftAxis + ',' + yt + ')';
 			});
-		
+			
 		// Y axis "g"
 		me.gYAxis = me.svg.append('svg:g')
 			.attr('class', 'axis')
@@ -122,7 +131,13 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 		// handlers
 		//////////////////////////////
 		me.handleBars();
+		me.handleLegend();
+		
+		//////////////////////////////
+		// axes / groupers
+		//////////////////////////////
 		me.callAxes();
+		me.triggerPrimaryGroupers();
 	},
 	
 	/**
@@ -133,19 +148,30 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	handleBars: function() {
 		var me = this;
 		
-		var p = me.getUniquePrimaries();
-		var s = me.getUniqueSecondaries();
-		var uConfig = Ext.Array.map(p, function(item) {
+		var p = me.getUniqueProperty(me.primaryGrouper);
+		var s = me.getUniqueProperty(me.secondaryGrouper);
+		var t = me.getUniqueProperty(me.tertiaryGrouper);
+		var sxt = s.length * t.length;	// length of secondaries * length of tertiaries
+		
+		// primary configuration
+		var uConfig = Ext.Array.map(p, function(item, index) {
+		
+			var domainToUse = Ext.Array.map(
+				Ext.Array.slice(me.graphData, index*sxt, (index*sxt)+sxt),
+				function(item) { return item.id; }
+			);
+			
 			return {
 				primary: item,
 				xs: d3.scale.ordinal()
-					.domain(s)
+					.domain(domainToUse)
 					.rangeRoundBands([
 						me.xScale(item),
 						me.xScale(item) + me.xScale.rangeBand()
 					], me.rangePadding, me.rangeOuterPadding)
 			};
 		});
+		
 		
 		////////////////////////////////////////
 		// BARS - JRAT
@@ -176,7 +202,7 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 					return d[me.primaryGrouper] == conf.primary;
 				})[0].xs;
 				
-				return scaleToUse(d[me.secondaryGrouper]);
+				return scaleToUse(d.id);
 			})
 			.attr('rx', 3)
 			.attr('ry', 3)
@@ -198,7 +224,145 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 					return d[me.colorDefinedInDataIndex];
 				}
 				return me.colorScale(i);
-			});	
+			});
+		
+		// apply tooltips
+		rectSelection.call(d3.helper.tooltip().text(me.tooltipFunction));
+	},
+	
+	/**
+ 	 * @function
+ 	 * @memberOf App.util.d3.AdvancedGroupedBar
+ 	 * @description Draw/redraw the legend
+ 	 */
+	handleLegend: function() {
+		var me = this;
+		
+		if(!me.showLegend) {
+			me.gLegend.selectAll('rect')
+				.transition()
+				.duration(500)
+				.attr('y', -500)
+				.remove();
+				
+			me.gLegend.selectAll('text')
+				.transition()
+				.duration(500)
+				.attr('x', me.canvasWidth + 200)
+				.remove();
+				
+			return;
+		}
+		
+		//////////////////////////////
+		// get unique data for legend
+		//////////////////////////////
+		var legendData = [], foundKeys = [];
+		Ext.each(me.graphData, function(item) {
+			if(foundKeys.indexOf(item[me.tertiaryGrouper]) < 0) {
+				foundKeys.push(item[me.tertiaryGrouper]);
+				legendData.push({
+					name: item[me.tertiaryGrouper],
+					color: item.color
+				});
+			}
+		}, me);
+		
+		////////////////////////////////////////
+		// LEGEND SQUARES - JRAT
+		////////////////////////////////////////
+		var legendSquareSelection = me.gLegend.selectAll('rect')
+			.data(legendData.sort(function(a, b) {
+				return a.name > b.name ? 1 : -1;
+			}));
+				
+		legendSquareSelection.exit().remove();
+			
+		legendSquareSelection.enter().append('rect')
+			.style('opacity', me.opacities.rect.default)
+			.style('stroke', 'black')
+			.style('stroke-width', .75)
+			.on('mouseover', function(d, i) {
+				me.handleMouseEvent(this, 'legendRect', 'mouseover', d, i);
+			})
+			.on('mouseout', function(d, i) {
+				me.handleMouseEvent(this, 'legendRect', 'mouseout', d, i);
+			});
+		
+		legendSquareSelection.transition()
+			.attr('x', 0)
+			.attr('y', function(d, i) {
+				return i * me.legendSquareHeight * 1.75;
+			})
+			.attr('width', me.legendSquareWidth)
+			.attr('height', me.legendSquareHeight)
+			.style('fill', function(d, i) {
+				return d[me.colorDefinedInDataIndex];
+			});
+		
+		////////////////////////////////////////
+		// LEGEND TEXT - JRAT
+		////////////////////////////////////////
+		var legendTextSelection = me.gLegend.selectAll('text')
+			.data(legendData.sort(function(a, b) {
+				return a.name > b.name ? 1 : -1;
+			}));
+				
+		legendTextSelection.exit().remove();
+			
+		legendTextSelection.enter().append('text')
+			.style('cursor', 'default')
+			.attr('class', me.legendClass)
+			.on('mouseover', function(d, i) {
+				me.handleMouseEvent(this, 'legendText', 'mouseover', d, i);
+			})
+			.on('mouseout', function(d, i) {
+				me.handleMouseEvent(this, 'legendText', 'mouseout', d, i);
+			});
+		
+		legendTextSelection.transition()
+			.attr('x', me.legendSquareWidth * 2)
+			.attr('y', function(d, i) {
+				return i * me.legendSquareHeight * 1.75;
+			})
+			.attr('transform', 'translate(0, ' + me.legendSquareHeight + ')')
+			.text(function(d) { return d.name; });
+	},
+	
+	triggerPrimaryGroupers: function(clearFirst) {
+		var me = this;
+		
+		var r = me.xScale.range(), 
+			rb = me.xScale.rangeBand();
+				
+		////////////////////////////////
+		// GROUPER - JRAT
+		////////////////////////////////
+		var textSelection = me.gGrouper.selectAll('text')
+			.data(me.getUniqueProperty(me.primaryGrouper));
+			
+		textSelection.exit()
+			.transition()
+			.duration(750)
+			.style('opacity', -1e6)
+			.remove();
+			
+		textSelection.enter()
+			.append('text')
+			.attr('class', me.labelClass)
+			.style('text-anchor', 'middle')
+			.style('opacity', 0);
+			
+		textSelection.transition()
+			.duration(750)
+			.style('opacity', 1)
+			.attr('x', function(d, i) {
+				return r[i] + (rb/2);
+			})
+			.attr('y', me.canvasHeight - me.margins.bottomText)
+			.text(String);
+
+
 	},
 	
 	/**
@@ -225,7 +389,9 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 		me.xAxis = d3.svg.axis()
 			.scale(me.xScale)
 			.tickSize(0)
-			.tickPadding(me.primaryTickPadding)
+			.tickFormat(function(d) { return ''; })
+			// .tickSize(1)
+			// .tickFormat(function(d) { return '-XX-'; })
 			.orient('bottom');
 	},
 	
@@ -237,17 +403,15 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	setYScale: function() {
 		var me = this;
 		
+		var yDataMetric = me.yDataMetric;
+		
+		var maxVal = d3.max(me.graphData, function(d) {
+			return d[yDataMetric];
+		});
+		
 		me.yScale = d3.scale.linear()
-			.domain([
-				d3.max(me.graphData, function(d) {
-					return d[me.yDataMetric];
-				}),
-				0
-			])
-			.range([
-				me.canvasHeight - me.margins.top,
-				me.margins.bottom
-			]);
+			.domain([maxVal, 0])
+			.range([me.canvasHeight - me.margins.top, me.margins.bottom]);
 	},
 	
 	/**
@@ -258,13 +422,14 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	setYAxisScale: function(metric) {
 		var me = this;
 		
+		var yDataMetric = me.yDataMetric;
+		
+		var maxVal = d3.max(me.graphData, function(d) {
+			return d[yDataMetric];
+		});
+		
 		me.yAxisScale = d3.scale.linear()
-			.domain([
-				0,
-				d3.max(me.graphData, function(d) {
-					return d[me.yDataMetric];
-				})
-			])
+			.domain([0, maxVal])
 			.range([
 				me.canvasHeight - me.margins.bottom,
 				me.canvasHeight - (me.canvasHeight - me.margins.top)
@@ -298,7 +463,14 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 				.duration(750)
 				.attr('transform', 'translate(' + me.margins.leftAxis + ', 0)');
 			
-			me.gGrouper.attr('transform', 'translate(' + me.margins.leftAxis + ',0)');
+			me.gLegend.attr('transform', function() {
+				var ltx = me.margins.left 
+			 		+ (me.getFlexUnit() * me.chartFlex) 
+				 	+ me.spaceBetweenChartAndLegend;
+			 	return 'translate(' + ltx + ',' + me.margins.top + ')';
+		 	});
+		 	
+		 	me.gGrouper.attr('transform', 'translate(' + me.margins.leftAxis + ',0)');
 			
 			me.gXAxis.attr('transform', function() {
 				var yt = me.canvasHeight - me.margins.bottom;
@@ -335,69 +507,79 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
     handleMouseEvent: function(el, elType, evt, d, i) {
         var me = this;
         
-        // local scope
-        var legendProperty = me.legendProperty;
-        
         ////////////////////////////////////////
-        // RECT
+        // PRIMARY RECTANGLES
         ////////////////////////////////////////
         if(elType == 'rect') {
-	        var rectSel = d3.select(el);
-	        me.mouseEventRect(rectSel, evt);
-	        
-	      /*  var legendRectSel = me.gLegend.selectAll('rect')
-		        .filter(function(e, j) {
-			        return d[legendProperty] == e;
-			    });
-			me.mouseEventLegendRect(legendRectSel, evt);
-			
-			var legendTextSel = me.gLegend.selectAll('text')
-				.filter(function(e, j) {
-					return d[legendProperty] == e;
-				});
-			me.mouseEventLegendText(legendTextSel, evt);*/
+        	// this rectangle
+        	me.mouseEventRect(d3.select(el), evt);
+        	
+        	// corresponding legend rect
+        	me.mouseEventLegendRect(
+	        	me.gLegend.selectAll('rect').filter(function(e, j) {
+		        	return d[me.tertiaryGrouper] == e.name;
+		        }),
+		        evt
+		    );
+
+        	// corresponding legend text
+        	me.mouseEventLegendText(
+	        	me.gLegend.selectAll('text').filter(function(e, j) {
+		        	return d[me.tertiaryGrouper] == e.name;
+		        }),
+		        evt
+		    );
         }
         
-		/*////////////////////////////////////////
-        // LEGEND RECT
+        ////////////////////////////////////////
+        // LEGEND RECTANGLES
         ////////////////////////////////////////
         if(elType == 'legendRect') {
-	        var rectSel = me.gBar.selectAll('rect')
-		        .filter(function(e, j) {
-			        return d == e[legendProperty];
-			    });
-			me.mouseEventRect(rectSel, evt);
+	        // this legend rectangle
+	        me.mouseEventLegendRect(d3.select(el), evt);
 	        
-	        var legendRectSel = d3.select(el);
-			me.mouseEventLegendRect(legendRectSel, evt);
-			
-			var legendTextSel = me.gLegend.selectAll('text')
-				.filter(function(e, j) {
-					return d == e;
-				});
-			me.mouseEventLegendText(legendTextSel, evt);
-        }
-        
-        ////////////////////////////////////////
-        // LEGEND TEXT
-        ////////////////////////////////////////
-        if(elType == 'legendText') {
-	        var rectSel = me.gBar.selectAll('rect')
-		        .filter(function(e, j) {
-			        return d == e[legendProperty];
-			    });
-			me.mouseEventRect(rectSel, evt);
+	        // corresponding primary rectangle
+	        me.mouseEventRect(
+		        me.gBar.selectAll('rect').filter(function(e, j) {
+			        return d.name == e[me.tertiaryGrouper];
+			    }),
+			    evt
+			);
 	        
-	        var legendRectSel = me.gLegend.selectAll('rect')
-		        .filter(function(e, j) {
-			        return d == e;
-			    });
-			me.mouseEventLegendRect(legendRectSel, evt);
+	        // corresponding legend text
+			me.mouseEventLegendText(
+	        	me.gLegend.selectAll('text').filter(function(e, j) {
+		        	return d.name == e.name;
+		        }),
+		        evt
+		    );
+		}
+		
+		////////////////////////////////////////
+		// LEGEND TEXT
+		////////////////////////////////////////
+		if(elType == 'legendText') {
+			// this legend text
+			me.mouseEventLegendText(d3.select(el), evt);
 			
-			var legendTextSel = d3.select(el);
-			me.mouseEventLegendText(legendTextSel, evt);
-        }
+			// corresponding primary rectangle
+	        me.mouseEventRect(
+		        me.gBar.selectAll('rect').filter(function(e, j) {
+			        return d.name == e[me.tertiaryGrouper];
+			    }),
+			    evt
+			);
+	        
+	        // corresponding legend rect
+			me.mouseEventLegendRect(
+	        	me.gLegend.selectAll('rect').filter(function(e, j) {
+		        	return d.name == e.name;
+		        }),
+		        evt
+		    );
+		}
         
+        /*
         // message bus
         if(me.handleEvents && me.eventRelay && me.mouseEvents[evt].enabled) {
             me.eventRelay.publish(me.mouseEvents[evt].eventName, {
@@ -407,6 +589,10 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
         }*/
     },
     
+    /**
+     * @function
+     * @description Handle mouse event for primary rectangles
+     */
     mouseEventRect: function(selection, evt) {
     	var me = this;
     	
@@ -418,20 +604,25 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 		}
     },
     
+    /**
+     * @function
+     * @description Handle mouse event for legend rectangles
+     */
     mouseEventLegendRect: function(selection, evt) {
 	    var me = this;
 	    
 	    if(evt == 'mouseover') {
-		    selection.style('opacity', me.opacities.rect.over)
-			    .style('stroke', '#555555')
-			    .style('stroke-width', 1);
+		    selection.style('opacity', me.opacities.rect.over);
 	    }
 	    if(evt == 'mouseout') {
-	    	selection.style('opacity', me.opacities.rect.default)
-			    .style('stroke', 'none');
+	    	selection.style('opacity', me.opacities.rect.default);
 	    }
 	},
 	
+	/**
+	 * @function
+	 * @description Handle mouse event for legend text
+	 */
 	mouseEventLegendText: function(selection, evt) {
 	    var me = this;
 	    
@@ -463,26 +654,13 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
  	/**
  	 * @function
  	 * @memberOf App.util.d3.AdvancedGroupedBar
- 	 * @description Get a sorted array of "primaryGrouper" values
+ 	 * @description Get a unique, sorted array of certain properties from the data
  	 */
- 	getUniquePrimaries: function() {
+ 	getUniqueProperty: function(propName) {
  		var me = this;
  		
  		return Ext.Array.unique(Ext.Array.sort(
- 			Ext.Array.pluck(me.graphData, me.primaryGrouper)
-		));
- 	},
- 	
- 	/**
- 	 * @function
- 	 * @memberOf App.util.d3.AdvancedGroupedBar
- 	 * @description Get a sorted array of "secondaryGrouper" values
- 	 */
- 	getUniqueSecondaries: function() {
- 		var me = this;
- 		
- 		return Ext.Array.unique(Ext.Array.sort(
- 			Ext.Array.pluck(me.graphData, me.secondaryGrouper)
+ 			Ext.Array.pluck(me.graphData, propName)
 		));
  	},
  	
@@ -533,5 +711,10 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	setShowLegend: function(bool) {
 		var me = this;
 		me.showLegend = bool;
+	},
+	
+	setTertiaryGrouper: function(g) {
+		var me = this;
+		me.tertiaryGrouper = g;
 	}
 });
