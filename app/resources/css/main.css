@@ -219,6 +219,17 @@ svg {
 	fill: #333333;
 }
 
+.axisMajor path, .axisMajor line {
+	fill: none;
+	stroke: black;
+	shape-rendering: crispEdges;
+}
+
+.axisMajor text {
+	font: 11px/1.1 sans-serif;
+	fill: #333333;
+}
+
 .treecell {
 	border: solid 1px white;
 	-moz-border-radius: 4px;
