@@ -37,6 +37,9 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 				xtype: 'button',
 				text: 'Randomize',
 				handler: function() {
+					me.groupedBarChart.setPrimaryGrouper('category');
+		me.groupedBarChart.setSecondaryGrouper('fy');
+		me.groupedBarChart.setTertiaryGrouper('budgetType');	
 					me.groupedBarChart.setGraphData(me.buildGraphData()).draw();
 				},
 				scope: me
@@ -66,7 +69,33 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 				xtype: 'button',
 				text: 'New Data',
 				handler: function() {
+					me.groupedBarChart.setPrimaryGrouper('category');
+		me.groupedBarChart.setSecondaryGrouper('fy');
+		me.groupedBarChart.setTertiaryGrouper('budgetType');	
 					me.groupedBarChart.setGraphData(me.buildAltGraphData()).draw();
+				},
+				scope: me
+			},
+			{xtype: 'tbspacer', width: 10},
+			{
+				xtype: 'button',
+				text: '<b>INVERSION</b>',
+				handler: function() {
+					me.groupedBarChart.setPrimaryGrouper('fy');
+					me.groupedBarChart.setSecondaryGrouper('category');
+					me.groupedBarChart.setTertiaryGrouper('budgetType');
+					
+					var temp = Ext.clone(me.groupedBarChart.graphData);
+					temp.sort(App.util.Global.sortUtils.dynamicMultiSort('fy', 'category', 'budgetType'));
+					var ind = 0;
+					Ext.each(temp, function(item) {
+						temp.id = ind;
+						ind++;
+					});
+					
+					me.groupedBarChart.setGraphData(temp).draw();
+					
+					
 				},
 				scope: me
 			}]
@@ -205,8 +234,10 @@ o2.rangeBand(); //returns 33
  	 * generate stub data
  	 */
 	buildAltGraphData: function() {
+		var me = this;
+		
 		var ret = [],
-			cats = ['Personnel', 'HR', 'Warehouse'],
+			cats = ['Personnel', 'HR', 'Accounting'],
 			fys = ['2011', '2009'],
 			budgetTypes = [{
 				name: 'Budgeted',

@@ -40,7 +40,7 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	marginChange: false,
 	opacities: {
 		rect: {
-			default: .7,
+			default: .4,
 			over: 1
 		}
 	},
@@ -220,10 +220,11 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 				return me.yScale(d.value) - me.margins.bottom;
 			})
 			.style('fill', function(d, i) {
-				if(me.colorDefinedInData) {
+				/*if(me.colorDefinedInData) {
 					return d[me.colorDefinedInDataIndex];
 				}
-				return me.colorScale(i);
+				return me.colorScale(i);*/
+				return '#0000FF';
 			});
 		
 		// apply tooltips
