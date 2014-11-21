@@ -20,10 +20,10 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 	initComponent: function() {
 		var me = this;
 		
-		me.chartDescription = '<b>Advanced Grouped Bar</b>';
-		me.eventRelay = Ext.create('App.util.MessageBus');
-		me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95);
-		me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
+		me.chartDescription = '<b>Advanced Grouped Bar</b>',
+			me.eventRelay = Ext.create('App.util.MessageBus'),
+			me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95),
+			me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
 		
 		me.dockedItems = [{
 			xtype: 'toolbar',
@@ -38,8 +38,8 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 				text: 'Randomize',
 				handler: function() {
 					me.groupedBarChart.setPrimaryGrouper('category');
-		me.groupedBarChart.setSecondaryGrouper('fy');
-		me.groupedBarChart.setTertiaryGrouper('budgetType');	
+					me.groupedBarChart.setSecondaryGrouper('fy');
+					me.groupedBarChart.setTertiaryGrouper('budgetType');	
 					me.groupedBarChart.setGraphData(me.buildGraphData()).draw();
 				},
 				scope: me
@@ -67,35 +67,16 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 			{xtype: 'tbspacer', width: 10},
 			{
 				xtype: 'button',
-				text: 'New Data',
+				text: 'FY View',
 				handler: function() {
-					me.groupedBarChart.setPrimaryGrouper('category');
-		me.groupedBarChart.setSecondaryGrouper('fy');
-		me.groupedBarChart.setTertiaryGrouper('budgetType');	
-					me.groupedBarChart.setGraphData(me.buildAltGraphData()).draw();
-				},
-				scope: me
-			},
-			{xtype: 'tbspacer', width: 10},
-			{
-				xtype: 'button',
-				text: '<b>INVERSION</b>',
-				handler: function() {
-					me.groupedBarChart.setPrimaryGrouper('fy');
+					me.groupedBarChart.setPrimaryGrouper('budgetType');
 					me.groupedBarChart.setSecondaryGrouper('category');
-					me.groupedBarChart.setTertiaryGrouper('budgetType');
-					
-					var temp = Ext.clone(me.groupedBarChart.graphData);
-					temp.sort(App.util.Global.sortUtils.dynamicMultiSort('fy', 'category', 'budgetType'));
-					var ind = 0;
-					Ext.each(temp, function(item) {
-						temp.id = ind;
-						ind++;
-					});
-					
-					me.groupedBarChart.setGraphData(temp).draw();
-					
-					
+					me.groupedBarChart.setTertiaryGrouper('fy');
+					me.groupedBarChart.setGraphData(
+						me.colorizeAndIndex(
+							me.groupedBarChart.getGraphData()
+						)
+					).draw();
 				},
 				scope: me
 			}]
@@ -135,7 +116,7 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,
 			colorDefinedInData: true,
-			graphData: me.buildGraphData(),
+			graphData: me.graphData,
 			margins: {
 				top: 30,
 				right: 10,
@@ -183,7 +164,7 @@ var o2 = d3.scale.ordinal().domain([1, 2, 3]).rangeRoundBands([0, 100], 0, 0);
 o2.range(); //returns [1, 34, 67]
 o2.rangeBand(); //returns 33
 		*/
-		me.groupedBarChart.initChart().draw();
+		me.groupedBarChart.setGraphData(me.buildGraphData()).initChart().draw();
 	},
 	
 	/**
@@ -193,82 +174,69 @@ o2.rangeBand(); //returns 33
 		var me = this;
 		
 		var ret = [],
-			//cats = ['Incentive', 'Travel', 'Training', 'Overtime'],
-			cats = ['Incentive', 'Overtime', 'Travel'],
-			fys = ['2011', '2012'],
-			budgetTypes = [{
-				name: 'Allocated',
-				color: '#1F77B4'
-			}, {
-				name: 'Funds Used',
-				color: '#AEC7E8'
-			}],
-			ind = 0;
-			
+			cats = ['Incentive', 'Travel', 'Overtime'],
+			fys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+			budgetTypes = ['Allocated', 'Funds Used'];
+		
 		Ext.each(cats, function(c) {
 			Ext.each(fys, function(fy) {
 				Ext.each(budgetTypes, function(bt) {
 					ret.push({
 						category: c,
 						fy: fy,
-						budgetType: bt.name,
-						color: bt.color,
+						budgetType: bt,
 						value: (Math.random() * 10000) + 1
 					});
-					ind++;
 				});
 			});
 		});
 		
-		ret.sort(App.util.Global.sortUtils.dynamicMultiSort('category', 'fy', 'budgetType'));
-		Ext.each(ret, function(item) {
-			item.id = ind;
-			ind++;
-		});
-		
-		
-		return ret;
+		return me.colorizeAndIndex(ret);
 	},
 	
 	/**
- 	 * generate stub data
+ 	 * @function
  	 */
-	buildAltGraphData: function() {
-		var me = this;
+	colorizeAndIndex: function(dat) {
+		var me = this,
+			ind = 0,
+			p = me.groupedBarChart.getPrimaryGrouper(),
+			s = me.groupedBarChart.getSecondaryGrouper(),
+			t = me.groupedBarChart.getTertiaryGrouper(),
+			cs = d3.scale.category20();
+			
+		// sort it
+		dat.sort(App.util.Global.sortUtils.dynamicMultiSort(p, s, t));
+			
 		
-		var ret = [],
-			cats = ['Personnel', 'HR', 'Accounting'],
-			fys = ['2011', '2009'],
-			budgetTypes = [{
-				name: 'Budgeted',
-				color: '#FFCC33'
-			}, {
-				name: 'Wasted',
-				color: '#990066'
-			}],
-			ind = 0;
-
-		Ext.each(cats, function(c) {
-			Ext.each(fys, function(fy) {
-				Ext.each(budgetTypes, function(bt) {
-					ret.push({
-						category: c,
-						fy: fy,
-						budgetType: bt.name,
-						color: bt.color,
-						value: (Math.random() * 10000) + 1
-					});
-					ind++;
-				});
-			});
+		
+		var colorMapper = Ext.Array.map(Ext.Array.unique(Ext.Array.sort(
+			Ext.Array.pluck(dat, t)
+		)), function(item, index) {
+			return {
+				name: item,
+				color: cs(index)
+			};
 		});
 		
-		ret.sort(App.util.Global.sortUtils.dynamicMultiSort('category', 'fy', 'budgetType'));
-		Ext.each(ret, function(item) {
+		/*var temp = Ext.Array.filter(propertiesToMatch, function(entry) {
+			return entry.name == 'Funds Used';
+		})[0].color;
+		
+		console.log(temp);*/
+		
+		// add IDs and color
+		Ext.each(dat, function(item) {
 			item.id = ind;
+			
+			item.color = Ext.Array.filter(colorMapper, function(entry) {
+				return entry.name == item[t];
+			})[0].color;
+			
 			ind++;
 		});
 		
-		return ret;
+		
+		return dat;
 	}
 });

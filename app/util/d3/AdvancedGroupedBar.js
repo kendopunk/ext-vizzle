@@ -40,14 +40,14 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	marginChange: false,
 	opacities: {
 		rect: {
-			default: .4,
+			default: .7,
 			over: 1
 		}
 	},
 	primaryGrouper: null,
 	primaryTickPadding: 10,
-	rangePadding: 0.2,
-	rangeOuterPadding: .1,
+	rangePadding: .05,
+	rangeOuterPadding: .05,
 	secondaryGrouper: null,
 	showLegend: true,
 	spaceBetweenChartAndLegend: 20,
@@ -220,11 +220,10 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 				return me.yScale(d.value) - me.margins.bottom;
 			})
 			.style('fill', function(d, i) {
-				/*if(me.colorDefinedInData) {
+				if(me.colorDefinedInData) {
 					return d[me.colorDefinedInDataIndex];
 				}
-				return me.colorScale(i);*/
-				return '#0000FF';
+				return me.colorScale(i);
 			});
 		
 		// apply tooltips
@@ -664,6 +663,27 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
  			Ext.Array.pluck(me.graphData, propName)
 		));
  	},
+ 	
+ 	/**
+  	 *
+  	 * GETTERS
+  	 *
+  	 */
+  	getGraphData: function() {
+	  	return this.graphData;
+	},
+	
+  	getPrimaryGrouper: function() {
+	  	return this.primaryGrouper;
+	},
+	
+	getSecondaryGrouper: function() {
+		return this.secondaryGrouper;
+	},
+	
+	getTertiaryGrouper: function() {
+		return this.tertiaryGrouper;
+	},
  	
  	/**
   	 *
