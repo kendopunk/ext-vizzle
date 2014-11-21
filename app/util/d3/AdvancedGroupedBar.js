@@ -46,7 +46,7 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	},
 	primaryGrouper: null,
 	primaryTickPadding: 10,
-	rangePadding: .05,
+	rangePadding: .09,
 	rangeOuterPadding: .05,
 	secondaryGrouper: null,
 	showLegend: true,
@@ -138,6 +138,7 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 		//////////////////////////////
 		me.callAxes();
 		me.triggerPrimaryGroupers();
+		me.triggerSecondaryGroupers();
 	},
 	
 	/**
@@ -202,22 +203,26 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 					return d[me.primaryGrouper] == conf.primary;
 				})[0].xs;
 				
-				return scaleToUse(d.id);
+				var xPos = scaleToUse(d.id);
+				d.xPos = xPos;		// stash
+				return xPos;
 			})
 			.attr('rx', 3)
 			.attr('ry', 3)
 			.attr('y', function(d) {
-				return me.canvasHeight - me.yScale(d.value);
+				return me.canvasHeight - me.yScale(d[me.yDataMetric]);
 			})
 			.attr('width', function(d) {
 				var scaleToUse = Ext.Array.filter(uConfig, function(conf) {
 					return d[me.primaryGrouper] == conf.primary;
 				})[0].xs;
 				
-				return scaleToUse.rangeBand();
+				var bWidth = scaleToUse.rangeBand();
+				d.bWidth = bWidth;	// stash
+				return bWidth;
 			})
 			.attr('height', function(d) {
-				return me.yScale(d.value) - me.margins.bottom;
+				return me.yScale(d[me.yDataMetric]) - me.margins.bottom;
 			})
 			.style('fill', function(d, i) {
 				if(me.colorDefinedInData) {
@@ -329,7 +334,12 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 			.text(function(d) { return d.name; });
 	},
 	
-	triggerPrimaryGroupers: function(clearFirst) {
+	/**
+ 	 * @function
+ 	 * @memberOf App.util.d3.AdvancedGroupedBar
+ 	 * @description Draw/redraw the primary groupers
+ 	 */
+	triggerPrimaryGroupers: function() {
 		var me = this;
 		
 		var r = me.xScale.range(), 
@@ -338,7 +348,7 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 		////////////////////////////////
 		// GROUPER - JRAT
 		////////////////////////////////
-		var textSelection = me.gGrouper.selectAll('text')
+		var textSelection = me.gGrouper.selectAll('text.primaryGrouper')
 			.data(me.getUniqueProperty(me.primaryGrouper));
 			
 		textSelection.exit()
@@ -349,7 +359,7 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 			
 		textSelection.enter()
 			.append('text')
-			.attr('class', me.labelClass)
+			.attr('class', 'primaryGrouper')
 			.style('text-anchor', 'middle')
 			.style('opacity', 0);
 			
@@ -361,6 +371,110 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 			})
 			.attr('y', me.canvasHeight - me.margins.bottomText)
 			.text(String);
+	},
+	
+	/**
+ 	 * @function
+ 	 * @memberOf App.util.d3.AdvancedGroupedBar
+ 	 * @description Draw/redraw the secondary groupers
+ 	 */
+	triggerSecondaryGroupers: function() {
+		var me = this;
+		
+		/*var r = me.xScale.range(), 
+			rb = me.xScale.rangeBand();
+			
+		var p = me.getUniqueProperty(me.primaryGrouper),
+			s = me.getUniqueProperty(me.secondaryGrouper),
+			t = me.getUniqueProperty(me.tertiaryGrouper);
+			
+		console.debug(p);
+		console.debug(s);
+		console.debug(t);
+		
+		console.debug(r);
+		console.debug(rb);*/
+		
+		console.debug(me.graphData[0]);
+		
+/*// primary configuration
+		var uConfig = Ext.Array.map(p, function(item, index) {
+		
+			var domainToUse = Ext.Array.map(
+				Ext.Array.slice(me.graphData, index*sxt, (index*sxt)+sxt),
+				function(item) { return item.id; }
+			);
+			
+			return {
+				primary: item,
+				xs: d3.scale.ordinal()
+					.domain(domainToUse)
+					.rangeRoundBands([
+						me.xScale(item),
+						me.xScale(item) + me.xScale.rangeBand()
+					], me.rangePadding, me.rangeOuterPadding)
+			};
+		});
+		*/
+		
+		/*var temp = me.gBar.selectAll('rect').attr('x', function(d) {
+			var s = d3.select(this).attr('x');
+			console.log(s);
+			
+			return 0;
+		});*/
+		
+		////////////////////////////////
+		// GROUPER - JRAT
+		////////////////////////////////
+		var textSelection = me.gGrouper.selectAll('text.secondaryGrouper')
+			//.data(me.getUniqueProperty(me.secondaryGrouper));
+			.data(me.graphData);
+			
+		textSelection.exit()
+			.transition()
+			.duration(750)
+			.style('opacity', -1e6)
+			.remove();
+			
+		textSelection.enter()
+			.append('text')
+			.attr('class', 'secondaryGrouper')
+			.style('text-anchor', 'middle')
+			.style('opacity', 0);
+			
+		textSelection.transition()
+			.duration(750)
+			.style('opacity', 1)
+			.attr('x', function(d, i) {
+				// r[0] = 12
+				// i = 0 || 1
+				// width = 50
+				
+				/*if(i == 0) {
+					return 12 + 50
+				
+				}
+				else {
+					return 12 + 100;
+				
+				}*/
+				
+				// WOW....every second one looks like it's lined up
+				// !!!!! HOORAY
+				
+				return d.xPos;
+								
+				
+				
+				
+				//return r[i] + (rb/2);
+			})
+			.attr('y', me.canvasHeight - (me.margins.bottomText + ((me.margins.bottom - me.margins.bottomText)/2)))
+			//.text(String);
+			.text(function(d) {
+				return d[me.secondaryGrouper];
+			});
 
 
 	},

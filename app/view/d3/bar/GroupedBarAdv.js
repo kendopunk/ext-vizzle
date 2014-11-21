@@ -20,66 +20,77 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 	initComponent: function() {
 		var me = this;
 		
-		me.chartDescription = '<b>Advanced Grouped Bar</b>',
+		me.availableSeasons = ['2014', '2013', '2012'],
+			me.selectedSeasons = ['2013', '2014'],
+	 		me.chartDescription = '<b>Advanced Grouped Bar</b>',
 			me.eventRelay = Ext.create('App.util.MessageBus'),
 			me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95),
-			me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight);
+			me.height = parseInt(Ext.getBody().getViewSize().height - App.util.Global.titlePanelHeight),
+			me.rawData = [],
+			me.cbxHighlightCss = 'btn-highlight-khaki';
+			
+		/**
+ 		 * runtime configuration of checkboxes
+ 		 */
+ 		var checkboxData = [];
+ 		Ext.each(me.availableSeasons, function(season) {
+			checkboxData.push({
+	 			xtype: 'checkboxfield',
+		 	 	boxLabel: season,
+		 	 	name: 'season',
+		 	 	inputValue: season,
+		 	 	cls: me.selectedSeasons.indexOf(season) >= 0 ? me.cbxHighlightCss : '',
+		 	 	checked: me.selectedSeasons.indexOf(season) >= 0,
+		 	 	listeners: {
+			 	 	change: me.checkboxChange,
+			 	 	scope: me
+		 	 	}
+	 		},
+	 		{xtype: 'tbspacer', width: 7}
+	 		);
+	 	}, me);
 		
 		me.dockedItems = [{
 			xtype: 'toolbar',
 			dock: 'top',
 			items: [{
-				xtype: 'button',
-				text: 'Drilldown'
+				xtype: 'tbtext',
+				text: '<b>Season(s)</b>'
 			},
-			{xtype: 'tbspacer', width: 10},
+			{
+				xtype: 'tbspacer',
+				width: 5
+			},
+			checkboxData,
+			'->',
 			{
 				xtype: 'button',
-				text: 'Randomize',
-				handler: function() {
-					me.groupedBarChart.setPrimaryGrouper('category');
-					me.groupedBarChart.setSecondaryGrouper('fy');
-					me.groupedBarChart.setTertiaryGrouper('budgetType');	
-					me.groupedBarChart.setGraphData(me.buildGraphData()).draw();
-				},
-				scope: me
-			},
-			{xtype: 'tbspacer', width: 10},
-			{
-				xtype: 'button',
-				text: 'Legend OFF',
-				handler: function() {
-					me.groupedBarChart.setShowLegend(false);
-					me.groupedBarChart.draw();
-				},
-				scope: me
-			},
-			{xtype: 'tbspacer', width: 10},
-			{
-				xtype: 'button',
-				text: 'Legend ON',
-				handler: function() {
-					me.groupedBarChart.setShowLegend(true);
-					me.groupedBarChart.draw();
-				},
-				scope: me
-			},
-			{xtype: 'tbspacer', width: 10},
-			{
-				xtype: 'button',
-				text: 'FY View',
-				handler: function() {
-					me.groupedBarChart.setPrimaryGrouper('budgetType');
-					me.groupedBarChart.setSecondaryGrouper('category');
-					me.groupedBarChart.setTertiaryGrouper('fy');
-					me.groupedBarChart.setGraphData(
-						me.colorizeAndIndex(
-							me.groupedBarChart.getGraphData()
-						)
-					).draw();
-				},
-				scope: me
-			}]
+				iconCls: 'icon-tools',
+				text: 'Customize',
+				menu: [/*{
+					xtype: 'menucheckitem',
+					text: 'Labels',
+					checked: true,
+					listeners: {
+						checkchange: function(cbx, checked) {
+							me.groupedBarChart.setShowLabels(checked);
+							me.groupedBarChart.draw();
+						},
+						scope: me
+					}
+				}, */{
+					xtype: 'menucheckitem',
+					text: 'Legend',
+					checked: true,
+					listeners: {
+						checkchange: function(cbx, checked) {
+							me.groupedBarChart.setShowLegend(checked);
+							me.groupedBarChart.draw();
+						},
+						scope: me
+					}
+				}]
+		 	}]
 		}];
 		
 		////////////////////////////////////////
@@ -100,10 +111,12 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 	initCanvas: function(panel) {
 	 	var me = this;
 	 	
+	 	me.getEl().mask('Loading...');
+	 	
 	 	// width, height
 	 	me.canvasWidth = Math.floor(me.body.dom.offsetWidth * .98),
-	 	me.canvasHeight = Math.floor(me.body.dom.offsetHeight * .98),
- 		me.panelId = '#' + me.body.id;
+	 		me.canvasHeight = Math.floor(me.body.dom.offsetHeight * .98),
+ 			me.panelId = '#' + me.body.id;
 	 	
 	 	// init svg
 	 	me.svg = d3.select(me.panelId)
@@ -115,83 +128,95 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 			svg: me.svg,
 			canvasWidth: me.canvasWidth,
 			canvasHeight: me.canvasHeight,
+			chartFlex: 5,
 			colorDefinedInData: true,
 			graphData: me.graphData,
+			legendFlex: 1,
 			margins: {
 				top: 30,
 				right: 10,
-				bottom: 50,
-				bottomText: 20,
+				bottom: 70,
+				bottomText: 30,
 				left: 80,
 				leftAxis: 70
 			},
-			primaryGrouper: 'category',
-			secondaryGrouper: 'fy',
-			tertiaryGrouper: 'budgetType',
-			
+			primaryGrouper: 'team',
+			secondaryGrouper: 'season',
+			tertiaryGrouper: 'metric',
 			tooltipFunction: function(d, i) {
-				return d.id + '/' + d.fy + '<br>'
-					+ d.budgetType + '<br>'
-					+ d.value;
-				//return d.id + '<br>' + d.value;
-				//return Ext.util.Format.currency(d.value, false, '0', false);
+				return '<b>' + d.team + '</b>'
+					+ '<br>'
+					+ d.season + ' ' + d.metric
+					+ ': '
+					+ Ext.util.Format.number(d.value, '0,000');
 			},
 			yDataMetric: 'value',
 			yTickFormat: function(d) {
-				return Ext.util.Format.currency(d, false, '0', false);
+				return Ext.util.Format.number(d, '0,000');
 			}
 		});
 		
-		/*var s1 = d3.scale.ordinal().domain([1, 2, 3]).rangeRoundBands([0, 100], 0, 0);
-		console.log(s1.range());
-		console.log(s1.rangeBand());
+		Ext.Ajax.request({
+			url: 'data/baseball.json',
+			method: 'GET',
+			success: function(response) {
+				var resp = Ext.JSON.decode(response.responseText);
+				
+				me.rawData = resp.data;
+				
+				var filteredData = me.filterBySeason(me.rawData);
+				
+				me.groupedBarChart.setGraphData(
+					me.colorizeAndIndex(filteredData)
+				).initChart().draw();
+			},
+			callback: function() {
+				me.getEl().unmask();
+			},
+			scope: me
+		});
+	},
+	
+	checkboxChange: function(cbx, oldVal, newVal) {
+		var me = this;
 		
-		var s2 = d3.scale.ordinal().domain([1, 2, 3]).rangeRoundBands([0, 100], .1, .1);
-		console.log(s2.range());
-		console.log(s2.rangeBand());
+		if(cbx.checked) {
+			cbx.addCls(me.cbxHighlightCss);
+		} else {
+			cbx.removeCls(me.cbxHighlightCss);
+		}
 		
-		var s3 = d3.scale.ordinal().domain([1, 2, 3]).rangeRoundBands([0, 100], .2, .1);
-		console.log(s3.range());
-		console.log(s3.rangeBand());
+		var filtered = me.filterBySeason(me.rawData);
 		
-		
-		var s2 = d3.scale.ordinal().domain([1, 2, 3]).rangeBands([0, 100], .1, .1);
-		
-		var o1 = d3.scale.ordinal().domain([1, 2, 3]).rangeBands([0, 100], 0, 0);
-o1.range(); //returns [0, 33.333333333333336, 66.66666666666667]
-o1.rangeBand(); //returns 33.333333333333336
-var o2 = d3.scale.ordinal().domain([1, 2, 3]).rangeRoundBands([0, 100], 0, 0);
-o2.range(); //returns [1, 34, 67]
-o2.rangeBand(); //returns 33
-		*/
-		me.groupedBarChart.setGraphData(me.buildGraphData()).initChart().draw();
+		me.groupedBarChart.setGraphData(
+			me.colorizeAndIndex(filtered)
+		).draw();
 	},
 	
 	/**
- 	 * generate stub data
+ 	 * @function
  	 */
-	buildGraphData: function() {
+	filterBySeason: function(dat) {
 		var me = this;
+			
+		var checkboxes = me.query('toolbar[dock=top] checkboxfield');
 		
-		var ret = [],
-			cats = ['Incentive', 'Travel', 'Overtime'],
-			fys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
-			budgetTypes = ['Allocated', 'Funds Used'];
+		if(checkboxes.length == 0) {
+			return dat;
+		}
 		
-		Ext.each(cats, function(c) {
-			Ext.each(fys, function(fy) {
-				Ext.each(budgetTypes, function(bt) {
-					ret.push({
-						category: c,
-						fy: fy,
-						budgetType: bt,
-						value: (Math.random() * 10000) + 1
-					});
-				});
-			});
-		});
+		me.selectedSeasons = [];
+		Ext.each(checkboxes, function(cbx) {
+			if(cbx.checked) {
+				me.selectedSeasons.push(cbx.inputValue);
+			}
+		}, me);
 		
-		return me.colorizeAndIndex(ret);
+		var filtered = Ext.Array.filter(dat, function(item) {
+			return me.selectedSeasons.indexOf(item.season) >= 0;
+		}, me);
+		
+		return filtered;
 	},
 	
 	/**
@@ -204,12 +229,15 @@ o2.rangeBand(); //returns 33
 			s = me.groupedBarChart.getSecondaryGrouper(),
 			t = me.groupedBarChart.getTertiaryGrouper(),
 			cs = d3.scale.category20();
-			
+		
+		//console.debug(p);
+		//console.debug(s);
+		//console.debug(t);
+		
 		// sort it
 		dat.sort(App.util.Global.sortUtils.dynamicMultiSort(p, s, t));
 			
-		
-		
+		// make the color mapper
 		var colorMapper = Ext.Array.map(Ext.Array.unique(Ext.Array.sort(
 			Ext.Array.pluck(dat, t)
 		)), function(item, index) {
@@ -218,12 +246,6 @@ o2.rangeBand(); //returns 33
 				color: cs(index)
 			};
 		});
-		
-		/*var temp = Ext.Array.filter(propertiesToMatch, function(entry) {
-			return entry.name == 'Funds Used';
-		})[0].color;
-		
-		console.log(temp);*/
 		
 		// add IDs and color
 		Ext.each(dat, function(item) {
@@ -235,7 +257,6 @@ o2.rangeBand(); //returns 33
 			
 			ind++;
 		});
-		
 		
 		return dat;
 	}

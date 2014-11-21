@@ -306,6 +306,15 @@ svg {
 	fill: #333333;
 }
 
+.primaryGrouper {
+	font: 10px/1.1 sans-serif;
+	fill: #990066;
+}
+
+.secondaryGrouper {
+	font: 9px/1.1 sans-serif;
+}
+
 .treemapCategory {
 	font: bold 11px/1.1 "Verdana", sans-serif;
 	fill: #FFF;
