@@ -21,7 +21,7 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 		var me = this;
 		
 		me.availableSeasons = ['2014', '2013', '2012'],
-			me.selectedSeasons = ['2013', '2014'],
+			me.selectedSeasons = ['2014'],
 	 		me.chartDescription = '<b>Advanced Grouped Bar</b>',
 			me.eventRelay = Ext.create('App.util.MessageBus'),
 			me.width = parseInt((Ext.getBody().getViewSize().width - App.util.Global.westPanelWidth) * .95),
@@ -213,7 +213,9 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 		}, me);
 		
 		var filtered = Ext.Array.filter(dat, function(item) {
-			return me.selectedSeasons.indexOf(item.season) >= 0;
+			//return me.selectedSeasons.indexOf(item.season) >= 0;
+			return item.season == '2014' && item.metric == 'Wins';
+			
 		}, me);
 		
 		return filtered;

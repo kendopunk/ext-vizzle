@@ -381,10 +381,10 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	triggerSecondaryGroupers: function() {
 		var me = this;
 		
-		/*var r = me.xScale.range(), 
+		var r = me.xScale.range(), 
 			rb = me.xScale.rangeBand();
 			
-		var p = me.getUniqueProperty(me.primaryGrouper),
+		/*var p = me.getUniqueProperty(me.primaryGrouper),
 			s = me.getUniqueProperty(me.secondaryGrouper),
 			t = me.getUniqueProperty(me.tertiaryGrouper);
 			
@@ -395,7 +395,7 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 		console.debug(r);
 		console.debug(rb);*/
 		
-		console.debug(me.graphData[0]);
+		//console.debug(me.graphData[0]);
 		
 /*// primary configuration
 		var uConfig = Ext.Array.map(p, function(item, index) {
@@ -424,6 +424,10 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 			return 0;
 		});*/
 		
+		var t = me.getUniqueProperty(me.tertiaryGrouper);
+		var tLen = t.length;
+		
+		
 		////////////////////////////////
 		// GROUPER - JRAT
 		////////////////////////////////
@@ -446,6 +450,9 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 		textSelection.transition()
 			.duration(750)
 			.style('opacity', 1)
+			.style('visibility', function(d, i) {
+				return i%2 == 1 ? 'visible': 'hidden';
+			})
 			.attr('x', function(d, i) {
 				// r[0] = 12
 				// i = 0 || 1
@@ -463,20 +470,20 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 				// WOW....every second one looks like it's lined up
 				// !!!!! HOORAY
 				
-				return d.xPos;
-								
+				if(tLen == 1) {
+					return r[i] + (rb/2);
+				} else {
+					return d.xPos;
+				}
 				
 				
 				
 				//return r[i] + (rb/2);
 			})
 			.attr('y', me.canvasHeight - (me.margins.bottomText + ((me.margins.bottom - me.margins.bottomText)/2)))
-			//.text(String);
 			.text(function(d) {
 				return d[me.secondaryGrouper];
 			});
-
-
 	},
 	
 	/**
