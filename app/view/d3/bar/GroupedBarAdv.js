@@ -213,8 +213,8 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 		}, me);
 		
 		var filtered = Ext.Array.filter(dat, function(item) {
-			//return me.selectedSeasons.indexOf(item.season) >= 0;
-			return item.season == '2014' && item.metric == 'Wins';
+			return me.selectedSeasons.indexOf(item.season) >= 0;
+			//return me.selectedSeasons.indexOf(item.season) >= 0 && item.metric == 'Wins';
 			
 		}, me);
 		

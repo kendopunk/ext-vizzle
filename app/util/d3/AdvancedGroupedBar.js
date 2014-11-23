@@ -46,8 +46,8 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	},
 	primaryGrouper: null,
 	primaryTickPadding: 10,
-	rangePadding: .09,
-	rangeOuterPadding: .05,
+	rangePadding: .2,
+	rangeOuterPadding: .2,
 	secondaryGrouper: null,
 	showLegend: true,
 	spaceBetweenChartAndLegend: 20,
@@ -382,57 +382,20 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 		var me = this;
 		
 		var r = me.xScale.range(), 
-			rb = me.xScale.rangeBand();
-			
-		/*var p = me.getUniqueProperty(me.primaryGrouper),
+			rb = me.xScale.rangeBand(),
+			p = me.getUniqueProperty(me.primaryGrouper),
 			s = me.getUniqueProperty(me.secondaryGrouper),
 			t = me.getUniqueProperty(me.tertiaryGrouper);
 			
-		console.debug(p);
-		console.debug(s);
-		console.debug(t);
-		
-		console.debug(r);
-		console.debug(rb);*/
-		
-		//console.debug(me.graphData[0]);
-		
-/*// primary configuration
-		var uConfig = Ext.Array.map(p, function(item, index) {
-		
-			var domainToUse = Ext.Array.map(
-				Ext.Array.slice(me.graphData, index*sxt, (index*sxt)+sxt),
-				function(item) { return item.id; }
-			);
-			
-			return {
-				primary: item,
-				xs: d3.scale.ordinal()
-					.domain(domainToUse)
-					.rangeRoundBands([
-						me.xScale(item),
-						me.xScale(item) + me.xScale.rangeBand()
-					], me.rangePadding, me.rangeOuterPadding)
-			};
-		});
-		*/
-		
-		/*var temp = me.gBar.selectAll('rect').attr('x', function(d) {
-			var s = d3.select(this).attr('x');
-			console.log(s);
-			
-			return 0;
-		});*/
-		
-		var t = me.getUniqueProperty(me.tertiaryGrouper);
-		var tLen = t.length;
-		
+		// product of s * t
+		var sLen = s.length,
+			tLen = t.length,
+			sxt = sLen * tLen;
 		
 		////////////////////////////////
 		// GROUPER - JRAT
 		////////////////////////////////
 		var textSelection = me.gGrouper.selectAll('text.secondaryGrouper')
-			//.data(me.getUniqueProperty(me.secondaryGrouper));
 			.data(me.graphData);
 			
 		textSelection.exit()
@@ -451,7 +414,12 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 			.duration(750)
 			.style('opacity', 1)
 			.style('visibility', function(d, i) {
-				return i%2 == 1 ? 'visible': 'hidden';
+				if(tLen == 1) {
+					return 'visible';
+				} else {
+					return i%2 == 0 ? 'visible' : 'hidden';
+					
+				}
 			})
 			.attr('x', function(d, i) {
 				// r[0] = 12
@@ -470,11 +438,32 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 				// WOW....every second one looks like it's lined up
 				// !!!!! HOORAY
 				
+				// ALWAYS UNDER EACH BAR
+				//return d.xPos + (d.bWidth/2);
 				if(tLen == 1) {
+					return d.xPos + (d.bWidth/2);
+				}
+				return d.xPos + d.bWidth + (d.bWidth * .09);		// padding
+				
+				/*if(tLen == 1) {
+					return d.xPos + (d.bWidth/2);
+					
+					
+				} else if(sLen == 1) {
+					return r[i] + (rb/2);
+					
+					// i is out of range i%tLen or i%sLen ??/
+				} else {
+					return d.xPos + (d.bWidth/2);
+				}*/
+				
+				
+				/*if(tLen == 1) {
 					return r[i] + (rb/2);
 				} else {
-					return d.xPos;
-				}
+					console.log('d.xPos: ' + d.xPos);
+					return d.xPos + (d.bWidth/2);
+				}*/
 				
 				
 				
