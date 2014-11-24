@@ -2,92 +2,65 @@
 	"data": [{
 		"team": "Baltimore",
 		"season": "2014",
-		"metric": "Wins",
-		"value": 96
-	}, {
-		"team": "Baltimore",
-		"season": "2014",
-		"metric": "Losses",
-		"value": 66
+		"wins": 96,
+		"losses": 66,
+		"runsScored": 705,
+		"runsAllowed": 593
 	}, {
 		"team": "Baltimore",
 		"season": "2013",
-		"metric": "Wins",
-		"value": 87
-	}, {
-		"team": "Baltimore",
-		"season": "2013",
-		"metric": "Losses",
-		"value": 77
+		"wins": 87,
+		"losses": 77,
+		"runsScored": 745,
+		"runsAllowed": 709
 	}, {
 		"team": "Baltimore",
 		"season": "2012",
-		"metric": "Wins",
-		"value": 93
-	}, {
-		"team": "Baltimore",
-		"season": "2012",
-		"metric": "Losses",
-		"value": 69
+		"wins": 93,
+		"losses": 69,
+		"runsScored": 712,
+		"runsAllowed": 705
 	}, {
 		"team": "Boston",
 		"season": "2014",
-		"metric": "Wins",
-		"value": 71
-	}, {
-		"team": "Boston",
-		"season": "2014",
-		"metric": "Losses",
-		"value": 91
+		"wins": 71,
+		"losses": 91,
+		"runsScored": 634,
+		"runsAllowed": 715
 	}, {
 		"team": "Boston",
 		"season": "2013",
-		"metric": "Wins",
-		"value": 97,
-	}, {
-		"team": "Boston",
-		"season": "2013",
-		"metric": "Losses",
-		"value": 65
+		"wins": 97,
+		"losses": 65,
+		"runsScored": 853,
+		"runsAllowed": 656
 	}, {
 		"team": "Boston",
 		"season": "2012",
-		"metric": "Wins",
-		"value": 69
-	}, {
-		"team": "Boston",
-		"season": "2012",
-		"metric": "Losses",
-		"value": 93
+		"wins": 69,
+		"losses": 93,
+		"runsScored": 734,
+		"runsAllowed": 806
 	}, {
 		"team": "Detroit",
 		"season": "2014",
-		"metric": "Wins",
-		"value": 90,
-	}, {
-		"team": "Detroit",
-		"season": "2014",
-		"metric": "Losses",
-		"value": 72
+		"wins": 90,
+		"losses": 72,
+		"runsScored": 757,
+		"runsAllowed": 705 
 	}, {
 		"team": "Detroit",
 		"season": "2013",
-		"metric": "Wins",
-		"value": 93,
-	}, {
-		"team": "Detroit",
-		"season": "2013",
-		"metric": "Losses",
-		"value": 69
+		"wins": 93,
+		"losses": 69,
+		"runsScored": 796,
+		"runsAllowed": 624 
 	}, {
 		"team": "Detroit",
 		"season": "2012",
-		"metric": "Wins",
-		"value": 88
-	}, {
-		"team": "Detroit",
-		"season": "2012",
-		"metric": "Losses",
-		"value": 74
+		"wins": 88,
+		"losses": 74,
+		"runsScored": 726,
+		"runsAllowed": 670
 	}]
 }

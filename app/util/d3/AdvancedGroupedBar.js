@@ -41,13 +41,14 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	opacities: {
 		rect: {
 			default: .7,
-			over: 1
+			over: 1,
+			excluded: .3
 		}
 	},
 	primaryGrouper: null,
 	primaryTickPadding: 10,
-	rangePadding: .2,
-	rangeOuterPadding: .2,
+	rangePadding: .1,
+	rangeOuterPadding: .1,
 	secondaryGrouper: null,
 	showLegend: true,
 	spaceBetweenChartAndLegend: 20,
@@ -190,10 +191,24 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 			.style('stroke', 'black')
 			.style('stroke-width', .75)
 			.on('mouseover', function(d, i) {
+				// this rectangle
 				me.handleMouseEvent(this, 'rect', 'mouseover', d, i);
+				
+				// rects not selected...opacity reduction
+				/*me.gBar.selectAll('rect').filter(function(e, j) {
+					return i != j;
+				})
+				.style('opacity', me.opacities.rect.excluded);*/
 			})
 			.on('mouseout', function(d, i) {
+				// this rectangle
 				me.handleMouseEvent(this, 'rect', 'mouseout', d, i);
+				
+				// rects not selected...opacity reduction
+				/*me.gBar.selectAll('rect').filter(function(e, j) {
+					return i != j;
+				})
+				.style('opacity', me.opacities.rect.default);*/
 			});
 			
 		rectSelection.transition()
@@ -412,65 +427,24 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 			
 		textSelection.transition()
 			.duration(750)
-			.style('opacity', 1)
-			.style('visibility', function(d, i) {
-				if(tLen == 1) {
-					return 'visible';
-				} else {
-					return i%2 == 0 ? 'visible' : 'hidden';
-					
-				}
+			.style('opacity', function(d, i) {
+				if(tLen == 1) { return 1; }
+				return i%tLen == 0 ? 1 : 0;
 			})
 			.attr('x', function(d, i) {
-				// r[0] = 12
-				// i = 0 || 1
-				// width = 50
-				
-				/*if(i == 0) {
-					return 12 + 50
-				
-				}
-				else {
-					return 12 + 100;
-				
-				}*/
-				
-				// WOW....every second one looks like it's lined up
-				// !!!!! HOORAY
-				
-				// ALWAYS UNDER EACH BAR
-				//return d.xPos + (d.bWidth/2);
+				// only 1 tertiary grouper?
 				if(tLen == 1) {
 					return d.xPos + (d.bWidth/2);
 				}
-				return d.xPos + d.bWidth + (d.bWidth * .09);		// padding
 				
-				/*if(tLen == 1) {
-					return d.xPos + (d.bWidth/2);
-					
-					
-				} else if(sLen == 1) {
-					return r[i] + (rb/2);
-					
-					// i is out of range i%tLen or i%sLen ??/
-				} else {
-					return d.xPos + (d.bWidth/2);
-				}*/
+				var paddingWidth = d.bWidth * me.rangePadding,
+					paddingFactor = (tLen - 1) * .5,
+					widthFactor = paddingFactor + .5;
 				
-				
-				/*if(tLen == 1) {
-					return r[i] + (rb/2);
-				} else {
-					console.log('d.xPos: ' + d.xPos);
-					return d.xPos + (d.bWidth/2);
-				}*/
-				
-				
-				
-				//return r[i] + (rb/2);
+				return d.xPos + (d.bWidth * widthFactor) + (paddingWidth * paddingFactor);
 			})
 			.attr('y', me.canvasHeight - (me.margins.bottomText + ((me.margins.bottom - me.margins.bottomText)/2)))
-			.text(function(d) {
+			.text(function(d, i) {
 				return d[me.secondaryGrouper];
 			});
 	},
@@ -500,8 +474,6 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 			.scale(me.xScale)
 			.tickSize(0)
 			.tickFormat(function(d) { return ''; })
-			// .tickSize(1)
-			// .tickFormat(function(d) { return '-XX-'; })
 			.orient('bottom');
 	},
 	

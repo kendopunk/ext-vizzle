@@ -30,9 +30,10 @@ Ext.application({
 		// var defaultXType = 'areaMultiPanel';
 		// var defaultXType = 'areaTicker';
 		// var defaultXType = 'barBuild';
-		var defaultXType = 'barGeneric';
+		// var defaultXType = 'barGeneric';
 		// var defaultXType = 'barGroup';
-		// var defaultXType = 'barStack';
+		// var defaultXType = 'barGroupAdvanced';
+		var defaultXType = 'barStack';
 		// var defaultXType = 'barMouse';
 		// var defaultXType = 'pieGeneric';
 		// var defaultXType = 'pieBuild';
