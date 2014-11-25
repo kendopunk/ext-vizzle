@@ -19,12 +19,14 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	colorScale: d3.scale.category20c(),
 	graphData: [],
 	gBar: null,
-	gBarLabel: null,
 	gGrouper: null,
 	gLegend: null,
 	gXAxis: null,
 	gYAxis: null,
 	labelClass: 'labelText',
+	labelFunction: function(d, i) {
+		return 'label';
+	},
 	legendClass: 'legendText',
 	legendBoldClass: 'legendTextBold',
 	legendFlex: 1,
@@ -50,6 +52,7 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	rangePadding: .1,
 	rangeOuterPadding: .1,
 	secondaryGrouper: null,
+	showBarLabels: true,
 	showLegend: true,
 	spaceBetweenChartAndLegend: 20,
 	tooltipFunction: function(d, i) {
@@ -133,6 +136,7 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 		//////////////////////////////
 		me.handleBars();
 		me.handleLegend();
+		me.handleBarLabels();
 		
 		//////////////////////////////
 		// axes / groupers
@@ -150,31 +154,11 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	handleBars: function() {
 		var me = this;
 		
-		var p = me.getUniqueProperty(me.primaryGrouper);
-		var s = me.getUniqueProperty(me.secondaryGrouper);
-		var t = me.getUniqueProperty(me.tertiaryGrouper);
-		var sxt = s.length * t.length;	// length of secondaries * length of tertiaries
-		
-		// primary configuration
-		var uConfig = Ext.Array.map(p, function(item, index) {
-		
-			var domainToUse = Ext.Array.map(
-				Ext.Array.slice(me.graphData, index*sxt, (index*sxt)+sxt),
-				function(item) { return item.id; }
-			);
-			
-			return {
-				primary: item,
-				xs: d3.scale.ordinal()
-					.domain(domainToUse)
-					.rangeRoundBands([
-						me.xScale(item),
-						me.xScale(item) + me.xScale.rangeBand()
-					], me.rangePadding, me.rangeOuterPadding)
-			};
-		});
-		
-		
+		////////////////////////////////////////
+		// primary grouper configuration
+		////////////////////////////////////////
+		var primaryGrouperConfig = me.buildPrimaryGrouperConfig();
+
 		////////////////////////////////////////
 		// BARS - JRAT
 		////////////////////////////////////////
@@ -214,7 +198,7 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 		rectSelection.transition()
 			.duration(500)
 			.attr('x', function(d, i) {
-				var scaleToUse = Ext.Array.filter(uConfig, function(conf) {
+				var scaleToUse = Ext.Array.filter(primaryGrouperConfig, function(conf) {
 					return d[me.primaryGrouper] == conf.primary;
 				})[0].xs;
 				
@@ -228,7 +212,7 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 				return me.canvasHeight - me.yScale(d[me.yDataMetric]);
 			})
 			.attr('width', function(d) {
-				var scaleToUse = Ext.Array.filter(uConfig, function(conf) {
+				var scaleToUse = Ext.Array.filter(primaryGrouperConfig, function(conf) {
 					return d[me.primaryGrouper] == conf.primary;
 				})[0].xs;
 				
@@ -249,6 +233,73 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 		// apply tooltips
 		rectSelection.call(d3.helper.tooltip().text(me.tooltipFunction));
 	},
+	
+	/**
+  	 * @function
+  	 * @description Handle bar labels
+  	 */
+  	handleBarLabels: function() {
+  		var me = this;
+  		
+  		if(!me.showBarLabels) {
+	  		me.gBar.selectAll('text')
+	  			.transition()
+	  			.duration(250)
+	  			.style('opacity', .1)
+	  			.remove();
+	  		
+	  		return;
+	  	}
+	  	
+	  	////////////////////////////////////////
+		// primary grouper configuration
+		////////////////////////////////////////
+		var primaryGrouperConfig = me.buildPrimaryGrouperConfig();
+	  	
+	  	////////////////////////////////////////
+	  	// BAR LABEL - JRAT
+	  	////////////////////////////////////////
+		var labelSelection = me.gBar.selectAll('text')
+			.data(me.graphData);
+			
+		labelSelection.exit().remove();
+	  	
+	  	labelSelection.enter()
+	  		.append('text')
+	  		.attr('class', 'labelText')
+	  		.style('text-anchor', 'start')
+	  		.style('opacity', 0);
+	  		
+	  	labelSelection.transition()
+		  	.duration(500)
+		  	.attr('x', function(d, i) {
+				var scaleToUse = Ext.Array.filter(primaryGrouperConfig, function(conf) {
+					return d[me.primaryGrouper] == conf.primary;
+				})[0].xs;
+				
+				return scaleToUse(d.id) + (d.bWidth/2);	// stashed
+			})
+			.attr('y', function(d) {
+				// 10 px up from margins.bottom
+				return me.canvasHeight - me.margins.bottom - 10;
+			})
+			.attr('transform', function(d) {
+				// rotation needs to happen around the text's X and Y position
+				
+				var scaleToUse = Ext.Array.filter(primaryGrouperConfig, function(conf) {
+					return d[me.primaryGrouper] == conf.primary;
+				})[0].xs;
+				
+				var x = scaleToUse(d.id) + (d.bWidth/2);
+				var y = me.canvasHeight - me.margins.bottom - 10;
+				
+				return 'rotate(-90,' + x + ',' + y + ')';
+			})
+			.style('opacity', 1)
+			.text(me.labelFunction);
+			
+		return;
+  	},
 	
 	/**
  	 * @function
@@ -747,6 +798,39 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
  	},
  	
  	/**
+  	 * @function
+  	 * @description Build the primary grouper configuration.  This configuration
+  	 * helps determine position of bars and labels in the rangeBand() scale
+  	 */
+ 	buildPrimaryGrouperConfig: function() {
+	 	var me = this;
+ 	
+ 		var p = me.getUniqueProperty(me.primaryGrouper),
+	 		s = me.getUniqueProperty(me.secondaryGrouper),
+	 		t = me.getUniqueProperty(me.tertiaryGrouper),
+	 		sxt = s.length * t.length;	// length of secondaries * length of tertiaries
+ 	
+ 	
+ 		return Ext.Array.map(p, function(item, index) {
+		
+			var domainToUse = Ext.Array.map(
+				Ext.Array.slice(me.graphData, index*sxt, (index*sxt)+sxt),
+				function(item) { return item.id; }
+			);
+			
+			return {
+				primary: item,
+				xs: d3.scale.ordinal()
+					.domain(domainToUse)
+					.rangeRoundBands([
+						me.xScale(item),
+						me.xScale(item) + me.xScale.rangeBand()
+					], me.rangePadding, me.rangeOuterPadding)
+			};
+		});
+	},
+ 	
+ 	/**
   	 *
   	 * GETTERS
   	 *
@@ -776,6 +860,11 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	  	var me = this;
 	  	me.graphData = d;
 	  	return me;
+	},
+	
+	setLabelFunction: function(fn) {
+		var me = this;
+		me.labelFunction = fn;
 	},
 
  	setMarginProperty: function(property, value) {
@@ -809,6 +898,11 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 	setSecondaryGrouper: function(g) {
 		var me = this;
 		me.secondaryGrouper = g;
+	},
+	
+	setShowBarLabels: function(bool) {
+		var me = this;
+		me.showBarLabels = bool;
 	},
 	
 	setShowLegend: function(bool) {

@@ -150,7 +150,7 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 					checked: true,
 					listeners: {
 						checkchange: function(cbx, checked) {
-							me.groupedBarChart.setShowLabels(checked);
+							me.groupedBarChart.setShowBarLabels(checked);
 							me.groupedBarChart.draw();
 						},
 						scope: me
@@ -181,6 +181,15 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 				me.viewCombo
 			]
 		}];
+		
+		////////////////////////////////////////
+		// label functions
+		////////////////////////////////////////
+		me.labelFunctions = {
+			metric: function(d, i) { return d.metric; },
+			team: function(d, i) { return d.team; },
+			season: function(d, i) { return d.season; }
+		};
 		
 		////////////////////////////////////////
 		// @listeners
@@ -220,6 +229,7 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 			chartFlex: 5,
 			colorDefinedInData: true,
 			graphData: me.graphData,
+			labelFunction: me.labelFunctions.metric,
 			legendFlex: 1,
 			margins: {
 				top: 30,
@@ -349,9 +359,17 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 			
 		// based on what the tertiary grouper is, set the color scale
 		if(t == 'team') {
-			cs = ['#F4632A', '#C60C30', '#10293F'];
+			cs = d3.scale.ordinal()
+				.domain(me.getUniqueRawProperty('team'))
+				.range(['#F4632A', '#C60C30', '#10293F']);
+		} else if(t == 'season') {
+			cs = d3.scale.ordinal()
+				.domain(me.getUniqueRawProperty('season'))
+				.range(colorbrewer.Set2[8]);
 		} else {
-			cs = colorbrewer.Paired[12];
+			cs = d3.scale.ordinal()
+				.domain(me.getUniqueRawProperty('metric'))
+				.range(colorbrewer.Paired[12]);
 		}
 		
 		// sort it
@@ -366,7 +384,7 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 			function(item, index) {
 				return {
 					name: item,
-					color: cs[index]
+					color: cs(item)
 				};
 			}
 		);
@@ -426,6 +444,14 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 		return ret;
 	},
 	
+	getUniqueRawProperty: function(propName) {
+ 		var me = this;
+ 		
+ 		return Ext.Array.unique(Ext.Array.sort(
+ 			Ext.Array.pluck(me.rawData, propName)
+		));
+ 	},
+	
 	/**
 	 * @function
 	 */
@@ -444,36 +470,42 @@ Ext.define('App.view.d3.bar.GroupedBarAdv', {
 			me.groupedBarChart.setPrimaryGrouper('team');
 			me.groupedBarChart.setSecondaryGrouper('metric');
 			me.groupedBarChart.setTertiaryGrouper('season');
+			me.groupedBarChart.setLabelFunction(me.labelFunctions.season);
 			break;
 			
 			case 'stm':
 			me.groupedBarChart.setPrimaryGrouper('season');
 			me.groupedBarChart.setSecondaryGrouper('team');
 			me.groupedBarChart.setTertiaryGrouper('metric');
+			me.groupedBarChart.setLabelFunction(me.labelFunctions.metric);
 			break;
 			
 			case 'smt':
 			me.groupedBarChart.setPrimaryGrouper('season');
 			me.groupedBarChart.setSecondaryGrouper('metric');
 			me.groupedBarChart.setTertiaryGrouper('team');
+			me.groupedBarChart.setLabelFunction(me.labelFunctions.team);
 			break;
 			
 			case 'mts':
 			me.groupedBarChart.setPrimaryGrouper('metric');
 			me.groupedBarChart.setSecondaryGrouper('team');
 			me.groupedBarChart.setTertiaryGrouper('season');
+			me.groupedBarChart.setLabelFunction(me.labelFunctions.season);
 			break;
 			
 			case 'mst':
 			me.groupedBarChart.setPrimaryGrouper('metric');
 			me.groupedBarChart.setSecondaryGrouper('season');
 			me.groupedBarChart.setTertiaryGrouper('team');
+			me.groupedBarChart.setLabelFunction(me.labelFunctions.team);
 			break;
 			
 			default:
 			me.groupedBarChart.setPrimaryGrouper('team');
 			me.groupedBarChart.setSecondaryGrouper('season');
 			me.groupedBarChart.setTertiaryGrouper('metric');
+			me.groupedBarChart.setLabelFunction(me.labelFunctions.metric);
 			break;
 		}
 		
