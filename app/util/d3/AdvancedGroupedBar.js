@@ -456,10 +456,11 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 		// product of s * t
 		var sLen = s.length,
 			tLen = t.length,
+			gLen = me.graphData.length,
 			sxt = sLen * tLen;
 		
 		////////////////////////////////
-		// GROUPER - JRAT
+		// SECONDARY GROUPER TEXT - JRAT
 		////////////////////////////////
 		var textSelection = me.gGrouper.selectAll('text.secondaryGrouper')
 			.data(me.graphData);
@@ -497,6 +498,93 @@ Ext.define('App.util.d3.AdvancedGroupedBar', {
 			.attr('y', me.canvasHeight - (me.margins.bottomText + ((me.margins.bottom - me.margins.bottomText)/2)))
 			.text(function(d, i) {
 				return d[me.secondaryGrouper];
+			})
+			.each('end', function(d, i) {
+				// computed text length
+				var ctl = d3.select(this).node().getComputedTextLength();
+				
+				// prevent overlapping secondary groupers
+				d3.select(this)
+					.transition()
+					.style('opacity', function(d) {
+						if(i%tLen == 0) {
+							return ctl > (d.bWidth * tLen) ? 0 : 1;
+						}
+						return 0;
+					});
+			});
+			
+		////////////////////////////////
+		// SECONDARY GROUPER LINES
+		////////////////////////////////
+		
+		/**
+ 		 * no secondary grouper lines if tertiary grouper
+ 		 * length == 1
+ 		 */
+		if(tLen == 1) {
+			me.gGrouper.selectAll('path').remove();
+			return;
+		}
+		
+		var pathData = [], 
+			ind = 0,
+			jumpInd = 0,
+			jumpRecord = null,
+			yA = me.canvasHeight - me.margins.bottom + 4,
+			yB = me.canvasHeight - me.margins.bottom + 7;
+			
+		// build path data
+		Ext.each(me.graphData, function(gd) {
+			if(ind%tLen == 0) {
+				jumpInd = ind + tLen;
+				jumpRecord = me.graphData[jumpInd-1];
+				
+				pathData.push({
+					pd: [{
+						x: gd.xPos,
+						y: yA
+					}, {
+						x: gd.xPos,
+						y: yB
+					}, {
+						x: jumpRecord.xPos + jumpRecord.bWidth,
+						y: yB
+					}, {
+						x: jumpRecord.xPos + jumpRecord.bWidth,
+						y: yA
+					}]
+				});
+			}
+			
+			ind++;
+		}, me);
+		
+		// generic path fn
+		var pathFn = d3.svg.line()
+		 	.x(function(d) { return d.x; })
+		 	.y(function(d) { return d.y; })
+		 	.interpolate('linear');
+
+		////////////////////////////////
+		// PATH - JRAT
+		////////////////////////////////
+		var pathSelection = me.gGrouper.selectAll('path')
+			.data(pathData);
+		
+		pathSelection.exit().remove();
+		
+		pathSelection.enter()
+			.append('path')
+			.style('stroke', 'black')
+			.style('opacity', .35)
+			.attr('shape-rendering', 'crispEdges')
+			.style('fill', 'none');
+	
+		pathSelection.transition()
+			.duration(500)
+			.attr('d', function(d) {
+				return pathFn(d.pd);
 			});
 	},
 	
