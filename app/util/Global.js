@@ -5,6 +5,21 @@
  */
 Ext.define('App.util.Global', {
 	statics: {
+		env: {
+			getEnvUrl: function(baseUrl) {
+				var env = App.util.Env.getEnv();
+				switch(env) {
+					case 'qa':
+					return '/scopo' + baseUrl;
+					break;
+					
+					default:
+					return baseUrl;
+					break;
+				}
+			}
+		},
+		
 		titlePanelHeight: 55,
 		
 		daaPanelHeight: 55,

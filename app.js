@@ -15,6 +15,7 @@ Ext.application({
 	
 	requires: [
 		'Ext.container.Viewport',
+		'App.util.Env',
 		'App.util.Global',
 		'App.util.MessageBus',
 		'App.util.GridRenderers',
