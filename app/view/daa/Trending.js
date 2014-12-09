@@ -12,6 +12,7 @@ Ext.define('App.view.daa.Trending', {
 	
 	requires: [
 		'App.store.daa.Players',
+		'App.store.daa.SeasonMetaStore',
 		'App.util.d3.UniversalLine'
 	],
 	
@@ -30,54 +31,62 @@ Ext.define('App.view.daa.Trending', {
 			me.width = Math.floor(Ext.getBody().getViewSize().width),
 			me.height = Math.floor(Ext.getBody().getViewSize().height) - App.util.Global.daaPanelHeight,
 			me.currentYDataMetric = 'goals',
-			me.currentPlayerSelection = 'ENTIRE TEAM',
+			me.defaultPlayerSelection = '',
 			me.baseTitle = 'Fall 2014 Trending';
+			
+		////////////////////////////////////////
+ 		// TOOLBAR COMPONENTS
+ 		////////////////////////////////////////
+ 		me.seasonCombo = Ext.create('Ext.form.field.ComboBox', {
+			store: Ext.create('App.store.daa.SeasonMetaStore', {
+				url: 'data/daa/seasonListMeta.json'
+			}),
+			displayField: 'seasonName',
+			valueField: 'seasonId',
+			editable: false,
+			queryMode: 'local',
+			triggerAction: 'all',
+			width: 150,
+			listWidth: 150,
+			listeners: {
+				select: function(combo, record) {
+					me.seasonId = combo.getValue();
+					me.seasonName = record[0].data.seasonName;
+
+					me.getPlayers();
+				},
+				scope: me
+			}
+		});
+		
+		me.playerCombo = Ext.create('Ext.form.field.ComboBox', {
+			disabled: true,
+			store: Ext.create('Ext.data.Store', {
+				fields: ['display', 'value'],
+				data: []
+			}),
+			displayField: 'display',
+			valueField: 'value',
+			value: '',
+			editable: false,
+			queryMode: 'local',
+			triggerAction: 'all',
+			width: 125,
+			listWidth: 125,
+			value: me.defaultPlayerSelection
+		});
 
 		me.dockedItems = [{
 			xtype: 'toolbar',
 			dock: 'top',
-			items: [{
-				xtype: 'tbspacer',
-				width: 5
-			}, {
-				xtype: 'tbtext',
-				text: '<b>Player:</b>'
-			}, {
-				xtype: 'combo',
-				store: Ext.create('App.store.daa.Players', {
-					autoLoad: true,
-					listeners: {
-						load: function(store) {
-							store.insert(0, ([
-								Ext.create(store.model, {
-									name: 'ENTIRE TEAM',
-									color: null,
-									gamesPlayed: null
-								})
-							]));
-						}
-					}
-				}),
-				displayField: 'name',
-				valueField: 'name',
-				editable: false,
-				queryMode: 'local',
-				triggerAction: 'all',
-				width: 125,
-				listWidth: 125,
-				value: me.currentPlayerSelection,
-				listeners: {
-					select: function(combo) {
-						me.currentPlayerSelection = combo.getValue();
-						me.lineChart.setChartTitle(me.buildChartTitle());
-						me.getData();
-					},
-					scope: me
-				}
-			}, {
-				xtype: 'tbspacer',
-				width: 10
-			}, {
+			items: [
+				{xtype: 'tbtext', text: '<b>Season:</b>'},
+				me.seasonCombo,
+				{xtype: 'tbspacer', width: 20},
+				{xtype: 'tbtext', text: '<b>Player:</b>'},
+				me.playerCombo,
+				{xtype: 'tbspacer', width: 20},
+				{
 					xtype: 'button',
 					iconCls: 'icon-soccer-ball',
 					text: 'Goals',
@@ -85,35 +94,33 @@ Ext.define('App.view.daa.Trending', {
 					metric: 'goals',
 					handler: me.metricHandler,
 					scope: me
-			},
-			'-',
-			{
-				xtype: 'button',
-				iconCls: 'icon-target',
-				text: 'Shots on Goal',
-				metric: 'shots',
-				handler: me.metricHandler,
-				scope: me
-			},
-			'-',
-			{
-				xtype: 'button',
-				iconCls: 'icon-soccer-assist',
-				text: 'Assists',
-				metric: 'assists',
-				handler: me.metricHandler,
-				scope: me
-			}, {
-				xtype: 'tbspacer',
-				width: 20
-			}, {
-				xtype: 'tbtext',
-				text: '* scrimmage'
-			}]
+				},
+				'-',
+				{
+					xtype: 'button',
+					iconCls: 'icon-target',
+					text: 'Shots on Goal',
+					metric: 'shots',
+					handler: me.metricHandler,
+					scope: me
+				},
+				'-',
+				{
+					xtype: 'button',
+					iconCls: 'icon-soccer-assist',
+					text: 'Assists',
+					metric: 'assists',
+					handler: me.metricHandler,
+					scope: me
+				},
+				{xtype: 'tbpsacer', width: 20},
+				{xtype: 'tbtext', text: '* = scrimmage'},
+				{xtype: 'tbspacer', width: 10}
+			]
 		}];
+		
+		me.on('afterrender', me.initSeason, me);
 			
- 		me.on('beforerender', me.initPlayerData, me);
- 		me.on('afterrender', me.initCanvas, me);
  		
  		me.callParent(arguments);
  	},
