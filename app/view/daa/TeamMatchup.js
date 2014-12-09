@@ -11,78 +11,129 @@ Ext.define('App.view.daa.TeamMatchup', {
 	closable: false,
 	
 	requires: [
+		'App.store.daa.SeasonMetaStore',
 		'App.util.d3.UniversalStackedBar'
 	],
 	
 	initComponent: function() {
 		var me = this;
 		
-		me.svgInitialized = false,
- 			me.rawData = [],
+		me.rawData = [],
  			me.graphData = [],
  			me.canvasWidth,
  			me.canvasHeight,
  			me.svg,
  			me.panelId,
+ 			me.seasonId = null,
+ 			me.seasonName = null,
  			me.stackedBarChart = null,
  			me.currentMetric = 'total',
  			me.width = Math.floor(Ext.getBody().getViewSize().width),
 			me.height = Math.floor(Ext.getBody().getViewSize().height) - App.util.Global.daaPanelHeight;
 			
-		me.dockedItems = [{
-			xtype: 'toolbar',
-			dock: 'top',
-			items: [{
-				xtype: 'tbtext',
-				text: '<b>Orientation:</b>'
-			}, {
-				xtype: 'button',	
-				tooltip: 'Vertical',
+		////////////////////////////////////////
+		// toolbar components
+		////////////////////////////////////////
+		me.seasonCombo = Ext.create('Ext.form.field.ComboBox', {
+			store: Ext.create('App.store.daa.SeasonMetaStore', {
+				url: 'data/daa/seasonListMeta.json'
+			}),
+			displayField: 'seasonName',
+			valueField: 'seasonId',
+			editable: false,
+			queryMode: 'local',
+			triggerAction: 'all',
+			width: 150,
+			listWidth: 150,
+			listeners: {
+				select: function(combo, record) {
+					me.seasonId = combo.getValue();
+					me.stackedBarChart.setChartTitle('Scoring by Game - ' + record[0].data.seasonName);
+					me.getData();
+				},
+				scope: me
+			}
+		});
+		
+		me.customizeButton = Ext.create('Ext.button.Button', {
+			disabled: true,
+			iconCls: 'icon-tools',
+			text: 'Orientation',
+			menu: [{
+				text: 'Vertical',
 				iconCls: 'icon-bar-chart',
 				orientationValue: 'vertical',
 				handler: me.orientationHandler,
 				scope: me
-			},
-			'-',
-			{
-				xtype: 'button',
-				tooltip: 'Horizontal',
+			}, {
+				text: 'Horizontal',
 				iconCls: 'icon-bar-chart-hoz',
 				orientationValue: 'horizontal',
 				handler: me.orientationHandler,
 				scope: me
-			}, {
-				xtype: 'tbspacer',
-				width: 40
-			}, {
-				xtype: 'tbtext',
-				text: '<i>* = scrimmage</i>'
-			}, {
-				xtype: 'tbspacer',
-				width: 10
-			}, 
-			{
-				xtype: 'checkboxfield',
-				boxLabel: 'Exclude Scrimmages',
-				listeners: {
-					change: function(cbx, oldVal, newVal) {
-						if(cbx.checked) {
-							me.stackedBarChart.setGraphData(me.filterScrimmages());
-						} else {
-							me.stackedBarChart.setGraphData(me.graphData);
-						}
-						me.stackedBarChart.draw();
-					},
-					scope: me
-				}
 			}]
+		});
+		
+		me.scrimmageToggler = Ext.create('Ext.form.field.Checkbox', {
+			disabled: true,
+			boxLabel: 'Exclude Scrimmages',
+			listeners: {
+				change: function(cbx, oldVal, newVal) {
+					if(cbx.checked) {
+						me.stackedBarChart.setGraphData(me.filterScrimmages());
+					} else {
+						me.stackedBarChart.setGraphData(me.graphData);
+					}
+					me.stackedBarChart.draw();
+				},
+				scope: me
+			}
+		});
+
+		me.dockedItems = [{
+			xtype: 'toolbar',
+			dock: 'top',
+			items: [
+				{xtype: 'tbtext', text: '<b>Season:</b>'},
+				me.seasonCombo,
+				{xtype: 'tbspacer', width: 10},
+				me.customizeButton,
+				{xtype: 'tbspacer', width: 10},
+				me.scrimmageToggler,
+				'->',
+				{xtype: 'tbtext', text: '<i>* = scrimmage</i>'},
+				{xtype: 'tbspacer', width: 10}
+			]
 		}];
  		
- 		me.on('afterrender', me.initCanvas, me);
+ 		////////////////////////////////////////
+ 		// @listeners
+ 		////////////////////////////////////////
+ 		me.on('afterrender', me.initSeason, me);
  		
  		me.callParent(arguments);
  	},
  	
+ 	/**
+  	 * @function
+  	 * @description Load the season selection store then initialize the canvas
+  	 */
+ 	initSeason: function(panel) {
+	 	var me = this;
+	 	
+	 	me.seasonCombo.getStore().load({
+		 	callback: function(records) {
+		 		var maxInd = records.length - 1;
+		 		me.seasonId = records[maxInd].data.seasonId;
+		 		me.seasonName = records[maxInd].data.seasonName;
+			 	me.seasonCombo.setValue(records[maxInd].data.seasonId);
+			 	
+			 	me.initCanvas(me);
+		 	},
+		 	scope: me
+		});
+	},
+	
  	/**
  	 * @function
  	 * @memberOf App.view.d3.bar.StackedBar
@@ -91,11 +142,8 @@ Ext.define('App.view.daa.TeamMatchup', {
  	initCanvas: function() {
  		var me = this;
  		
- 		me.getEl().mask('Loading...');
-	 	
 	 	// initialize SVG, width, height
- 		me.svgInitialized = true,
- 			me.canvasWidth = parseInt(me.body.dom.offsetWidth * .98),
+ 		me.canvasWidth = parseInt(me.body.dom.offsetWidth * .98),
 	 		me.canvasHeight = parseInt(me.body.dom.offsetHeight * .98),
  			me.panelId = '#' + me.body.id;
 	 	
@@ -119,7 +167,7 @@ Ext.define('App.view.daa.TeamMatchup', {
 				bottom: 50,
 				left: 80
 			},
-			chartTitle: 'Scoring by Game / Results',
+			chartTitle: 'Scoring by Game - ' + me.seasonName,
 			showLabels: true,
 			showLegend: true,
 			spaceBetweenChartAndLegend: 30,
@@ -131,7 +179,7 @@ Ext.define('App.view.daa.TeamMatchup', {
 			tooltipFunction: function(d, i) {
 				var ret = '<b>vs ' + d.opponent + '</b><br><br>';
 				
-				ret = ret + 'Date: ' + d.date + '<br>';
+				ret = ret + 'Date: ' + d.gameDate + '<br>';
 				
 				ret = ret + 'Result: ';
 				if(d.goalsFor > d.goalsAgainst) {
@@ -150,17 +198,35 @@ Ext.define('App.view.daa.TeamMatchup', {
 			}
 		});
 		
-		// retrieve the graph data via AJAX and load the visualization
+		me.getData();
+	},
+	
+	getData: function() {
+		var me = this;
+		
+		me.getEl().mask('Loading...');
+		
+		if(me.seasonId == null) {
+			me.seasonId = 'F14';
+		}
+	
 		Ext.Ajax.request({
-			url: 'data/daa/gamedata.json',
+			url: 'data/daa/game' + me.seasonId + '.json',
 	 		method: 'GET',
 	 		success: function(response) {
 	 			var resp = Ext.JSON.decode(response.responseText);
 	 			
 	 			me.rawData = resp;
-	 			me.graphData = me.normalizeData(resp.data);
+	 			me.graphData = me.normalizeData(resp);
 		 		me.stackedBarChart.setGraphData(me.graphData);
-		 		me.stackedBarChart.initChart().draw();
+		 		if(me.stackedBarChart.chartInitialized) {
+		 			me.stackedBarChart.draw();
+		 		} else {
+		 			me.stackedBarChart.initChart().draw();
+		 			
+					me.customizeButton.setDisabled(false);
+			 		me.scrimmageToggler.setDisabled(false);
+		 		}
 		 	},
 		 	callback: function() {
 			 	me.getEl().unmask();
@@ -189,7 +255,6 @@ Ext.define('App.view.daa.TeamMatchup', {
 			var gf = entry.goalsFor > 0 ? entry.goalsFor : '0';
 			var ga = entry.goalsAgainst > 0 ? entry.goalsAgainst : '0';
 
-			
 			us.push({
 				id: id,
 				category: 'DAA',
@@ -199,7 +264,7 @@ Ext.define('App.view.daa.TeamMatchup', {
 				goalsAgainst: entry.goalsAgainst,
 				goalLabel: 'DAA (' + gf + ')',
 				opponent: entry.opponent,
-				date: entry.date
+				gameDate: entry.gameDate
 			});
 			
 			them.push({
@@ -211,7 +276,7 @@ Ext.define('App.view.daa.TeamMatchup', {
 				goalsAgainst: entry.goalsAgainst,
 				goalLabel: entry.opponent + ' (' + ga + ')',
 				opponent: entry.opponent,
-				date: entry.date
+				gameDate: entry.gameDate
 			});
 			
 			gameNum++;

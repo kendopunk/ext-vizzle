@@ -11,6 +11,7 @@ Ext.define('App.view.daa.StatsByGame', {
 	closable: false,
 	
 	requires: [
+		'App.store.daa.SeasonMetaStore',
 		'App.store.daa.Players'
 	],
 	
@@ -18,6 +19,9 @@ Ext.define('App.view.daa.StatsByGame', {
 		var me = this;
 		
 		me.gameData = [],
+			me.seasonId = null,
+			me.seasonName = null,
+			me.gameData = [],
 			me.gameId = null,
 			me.currentOpponent = '',
 			me.goalChart = null,
@@ -33,7 +37,29 @@ Ext.define('App.view.daa.StatsByGame', {
  			me.width = Math.floor(Ext.getBody().getViewSize().width),
 			me.height = Math.floor(Ext.getBody().getViewSize().height) - App.util.Global.daaPanelHeight;
 
-		// game selector
+		////////////////////////////////////////
+		// toolbar components
+		////////////////////////////////////////
+		me.seasonCombo = Ext.create('Ext.form.field.ComboBox', {
+			store: Ext.create('App.store.daa.SeasonMetaStore', {
+				url: 'data/daa/seasonListMeta.json'
+			}),
+			displayField: 'seasonName',
+			valueField: 'seasonId',
+			editable: false,
+			queryMode: 'local',
+			triggerAction: 'all',
+			width: 150,
+			listWidth: 150,
+			listeners: {
+				select: function(combo, record) {
+					me.seasonId = combo.getValue();
+					me.setGameCombo(false);
+				},
+				scope: me
+			}
+		});
+		
 		me.gameCombo = Ext.create('Ext.form.field.ComboBox', {
 			disabled: true,
 			store: Ext.create('Ext.data.Store', {
@@ -62,31 +88,91 @@ Ext.define('App.view.daa.StatsByGame', {
 		me.dockedItems = [{
 			xtype: 'toolbar',
 			dock: 'top',
-			items: [{
-				xtype: 'tbtext',
-				text: '<b>Select Game:</b>'
-			},
+			items: [
+				{xtype: 'tbtext', text: '<b>Season:</b>'},
+				me.seasonCombo,
+				{xtype: 'tbspacer', width: 10},
+				{xtype: 'tbtext', text: '<b>Game:</b>'},
 				me.gameCombo,
-			{
-				xtype: 'tbspacer',
-				width: 15
-			}, {
-				xtype: 'tbtext',
-				text: '* = scrimmage'
-			}, {
-				xtype: 'tbspacer',
-				width: 20
-			},
-			me.scoreTextItem
+				{xtype: 'tbspacer', width: 10},
+				me.scoreTextItem,
+				'->',
+				{xtype: 'tbtext', text: '* = scrimmage'},
+				{xtype: 'tbspacer', width: 20}
 			]
 		}];
 		
-		me.on('afterrender', me.initData, me);
+		me.on('afterrender', me.initSeason, me);
 		
 		me.callParent(arguments);
 	},
 	
-	initData: function(panel) {
+	/**
+  	 * @function
+  	 * @description Load the season selection store then initialize the canvas
+  	 */
+ 	initSeason: function(panel) {
+	 	var me = this;
+	 	
+	 	me.seasonCombo.getStore().load({
+		 	callback: function(records) {
+			 	var maxInd = records.length - 1;
+		 		me.seasonId = records[maxInd].data.seasonId;
+		 		me.seasonName = records[maxInd].data.seasonName;
+			 	me.seasonCombo.setValue(records[maxInd].data.seasonId);
+			 	
+			 	me.setGameCombo(true);
+		 	},
+		 	scope: me
+		});
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Set up the game selection combo
+ 	 * @param initial Boolean...initial setting
+ 	 */
+ 	setGameCombo: function(initial) {
+ 		var me = this;
+ 		
+ 		Ext.Ajax.request({
+	 		url: 'data/daa/game' + me.seasonId + '.json',
+	 		method: 'GET',
+			success: function(response) {
+				var resp = Ext.JSON.decode(response.responseText);
+				me.gameData = resp;
+			},
+			callback: function() {
+				var comboData = [];
+				Ext.each(me.gameData, function(gd) {
+					var opp = gd.opponent + ' - ' + gd.gameDate;
+					if(gd.scrimmage) {
+						opp = opp + ' *';
+					}
+					
+					comboData.push({
+						id: gd.gameId,
+						opponent: opp
+					});
+				});
+				
+				me.gameCombo.setDisabled(false);
+				me.gameCombo.getStore().loadData(comboData);
+				me.gameCombo.setValue(comboData[0].id);
+				me.gameId = comboData[0].id;
+				me.gameCombo.enable();
+				
+				if(initial) {
+					me.initCanvas();
+				} else {
+					me.buildChart();
+				}
+			},
+			scope: me
+		});	
+	},
+	
+	initCanvas: function(panel) {
 		var me = this;
 		
 		// initialize SVG, width, height
@@ -217,33 +303,7 @@ Ext.define('App.view.daa.StatsByGame', {
 			tooltipFunction: theTooltipFunction
 		});
 		
-		// get game data
-		Ext.Ajax.request({
-			url: 'data/daa/gamedata.json',
-			method: 'GET',
-			success: function(response) {
-				var resp = Ext.JSON.decode(response.responseText);
-				me.gameData = resp.data;
-			},
-			callback: function() {
-				var comboData = [];
-				Ext.each(me.gameData, function(g) {
-					var opp = g.opponent + ' - ' + g.date;
-					if(g.scrimmage) {
-						opp = opp + ' *';
-					}
-					
-					comboData.push({
-						id: g.id,
-						opponent: opp
-					});
-				});
-				
-				me.gameCombo.getStore().loadData(comboData);
-				me.gameCombo.enable();
-			},
-			scope: me
-		});
+		me.buildChart();
 	},
 	
 	/**
@@ -258,7 +318,7 @@ Ext.define('App.view.daa.StatsByGame', {
 			saveData = [], shotsAgainstData = [], shotsScoreData = [];
 			
 		Ext.each(me.gameData, function(gd) {
-			if(gd.id == me.gameId) {
+			if(gd.gameId == me.gameId) {
 				
 				me.scoreTextItem.setText('<b>' + gd.scoreString + '</b>');
 			

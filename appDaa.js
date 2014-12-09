@@ -35,7 +35,7 @@ Ext.application({
 					padding: '10px'
 				},
 				bodyCls: 'soccerHeader',
-				html: 'Davidsonville Travel Soccer - Visual Statistics',
+				html: 'DAA Gators \'03-\'04 Visual Statistics',
 				region: 'north'
 			}, {
 				xtype: 'tabpanel',
@@ -53,7 +53,7 @@ Ext.application({
 				}, {
 					xtype: 'daaConditioningTwo'
 				}]
-				//,activeTab: 1
+				//,activeTab: 2
 			}]
 		});
 

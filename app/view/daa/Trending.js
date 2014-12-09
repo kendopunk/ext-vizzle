@@ -126,12 +126,12 @@ Ext.define('App.view.daa.Trending', {
 	 	var me = this;
 	 	
 	 	Ext.Ajax.request({
-		 	url: 'data/daa/players.json',
+		 	url: 'data/daa/playersF14.json',
 		 	method: 'GET',
 			success: function(response) {
 	 			var resp = Ext.JSON.decode(response.responseText);
 	 			
-	 			me.playerData = resp.F14;
+	 			me.playerData = resp;
 		 	},
 		 	scope: me
 		 });
@@ -233,13 +233,13 @@ Ext.define('App.view.daa.Trending', {
 		}
 		 	
 	 	me.getEl().mask('Loading...');
-	 	
+
 		Ext.Ajax.request({
-			url: 'data/daa/gamedata.json',
+			url: 'data/daa/gameF14.json',
 			method: 'GET',
 			success: function(response) {
 				var resp = Ext.JSON.decode(response.responseText);
-				me.graphData = me.normalizeData(resp.data, filter, player);
+				me.graphData = me.normalizeData(resp, filter, player);
 				
 				me.lineChart.setGraphData(me.graphData);
 				if(!me.lineChart.chartInitialized) {

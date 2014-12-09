@@ -12,6 +12,7 @@ Ext.define('App.view.daa.Individual', {
 	
 	requires: [
 		'App.util.MessageBus',
+		'App.store.daa.SeasonMetaStore',
 		'App.util.d3.UniversalGroupedBar'
 	],
 	
@@ -52,6 +53,8 @@ Ext.define('App.view.daa.Individual', {
  			me.svg,
  			me.g,
  			me.panelId,
+ 			me.seasonId = null,
+ 			me.seasonName = null,
  			me.groupedBarChart = null,
  			me.currentView = 'absolute',
  			me.excludeScrimmages = false,
@@ -64,10 +67,32 @@ Ext.define('App.view.daa.Individual', {
  		////////////////////////////////////////
  		me.eventRelay.subscribe(me.gridHighlightEvent, me.gridRowHighlight, me);
  		me.eventRelay.subscribe(me.gridUnhighlightEvent, me.gridRowUnhighlight, me);
+ 		
+ 		////////////////////////////////////////
+ 		// TOOLBAR COMPONENTS
+ 		////////////////////////////////////////
+ 		me.seasonCombo = Ext.create('Ext.form.field.ComboBox', {
+			store: Ext.create('App.store.daa.SeasonMetaStore', {
+				url: 'data/daa/seasonListMeta.json'
+			}),
+			displayField: 'seasonName',
+			valueField: 'seasonId',
+			editable: false,
+			queryMode: 'local',
+			triggerAction: 'all',
+			width: 150,
+			listWidth: 150,
+			listeners: {
+				select: function(combo, record) {
+					me.seasonId = combo.getValue();
+					me.seasonName = record[0].data.seasonName;
+
+					me.getPlayers();
+				},
+				scope: me
+			}
+		});
 		
-		////////////////////////////////////////
-		// runtime configuration of checkboxes
-		////////////////////////////////////////
 		var checkboxData = [],
 			metricArr = [
 				{display: 'Goals', value: 'goals'},
@@ -127,90 +152,86 @@ Ext.define('App.view.daa.Individual', {
 			dockedItems: [{
 				xtype: 'toolbar',
 				dock: 'top',
-				items: [{
-					xtype: 'tbspacer',
-					width: 10
-				},
-				checkboxData,
-				{
-					xtype: 'tbspacer',
-					width: 25
-				}, {
-					xtype: 'tbtext',
-					text: '<b>View:</b>'
-				}, {
-					xtype: 'combo',
-					store: Ext.create('Ext.data.Store', {
-						fields: ['display', 'value'],
-						data: [{
-							display: 'Totals', value: 'absolute'
-						}, {
-							display: 'Averages per Game', value: 'average'
-						}]
-					}),
-					displayField: 'display',
-					valueField: 'value',
-					editable: false,
-					queryMode: 'local',
-					triggerAction: 'all',
-					width: 150,
-					listWidth: 150,
-					value: 'absolute',
-					listeners: {
-						select: function(combo) {
-							me.currentView = combo.getValue();
-							
-							if(combo.getValue() == 'average') {
-								me.groupedBarChart.setTooltipFunction(function(d, i) {
-									return '<b>' + d.grouper + '</b><br>'
-									+ Ext.util.Format.number(d.value, '0,000.00')
-									+ ' '
-									+ d.name + ' per game';
-								});
+				items: [
+					{xtype: 'tbtext', text: '<b>Season:</b>'},
+					me.seasonCombo,
+					{xtype: 'tbspacer', width: 20},
+					checkboxData,
+					{xtype: 'tbspacer', width: 20},
+					{xtype: 'tbtext', text: '<b>View:</b>'},
+					{
+						xtype: 'combo',
+						store: Ext.create('Ext.data.Store', {
+							fields: ['display', 'value'],
+							data: [{
+								display: 'Totals', value: 'absolute'
+							}, {
+								display: 'Averages per Game', value: 'average'
+							}]
+						}),
+						displayField: 'display',
+						valueField: 'value',
+						editable: false,
+						queryMode: 'local',
+						triggerAction: 'all',
+						width: 150,
+						listWidth: 150,
+						value: 'absolute',
+						listeners: {
+							select: function(combo) {
+								me.currentView = combo.getValue();
 								
-								me.groupedBarChart.setYTickFormat(function(d, i) {
-									return Ext.util.Format.number(d, '0.0');
-								});
-							} else {
-								me.groupedBarChart.setTooltipFunction(function(d, i) {
-									return '<b>' + d.grouper + '</b><br>'
-									+ Ext.util.Format.number(d.value, '0,000')
-									+ ' '
-									+ d.name;
-								});
-							
-								me.groupedBarChart.setYTickFormat(function(d, i) {
-									return Ext.util.Format.number(d, '0,000');
-								});
-							}
+								if(combo.getValue() == 'average') {
+									me.groupedBarChart.setTooltipFunction(function(d, i) {
+										return '<b>' + d.grouper + '</b><br>'
+										+ Ext.util.Format.number(d.value, '0,000.00')
+										+ ' '
+										+ d.name + ' per game';
+									});
+									
+									me.groupedBarChart.setYTickFormat(function(d, i) {
+										return Ext.util.Format.number(d, '0.0');
+									});
+								} else {
+									me.groupedBarChart.setTooltipFunction(function(d, i) {
+										return '<b>' + d.grouper + '</b><br>'
+										+ Ext.util.Format.number(d.value, '0,000')
+										+ ' '
+										+ d.name;
+									});
 								
-							me.groupedBarChart.setGraphData(me.filterData());
-							me.groupedBarChart.draw();
-						},
-						scope: me
+									me.groupedBarChart.setYTickFormat(function(d, i) {
+										return Ext.util.Format.number(d, '0,000');
+									});
+								}
+									
+								me.groupedBarChart.setGraphData(me.filterData());
+								me.groupedBarChart.draw();
+							},
+							scope: me
+						}
+					},
+					{xtype: 'tbspacer', width: 20},
+					{
+						xtype: 'checkboxfield',
+						boxLabel: 'Exclude Scrimmages',
+						cbxType: 'scrimmage',
+						listeners: {
+							change: function(cbx, oldVal, newVal) {
+								if(cbx.checked) {
+									me.excludeScrimmages = true;
+									me.store.loadData(me.noScrimmageData);
+								} else {
+									me.excludeScrimmages = false;
+									me.store.loadData(me.allData);
+								}
+								me.groupedBarChart.setGraphData(me.filterData());
+								me.groupedBarChart.draw();
+							},
+							scope: me
+						}
 					}
-				}, {
-					xtype: 'tbspacer',
-					width: 20
-				}, {
-					xtype: 'checkboxfield',
-					boxLabel: 'Exclude Scrimmages',
-					cbxType: 'scrimmage',
-					listeners: {
-						change: function(cbx, oldVal, newVal) {
-							if(cbx.checked) {
-								me.excludeScrimmages = true;
-								me.store.loadData(me.noScrimmageData);
-							} else {
-								me.excludeScrimmages = false;
-								me.store.loadData(me.allData);
-							}
-							me.groupedBarChart.setGraphData(me.filterData());
-							me.groupedBarChart.draw();
-						},
-						scope: me
-					}
-				}]
+				]
 			}]
 		});
 
@@ -221,7 +242,7 @@ Ext.define('App.view.daa.Individual', {
 			cls: 'gridRowSelection',
 			columns: [{
 				header: 'Player',
-				dataIndex: 'name',
+				dataIndex: 'player',
 				width: 150
 			}, {
 				text: '<span style="color:#990066;font-weight:bold;">Goals</span>',
@@ -284,39 +305,32 @@ Ext.define('App.view.daa.Individual', {
 		
 		me.items = [ me.vizPanel, me.gridPanel ];
 		
-		me.on('beforerender', me.initPlayerData, me);
+		me.on('beforerender', me.initSeason, me);
 
 		me.callParent(arguments);
 	},
 	
 	/**
- 	 * @function
- 	 * @description Initialize the entire array of players
- 	 */
- 	initPlayerData: function() {
+  	 * @function
+  	 * @description Load the season selection store then initialize the canvas
+  	 */
+ 	initSeason: function(panel) {
 	 	var me = this;
 	 	
-	 	Ext.Ajax.request({
-		 	url: 'data/daa/players.json',
-		 	method: 'GET',
-			success: function(response) {
-	 			var resp = Ext.JSON.decode(response.responseText);
-	 			
-	 			me.playerData = resp.F14;
-	 			
-	 			Ext.each(me.playerData, function(item) {
-		 			item.goals = 0;
-		 			item.avgGoals = 0;
-		 			item.assists = 0;
-		 			item.avgAssists = 0;
-		 			item.shots = 0;
-		 			item.avgShots = 0;
-		 			item.saves = 0;
-		 			item.avgSaves = 0;
-		 		}, me);
-		 	},
+	 	me.seasonCombo.getStore().load({
+		 	success: function() {
+			 	me.initCanvas();
+			},
+		 	callback: function(records) {
+			 	var maxInd = records.length - 1;
+		 		me.seasonId = records[maxInd].data.seasonId;
+		 		me.seasonName = records[maxInd].data.seasonName;
+			 	me.seasonCombo.setValue(records[maxInd].data.seasonId);
+			 	
+			 	me.getPlayers();
+			},
 		 	scope: me
-		 });
+		});
 	},
 	
 	/**
@@ -386,15 +400,51 @@ Ext.define('App.view.daa.Individual', {
 				}
 			}
 		});
-		
-		// get data
+	},
+	
+	/**
+ 	 * @function
+ 	 * @description Initialize the entire array of players for selected season
+ 	 */
+ 	getPlayers: function() {
+		var me = this;
+	 	
+	 	Ext.Ajax.request({
+		 	url: 'data/daa/players' + me.seasonId + '.json',
+		 	method: 'GET',
+			success: function(response) {
+	 			var resp = Ext.JSON.decode(response.responseText);
+	 			
+	 			me.playerData = resp;
+	 			
+	 			Ext.each(me.playerData, function(item) {
+		 			item.goals = 0;
+		 			item.avgGoals = 0;
+		 			item.assists = 0;
+		 			item.avgAssists = 0;
+		 			item.shots = 0;
+		 			item.avgShots = 0;
+		 			item.saves = 0;
+		 			item.avgSaves = 0;
+		 		}, me);
+		 	},
+		 	callback: function() {
+			 	me.getGameData();
+			},
+		 	scope: me
+		 });
+	},
+	
+	getGameData: function() {
+		var me = this;
+	
 		Ext.Ajax.request({
-			url: 'data/daa/gamedata.json',
+			url: 'data/daa/game' + me.seasonId + '.json',
 			method: 'GET',
 			success: function(response) {
 				var resp = Ext.JSON.decode(response.responseText);
 				
-				Ext.each(resp.data, function(item) {
+				Ext.each(resp, function(item) {
 					if(item.scrimmage) {
 						me.numScrimmages++;
 					} else {
@@ -402,13 +452,21 @@ Ext.define('App.view.daa.Individual', {
 					}
 				}, me);
 				
-				me.allData = me.normalizeData(resp.data);
-				me.noScrimmageData = me.normalizeNoScrimmageData(resp.data);
+				me.allData = me.normalizeData(resp);
+				me.noScrimmageData = me.normalizeNoScrimmageData(resp);
+				
+				
+				console.debug(me.allData);
 				
 				me.store.loadData(me.allData);
 				
 				me.groupedBarChart.setGraphData(me.filterData());
-				me.groupedBarChart.initChart().draw();
+				me.groupedBarChart.setChartTitle(me.seasonName + ' - Individual Stats');
+				if(me.groupedBarChart.chartInitialized) {
+					me.groupedBarChart.draw();
+				} else {
+					me.groupedBarChart.initChart().draw();
+				}
 				me.groupedBarChart.triggerGroupers(false);
 			},
 			callback: function() {
@@ -431,7 +489,8 @@ Ext.define('App.view.daa.Individual', {
 	 	
 	 	Ext.each(dat, function(player) {
 	 	
-	 		playerName = player.name;
+	 		playerName = player.fname;
+	 		player.player = player.fname;
 	 		
 	 		Ext.each(obj, function(a) {
 	 		
@@ -486,7 +545,8 @@ Ext.define('App.view.daa.Individual', {
 	 	
 	 	Ext.each(dat, function(player) {
 	 	
-	 		playerName = player.name;
+	 		playerName = player.fname;
+	 		player.player = player.fname;
 	 		
 	 		Ext.each(obj, function(a) {
 		 		
@@ -563,6 +623,7 @@ Ext.define('App.view.daa.Individual', {
 		
 		var ind = 1;
 		
+		// which data set to use
 		var useData = me.excludeScrimmages ? me.noScrimmageData : me.allData;
 		
 		Ext.each(useData, function(entry) {
@@ -571,7 +632,7 @@ Ext.define('App.view.daa.Individual', {
 				ret.push({
 					id: ind,
 					name: 'goals',
-					grouper: entry.name,	// player
+					grouper: entry.fname,	// player
 					value: currentView == 'average' ? entry.avgGoals : entry.goals
 				});
 				
@@ -582,7 +643,7 @@ Ext.define('App.view.daa.Individual', {
 				ret.push({
 					id: ind,
 					name: 'assists',
-					grouper: entry.name,
+					grouper: entry.fname,
 					value: currentView == 'average' ? entry.avgAssists : entry.assists
 				});
 				
@@ -593,7 +654,7 @@ Ext.define('App.view.daa.Individual', {
 				ret.push({
 					id: ind,
 					name: 'shots',
-					grouper: entry.name,
+					grouper: entry.fname,
 					value: currentView == 'average' ? entry.avgShots : entry.shots
 				});
 				
@@ -604,7 +665,7 @@ Ext.define('App.view.daa.Individual', {
 				ret.push({
 					id: ind,
 					name: 'saves',
-					grouper: entry.name,
+					grouper: entry.fname,
 					value: currentView == 'average' ? entry.avgSaves : entry.saves
 				});
 				
@@ -645,7 +706,7 @@ Ext.define('App.view.daa.Individual', {
 	gridRowHighlight: function(obj) {
 		var me = this;
 		
-		var record = me.gridPanel.getStore().findRecord('name', obj.payload.grouper);
+		var record = me.gridPanel.getStore().findRecord('player', obj.payload.grouper);
 		if(record) {
 			var rowIndex = me.gridPanel.getStore().indexOf(record);
 			me.gridPanel.getSelectionModel().select(rowIndex);

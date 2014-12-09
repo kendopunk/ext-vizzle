@@ -1,0 +1,23 @@
+[
+	{
+		"id": "547f69e17ba4a427130ee854",
+		"seasonId": "F14",
+		"seasonYear": 2014,
+		"seasonName": "Fall 2014 Travel",
+		"seasonSeason": "Fall",
+		"wins": 12,
+		"losses": 1,
+		"ties": 3,
+		"players": null
+	}, {
+		"id": "547f69e17ba4a427130ee855",
+		"seasonId": "W14",
+		"seasonYear": 2014,
+		"seasonName": "Winter 2014 Futsal",
+		"seasonSeason": "Winter",
+		"wins": 0,
+		"losses": 0,
+		"ties": 0,
+		"players": null
+	}
+]
