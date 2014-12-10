@@ -277,7 +277,7 @@ Ext.define('App.view.daa.StatsByGame', {
 			margins: {
 				top: 30
 			},
-			chartTitle: 'Shots on Goal',
+			chartTitle: 'Shots Against',
 			dataMetric: 'num',
 			showLabels: true,
 			labelFunction: theLabelFunction,
