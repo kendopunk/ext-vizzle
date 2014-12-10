@@ -31,7 +31,7 @@ Ext.define('App.view.daa.Trending', {
 			me.width = Math.floor(Ext.getBody().getViewSize().width),
 			me.height = Math.floor(Ext.getBody().getViewSize().height) - App.util.Global.daaPanelHeight,
 			me.currentYDataMetric = 'goals',
-			me.defaultPlayerSelection = '',
+			me.currentPlayerSelection = null,
 			me.baseTitle = 'Fall 2014 Trending';
 			
 		////////////////////////////////////////
@@ -67,13 +67,18 @@ Ext.define('App.view.daa.Trending', {
 			}),
 			displayField: 'display',
 			valueField: 'value',
-			value: '',
 			editable: false,
 			queryMode: 'local',
 			triggerAction: 'all',
 			width: 125,
 			listWidth: 125,
-			value: me.defaultPlayerSelection
+			listeners: {
+				select: function(combo) {
+					me.currentPlayerSelection = combo.getValue();
+					me.getData();
+				},
+				scope: me
+			}
 		});
 
 		me.dockedItems = [{
@@ -113,35 +118,36 @@ Ext.define('App.view.daa.Trending', {
 					handler: me.metricHandler,
 					scope: me
 				},
-				{xtype: 'tbpsacer', width: 20},
+				'->',
 				{xtype: 'tbtext', text: '* = scrimmage'},
-				{xtype: 'tbspacer', width: 10}
+				{xtype: 'tbspacer', width: 20}
 			]
 		}];
 		
 		me.on('afterrender', me.initSeason, me);
 			
- 		
  		me.callParent(arguments);
  	},
  	
  	/**
- 	 * @function
- 	 * @description Initialize the entire array of players
- 	 */
- 	initPlayerData: function() {
+  	 * @function
+  	 * @description Load the season selection store then initialize the canvas
+  	 */
+ 	initSeason: function(panel) {
 	 	var me = this;
 	 	
-	 	Ext.Ajax.request({
-		 	url: 'data/daa/playersF14.json',
-		 	method: 'GET',
-			success: function(response) {
-	 			var resp = Ext.JSON.decode(response.responseText);
-	 			
-	 			me.playerData = resp;
-		 	},
+	 	me.seasonCombo.getStore().load({
+		 	callback: function(records) {
+			 	me.initCanvas();
+
+		 		me.seasonId = records[0].data.seasonId;
+		 		me.seasonName = records[0].data.seasonName;
+			 	me.seasonCombo.setValue(records[0].data.seasonId);
+			 	
+			 	me.getPlayers();
+			},
 		 	scope: me
-		 });
+		});
 	},
 	
 	/**
@@ -220,21 +226,56 @@ Ext.define('App.view.daa.Trending', {
 			},
 			markerRadius: 5
 		});
-		
-		me.getData();
-	 },
+	},
+ 	
+	/**
+ 	 * @function
+ 	 * @description Initialize the entire array of players for selected season
+ 	 */
+ 	getPlayers: function() {
+		var me = this;
+	 	
+	 	Ext.Ajax.request({
+		 	url: 'data/daa/players' + me.seasonId + '.json',
+		 	method: 'GET',
+			success: function(response) {
+	 			var resp = Ext.JSON.decode(response.responseText);
+	 			
+	 			me.playerCombo.setDisabled(false);
+	 			
+		 		me.playerCombo.getStore().loadData(
+		 			Ext.Array.merge([{display: 'ENTIRE TEAM', value: ''}], 
+			 			Ext.Array.map(resp, function(item) {
+				 			return {
+					 			display: item.fname,
+					 			value: item.fname
+					 		};
+				 		})
+				 	)
+		 		);
+		 		
+		 		if(me.currentPlayerSelection == null) {
+			 		me.currentPlayerSelection = '';
+			 		me.playerCombo.setValue('');
+			 	}
+	 		},
+	 		callback: function() {
+	 			me.getData();
+	 		},
+	 		scope: me
+	 	});
+	},
 	 
-	 /**
-	  * @function
-	  * @description Retrieve initial data set
-	  */
-	 getData: function() {
-	 
+	/**
+	 * @function
+	 * @description Retrieve initial data set
+	 */
+	getData: function() {
 	 	var me = this,
 	 		filter = false,
 	 		player = null;
-	 		
-	 	if(me.currentPlayerSelection != 'ENTIRE TEAM') {
+
+	 	if(me.currentPlayerSelection !== '') {
 		 	filter = true;
 		 	player = me.currentPlayerSelection;
 		}
@@ -242,7 +283,7 @@ Ext.define('App.view.daa.Trending', {
 	 	me.getEl().mask('Loading...');
 
 		Ext.Ajax.request({
-			url: 'data/daa/gameF14.json',
+			url: 'data/daa/game' + me.seasonId + '.json',
 			method: 'GET',
 			success: function(response) {
 				var resp = Ext.JSON.decode(response.responseText);

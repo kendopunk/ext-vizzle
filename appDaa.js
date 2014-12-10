@@ -35,7 +35,7 @@ Ext.application({
 					padding: '10px'
 				},
 				bodyCls: 'soccerHeader',
-				html: 'DAA Gators \'03-\'04 Visual Statistics',
+				html: 'DAA Gators \'03-\'04 Visual Stats',
 				region: 'north'
 			}, {
 				xtype: 'tabpanel',

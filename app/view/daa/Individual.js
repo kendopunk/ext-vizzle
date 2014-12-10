@@ -322,10 +322,9 @@ Ext.define('App.view.daa.Individual', {
 			 	me.initCanvas();
 			},
 		 	callback: function(records) {
-			 	var maxInd = records.length - 1;
-		 		me.seasonId = records[maxInd].data.seasonId;
-		 		me.seasonName = records[maxInd].data.seasonName;
-			 	me.seasonCombo.setValue(records[maxInd].data.seasonId);
+		 		me.seasonId = records[0].data.seasonId;
+		 		me.seasonName = records[0].data.seasonName;
+			 	me.seasonCombo.setValue(records[0].data.seasonId);
 			 	
 			 	me.getPlayers();
 			},
@@ -435,8 +434,14 @@ Ext.define('App.view.daa.Individual', {
 		 });
 	},
 	
+	/**
+ 	 * @function
+ 	 * @description Retrieve game data for the selected season
+ 	 */
 	getGameData: function() {
 		var me = this;
+		
+		me.numGames = 0, me.numScrimmages = 0;
 	
 		Ext.Ajax.request({
 			url: 'data/daa/game' + me.seasonId + '.json',
@@ -455,8 +460,9 @@ Ext.define('App.view.daa.Individual', {
 				me.allData = me.normalizeData(resp);
 				me.noScrimmageData = me.normalizeNoScrimmageData(resp);
 				
-				
-				console.debug(me.allData);
+				/*console.log(Ext.Array.map(me.allData, function(item) {
+					return item.fname
+				}).join(','));*/
 				
 				me.store.loadData(me.allData);
 				
@@ -464,10 +470,11 @@ Ext.define('App.view.daa.Individual', {
 				me.groupedBarChart.setChartTitle(me.seasonName + ' - Individual Stats');
 				if(me.groupedBarChart.chartInitialized) {
 					me.groupedBarChart.draw();
+					me.groupedBarChart.triggerGroupers(true);
 				} else {
 					me.groupedBarChart.initChart().draw();
+					me.groupedBarChart.triggerGroupers(false);
 				}
-				me.groupedBarChart.triggerGroupers(false);
 			},
 			callback: function() {
 				me.getEl().unmask();

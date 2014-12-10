@@ -53,7 +53,7 @@ Ext.define('App.view.daa.ConditioningTwo', {
  			me.currentMetric = 'fiveTenTens',
  			me.btnHighlightCss = 'btn-highlight-peachpuff',
  			me.eventRelay = Ext.create('App.util.MessageBus'),
- 			me.baseTitle = '2014 Conditioning Results';
+ 			me.baseTitle = '2014 Fall Conditioning Results II';
  			
  		////////////////////////////////////////
  		// eventing

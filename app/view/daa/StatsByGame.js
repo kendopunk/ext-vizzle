@@ -116,10 +116,9 @@ Ext.define('App.view.daa.StatsByGame', {
 	 	
 	 	me.seasonCombo.getStore().load({
 		 	callback: function(records) {
-			 	var maxInd = records.length - 1;
-		 		me.seasonId = records[maxInd].data.seasonId;
-		 		me.seasonName = records[maxInd].data.seasonName;
-			 	me.seasonCombo.setValue(records[maxInd].data.seasonId);
+		 		me.seasonId = records[0].data.seasonId;
+		 		me.seasonName = records[0].data.seasonName;
+			 	me.seasonCombo.setValue(records[0].data.seasonId);
 			 	
 			 	me.setGameCombo(true);
 		 	},
