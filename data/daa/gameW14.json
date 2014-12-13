@@ -78,7 +78,7 @@
 			"name": "Joe",
 			"num": 1
 		}]
-	}/*, {
+	}, {
 		"id": 5151,
 		"gameId": 17,
 		"seasonId": "W14",
@@ -87,17 +87,65 @@
 		"gameLocation": "Sportsplex",
 		"gameNotes": "",
 		"scrimmage": false,
-		"opponent": "Pen Gray",
-		"goalsFor": 0,
-		"goalsAgainst": 0,
-		"scoreString": "",
-		"goalData": [],
-		"assistData": [],
-		"shotData": [],
-		"saveData": [],
-		"shotsAgainst": [],
-		"shotsScored": []
-	}, {
+		"opponent": "Pen. Gray",
+		"goalsFor": 6,
+		"goalsAgainst": 8,
+		"scoreString": "6-8 Loss",
+		"goalData": [{
+			"name": "Christian",
+			"num": 1
+		}, {
+			"name": "Riley",
+			"num": 4
+		}, {
+			"name": "Skyler",
+			"num": 1
+		}],
+		"assistData": [{
+			"name": "Joe",
+			"num": 1
+		}],
+		"shotData": [{
+			"name": "Neel",
+			"num": 2
+		}, {
+			"name": "Joe",
+			"num": 2
+		}, {
+			"name": "Christian",
+			"num": 4
+		}, {
+			"name": "Riley",
+			"num": 7
+		}, {
+			"name": "Ned",
+			"num": 3
+		}, {
+			"name": "Skyler",
+			"num": 3
+		}],
+		"saveData": [{
+			"name": "Joe",
+			"num": 3
+		}, {
+			"name": "Jack",
+			"num": 2
+		}],
+		"shotsAgainst": [{
+			"name": "Joe",
+			"num": 6
+		}, {
+			"name": "Jack",
+			"num": 9
+		}],
+		"shotsScored": [{
+			"name": "Joe",
+			"num": 1
+		}, {
+			"name": "Jack",
+			"num": 7
+		}]
+	}/*, {
 		"id": 5152,
 		"gameId": 18,
 		"seasonId": "W14",
