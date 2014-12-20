@@ -145,7 +145,7 @@
 			"name": "Jack",
 			"num": 7
 		}]
-	}/*, {
+	}, {
 		"id": 5152,
 		"gameId": 18,
 		"seasonId": "W14",
@@ -155,16 +155,79 @@
 		"gameNotes": "",
 		"scrimmage": false,
 		"opponent": "Pen Blue",
-		"goalsFor": 0,
-		"goalsAgainst": 0,
-		"scoreString": "",
-		"goalData": [],
-		"assistData": [],
-		"shotData": [],
-		"saveData": [],
-		"shotsAgainst": [],
-		"shotsScored": []
-	}, {
+		"goalsFor": 5,
+		"goalsAgainst": 4,
+		"scoreString": "5-4 Win",
+		"goalData": [{
+			"name": "Davis",
+			"num": 2
+		}, {
+			"name": "Christian",
+			"num": 2
+		}, {
+			"name": "Joe",
+			"num": 1
+		}],
+		"assistData": [{
+			"name": "Karl",
+			"num": 1
+		}, {
+			"name": "Chris",
+			"num": 1
+		}, {
+			"name": "Ned",
+			"num": 1
+		}, {
+			"name": "Riley",
+			"num": 1
+		}, {
+			"name": "Joe",
+			"num": 1
+		}],
+		"shotData": [{
+			"name": "Chris",
+			"num": 1
+		}, {
+			"name": "Ned",
+			"num": 7
+		}, {
+			"name": "Finn",
+			"num": 8
+		}, {
+			"name": "Riley",
+			"num": 7
+		}, {
+			"name": "Joe",
+			"num": 5
+		}, {
+			"name": "Davis",
+			"num": 7
+		}, {
+			"name": "Christian",
+			"num": 10
+		}],
+		"saveData": [{
+			"name": "Joe",
+			"num": 7
+		}, {
+			"name": "Davis",
+			"num": 6
+		}],
+		"shotsAgainst": [{
+			"name": "Joe",
+			"num": 10
+		}, {
+			"name": "Davis",
+			"num": 10
+		}],
+		"shotsScored": [{
+			"name": "Joe",
+			"num": 1
+		}, {
+			"name": "Davis",
+			"num": 3
+		}]
+	}/*, {
 		"id": 5153,
 		"gameId": 19,
 		"seasonId": "W14",
