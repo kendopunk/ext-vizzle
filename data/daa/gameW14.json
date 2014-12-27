@@ -227,7 +227,7 @@
 			"name": "Davis",
 			"num": 3
 		}]
-	}/*, {
+	}, {
 		"id": 5153,
 		"gameId": 19,
 		"seasonId": "W14",
@@ -236,17 +236,86 @@
 		"gameLocation": "Sportsplex",
 		"gameNotes": "",
 		"scrimmage": false,
-		"opponent": "Ice",
-		"goalsFor": 0,
-		"goalsAgainst": 0,
-		"scoreString": "",
-		"goalData": [],
-		"assistData": [],
-		"shotData": [],
-		"saveData": [],
-		"shotsAgainst": [],
-		"shotsScored": []
-	}, {
+		"opponent": "A3 Ice",
+		"goalsFor": 10,
+		"goalsAgainst": 2,
+		"scoreString": "10-2 Win",
+		"goalData": [{
+			"name": "Karl",
+			"num": 1
+		}, {
+			"name": "Riley",
+			"num": 1
+		}, {
+			"name": "Christian",
+			"num": 2
+		}, {
+			"name": "Joe",
+			"num": 5
+		}, {
+			"name": "Jack",
+			"num": 1
+		}],
+		"assistData": [{
+			"name": "Chris",
+			"num": 1
+		}, {
+			"name": "Riley",
+			"num": 2
+		}, {
+			"name": "Tyler",
+			"num": 1
+		}, {
+			"name": "Christian",
+			"num": 1
+		}, {
+			"name": "Joe",
+			"num": 2
+		}],
+		"shotData": [{
+			"name": "Karl",
+			"num": 4
+		}, {
+			"name": "Riley",
+			"num": 5
+		}, {
+			"name": "Tyler",
+			"num": 1
+		}, {
+			"name": "Christian",
+			"num": 3
+		}, {
+			"name": "Joe",
+			"num": 9
+		}, {
+			"name": "Ned",
+			"num": 3
+		}, {
+			"name": "Jack",
+			"num": 1
+		}],
+		"saveData": [{
+			"name": "Jack",
+			"num": 5
+		}, {
+			"name": "Joe",
+			"num": 3
+		}],
+		"shotsAgainst": [{
+			"name": "Jack",
+			"num": 6
+		}, {
+			"name": "Joe",
+			"num": 4
+		}],
+		"shotsScored": [{
+			"name": "Jack",
+			"num": 1
+		}, {
+			"name": "Joe",
+			"num": 1
+		}]
+	}/*, {
 		"id": 5154,
 		"gameId": 20,
 		"seasonId": "W14",
