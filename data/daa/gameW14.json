@@ -1070,9 +1070,9 @@
 		"gameNotes": "",
 		"scrimmage": false,
 		"opponent": "Tobe",
-		"goalsFor": 8,
+		"goalsFor": 9,
 		"goalsAgainst": 5,
-		"scoreString": "8-5 Win",
+		"scoreString": "9-5 Win",
 		"goalData": [{
 			"name": "Davis",
 			"num": 3
@@ -1082,10 +1082,16 @@
 		}, {
 			"name": "Ned",
 			"num": 1
+		}, {
+			"name": "Joe",
+			"num": 1
 		}],
 		"assistData": [{
 			"name": "Ned",
 			"num": 1
+		}, {
+			"name": "Joe",
+			"num": 2
 		}],
 		"shotData": [{
 			"name": "Davis",
@@ -1108,6 +1114,9 @@
 		}, {
 			"name": "Neel",
 			"num": 2
+		}, {
+			"name": "Joe",
+			"num": 1
 		}],
 		"saveData": [{
 			"name": "Jack",
