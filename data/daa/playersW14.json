@@ -59,5 +59,10 @@
         "fname": "Tyler",
         "lname": "Liberatore",
         "color": "#c7e9c0"
+    }, {
+        "playerId": "JHOO",
+        "fname": "John",
+        "lname": "Hooker",
+        "color": "#990066"
     }
 ]
